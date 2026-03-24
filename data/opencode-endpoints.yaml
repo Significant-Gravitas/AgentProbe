@@ -1,0 +1,76 @@
+# Endpoint template for the OpenCode HTTP server.
+# Sources:
+# - https://opencode.ai/docs/server/
+# - OpenAPI served by `opencode serve` at /doc
+#
+# Note: the v0.2 spec implies that managed HTTP sessions must extract a
+# `session_id` from the create response, but it does not document the exact
+# config field name for that extraction. `session_id_path` below is therefore
+# an implementation-facing placeholder.
+
+preset: opencode
+
+transport: http
+
+connection:
+  base_url: "${OPENCODE_BASE_URL:-http://127.0.0.1:4096}"
+  timeout_seconds: 300
+  max_retries: 1
+
+auth:
+  type: none
+  # If OPENCODE_SERVER_PASSWORD is enabled, OpenCode uses HTTP Basic auth.
+  # The v0.2 spec does not define a dedicated basic-auth mode, so keep this
+  # template unauthenticated and add an Authorization header in the adapter.
+
+endpoints:
+  health:
+    method: GET
+    url: "{{ base_url }}/global/health"
+
+  create_session:
+    method: POST
+    url: "{{ base_url }}/session"
+    body_template: |
+      {
+        "title": "AgentProbe: {{ scenario.id }} / {{ persona.id }}"
+      }
+
+  send_message:
+    method: POST
+    url: "{{ base_url }}/session/{{ session_id }}/message"
+    body_template: |
+      {
+        "parts": [
+          {
+            "type": "text",
+            "text": {{ last_message.content | tojson }}
+          }
+        ]
+      }
+
+  delete_session:
+    method: DELETE
+    url: "{{ base_url }}/session/{{ session_id }}"
+
+session:
+  type: managed
+  create:
+    endpoint: create_session
+    session_id_path: "$.id"
+  close:
+    endpoint: delete_session
+
+request:
+  endpoint: send_message
+
+response:
+  format: json
+  content_path: '$.parts[?(@.type=="text")].text'
+
+health_check:
+  enabled: true
+  endpoint: health
+
+logging:
+  log_raw_exchanges: true

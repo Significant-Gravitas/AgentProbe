@@ -1,0 +1,49 @@
+# Endpoint template for the OpenClaw Gateway WebSocket protocol.
+# Sources:
+# - https://openclawcn.com/en/docs/gateway/protocol/
+# - https://openclawcn.com/en/docs/concepts/architecture/
+#
+# The Gateway control plane is WS/WSS JSON RPC. Clients first receive a
+# `connect.challenge` event, then send a `connect` request that declares the
+# client role, scopes, caps, permissions, and gateway auth token.
+#
+# AgentProbe now executes the full WS handshake, including the server challenge,
+# signed device identity, and cached device-token reuse. A first-time remote
+# connect may still require the gateway operator to approve the new device.
+
+preset: openclaw
+
+transport: websocket
+
+connection:
+  url: "${OPENCLAW_GATEWAY_URL:-ws://127.0.0.1:18789}"
+  timeout_seconds: 300
+  max_retries: 1
+
+websocket:
+  connect:
+    challenge_event: connect.challenge
+    method: connect
+    params:
+      minProtocol: 3
+      maxProtocol: 3
+      client:
+        id: openclaw-probe
+        version: "0.1.0"
+        platform: python
+        mode: probe
+      role: operator
+      scopes:
+        - operator.read
+        - operator.write
+      caps: []
+      commands: []
+      permissions: {}
+      auth:
+        token: "${OPENCLAW_GATEWAY_TOKEN:-}"
+
+health_check:
+  enabled: true
+
+logging:
+  log_raw_exchanges: true

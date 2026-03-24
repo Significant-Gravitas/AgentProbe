@@ -1,0 +1,54 @@
+# Endpoint template for the local AutoGPT copilot backend.
+# Based on /Users/swifty/work/AutoGPTResearch/research/copilot_smoke_test.py.
+#
+# AutoGPT auth is handled internally by the main AgentProbe CLI for this preset.
+# The CLI should call `agentprobe.endpoints.autogpt.resolve_auth()` before
+# sending requests, which acquires a token and registers the user.
+
+preset: autogpt
+transport: http
+
+connection:
+  base_url: "${AUTOGPT_BACKEND_URL:-http://localhost:8006}"
+  timeout_seconds: 300
+  max_retries: 1
+
+auth:
+  type: none
+
+endpoints:
+  register_user:
+    method: POST
+    url: "{{ base_url }}/api/auth/user"
+
+  create_session:
+    method: POST
+    url: "{{ base_url }}/api/chat/sessions"
+
+  send_message:
+    method: POST
+    url: "{{ base_url }}/api/chat/sessions/{{ session_id }}/stream"
+    body_template: |
+      {
+        "message": {{ last_message.content | tojson }},
+        "is_user_message": true
+      }
+
+session:
+  type: managed
+  create:
+    endpoint: create_session
+    session_id_path: "$.id"
+
+request:
+  endpoint: send_message
+
+response:
+  format: sse
+  content_path: "$.delta"
+
+health_check:
+  enabled: false
+
+logging:
+  log_raw_exchanges: true
