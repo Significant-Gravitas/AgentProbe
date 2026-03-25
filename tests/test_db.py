@@ -57,22 +57,30 @@ class FailingAdapter(FakeAdapter):
 
 
 class FakeResponsesAPI:
-    def __init__(self, *, parsed: RubricScore | None = None) -> None:
+    def __init__(self, *, create_responses: list[object] | None = None) -> None:
         self.create_calls: list[dict[str, object]] = []
-        self._parsed = parsed
+        self._create_responses = list(create_responses or [])
 
     async def create(self, **kwargs: object) -> SimpleNamespace:
         self.create_calls.append(kwargs)
-        if self._parsed is None:
+        if not self._create_responses:
             return SimpleNamespace(output_text=None)
-        return SimpleNamespace(
-            output_text=json.dumps(self._parsed.model_dump(by_alias=True))
-        )
+
+        payload = self._create_responses.pop(0)
+        if isinstance(payload, SimpleNamespace):
+            return payload
+        if isinstance(payload, RubricScore):
+            return SimpleNamespace(
+                output_text=json.dumps(payload.model_dump(by_alias=True))
+            )
+        if isinstance(payload, dict):
+            return SimpleNamespace(output_text=json.dumps(payload))
+        return SimpleNamespace(output_text=payload)
 
 
 class FakeOpenAIClient:
-    def __init__(self, *, parsed: RubricScore | None = None) -> None:
-        self.responses = FakeResponsesAPI(parsed=parsed)
+    def __init__(self, *, create_responses: list[object] | None = None) -> None:
+        self.responses = FakeResponsesAPI(create_responses=create_responses)
 
 
 def build_score(score: int = 4, passed: bool = True) -> RubricScore:
@@ -89,6 +97,13 @@ def build_score(score: int = 4, passed: bool = True) -> RubricScore:
             "pass": passed,
         }
     )
+
+
+def build_persona_step(
+    status: str,
+    message: str | None = None,
+) -> dict[str, str | None]:
+    return {"status": status, "message": message}
 
 
 def write_suite_files(tmp_path: Path) -> dict[str, Path]:
@@ -149,7 +164,7 @@ personas:
         """
 judge:
   provider: openai
-  model: gpt-4.1-mini
+  model: anthropic/claude-opus-4.6
   temperature: 0.0
   max_tokens: 500
 rubrics:
@@ -301,7 +316,13 @@ def test_init_db_creates_tables_and_is_idempotent(tmp_path: Path):
 async def test_sqlite_run_recorder_persists_full_trace_and_queries(tmp_path: Path):
     paths = write_suite_files(tmp_path)
     recorder = SqliteRunRecorder(db_url_for(tmp_path))
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Rebook FLT-29481."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
 
     def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
         del endpoint
@@ -331,6 +352,7 @@ async def test_sqlite_run_recorder_persists_full_trace_and_queries(tmp_path: Pat
         "checkpoint_count": 1,
     }
     assert len(scenario["turns"]) == 3
+    assert scenario["turns"][1]["source"] == "user_guided"
     assert len(scenario["target_events"]) == 1
     assert len(scenario["tool_calls"]) == 1
     assert len(scenario["checkpoints"]) == 1
@@ -360,7 +382,13 @@ async def test_sqlite_run_recorder_redacts_endpoint_and_exchange_secrets(
 ):
     paths = write_suite_files(tmp_path)
     recorder = SqliteRunRecorder(db_url_for(tmp_path))
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Rebook FLT-29481."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
 
     def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
         del endpoint
@@ -391,10 +419,82 @@ async def test_sqlite_run_recorder_redacts_endpoint_and_exchange_secrets(
 
 
 @pytest.mark.anyio
+async def test_sqlite_run_recorder_distinguishes_exact_and_guided_user_turns(
+    tmp_path: Path,
+):
+    paths = write_suite_files(tmp_path)
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+defaults:
+  max_turns: 2
+scenarios:
+  - id: smoke-scenario
+    name: Smoke
+    tags: [smoke]
+    priority: high
+    persona: business-traveler
+    rubric: customer-support
+    context:
+      system_prompt: You are a travel assistant.
+      injected_data:
+        booking_id: FLT-29481
+    turns:
+      - role: user
+        content: Use booking {{ booking_id }} exactly.
+        use_exact_message: true
+      - role: user
+        content: Ask to arrive before noon.
+    expectations:
+      expected_behavior: Help the user quickly.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    recorder = SqliteRunRecorder(db_url_for(tmp_path))
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "I need to land before noon."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        del endpoint
+        return FakeAdapter(
+            [
+                AdapterReply(assistant_text="What timing works?"),
+                AdapterReply(assistant_text="I found an 11:15 AM arrival."),
+            ]
+        )
+
+    result = await run_suite(
+        endpoint=paths["endpoint"],
+        scenarios=scenarios_path,
+        personas=paths["personas"],
+        rubric=paths["rubric"],
+        adapter_factory=adapter_factory,
+        oai_client=cast(openai.AsyncClient, oai_client),
+        recorder=recorder,
+    )
+
+    persisted_run = get_run(result.run_id or "", db_url=db_url_for(tmp_path))
+    assert persisted_run is not None
+    sources = [
+        turn["source"]
+        for turn in persisted_run["scenarios"][0]["turns"]
+        if turn["role"] == "user"
+    ]
+    assert sources == ["user_exact", "user_guided"]
+
+
+@pytest.mark.anyio
 async def test_sqlite_run_recorder_persists_config_errors(tmp_path: Path):
     paths = write_suite_files(tmp_path)
     recorder = SqliteRunRecorder(db_url_for(tmp_path))
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(create_responses=[build_score()])
 
     with pytest.raises(AgentProbeConfigError, match="No scenarios matched"):
         await run_suite(
@@ -423,7 +523,7 @@ async def test_sqlite_run_recorder_persists_runtime_errors_and_scenario_state(
 ):
     paths = write_suite_files(tmp_path)
     recorder = SqliteRunRecorder(db_url_for(tmp_path))
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(create_responses=[build_score()])
 
     def adapter_factory(endpoint: Endpoints) -> FailingAdapter:
         del endpoint

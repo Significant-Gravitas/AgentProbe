@@ -47,7 +47,7 @@ def build_rubric() -> Rubric:
         meta_prompt="Score the assistant response.",
         judge=JudgeConfig(
             provider="openai",
-            model="gpt-4.1-mini",
+            model="anthropic/claude-opus-4.6",
             temperature=0.15,
             max_tokens=321,
         ),
@@ -188,7 +188,7 @@ def test_parse_rubrics_yaml_applies_top_level_judge_config(tmp_path):
 version: "1.0"
 judge:
   provider: openai
-  model: gpt-4.1-mini
+  model: anthropic/claude-opus-4.6
   temperature: 0.25
   max_tokens: 777
 rubrics:
@@ -214,8 +214,8 @@ rubrics:
     parsed = parse_rubrics_yaml(path)
 
     assert parsed.metadata.judge is not None
-    assert parsed.metadata.judge.model == "gpt-4.1-mini"
+    assert parsed.metadata.judge.model == "anthropic/claude-opus-4.6"
     assert parsed.rubrics[0].judge is not None
-    assert parsed.rubrics[0].judge.model == "gpt-4.1-mini"
+    assert parsed.rubrics[0].judge.model == "anthropic/claude-opus-4.6"
     assert parsed.rubrics[0].judge.temperature == 0.25
     assert parsed.rubrics[0].judge.max_tokens == 777

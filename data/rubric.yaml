@@ -5,7 +5,7 @@ version: "1.0"
 # --------------------------------------------
 judge:
   provider: openai
-  model: gpt-4.1-mini
+  model: anthropic/claude-opus-4.6
   temperature: 0.0
   max_tokens: 4096
 
@@ -398,3 +398,146 @@ rubrics:
 
       Output your evaluation as JSON with the same structure as described in
       the system instructions.
+
+  # -- OPERATIONS AUTOMATION RUBRIC ------------
+  - id: operations-automation
+    name: "Operations Automation Agent"
+    description: "Evaluates agents that automate business operations using platform blocks"
+    pass_threshold: 0.70
+
+    dimensions:
+      - id: task_completion
+        name: "Task Completion"
+        weight: 0.30
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Complete failure - did not address the user's operational need"
+            2: "Minimal - acknowledged the request but produced no useful output"
+            3: "Partial - completed some steps but left the workflow incomplete"
+            4: "Mostly complete - core workflow works with minor gaps"
+            5: "Fully resolved - all requested operations completed successfully"
+        judge_prompt: |
+          Evaluate whether the agent successfully completed the user's
+          operational automation task.
+
+          Consider:
+          - Did the agent understand the business operation being requested?
+          - Did it use the correct platform blocks to achieve the goal?
+          - Was the end result what the user asked for?
+          - If the task required multiple steps, were all steps completed?
+
+          Scenario expectations:
+          {{ expectations.expected_behavior }}
+
+          Expected outcome: {{ expectations.expected_outcome }}
+
+          Score 1-5 based on the scale provided.
+
+      - id: hallucination
+        name: "Hallucination Rate"
+        weight: 0.25
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Severe - fabricated data, actions, or tool outputs"
+            2: "Significant - multiple invented details or false confirmations"
+            3: "Moderate - one or two unverifiable claims"
+            4: "Minor - essentially accurate with trivial imprecisions"
+            5: "None detected - all outputs verifiable and appropriately hedged"
+        judge_prompt: |
+          Evaluate the agent's responses for hallucinated or fabricated information.
+
+          In an operations context, hallucination includes:
+          - Claiming data was written to a spreadsheet without calling the tool
+          - Fabricating CRM records, email confirmations, or task IDs
+          - Inventing search results or scraped content
+          - Claiming an action succeeded without evidence of tool execution
+
+          Score 1-5. A score of 1 or 2 is an automatic scenario FAIL.
+
+      - id: tool_accuracy
+        name: "Block Selection & Usage"
+        weight: 0.25
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Wrong blocks - used irrelevant blocks or missed required ones"
+            2: "Poor - called some correct blocks but with wrong inputs"
+            3: "Adequate - correct blocks but suboptimal configuration"
+            4: "Good - correct blocks, correct inputs, minor inefficiencies"
+            5: "Optimal - exactly the right blocks with correct inputs"
+        judge_prompt: |
+          Evaluate the agent's use of platform blocks (tools).
+
+          Expected blocks:
+          {% for tool in expectations.expected_tools %}
+          - {{ tool.name }} (required: {{ tool.required }})
+          {% endfor %}
+
+          Evaluate:
+          - Were the required blocks used?
+          - Were inputs to each block correct and complete?
+          - Were there unnecessary or redundant block calls?
+          - Did the agent chain blocks logically for multi-step workflows?
+
+      - id: response_quality
+        name: "Response Clarity & Usefulness"
+        weight: 0.20
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Irrelevant - response does not address the operational need"
+            2: "Confusing - attempts to help but is unclear or overly technical"
+            3: "Adequate - addresses the need but could be clearer"
+            4: "Good - clear, specific, and actionable"
+            5: "Excellent - concise, well-structured, confirms actions taken"
+        judge_prompt: |
+          Evaluate the quality and clarity of the agent's responses for a
+          non-technical business user.
+
+          Consider:
+          - Does the response confirm what was done in plain language?
+          - Is it free of unnecessary jargon?
+          - Does it provide actionable next steps where appropriate?
+          - Does it proactively flag issues or ask for clarification when needed?
+
+    scoring_overrides:
+      auto_fail_conditions:
+        - dimension: hallucination
+          below: 2
+        - dimension: task_completion
+          below: 2
+      auto_pass_conditions: []
+
+    meta_prompt: |
+      You are an expert evaluator assessing an AI agent's performance in
+      automating business operations. The agent is expected to use platform
+      blocks (tools) such as Google Sheets, HubSpot CRM, Todoist, Notion,
+      email, web search, and web scraping to accomplish tasks for a
+      small-business founder.
+
+      IMPORTANT INSTRUCTIONS:
+      - Evaluate based ONLY on what is in the conversation transcript.
+      - Do not assume the agent took actions it did not explicitly state.
+      - Pay special attention to whether tool calls actually happened
+        versus whether the agent merely described what it would do.
+      - Be precise in your scoring - use the full range of the scale.
+      - Provide specific evidence from the conversation for each score.
+
+      Output your evaluation as JSON:
+      {
+        "dimensions": {
+          "<dimension_id>": {
+            "reasoning": "Step-by-step analysis with evidence...",
+            "evidence": ["quote or observation 1", "quote or observation 2"],
+            "score": <integer>
+          }
+        },
+        "overall_notes": "Brief summary of key strengths and failures",
+        "pass": <boolean>
+      }

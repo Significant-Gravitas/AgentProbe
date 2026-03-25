@@ -44,7 +44,7 @@ def build_run() -> dict[str, object]:
                 "pass_threshold": 0.7,
                 "judge": {
                     "provider": "openai",
-                    "model": "gpt-4.1-mini",
+                    "model": "anthropic/claude-opus-4.6",
                     "temperature": 0.0,
                     "max_tokens": 4096,
                     "overall_notes": "Clear and empathetic resolution.",

@@ -173,6 +173,13 @@ def validate(data_path: Path) -> None:
     "--scenario-id", type=str, default=None, help="Run a single scenario by id."
 )
 @click.option("--tags", type=str, default=None, help="Comma-separated scenario tags.")
+@click.option(
+    "--parallel",
+    "--parrallel",
+    "parallel",
+    is_flag=True,
+    help="Run matching scenarios concurrently.",
+)
 def run(
     endpoint_path: Path,
     scenarios_path: Path,
@@ -180,6 +187,7 @@ def run(
     rubric_path: Path,
     scenario_id: str | None,
     tags: str | None,
+    parallel: bool,
 ) -> None:
     db_url = _suite_db_url(
         endpoint_path,
@@ -200,6 +208,7 @@ def run(
                 oai_client=oai_client,
                 recorder=recorder,
                 progress_callback=_print_run_progress,
+                parallel=parallel,
             )
 
     try:

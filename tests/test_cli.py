@@ -179,6 +179,48 @@ def test_run_command_emits_live_progress_to_stderr(monkeypatch, tmp_path: Path):
     assert "[1/1] PASS smoke-scenario (Smoke) score=0.80" in result.output
 
 
+def test_run_command_forwards_parallel_flag(monkeypatch, tmp_path: Path):
+    async def fake_run_suite(**kwargs: object) -> RunResult:
+        assert kwargs["parallel"] is True
+        return RunResult(
+            passed=True,
+            exit_code=0,
+            results=[
+                ScenarioRunResult(
+                    scenario_id="smoke-scenario",
+                    scenario_name="Smoke",
+                    persona_id="business-traveler",
+                    rubric_id="customer-support",
+                    passed=True,
+                    overall_score=0.8,
+                )
+            ],
+        )
+
+    monkeypatch.setattr("agentprobe.cli.run_suite", fake_run_suite)
+    paths = create_dummy_paths(tmp_path)
+    runner = CliRunner()
+
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--endpoint",
+            str(paths["endpoint"]),
+            "--scenarios",
+            str(paths["scenarios"]),
+            "--personas",
+            str(paths["personas"]),
+            "--rubric",
+            str(paths["rubric"]),
+            "--parrallel",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "PASS smoke-scenario score=0.80" in result.output
+
+
 def test_run_command_returns_config_error_exit_code(monkeypatch, tmp_path: Path):
     async def fake_run_suite(**kwargs: object) -> RunResult:
         raise AgentProbeConfigError("bad config")

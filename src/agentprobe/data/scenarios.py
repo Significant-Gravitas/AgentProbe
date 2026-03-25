@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Literal, TypeAlias, cast
 
 from pydantic import Field
+from pydantic import model_validator
 
 from .common import (
     AgentProbeModel,
@@ -17,7 +18,13 @@ JsonFlatObject: TypeAlias = dict[str, JsonScalar]
 JsonFlatList: TypeAlias = list[JsonScalar] | list[JsonFlatObject]
 JsonValue: TypeAlias = JsonScalar | JsonFlatObject | JsonFlatList
 ScenarioPriority: TypeAlias = Literal["critical", "high", "medium", "low"]
-ExpectedOutcome: TypeAlias = Literal["resolved", "escalated", "deflected", "failed"]
+ExpectedOutcome: TypeAlias = Literal[
+    "resolved",
+    "escalated",
+    "deflected",
+    "failed",
+    "clarified",
+]
 
 
 class ScenarioDefaults(AgentProbeModel):
@@ -40,6 +47,15 @@ class CheckpointAssertion(AgentProbeModel):
 class UserTurn(AgentProbeModel):
     role: Literal["user"]
     content: str | None = None
+    use_exact_message: bool = False
+
+    @model_validator(mode="after")
+    def validate_exact_message_content(self) -> "UserTurn":
+        if self.use_exact_message and not isinstance(self.content, str):
+            raise ValueError(
+                "`use_exact_message` requires `content` so the exact user message can be rendered."
+            )
+        return self
 
 
 class CheckpointTurn(AgentProbeModel):

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import Mapping
 from pathlib import Path
@@ -14,9 +15,13 @@ from agentprobe.data import Endpoints
 from agentprobe.data.personas import Persona
 from agentprobe.data.rubrics import JudgeConfig, Rubric, RubricDimension, RubricScale
 from agentprobe.data.scenarios import Scenario, ScenarioDefaults
-from agentprobe.errors import AgentProbeRuntimeError
 from agentprobe.judge import RubricScore
-from agentprobe.runner import RunProgressEvent, run_scenario, run_suite
+from agentprobe.runner import (
+    RunProgressEvent,
+    ScenarioRunResult,
+    run_scenario,
+    run_suite,
+)
 from agentprobe.simulator import ConversationTurn
 
 
@@ -57,38 +62,30 @@ class FakeAdapter:
 
 
 class FakeResponsesAPI:
-    def __init__(
-        self,
-        *,
-        parsed: RubricScore | None = None,
-        response_text: str | None = None,
-    ) -> None:
-        self.parse_calls: list[dict[str, object]] = []
+    def __init__(self, *, create_responses: list[object] | None = None) -> None:
         self.create_calls: list[dict[str, object]] = []
-        self._parsed = parsed
-        self._response_text = response_text
-
-    async def parse(self, **kwargs: object) -> SimpleNamespace:
-        self.parse_calls.append(kwargs)
-        return SimpleNamespace(output_parsed=self._parsed)
+        self._create_responses = list(create_responses or [])
 
     async def create(self, **kwargs: object) -> SimpleNamespace:
         self.create_calls.append(kwargs)
-        if "text" in kwargs and self._parsed is not None:
+        if not self._create_responses:
+            raise AssertionError("No fake OpenAI responses remaining.")
+
+        payload = self._create_responses.pop(0)
+        if isinstance(payload, SimpleNamespace):
+            return payload
+        if isinstance(payload, RubricScore):
             return SimpleNamespace(
-                output_text=json.dumps(self._parsed.model_dump(by_alias=True))
+                output_text=json.dumps(payload.model_dump(by_alias=True))
             )
-        return SimpleNamespace(output_text=self._response_text)
+        if isinstance(payload, dict):
+            return SimpleNamespace(output_text=json.dumps(payload))
+        return SimpleNamespace(output_text=payload)
 
 
 class FakeOpenAIClient:
-    def __init__(
-        self,
-        *,
-        parsed: RubricScore | None = None,
-        response_text: str | None = None,
-    ) -> None:
-        self.responses = FakeResponsesAPI(parsed=parsed, response_text=response_text)
+    def __init__(self, *, create_responses: list[object] | None = None) -> None:
+        self.responses = FakeResponsesAPI(create_responses=create_responses)
 
 
 def build_persona() -> Persona:
@@ -130,7 +127,7 @@ def build_rubric() -> Rubric:
         meta_prompt="Judge behavior: {{ expectations.expected_behavior }}",
         judge=JudgeConfig(
             provider="openai",
-            model="gpt-4.1-mini",
+            model="anthropic/claude-opus-4.6",
             temperature=0.0,
             max_tokens=500,
         ),
@@ -148,7 +145,8 @@ def build_rubric() -> Rubric:
     )
 
 
-def build_score(score: int = 4) -> RubricScore:
+def build_score(score: int = 4, *, passed: bool | None = None) -> RubricScore:
+    final_passed = passed if passed is not None else (float(score) / 5.0) >= 0.7
     return RubricScore.model_validate(
         {
             "dimensions": {
@@ -159,9 +157,30 @@ def build_score(score: int = 4) -> RubricScore:
                 }
             },
             "overall_notes": "Solid answer.",
-            "pass": True,
+            "pass": final_passed,
         }
     )
+
+
+def build_persona_step(
+    status: str,
+    message: str | None = None,
+) -> dict[str, str | None]:
+    return {"status": status, "message": message}
+
+
+def simulator_calls(client: FakeOpenAIClient) -> list[dict[str, object]]:
+    calls: list[dict[str, object]] = []
+    for call in client.responses.create_calls:
+        text_config = call.get("text")
+        if not isinstance(text_config, dict):
+            continue
+        text_format = text_config.get("format")
+        if not isinstance(text_format, dict):
+            continue
+        if text_format.get("name") == "persona_step":
+            calls.append(call)
+    return calls
 
 
 def build_scenario(*, turns: list[dict[str, object]]) -> Scenario:
@@ -193,8 +212,12 @@ async def test_run_scenario_renders_injected_data_and_uses_persona_generation():
         ]
     )
     oai_client = FakeOpenAIClient(
-        parsed=build_score(),
-        response_text="I need to land before noon.",
+        create_responses=[
+            build_persona_step("continue", "Please change booking FLT-29481."),
+            build_persona_step("continue", "I need to land before noon."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
     )
 
     result = await run_scenario(
@@ -215,6 +238,7 @@ async def test_run_scenario_renders_injected_data_and_uses_persona_generation():
     second_message = cast(ConversationTurn, adapter.send_calls[1]["last_message"])
     assert first_message.content == "Please change booking FLT-29481."
     assert second_message.content == "I need to land before noon."
+    assert "Please change booking FLT-29481." in str(simulator_calls(oai_client)[0]["input"])
     assert [turn.role for turn in result.transcript] == [
         "system",
         "user",
@@ -222,6 +246,48 @@ async def test_run_scenario_renders_injected_data_and_uses_persona_generation():
         "user",
         "assistant",
     ]
+
+
+@pytest.mark.anyio
+async def test_run_scenario_uses_exact_messages_only_when_requested():
+    adapter = FakeAdapter(
+        [
+            AdapterReply(assistant_text="What is your timing constraint?"),
+            AdapterReply(assistant_text="I found a flight arriving at 11:15 AM."),
+        ]
+    )
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "I need to land before noon."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    await run_scenario(
+        adapter,
+        build_scenario(
+            turns=[
+                {
+                    "role": "user",
+                    "content": "Use booking {{ booking_id }} exactly.",
+                    "use_exact_message": True,
+                },
+                {"role": "user", "content": "Ask to land before noon."},
+            ]
+        ),
+        build_persona(),
+        build_rubric(),
+        defaults=ScenarioDefaults(max_turns=2),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    first_message = cast(ConversationTurn, adapter.send_calls[0]["last_message"])
+    second_message = cast(ConversationTurn, adapter.send_calls[1]["last_message"])
+    assert first_message.content == "Use booking FLT-29481 exactly."
+    assert second_message.content == "I need to land before noon."
+    assert len(simulator_calls(oai_client)) == 2
+    assert "Ask to land before noon." in str(simulator_calls(oai_client)[0]["input"])
 
 
 @pytest.mark.anyio
@@ -238,7 +304,13 @@ async def test_run_scenario_records_checkpoint_failures_without_stopping():
             )
         ]
     )
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Where is order 123?"),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
 
     result = await run_scenario(
         adapter,
@@ -284,7 +356,13 @@ async def test_run_scenario_renders_rubric_and_judge_receives_full_transcript():
             )
         ]
     )
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Rebook FLT-29481."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
 
     await run_scenario(
         adapter,
@@ -294,7 +372,7 @@ async def test_run_scenario_renders_rubric_and_judge_receives_full_transcript():
         oai_client=cast(openai.AsyncClient, oai_client),
     )
 
-    call = oai_client.responses.create_calls[0]
+    call = oai_client.responses.create_calls[-1]
     assert "Booking reference: FLT-29481" in str(call["instructions"])
     assert "Judge behavior: Agent must help the user quickly." in str(
         call["instructions"]
@@ -311,7 +389,13 @@ async def test_run_scenario_renders_rubric_and_judge_receives_full_transcript():
 @pytest.mark.anyio
 async def test_run_scenario_exposes_rendered_turns_to_rubric_templates():
     adapter = FakeAdapter([AdapterReply(assistant_text="Handled.")])
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Please rebook FLT-29481."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
     rubric = build_rubric().model_copy(deep=True)
     rubric.dimensions[0].judge_prompt = "User asked: {{ turns[0].content }}"
 
@@ -323,34 +407,80 @@ async def test_run_scenario_exposes_rendered_turns_to_rubric_templates():
         oai_client=cast(openai.AsyncClient, oai_client),
     )
 
-    call = oai_client.responses.create_calls[0]
-    assert "User asked: Rebook FLT-29481." in str(call["instructions"])
+    call = oai_client.responses.create_calls[-1]
+    assert "User asked: Please rebook FLT-29481." in str(call["instructions"])
 
 
 @pytest.mark.anyio
-async def test_run_scenario_enforces_inherited_max_turns():
+async def test_run_scenario_continues_after_scripted_turns_until_stalled():
     adapter = FakeAdapter(
         [
-            AdapterReply(assistant_text="First reply."),
-            AdapterReply(assistant_text="Second reply."),
+            AdapterReply(assistant_text="What timing works?"),
+            AdapterReply(assistant_text="I can get you in before noon."),
+            AdapterReply(assistant_text="There is a 6:45 AM option."),
         ]
     )
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Please change booking FLT-29481."),
+            build_persona_step("continue", "I need to land before noon."),
+            build_persona_step("continue", "What options are available?"),
+            build_persona_step("stalled"),
+            build_score(),
+        ]
+    )
 
-    with pytest.raises(AgentProbeRuntimeError, match="exceeded max_turns=1"):
-        await run_scenario(
-            adapter,
-            build_scenario(
-                turns=[
-                    {"role": "user", "content": "First turn"},
-                    {"role": "user", "content": "Second turn"},
-                ]
-            ),
-            build_persona(),
-            build_rubric(),
-            defaults=ScenarioDefaults(max_turns=1),
-            oai_client=cast(openai.AsyncClient, oai_client),
-        )
+    await run_scenario(
+        adapter,
+        build_scenario(
+            turns=[
+                {"role": "user", "content": "Please change booking {{ booking_id }}."},
+                {"role": "user", "content": "Mention that arrival must be before noon."},
+            ]
+        ),
+        build_persona(),
+        build_rubric(),
+        defaults=ScenarioDefaults(max_turns=3),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    assert [
+        cast(ConversationTurn, call["last_message"]).content for call in adapter.send_calls
+    ] == [
+        "Please change booking FLT-29481.",
+        "I need to land before noon.",
+        "What options are available?",
+    ]
+
+
+@pytest.mark.anyio
+async def test_run_scenario_judges_when_continuation_exceeds_inherited_max_turns():
+    adapter = FakeAdapter([AdapterReply(assistant_text="First reply.")])
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "First turn"),
+            build_persona_step("continue", "Second turn"),
+            build_score(2),
+        ]
+    )
+
+    result = await run_scenario(
+        adapter,
+        build_scenario(turns=[{"role": "user", "content": "First turn"}]),
+        build_persona(),
+        build_rubric(),
+        defaults=ScenarioDefaults(max_turns=1),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    assert len(adapter.send_calls) == 1
+    assert result.passed is False
+    assert result.overall_score == pytest.approx(0.4)
+    judge_call = oai_client.responses.create_calls[-1]
+    assert "Scenario flight-rebooking exceeded max_turns=1." in str(
+        judge_call["input"]
+    )
+    assert "Assistant: First reply." in str(judge_call["input"])
 
 
 @pytest.mark.anyio
@@ -404,7 +534,7 @@ personas:
         """
 judge:
   provider: openai
-  model: gpt-4.1-mini
+  model: anthropic/claude-opus-4.6
   temperature: 0.0
   max_tokens: 500
 rubrics:
@@ -459,7 +589,13 @@ scenarios:
         encoding="utf-8",
     )
 
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Hello smoke"),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
 
     def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
         return FakeAdapter([AdapterReply(assistant_text="Handled.")])
@@ -529,7 +665,7 @@ personas:
         """
 judge:
   provider: openai
-  model: gpt-4.1-mini
+  model: anthropic/claude-opus-4.6
   temperature: 0.0
   max_tokens: 500
 rubrics:
@@ -570,7 +706,13 @@ scenarios:
         encoding="utf-8",
     )
 
-    oai_client = FakeOpenAIClient(parsed=build_score())
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Hello smoke"),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
     events: list[RunProgressEvent] = []
 
     def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
@@ -595,3 +737,300 @@ scenarios:
     assert events[1].scenario_index == 1
     assert events[2].passed is True
     assert events[2].overall_score == pytest.approx(0.8)
+
+
+@pytest.mark.anyio
+async def test_run_suite_parallel_runs_scenarios_concurrently_and_keeps_result_order(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text(
+        """
+personas:
+  - id: business-traveler
+    name: Business Traveler
+    demographics:
+      role: business customer
+      tech_literacy: high
+      domain_expertise: intermediate
+      language_style: terse
+    personality:
+      patience: 2
+      assertiveness: 4
+      detail_orientation: 5
+      cooperativeness: 4
+      emotional_intensity: 2
+    behavior:
+      opening_style: Be direct.
+      follow_up_style: Answer follow-up questions directly.
+      escalation_triggers: []
+      topic_drift: none
+      clarification_compliance: high
+    system_prompt: You are a direct business traveler.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: Customer Support
+    pass_threshold: 0.7
+    meta_prompt: Judge behavior.
+    dimensions:
+      - id: task_completion
+        name: Task Completion
+        weight: 1.0
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: bad
+            5: good
+        judge_prompt: Check task completion.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+scenarios:
+  - id: smoke-scenario
+    name: Smoke
+    persona: business-traveler
+    rubric: customer-support
+    turns:
+      - role: user
+        content: Hello smoke
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+  - id: regression-scenario
+    name: Regression
+    persona: business-traveler
+    rubric: customer-support
+    turns:
+      - role: user
+        content: Hello regression
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    async def fake_run_scenario(
+        adapter: FakeAdapter,
+        scenario: Scenario,
+        persona: Persona,
+        rubric: Rubric,
+        *,
+        defaults: ScenarioDefaults | None = None,
+        oai_client: openai.AsyncClient,
+        recorder: object | None = None,
+        scenario_ordinal: int | None = None,
+    ) -> ScenarioRunResult:
+        del adapter, persona, rubric, defaults, oai_client, recorder
+        if scenario.id == "smoke-scenario":
+            await asyncio.sleep(0.05)
+            return ScenarioRunResult(
+                scenario_id=scenario.id,
+                scenario_name=scenario.name,
+                persona_id=scenario.persona,
+                rubric_id=scenario.rubric,
+                passed=True,
+                overall_score=0.8,
+            )
+
+        await asyncio.sleep(0.01)
+        return ScenarioRunResult(
+            scenario_id=scenario.id,
+            scenario_name=scenario.name,
+            persona_id=scenario.persona,
+            rubric_id=scenario.rubric,
+            passed=True,
+            overall_score=0.9,
+        )
+
+    monkeypatch.setattr("agentprobe.runner.run_scenario", fake_run_scenario)
+    events: list[RunProgressEvent] = []
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="Handled.")])
+
+    result = await run_suite(
+        endpoint=endpoint_path,
+        scenarios=scenarios_path,
+        personas=personas_path,
+        rubric=rubric_path,
+        adapter_factory=adapter_factory,
+        oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+        progress_callback=events.append,
+        parallel=True,
+    )
+
+    assert result.exit_code == 0
+    assert [item.scenario_id for item in result.results] == [
+        "smoke-scenario",
+        "regression-scenario",
+    ]
+    assert [(event.kind, event.scenario_id, event.scenario_index) for event in events] == [
+        ("suite_started", None, None),
+        ("scenario_started", "smoke-scenario", 1),
+        ("scenario_started", "regression-scenario", 2),
+        ("scenario_finished", "regression-scenario", 2),
+        ("scenario_finished", "smoke-scenario", 1),
+    ]
+    assert events[3].overall_score == pytest.approx(0.9)
+    assert events[4].overall_score == pytest.approx(0.8)
+
+
+@pytest.mark.anyio
+async def test_run_suite_finishes_with_a_judged_failure_after_max_turns(tmp_path: Path):
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text(
+        """
+personas:
+  - id: business-traveler
+    name: Business Traveler
+    demographics:
+      role: business customer
+      tech_literacy: high
+      domain_expertise: intermediate
+      language_style: terse
+    personality:
+      patience: 2
+      assertiveness: 4
+      detail_orientation: 5
+      cooperativeness: 4
+      emotional_intensity: 2
+    behavior:
+      opening_style: Be direct.
+      follow_up_style: Answer follow-up questions directly.
+      escalation_triggers: []
+      topic_drift: none
+      clarification_compliance: high
+    system_prompt: You are a direct business traveler.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: Customer Support
+    pass_threshold: 0.7
+    meta_prompt: Judge behavior.
+    dimensions:
+      - id: task_completion
+        name: Task Completion
+        weight: 1.0
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: bad
+            5: good
+        judge_prompt: Check task completion.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+defaults:
+  max_turns: 1
+scenarios:
+  - id: smoke-scenario
+    name: Smoke
+    persona: business-traveler
+    rubric: customer-support
+    turns:
+      - role: user
+        content: Hello smoke
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Hello smoke"),
+            build_persona_step("continue", "One more question"),
+            build_score(2),
+        ]
+    )
+    events: list[RunProgressEvent] = []
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="Handled.")])
+
+    result = await run_suite(
+        endpoint=endpoint_path,
+        scenarios=scenarios_path,
+        personas=personas_path,
+        rubric=rubric_path,
+        adapter_factory=adapter_factory,
+        oai_client=cast(openai.AsyncClient, oai_client),
+        progress_callback=events.append,
+    )
+
+    assert result.exit_code == 1
+    assert result.passed is False
+    assert [item.scenario_id for item in result.results] == ["smoke-scenario"]
+    assert result.results[0].passed is False
+    assert [(event.kind, event.scenario_id) for event in events] == [
+        ("suite_started", None),
+        ("scenario_started", "smoke-scenario"),
+        ("scenario_finished", "smoke-scenario"),
+    ]
