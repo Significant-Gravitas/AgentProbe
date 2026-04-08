@@ -7,3 +7,4 @@ __pycache__/
 *.pyo
 *.pyd
 data/cluster_scenarios
+.env
