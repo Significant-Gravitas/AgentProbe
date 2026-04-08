@@ -1,0 +1,1521 @@
+version: "1.0"
+id: "multi-session-memory-v1"
+name: "Multi-Session Memory Evaluation"
+
+defaults:
+  max_turns: 10
+  timeout_seconds: 30
+  persona: smb-founder
+  rubric: multi-session-memory
+
+# Multi-Session Memory Evaluation
+#
+# Format extensions over the base scenario format:
+#   - `sessions:` replaces `turns:` at the scenario level. Each session has
+#     its own turns, an optional `id`, a `time_offset` (logical, not wall-clock),
+#     a `reset` policy, and optional `identity` (for scope isolation tests,
+#     deferred to a future pack).
+#
+#   - `reset` values:
+#       none         -- continue same process/context (default within a session)
+#       new          -- clear context window, same process/identity
+#       fresh_agent  -- fully cold boot: new process, empty context, memory
+#                       backend is the only persistent channel. This MUST be
+#                       enforced by the harness; most scenarios test nothing
+#                       if fresh_agent is faked.
+#
+#   - `failure_modes:` under expectations lists named failures with their own
+#     semantics so graders can tag *which* failure happened, not just pass/fail.
+#     Most scenarios have multiple distinct failure modes that are diagnostic.
+#
+#   - Scenarios in this pack do NOT assume pre-existing memory state unless
+#     explicitly noted. Each scenario seeds its own context in session 1.
+#
+# Scope isolation (personal vs org memory) is intentionally NOT included here.
+# It depends on product decisions about scope UX that aren't settled yet; add
+# as a separate pack once those are nailed down.
+scenarios:
+
+  # =========================================================================
+  # Category 1: Retention (the floor)
+  # =========================================================================
+
+  - id: mem-retention-basic-identity
+    name: "Basic identity recall across sessions"
+    description: "Declarative facts mentioned in S1 are available in S2 without restating"
+    tags: [multi_session, memory, retention, smoke]
+    priority: critical
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-seed
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Quick housekeeping before we get into it: my assistant is Sarah -- you can CC her on client stuff. Our CRM is HubSpot, and our standing rule is invoices go out on the 1st of the month. Now, log a new contact: Marcus Lee, marcus@northstar.io, NorthStar, CTO."
+
+      - id: s2-probe
+        time_offset: "48h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Who should I CC on outgoing client proposals?"
+          - role: user
+            content: "Add this new lead to our CRM: Rachel Torres, rachel@greenbuildstudios.com, GreenBuild Studios, Director."
+
+    expectations:
+      expected_behavior: |
+        In S2, agent should CC Sarah (or name her as the assistant to CC),
+        and use HubSpot to create the new lead without asking which CRM.
+        No clarifying questions about either fact.
+      expected_outcome: resolved
+      failure_modes:
+        - retention_fail: Agent asks who the assistant is or which CRM to use
+        - fabrication: Agent picks a different CRM without prompting (worse than retention fail)
+        - partial: Recalls one of two facts
+
+  - id: mem-retention-incidental-facts
+    name: "Incidental fact recall (not flagged for saving)"
+    description: "Facts mentioned in passing across a working session are captured without explicit save"
+    tags: [multi_session, memory, retention]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-natural-work
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Draft a client proposal for NovaTech -- they're interested in our consulting package. Our fiscal year ends in March, so mention we have bandwidth for a Q2 start. Oh and make sure to bcc billing@acme.co on it."
+          - role: user
+            content: "Also, pull some competitive research on FreshPaws -- they're our main competitor. We ship out of our warehouse in Reno, so focus on whatever's regional if relevant."
+          - role: user
+            content: "One more thing -- we're going through a six-week sales cycle typically, so plan the follow-up cadence around that. And use Inter as the font on any client-facing docs, that's our standard."
+
+      - id: s2-probe
+        time_offset: "120h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "When does our fiscal year end?"
+          - role: user
+            content: "Who's our main competitor?"
+          - role: user
+            content: "Where do we ship out of?"
+          - role: user
+            content: "What's our billing email?"
+          - role: user
+            content: "What's our typical sales cycle length?"
+          - role: user
+            content: "What font do we use for client docs?"
+
+    expectations:
+      expected_behavior: |
+        Agent recalls at least 4 of 6 facts cleanly. Full recall is a strong
+        pass; 0-3 indicates the memory system only captures explicit save
+        instructions. Don't telegraph that this is a memory test.
+      expected_outcome: resolved
+      failure_modes:
+        - retention_fail: Recalls 3 or fewer facts
+        - fabrication: Confidently produces wrong answers (worse than failing to recall)
+        - explicit_only: Recalls only facts that were syntactically prominent
+      tester_note: |
+        Track WHICH facts survive and which don't. Pattern is often diagnostic
+        (proper nouns vs dates, specifics vs generalities).
+
+  # =========================================================================
+  # Category 2: Distilled procedural knowledge
+  # =========================================================================
+
+  - id: mem-distill-authed-http-image-gen
+    name: "Distilled procedure: authed HTTP image generation"
+    description: "Non-obvious technical procedure taught once, executed cleanly two weeks later"
+    tags: [multi_session, memory, distillation, tool_use]
+    priority: critical
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-teach
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: |
+              I want you to generate images by calling OpenAI's API directly, not
+              through any built-in image-generation block. Use the Send Web Request
+              block. POST to https://api.openai.com/v1/images/generations with an
+              Authorization: Bearer header using the OPENAI_API_KEY environment
+              variable. Body is JSON: {"model": "gpt-image-1", "prompt": "...",
+              "size": "1024x1024"}. The response comes back with base64 in
+              data[0].b64_json. Try it now with the prompt "a red fox in a forest
+              at dawn" so we know it works end to end.
+          - role: checkpoint
+            assert:
+              - response_contains_any:
+                  - "api.openai.com"
+                  - "Send Web Request"
+                  - "b64_json"
+
+      - id: s2-apply-cold
+        time_offset: "336h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Generate an image of a cat wearing sunglasses on a beach."
+
+    expectations:
+      expected_behavior: |
+        Agent calls Send Web Request to the OpenAI images endpoint, includes
+        the Authorization header with the bearer token, structures the body
+        correctly, and returns the image. No clarifying questions about the
+        API, endpoint, auth pattern, or model.
+      expected_outcome: resolved
+      failure_modes:
+        - reteach_request: Agent asks how to generate images or asks for the API details
+        - wrong_tool: Uses a built-in image-gen block instead of Send Web Request
+        - wrong_endpoint: Hits the wrong URL
+        - missing_auth: Omits or malforms the Authorization header
+        - memory_aware_but_unusable: Says "I remember you mentioned an API last time, can you remind me of the details?"
+
+  - id: mem-distill-onboarding-workflow
+    name: "Distilled procedure: custom client onboarding workflow"
+    description: "Multi-step workflow with specific tool choices survives across sessions"
+    tags: [multi_session, memory, distillation, multi_turn]
+    priority: critical
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-teach
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: |
+              Here's how I always onboard new clients, remember this for next time.
+              Step 1: add them to HubSpot. Step 2: create a Notion page in the
+              Clients database with their plan and start date. Step 3: make four
+              Todoist tasks spaced two days apart -- welcome email, kickoff call,
+              scope doc, first invoice. Step 4: send the welcome email from my
+              Gmail, NOT via SMTP. Got it? Save this as our onboarding flow.
+
+      - id: s2-apply-cold
+        time_offset: "168h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "New client: BrightPath Education, contact Lisa Park, lisa@brightpath.edu, COO, Growth plan, starts April 1. Onboard her."
+
+    expectations:
+      expected_behavior: |
+        Agent executes all four steps in order with the right tool for each:
+        HubSpot (not Airtable), Notion in the Clients database (not generic),
+        Todoist with exactly 4 tasks at 2-day spacing, Gmail (not SMTP) for
+        the welcome email. No clarifying questions.
+      expected_outcome: resolved
+      failure_modes:
+        - reteach_request: Asks what the onboarding process is
+        - missing_step: Skips any of the four steps
+        - wrong_tool: Uses SMTP instead of Gmail (the canonical failure -- negation got lost)
+        - wrong_count: Creates a different number of Todoist tasks
+        - wrong_spacing: Spacing other than 2 days
+        - wrong_order: Executes in the wrong order
+      tester_note: |
+        "Don't use SMTP" is a NEGATION, and negations are hard for memory systems
+        to preserve. If the agent uses SMTP, that's high-information -- the
+        procedure was captured but the negative constraint was lost.
+
+  - id: mem-distill-weekly-report-format
+    name: "Distilled procedure: weekly report format"
+    description: "Specific output format with sections, tone, and distribution list survives as a template"
+    tags: [multi_session, memory, distillation]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-build
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: |
+              Help me put together our weekly report. Four sections in this order:
+              Wins, Numbers, Blockers, Next Week. Tone is casual but informative,
+              no buzzwords. Numbers section should pull from our March 2026 Sales
+              sheet in Google Sheets. Email it to me at founder@acme.co and my
+              partner at partner@acme.co. Subject line format:
+              "Week of [Monday date] -- Acme Update". Draft it now for this week.
+          - role: checkpoint
+            assert:
+              - response_contains_any:
+                  - "Wins"
+                  - "Numbers"
+                  - "Blockers"
+                  - "Next Week"
+          - role: user
+            content: "Perfect. Send it. This is our standard weekly report going forward."
+
+      - id: s2-trigger
+        time_offset: "168h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Run the weekly report."
+
+    expectations:
+      expected_behavior: |
+        Same four sections in the same order, casual tone, reads from the
+        Sales sheet, sends to both recipients with the specified subject
+        format. No clarifying questions.
+      expected_outcome: resolved
+      failure_modes:
+        - reteach_request: Asks for the format or recipients
+        - wrong_sections: Drops a section or adds extras
+        - wrong_order: Reorders sections
+        - wrong_tone: Reverts to generic business-jargon tone
+        - wrong_recipients: Missing one or both email addresses
+        - wrong_subject: Subject doesn't match the template
+
+  - id: mem-distill-implicit-tool-preferences
+    name: "Distilled procedure: implicit tool-choice preferences"
+    description: "Preferences accumulated through choices (never declared) distill into defaults"
+    tags: [multi_session, memory, distillation]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-accumulate
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Send a quick email to james@urbanfit.co letting him know the proposal is coming Friday. Use my Gmail, not SMTP."
+          - role: user
+            content: "Now scrape freshpaws.com/pricing -- use Firecrawl, I've had bad luck with basic scrape on them."
+          - role: user
+            content: "Finally, store the pricing info we pulled as a page in Notion, under the Competitive Research section. We keep all that kind of thing in Notion, not Airtable."
+
+      - id: s2-ambiguous
+        time_offset: "120h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Scrape the latest pricing from freshpaws.com, store it somewhere I can find it later, and email me a summary."
+
+    expectations:
+      expected_behavior: |
+        Agent uses Firecrawl for scraping, stores the result in Notion under
+        Competitive Research, and sends the summary email via Gmail. No
+        clarifying questions about which tool to use for any of the three.
+      expected_outcome: resolved
+      failure_modes:
+        - reteach_request: Asks which scraper, where to store, or Gmail vs SMTP
+        - wrong_tool: Picks the wrong tool for any of the three
+        - exposed_seam: Correct tool but narrates ("I noticed you used Firecrawl before")
+        - explicit_only: Memory system only captures stated preferences, not inferred ones
+      tester_note: |
+        Nothing was ever declared "my preference is X" in S1. A failure here
+        reveals a system that only learns from explicit statements, which is
+        a product gap worth knowing about.
+
+  - id: mem-distill-lead-cleaning-procedure
+    name: "Distilled procedure: lead-list cleaning rules learned by example"
+    description: "Procedure learned through corrective feedback, not instruction"
+    tags: [multi_session, memory, distillation]
+    priority: medium
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-walk-through
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "I'm uploading a messy CSV of leads. Clean it up -- dedupe by email, normalize phone numbers to E.164 format, capitalize names properly, drop any rows with no email at all, and for rows where the company column is empty, flag them but don't drop them. Walk me through what you'd do."
+          - role: user
+            content: "Wait -- you deduped by name. Do it by email, people have nicknames."
+          - role: user
+            content: "Good. And don't drop the empty-company rows, flag them so I can review. OK that's the process, lock it in."
+
+      - id: s2-reapply
+        time_offset: "240h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "I just uploaded a new messy lead CSV. Clean it up the way we usually do."
+
+    expectations:
+      expected_behavior: |
+        All five rules applied without being restated: dedupe by email,
+        E.164 phones, proper-case names, drop no-email rows, flag (don't
+        drop) empty-company rows. No clarifying questions.
+      expected_outcome: resolved
+      failure_modes:
+        - dropped_empty_company: Drops empty-company rows instead of flagging (most common -- the instinctive policy)
+        - dedupe_by_name: Dedupes by name instead of email (forgot the correction)
+        - reteach_request: Asks how to clean it
+        - missing_rule: Misses any of the 5 rules
+
+  # =========================================================================
+  # Category 3: Rigidity tests (guardrails on distillation)
+  # =========================================================================
+
+  - id: mem-rigidity-email-tone-override
+    name: "Rigidity: email tone preference override"
+    description: "Updated preference cleanly replaces the old one and doesn't ghost back later"
+    tags: [multi_session, memory, rigidity, anti_rigidity]
+    priority: critical
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-initial-pref
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "For outreach emails, keep them tight -- under 100 words, skip the pleasantries, get to the point. Draft one now for a prospect at a local cafe chain."
+          - role: user
+            content: "Good, that's the style. Use that going forward for all outreach."
+
+      - id: s2-override
+        time_offset: "48h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "I've been getting pushback on my outreach emails -- apparently they come across as cold. Let's go back to warmer, longer ones. Aim for around 200 words, friendly opener, a bit of small talk before the ask. That's the new standard."
+
+      - id: s3-probe
+        time_offset: "96h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
+
+    expectations:
+      expected_behavior: |
+        Email is roughly 150-260 words, has a friendly opener, doesn't apply
+        the old "under 100" or "skip pleasantries" rules. Agent doesn't
+        mention either preference explicitly -- just writes in the new style.
+      expected_outcome: resolved
+      failure_modes:
+        - rigidity_full: Email under 100 words, curt, skips pleasantries
+        - rigidity_exposed: Says "I know you used to prefer short emails but here's a longer one"
+        - rigidity_confused: Asks "do you want the short or long version?"
+        - averaging: Writes a 130-word email that splits the difference (vector-store pathology)
+      tester_note: |
+        Run this scenario twice, second time reversing the order (long first,
+        short override). If one direction passes and the other fails, you've
+        found a recency-bias bug, which is a real bug not a quirk.
+
+  - id: mem-rigidity-tool-migration
+    name: "Rigidity: tool migration from HubSpot to Airtable"
+    description: "Agent drops old tool entirely once told it's replaced, doesn't hedge by using both"
+    tags: [multi_session, memory, rigidity]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-establish
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Add these 2 contacts to HubSpot: Sarah Kim, sarah@brightcafe.com, Bright Cafe, Owner. James Patel, james@urbanfit.co, UrbanFit, CEO."
+          - role: user
+            content: "Now look up sarah@brightcafe.com and tell me what's in her record."
+
+      - id: s2-migrate
+        time_offset: "336h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "We migrated off HubSpot last week -- we're on Airtable now. The base is called 'CRM 2026' with a Contacts table. Use that going forward for all CRM stuff."
+
+      - id: s3-probe
+        time_offset: "24h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Add this lead: Marcus Lee, marcus@northstar.io, NorthStar, CTO."
+
+    expectations:
+      expected_behavior: |
+        Agent uses Airtable, the right base ('CRM 2026'), the right table
+        ('Contacts'). Does not touch HubSpot at all. No clarifying questions.
+      expected_outcome: resolved
+      failure_modes:
+        - stale_tool: Uses HubSpot
+        - hedge: Uses both HubSpot and Airtable "to be safe"
+        - confusion_ask: Asks which to use
+        - wrong_airtable_location: Right tool, wrong base or table
+
+  - id: mem-rigidity-pricing-update
+    name: "Rigidity: pricing fact update with no averaging"
+    description: "Updated fact cleanly replaces old, no compromise between values"
+    tags: [multi_session, memory, rigidity, temporal]
+    priority: critical
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-initial
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Draft a quote for NovaTech on our Growth plan. Our pricing is $2,500/mo for Growth. One year commitment."
+
+      - id: s2-price-change
+        time_offset: "504h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Heads up, we raised prices last week. Growth is $3,000/mo now. Standard is unchanged. Update your notes."
+
+      - id: s3-new-quote
+        time_offset: "48h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Draft a quote for a new prospect, BrightPath Education, on the Growth plan. One year commitment."
+
+    expectations:
+      expected_behavior: |
+        Quote shows $3,000/mo. Does not mention old pricing. Does not average
+        to $2,750 or any other intermediate value.
+      expected_outcome: resolved
+      failure_modes:
+        - stale_fact: Quote shows $2,500
+        - averaging: Quote shows $2,750 or another intermediate (vector-store pathology)
+        - both: Mentions both prices and asks which to use
+        - fabrication: A number that's neither old nor new
+
+  # =========================================================================
+  # Category 4: Abstention and not-fabricating
+  # =========================================================================
+
+  - id: mem-abstain-ambiguous-reference
+    name: "Abstention: ambiguous reference triggers clarification"
+    description: "Genuinely ambiguous user reference should produce a clarifying question, not a guess"
+    tags: [multi_session, memory, abstention]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-onboard-both
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Onboard a new client: BrightPath Education, Lisa Park, lisa@brightpath.edu, COO, Growth plan, starts April 1. Add to HubSpot and create a Notion page."
+          - role: user
+            content: "Also onboard another new client: BrightCafe, Sarah Kim, sarah@brightcafe.com, Owner, Standard plan, starts April 5. Same thing -- HubSpot and Notion."
+
+      - id: s2-ambiguous
+        time_offset: "96h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Send the usual follow-up to Bright."
+
+    expectations:
+      expected_behavior: |
+        Agent recognizes the ambiguity and asks which client. Bonus if it
+        lists both options ("BrightPath Education or BrightCafe?") and asks
+        to pick.
+      expected_outcome: resolved
+      failure_modes:
+        - silent_guess: Picks one and proceeds without asking
+        - silent_execution: Picks one, executes silently, reveals choice after the fact (worst)
+        - fabrication: Refers to a client named just "Bright"
+
+  - id: mem-abstain-no-fabricated-preferences
+    name: "Abstention: don't invent remembered preferences"
+    description: "Generic history should not be over-interpreted as preference signal"
+    tags: [multi_session, memory, abstention, anti_rigidity]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-generic-ops
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Add these 3 contacts to HubSpot: Sarah Kim, sarah@brightcafe.com, Bright Cafe, Owner. James Patel, james@urbanfit.co, UrbanFit, CEO. Maria Gonzalez, maria@greenleafco.com, Greenleaf Co, Founder."
+          - role: user
+            content: "Create a Google Sheet called 'April 2026 Expenses' with columns: Date, Vendor, Category, Amount, Notes."
+          - role: user
+            content: "Scrape freshpaws.com and summarize what they offer."
+
+      - id: s2-neutral-request
+        time_offset: "72h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
+
+    expectations:
+      expected_behavior: |
+        Reasonable default-style email. Agent does NOT claim to remember a
+        preference that wasn't established. Phrases like "as you prefer,"
+        "your usual style," "as always," "like before" should not appear.
+      expected_outcome: resolved
+      failure_modes:
+        - fabricated_preference: Uses phrases implying a remembered preference that was never set
+        - idiosyncratic_style: Writes in a weird style and claims it's the user's
+        - over_extracted: Agent explicitly lists "preferences" inferred from S1 that weren't expressed
+
+  # =========================================================================
+  # Category 5: Temporal and conflict resolution
+  # =========================================================================
+
+  - id: mem-temporal-stale-team-member
+    name: "Temporal: superseded person reference"
+    description: "Outdated fact about a team member gets replaced when the user updates it"
+    tags: [multi_session, memory, temporal]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-establish
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Sarah is my assistant -- sarah@acme.co. CC her on client stuff."
+          - role: user
+            content: "Draft a proposal email to james@urbanfit.co about our consulting package, CC my assistant."
+
+      - id: s2-update
+        time_offset: "1008h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Quick update: Sarah left last month. Marcus is my new assistant -- marcus@acme.co."
+
+      - id: s3-probe
+        time_offset: "72h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Draft a proposal email to the team at NovaTech and CC my assistant."
+
+    expectations:
+      expected_behavior: |
+        Email is CC'd to Marcus at marcus@acme.co. Sarah is not mentioned
+        or included.
+      expected_outcome: resolved
+      failure_modes:
+        - stale: CC's Sarah
+        - both: CC's both Sarah and Marcus
+        - confusion_ask: Asks who the assistant is
+        - fabrication: Different name entirely
+
+  - id: mem-temporal-deprecated-procedure
+    name: "Temporal: replaced refund handling procedure"
+    description: "Entire procedure replaced cleanly when user says 'use this going forward'"
+    tags: [multi_session, memory, temporal, distillation]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-original
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: |
+              Here's our refund process. When a customer requests a refund: use
+              the canned "Refund Approved" email template, log the refund to the
+              March 2026 Refunds Google Sheet, and post a notification to the
+              #support Slack channel with the customer name and amount. Use this
+              for all refund requests.
+
+      - id: s2-replace
+        time_offset: "504h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: |
+              We changed our refund process. From now on: handle the customer
+              reply through Zendesk instead of the email template, log the refund
+              to our Airtable Refunds base (not the spreadsheet), and NO more
+              Slack notification -- a manager reviews the Airtable view weekly.
+              Use this new process for all refund requests going forward.
+
+      - id: s3-apply
+        time_offset: "48h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "We just got a refund request from sarah@brightcafe.com -- she ordered a 5lb bag and it arrived damaged. Handle it."
+
+    expectations:
+      expected_behavior: |
+        Uses Zendesk for the customer reply, logs to Airtable Refunds base,
+        does NOT post to Slack. None of the original workflow's steps appear.
+      expected_outcome: resolved
+      failure_modes:
+        - slack_persists: Posts to Slack (the negation that's easiest to lose)
+        - spreadsheet_persists: Logs to the Google Sheet instead of Airtable
+        - template_persists: Uses the old email template instead of Zendesk
+        - partial_replacement: Only some steps replaced
+
+  # =========================================================================
+  # Category 6: Workflow continuation
+  # =========================================================================
+
+  - id: mem-continuation-interrupted-task
+    name: "Continuation: picking up an interrupted task"
+    description: "Agent identifies in-flight work without being told what it was"
+    tags: [multi_session, memory, continuation]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-interrupted
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "I need to send outreach emails to three prospects: rachel@greenbuildstudios.com (sustainable construction), david@novatech.io (inventory automation), and lisa@brightpath.edu (education tech). Draft the first one for Rachel -- mention we work with sustainable businesses."
+          - role: user
+            content: "That looks good, send it."
+          - role: user
+            content: "Ok gotta run, let's pick this up later."
+
+      - id: s2-resume
+        time_offset: "48h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Let's pick up where we left off."
+
+    expectations:
+      expected_behavior: |
+        Agent identifies that outreach emails to David at NovaTech and Lisa
+        at BrightPath are still pending, names both prospects, and offers
+        to draft the next one. Bonus: remembers any style feedback from the
+        Rachel email.
+      expected_outcome: resolved
+      failure_modes:
+        - cold: Asks "what were we working on?"
+        - wrong_task: Starts a different task
+        - redo_all: Drafts all three emails, forgetting Rachel's was already sent
+        - partial: Identifies one of two remaining, not both
+
+  - id: mem-continuation-project-state
+    name: "Continuation: accumulating project state across sessions"
+    description: "Ongoing data entry across sessions correctly aggregates"
+    tags: [multi_session, memory, continuation]
+    priority: medium
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-create-and-log
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Create a Google Sheet called 'March 2026 Expenses' with columns: Date, Vendor, Category, Amount, Notes. Then log these 3 expenses: Mar 5 Adobe Software $54.99 'Creative Cloud'; Mar 8 AWS Infrastructure $312.40 'monthly'; Mar 12 Zoom Software $14.99 'Pro plan'."
+
+      - id: s2-add-more
+        time_offset: "96h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Log two more expenses to the March sheet: Mar 18 Notion Software $10.00 'team plan'; Mar 22 Office Depot Supplies $47.85 'printer ink'."
+
+      - id: s3-summary
+        time_offset: "48h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Give me a summary of March expenses so far -- total, breakdown by category, largest item."
+
+    expectations:
+      expected_behavior: |
+        Summary covers all 5 entries. Total adds up correctly. Agent ideally
+        re-reads the sheet (source of truth) rather than relying on memory
+        of what it logged.
+      expected_outcome: resolved
+      failure_modes:
+        - partial_recall: Summary covers only S1's or only S2's entries
+        - pure_memory: Summarizes from memory instead of re-reading sheet (fragile even if correct)
+        - wrong_total: Entries right, arithmetic wrong
+      tester_note: |
+        The "right" behavior here is arguably "re-read the source of truth"
+        rather than "recall from memory." If the agent re-reads and gets the
+        answer, that's a pass even if its memory was stale -- note that in
+        the trace.
+
+  # =========================================================================
+  # Category 7: Cross-domain recall
+  # =========================================================================
+
+  - id: mem-crossdomain-business-identity
+    name: "Cross-domain: business identity facts flow between form contexts"
+    description: "Entity facts learned in one form-shaped task surface in another"
+    tags: [multi_session, memory, cross_domain]
+    priority: critical
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-contractor-agreement
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: |
+              Draft a contractor agreement for a consultant I'm hiring -- name is
+              Devon Okafor, rate is $120/hr, project is "marketing site redesign,"
+              3 month engagement. Our side: Acme Co, LLC registered in Delaware,
+              EIN 12-3456789, I'll be signing as the authorized officer (Alice Chen,
+              CEO). Use standard terms.
+
+      - id: s2-vendor-form
+        time_offset: "336h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: |
+              A new supplier sent us a vendor onboarding form. They need: legal
+              entity name, entity type, state of registration, EIN, and name and
+              title of authorized signer. Fill it out.
+
+    expectations:
+      expected_behavior: |
+        All five fields filled correctly: Acme Co, LLC, Delaware, 12-3456789,
+        Alice Chen CEO. No clarifying questions.
+      expected_outcome: resolved
+      failure_modes:
+        - full_miss: Asks for all fields
+        - partial_recall: Gets some but not all (track which -- EIN is most commonly dropped)
+        - fabrication: Fills with plausible-looking wrong values
+        - reteach_request: "Can you remind me of our business details?"
+
+  - id: mem-crossdomain-customer-allergy-with-negative
+    name: "Cross-domain: customer dietary constraint with negative probe"
+    description: "Constraint about one entity applied correctly in a new context, but not generalized to others"
+    tags: [multi_session, memory, cross_domain, negative_probe]
+    priority: critical
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-mention-in-passing
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Log a lunch expense: Mar 14, Verde Kitchen, Meals & Entertainment, $87.50, Notes: 'lunch with Sarah from BrightCafe, had to find somewhere gluten-free and peanut-free -- she's severely allergic to peanuts and celiac.' Add it to the March expenses sheet."
+
+      - id: s2-gift-for-brightcafe
+        time_offset: "504h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Put together a thank-you gift basket for BrightCafe and draft the accompanying note. Budget around $150."
+
+      - id: s3-gift-for-different-client
+        time_offset: "24h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Put together a similar gift basket for our other client, Greenleaf Co. Same budget, around $150."
+
+    expectations:
+      expected_behavior: |
+        S2: Gift basket for BrightCafe contains no wheat and no peanut/
+        peanut-derived items. The note does not need to mention the allergy
+        explicitly -- the basket choices should just reflect it silently.
+        S3: Basket for Greenleaf has no allergy restrictions applied and no
+        mention of BrightCafe or Sarah's allergies.
+      expected_outcome: resolved
+      failure_modes:
+        - s2_missed: Basket contains baked goods or peanut products
+        - s2_ask: Asks "any dietary restrictions?" (failure to use known info)
+        - s2_overshare: Mentions the allergy gratuitously in the note ("we know about your peanut allergy!")
+        - s3_over_generalized: Avoids wheat/peanuts for Greenleaf "just to be safe"
+        - s3_cross_reference: Mentions BrightCafe or Sarah when talking about Greenleaf
+      tester_note: |
+        The negative probe (S3) is the critical test for over-eager linking.
+        A system that passes S2 but fails S3 is generalizing constraints from
+        one entity to all entities in the category -- a real and common bug.
+
+  - id: mem-crossdomain-pricing-structure-with-negative
+    name: "Cross-domain: pricing structure with eligibility constraints"
+    description: "Multi-part pricing rules applied correctly across different prospect scenarios"
+    tags: [multi_session, memory, cross_domain, negative_probe]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-first-quote
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Draft a quote for UrbanFit -- they want 60 units of our Premium Blend 5lb. Our wholesale tier is $24.99/unit at 50+ units, retail is $34.99, and we do a 10% discount for first-time wholesale buyers. UrbanFit is a returning customer so no first-time discount. One year terms."
+
+      - id: s2-new-wholesale
+        time_offset: "168h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Draft a quote for NorthStar. They want 75 units of Premium Blend 5lb. This is their first order with us."
+
+      - id: s3-small-retail-probe
+        time_offset: "24h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Draft a quote for a small order -- 5 units of Premium Blend 5lb for a customer named GreenBuild Studios. They've never ordered before."
+
+    expectations:
+      expected_behavior: |
+        S2: Quote uses wholesale ($24.99), applies the 10% first-time
+        discount. Per unit price after discount should be ~$22.49. No
+        clarifying questions about pricing rules.
+        S3: Quote uses retail ($34.99). Does NOT apply wholesale rate
+        (wrong tier) and does NOT apply the 10% discount (wholesale-only).
+      expected_outcome: resolved
+      failure_modes:
+        - s2_retail: Uses retail instead of wholesale
+        - s2_no_discount: Skips the first-time discount
+        - s2_ask: Asks for the pricing rules
+        - s3_wholesale: Applies wholesale to a 5-unit order (over-eager)
+        - s3_discount: Applies the 10% discount to retail (lost the eligibility constraint -- especially informative)
+
+  - id: mem-crossdomain-shipping-schedule-reasoning
+    name: "Cross-domain: operational constraint used for reasoning (complex)"
+    description: "Fact learned in setup context must be combined with new inputs to produce the right answer"
+    tags: [multi_session, memory, cross_domain, reasoning, complex]
+    priority: critical
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-automation-setup
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Help me set up an inventory restock alert. When stock of any product drops below 20 units, post a message to the #ops Slack channel. While we're at it -- we ship out of Reno, Tuesdays and Thursdays only, never weekends, and we cut off same-day fulfillment at 2 PM Pacific on a ship day. Consider that when we're setting up anything related to fulfillment."
+
+      - id: s2-customer-eta-question
+        time_offset: "240h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "A customer just emailed asking when their order will arrive. They placed it Monday at 4 PM Pacific. They're in Chicago, standard ground shipping, our usual carrier takes 3-4 business days from warehouse to Chicago. Draft a reply with the ETA."
+
+    expectations:
+      expected_behavior: |
+        Reply correctly reasons: Monday 4 PM Pacific order, Monday isn't a
+        ship day -> next ship day is Tuesday -> Tuesday + 3-4 business days =
+        arrival Friday to the following Monday. Reply gives a window like
+        "Friday to Monday" or names a specific day with an appropriate hedge.
+        No clarifying questions about the shipping schedule.
+      expected_outcome: resolved
+      failure_modes:
+        - ignored_constraint: Says "ships Monday" or "3-4 business days from order date" -> Thursday/Friday (forgot Reno schedule)
+        - ask: "When do we ship out?"
+        - exposed_reasoning: Gets answer right but narrates ("I remember you mentioned Tuesday/Thursday...") -- partial pass
+        - wrong_ship_day: Identifies a ship day but the wrong one
+      tester_note: |
+        This is the hardest cross-domain scenario in the suite. It requires
+        retrieval AND multi-step reasoning over the retrieved fact plus the
+        new request. A system can pass the other cross-domain tests through
+        clever retrieval alone; this one needs the retrieved fact to be
+        usable in a calculation. High-value stress test.
+
+  - id: mem-crossdomain-notion-rate-limit
+    name: "Cross-domain: negative operational constraint changes behavior invisibly"
+    description: "A learned rate-limit constraint changes later behavior without producing a visible artifact"
+    tags: [multi_session, memory, cross_domain, negative_constraint, agent_generation]
+    priority: medium
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-mention-in-debugging
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "I'm debugging an automation that keeps failing when it hits Notion. Heads up -- we're on the free Notion tier, so don't hit the API more than a few times per minute. Batch writes when you can. Rebuild the failing step with that in mind."
+
+      - id: s2-bulk-operation
+        time_offset: "168h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Take the 40 leads from the lead_list.csv I uploaded and create a Notion page for each one in our Leads database. Each page should have: lead name, company, email, and a 'Status: New' field."
+
+    expectations:
+      expected_behavior: |
+        Agent batches the Notion writes -- either a single bulk operation
+        if available, or rate-limited individual calls with explicit delays,
+        or asks if a lower-throughput approach is OK. Does NOT fire 40 calls
+        in rapid succession.
+      expected_outcome: resolved
+      failure_modes:
+        - rate_limited: Fires 40 rapid calls and hits the rate limit
+        - ask: Asks about rate limits instead of using known constraint
+        - forgot_tier: Proceeds without considering the free-tier constraint
+      tester_note: |
+        Hard to grade by output alone -- the test is the BEHAVIOR (request
+        rate), not the artifact (pages created). If you can't instrument API
+        call timing, a workable fallback is to ask the agent at the end to
+        report the approach it took and grade the report. Less rigorous but
+        practical. This scenario is especially relevant for agent-generation
+        use cases where the agent is building automations that run unattended.
+
+  # =========================================================================
+  # Category 8: Procedural updates
+  # =========================================================================
+
+  - id: mem-procupdate-clean-replacement
+    name: "Procedure update: replace one tool in a multi-step flow"
+    description: "Tool in an existing procedure swapped without breaking surrounding steps"
+    tags: [multi_session, memory, procedural_update]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-teach-original
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: |
+              Remember this onboarding flow for new clients. Step 1: add to
+              HubSpot. Step 2: create a page in our Notion Clients database
+              with plan and start date. Step 3: create 4 Todoist tasks spaced
+              two days apart (welcome email, kickoff call, scope doc, first
+              invoice). Step 4: send welcome email via Gmail.
+
+      - id: s2-update-one-step
+        time_offset: "336h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: |
+              Small change to our onboarding flow -- we're moving off Notion.
+              Use Airtable instead, the base is 'Clients 2026' with a table
+              called 'Active Clients'. Everything else stays the same.
+
+      - id: s3-apply-updated
+        time_offset: "72h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "New client: Marcus Lee at NorthStar, marcus@northstar.io, CTO, Standard plan, starts April 15. Onboard him."
+
+    expectations:
+      expected_behavior: |
+        HubSpot contact created, Airtable record created in 'Clients 2026' /
+        'Active Clients', four Todoist tasks at 2-day spacing, Gmail welcome
+        email. Notion is not touched at all.
+      expected_outcome: resolved
+      failure_modes:
+        - update_not_taken: Still uses Notion
+        - partial_update: Uses both Notion and Airtable
+        - step_dropped: Drops the Todoist step or Gmail step (update bled into other steps)
+        - wrong_airtable: Uses Airtable but wrong base/table
+      tester_note: |
+        Failure modes are diagnostic. Touching Notion = update didn't take.
+        Dropping a step = update partially overwrote the procedure. Both are
+        bugs, and they're different bugs.
+
+  - id: mem-procupdate-additive
+    name: "Procedure update: add a step without disrupting existing ones"
+    description: "Additive update to a distilled procedure"
+    tags: [multi_session, memory, procedural_update]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-teach-original
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: |
+              Remember this onboarding flow. Step 1: add to HubSpot. Step 2:
+              create a Notion page in Clients database. Step 3: create 4
+              Todoist tasks spaced 2 days apart (welcome email, kickoff,
+              scope doc, first invoice). Step 4: send welcome email via Gmail.
+
+      - id: s2-add-step
+        time_offset: "168h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Adding to our onboarding flow -- from now on, also CC legal@acme.co on the welcome email. Everything else stays the same."
+
+      - id: s3-apply
+        time_offset: "72h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "New client: David Chen at NovaTech, david@novatech.io, CEO, Growth plan, starts April 20. Onboard him."
+
+    expectations:
+      expected_behavior: |
+        All four original steps execute correctly AND legal@acme.co is CC'd
+        on the welcome email. Welcome email still goes primarily to the
+        client; legal is CC, not the only recipient.
+      expected_outcome: resolved
+      failure_modes:
+        - update_not_taken: Legal not CC'd
+        - catastrophic_replacement: All original steps replaced with just "send to legal"
+        - wrong_recipient: Welcome email goes only to legal, client not in To
+        - partial: Some original steps dropped
+
+  # =========================================================================
+  # Category 9: Compositional recall
+  # =========================================================================
+
+  - id: mem-compositional-board-prep
+    name: "Compositional: combine two separately-learned facts with arithmetic"
+    description: "Agent combines two facts from different sessions to answer a derived question"
+    tags: [multi_session, memory, compositional, high_signal]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-fact-one
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Draft a quick update email to my accountant letting her know our fiscal year ends in March, same as last year, and we'll have everything ready for her by mid-April."
+
+      - id: s2-fact-two
+        time_offset: "336h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Log this in my Notion calendar note -- I always do board prep two weeks before fiscal year end. It takes about a week of focused work, and I need to block my calendar during that time."
+
+      - id: s3-synthesis-question
+        time_offset: "720h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "When should I block calendar time for board prep this year?"
+
+    expectations:
+      expected_behavior: |
+        Agent reasons: fiscal year end = March 31, board prep = 2 weeks
+        before = around March 17, takes a week -> block calendar roughly
+        March 10-17 (or similar specific window). Gives dates and a
+        week-long block.
+      expected_outcome: resolved
+      failure_modes:
+        - asks_fact_one: "When does your fiscal year end?"
+        - asks_fact_two: "When do you usually do board prep?"
+        - partial: Gives "two weeks before fiscal year end" without computing dates
+        - hallucination: Makes up a date unrelated to the stored facts
+        - wrong_math: Has the facts but computes the window wrong
+      tester_note: |
+        This is the test that distinguishes graph memory from flat stores.
+        Flat stores surface either fact in isolation but rarely combine them;
+        graph stores should traverse from "board prep" to its temporal anchor.
+        Worth running against every candidate as a differentiator.
+
+  # =========================================================================
+  # Category 10: Memory introspection
+  # =========================================================================
+
+  - id: mem-introspection-what-do-you-know
+    name: "Introspection: agent summarizes stored knowledge"
+    description: "Agent produces a coherent, accurate, non-fabricated summary of what it knows"
+    tags: [multi_session, memory, introspection]
+    priority: medium
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-seed-facts
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Quick facts: company is Acme Co, LLC, Delaware, fiscal year ends March. My assistant is Sarah -- sarah@acme.co. Our main CRM is HubSpot. We ship from Reno, Tuesdays and Thursdays only. Our competitor is FreshPaws. Sales cycle is 6 weeks."
+
+      - id: s2-more-facts
+        time_offset: "168h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Pricing update for your records: Growth plan is $3,000/mo, Standard is $1,500/mo, wholesale tier kicks in at 50+ units with $24.99/unit."
+
+      - id: s3-introspect
+        time_offset: "120h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "What do you know about me and my business?"
+
+    expectations:
+      expected_behavior: |
+        Coherent, organized summary hitting the major facts: company name
+        and structure, fiscal year, assistant, CRM, shipping schedule,
+        competitor, pricing tiers. Organized by category or importance,
+        not a flat dump. Does not include facts not present in S1/S2.
+      expected_outcome: resolved
+      failure_modes:
+        - fabrication: Lists facts never mentioned (worst failure -- erodes trust)
+        - omission: Misses obvious things like company name
+        - flat_dump: Lists facts as a disorganized 15+ item bullet list with no structure
+        - refusal: "I don't really have that kind of memory"
+      tester_note: |
+        Fabrication is the worst failure and the most common one for
+        vector-based stores (retrieval pulls up similar-but-not-identical
+        chunks, LLM generates over them). Track fabrication separately from
+        omission -- they have different root causes and different fixes.
+
+  - id: mem-introspection-gaps
+    name: "Introspection: agent identifies its own knowledge gaps"
+    description: "Agent names actual missing information, not generic or false gaps"
+    tags: [multi_session, memory, introspection, stretch_goal]
+    priority: low
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-seed-partial
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Quick facts: company is Acme Co, my CRM is HubSpot, assistant is Sarah. We ship from Reno."
+
+      - id: s2-probe
+        time_offset: "72h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "What information about me or my business would be useful for you to have, that you don't currently?"
+
+    expectations:
+      expected_behavior: |
+        Agent names actual gaps: missing entity type / legal structure, no
+        billing or payment info, unknown customer profile, unknown pricing,
+        etc. Specific and pointed.
+      expected_outcome: resolved
+      failure_modes:
+        - generic: "I'd love to learn more about your goals!"
+        - lists_known: Names things the agent actually does know
+        - refusal: Declines to answer
+        - dump_request: "Tell me everything about your business"
+      tester_note: |
+        Most systems will fail this -- it's a stretch goal. But HOW they fail
+        is informative. Generic answer = no introspection at all. Listing
+        known things = introspection without integrity check. Refusal = at
+        least honest. Score the failure modes, don't just pass/fail.
+
+  # =========================================================================
+  # Category 11: Long-tail / cold recall
+  # =========================================================================
+
+  - id: mem-longtail-lawyer-recall
+    name: "Long-tail: single passing mention surfaces weeks later in a new context"
+    description: "Fact mentioned once, in passing, retrieved much later when relevant"
+    tags: [multi_session, memory, long_tail]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-passing-mention
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Draft a contractor agreement for Devon Okafor, marketing site redesign, $120/hr, 3 month engagement. Our lawyer is Pat Nguyen at Hartwell & Co, pat@hartwellco.legal -- I'll have her review before I sign so make the draft clean. Use standard terms."
+
+      - id: s2-filler-one
+        time_offset: "120h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Log 4 expenses to the April sheet: Adobe $54.99, AWS $312.40, Zoom $14.99, Notion $10.00. Categories are Software for all."
+
+      - id: s3-filler-two
+        time_offset: "168h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Research GreenBuild Studios at greenbuildstudios.com and draft a partnership outreach email to their team."
+
+      - id: s4-filler-three
+        time_offset: "120h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Post a tweet announcing we just hit 100 customers. Celebratory tone, relevant hashtags."
+
+      - id: s5-probe
+        time_offset: "960h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Loop in our lawyer on this -- I need them to review the attached supplier agreement before I sign."
+
+    expectations:
+      expected_behavior: |
+        Agent identifies Pat Nguyen at Hartwell & Co, pat@hartwellco.legal,
+        drafts an email or handles the loop-in correctly. No clarifying
+        questions about who the lawyer is.
+      expected_outcome: resolved
+      failure_modes:
+        - cold_recall_fail: Asks who the lawyer is
+        - no_record: Says it has no record of a lawyer
+        - fabrication: Invents a different lawyer name
+      tester_note: |
+        Systems with recency-weighted retrieval will systematically fail
+        this. Consider running multiple variants at different time offsets
+        (1 week, 1 month, 2 months) to map the decay curve -- the SHAPE is
+        more diagnostic than a single pass/fail.
+
+  # =========================================================================
+  # Category 12: Memory hygiene and decay
+  # =========================================================================
+
+  - id: mem-hygiene-bounded-time
+    name: "Hygiene: bounded-time constraint correctly expires"
+    description: "Temporary constraint applies during its window and not after"
+    tags: [multi_session, memory, hygiene, decay]
+    priority: medium
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-set-constraint
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "I'm in heads-down mode this week -- no meetings, no calls, push everything to next week at the earliest."
+
+      - id: s2-during-window
+        time_offset: "24h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "A prospect at rachel@greenbuildstudios.com just emailed asking for a 30-minute call this week to discuss our consulting services. Draft a reply."
+
+      - id: s3-after-window
+        time_offset: "216h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "A different prospect at david@novatech.io wants a call this week to discuss our Growth plan. Draft a reply."
+
+    expectations:
+      expected_behavior: |
+        S2: Reply pushes the call to next week, reflecting the "heads-down"
+        constraint.
+        S3: Reply offers a call this week normally, or proposes standard
+        scheduling options. The "heads-down" constraint has expired and
+        should not apply.
+      expected_outcome: resolved
+      failure_modes:
+        - s2_ignored: S2 reply offers a meeting this week anyway
+        - s3_persisted: S3 reply still pushes to next week citing or reflecting the stale constraint
+        - both_behaviors_wrong: Fails both -- probably a deeper bug
+      tester_note: |
+        "This week" is a fuzzy time bound. A strict system may pass S2 and
+        fail S3 because it doesn't know when "this week" ends. For v1 of
+        testing, consider a parallel scenario that uses explicit dates
+        ("no meetings until Friday April 10"). The natural-language version
+        is the better test but the explicit version is the more gradeable one.
+
+  - id: mem-hygiene-temporary-status
+    name: "Hygiene: temporary stockout status correctly expires"
+    description: "Temporary status fact does not persist beyond its expected expiry"
+    tags: [multi_session, memory, hygiene, decay]
+    priority: medium
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-set-status
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Heads up: we're temporarily out of stock on the Premium Blend 5lb -- should be back in stock by April 15. If any customer asks, let them know."
+
+      - id: s2-during-stockout
+        time_offset: "120h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "A customer just emailed asking about Premium Blend 5lb availability -- they want to place a 10-unit order. Draft a reply."
+
+      - id: s3-after-stockout
+        time_offset: "720h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "A customer just emailed asking about Premium Blend 5lb availability -- they want a 10-unit order. Draft a reply."
+
+    expectations:
+      expected_behavior: |
+        S2: Reply mentions the temporary stockout and the expected return
+        date (April 15).
+        S3: Reply does not mention the stockout. Ideally checks a live
+        source of truth for current stock; at minimum, does not assume the
+        stockout from S1 still applies.
+      expected_outcome: resolved
+      failure_modes:
+        - s2_missing: S2 doesn't mention the stockout (didn't use known info)
+        - s3_persisted: S3 tells the customer it's out of stock, using stale info
+        - s3_stale_date: S3 cites the April 15 return date as still upcoming
+      tester_note: |
+        The "right" architecture here may be "agent checks source of truth"
+        rather than "memory decays correctly." If your architecture supports
+        live inventory checks, the test becomes whether the agent knows to
+        verify rather than whether the memory aged out. Two valid approaches,
+        pick which you're testing and grade accordingly.
+
+  # =========================================================================
+  # Category 13: Negative tests
+  # =========================================================================
+
+  - id: mem-negative-one-off-qualifier
+    name: "Negative: one-off qualifier is not stored as standing preference"
+    description: "A 'just for this one' instruction does not become a default"
+    tags: [multi_session, memory, negative, anti_rigidity]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-one-off
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Draft a quick email to one of our board members about Q1 results. Just for this one, use a more formal tone than usual -- board members expect that level of formality."
+
+      - id: s2-probe
+        time_offset: "72h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Draft an outreach email to a new prospect at rachel@greenbuildstudios.com about our consulting services."
+
+    expectations:
+      expected_behavior: |
+        Default / standard tone, not formal. Agent did not generalize the
+        one-off formality qualifier into a standing preference.
+      expected_outcome: resolved
+      failure_modes:
+        - overgeneralized: Uses formal tone for the prospect email
+        - exposed: Explicitly says "I'm using a formal tone like you prefer"
+        - partial: Writes somewhere between formal and casual, split-the-difference
+
+  - id: mem-negative-forget-on-request
+    name: "Negative: explicit forget command clears the fact"
+    description: "When the user says 'forget that,' the fact does not resurface"
+    tags: [multi_session, memory, negative]
+    priority: high
+
+    context:
+      system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
+
+    sessions:
+      - id: s1-teach
+        time_offset: "0h"
+        reset: none
+        turns:
+          - role: user
+            content: "Quick planning note: our budget for the Q2 marketing push is $50K. Help me sketch out how to allocate it across channels."
+
+      - id: s2-forget
+        time_offset: "48h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "Actually, scratch what I said about the Q2 marketing budget. I don't want that number floating around in your memory. Forget it."
+
+      - id: s3-probe
+        time_offset: "120h"
+        reset: fresh_agent
+        turns:
+          - role: user
+            content: "What's our Q2 marketing budget?"
+
+    expectations:
+      expected_behavior: |
+        Agent says it doesn't have that information on file, or explicitly
+        says it was asked to forget the budget. Does NOT return "$50K."
+      expected_outcome: resolved
+      failure_modes:
+        - forget_ignored: Returns $50K
+        - forget_acknowledged_but_leaked: Returns $50K with a note that it was asked to forget (proves forget didn't clear storage -- worst failure)
+        - fabrication: Returns a different number
+      tester_note: |
+        This partly tests whether the system CAN honor forget requests at
+        all. Vector stores in particular have no native "delete this fact"
+        semantic -- they have "delete this chunk" which may or may not
+        contain the fact. Document the architecture's actual capability
+        before running and distinguish "can't" from "didn't."

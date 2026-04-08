@@ -22,8 +22,10 @@ from .data.personas import Persona, parse_persona_yaml
 from .data.rubrics import Rubric, parse_rubrics_yaml
 from .data.scenarios import (
     CheckpointAssertion,
+    ResetPolicy,
     Scenario,
     ScenarioDefaults,
+    Session,
     parse_scenario_yaml,
 )
 from .errors import AgentProbeConfigError, AgentProbeRuntimeError
@@ -78,7 +80,7 @@ class ScenarioTermination:
 
 @dataclass(frozen=True, slots=True)
 class _PreparedScenarioRun:
-    adapter: EndpointAdapter
+    adapter_factory: Callable[[], EndpointAdapter]
     scenario: Scenario
     persona: Persona
     rubric: Rubric
@@ -195,6 +197,253 @@ class RunRecorder(Protocol):
     ) -> None: ...
 
 
+async def _run_session_turns(
+    *,
+    adapter: EndpointAdapter,
+    session: Session,
+    scenario: Scenario,
+    persona: Persona,
+    base_context: dict[str, object],
+    session_state: dict[str, object],
+    transcript: list[ConversationTurn],
+    checkpoints: list[CheckpointResult],
+    tool_calls_by_turn: dict[int, list[ToolCallRecord]],
+    rendered_turns: list[dict[str, object]],
+    last_message_box: list[ConversationTurn | None],
+    last_reply_box: list[AdapterReply | None],
+    user_turn_count_box: list[int],
+    max_turns: int | None,
+    persona_model: str,
+    oai_client: openai.AsyncClient,
+    recorder: RunRecorder | None,
+    scenario_run_id: int | None,
+) -> ScenarioTermination | None:
+    """Execute all turns within a single session. Returns a termination if
+    max_turns was exceeded, otherwise ``None``."""
+
+    termination: ScenarioTermination | None = None
+
+    async def submit_user_turn(
+        user_text: str,
+        *,
+        source: str,
+        generator_model: str | None = None,
+    ) -> None:
+        last_message = ConversationTurn(role="user", content=user_text)
+        last_message_box[0] = last_message
+        transcript.append(last_message)
+        if recorder is not None and scenario_run_id is not None:
+            recorder.record_turn(
+                scenario_run_id,
+                turn_index=len(transcript) - 1,
+                turn=last_message,
+                source=source,
+                generator_model=generator_model,
+            )
+
+        user_turn_count_box[0] = _increment_user_turn_count(
+            user_turn_count_box[0],
+            scenario_id=scenario.id,
+            max_turns=max_turns,
+        )
+
+        reply_context = _build_run_context(
+            base_context=base_context,
+            session_state=session_state,
+            transcript=transcript,
+            last_message=last_message_box[0],
+            last_reply=last_reply_box[0],
+        )
+        adapter_reply = await adapter.send_user_turn(reply_context)
+        last_reply_box[0] = adapter_reply
+
+        assistant_turn = ConversationTurn(
+            role="assistant",
+            content=adapter_reply.assistant_text,
+        )
+        transcript.append(assistant_turn)
+        assistant_turn_index = len(transcript) - 1
+        if recorder is not None and scenario_run_id is not None:
+            recorder.record_turn(
+                scenario_run_id,
+                turn_index=assistant_turn_index,
+                turn=assistant_turn,
+                source="assistant",
+            )
+            recorder.record_assistant_reply(
+                scenario_run_id,
+                turn_index=assistant_turn_index,
+                reply=adapter_reply,
+            )
+        if adapter_reply.tool_calls:
+            tool_calls_by_turn[assistant_turn_index] = list(
+                adapter_reply.tool_calls
+            )
+
+    scripted_user_turn_seen = False
+
+    try:
+        turn_index = 0
+        while turn_index < len(session.turns):
+            turn = session.turns[turn_index]
+
+            if turn.role == "checkpoint":
+                rendered_turns.append(turn.model_dump(by_alias=True))
+                checkpoint_result = _evaluate_checkpoint_turn(
+                    turn.assert_, last_reply_box[0]
+                )
+                checkpoints.append(checkpoint_result)
+                if recorder is not None and scenario_run_id is not None:
+                    recorder.record_checkpoint(
+                        scenario_run_id,
+                        checkpoint_index=len(checkpoints) - 1,
+                        preceding_turn_index=len(transcript) - 1
+                        if transcript
+                        else None,
+                        assertions=turn.assert_,
+                        result=checkpoint_result,
+                    )
+                turn_index += 1
+                continue
+
+            # Build render context only for turns that need it (inject / user).
+            render_context = _build_run_context(
+                base_context=base_context,
+                session_state=session_state,
+                transcript=transcript,
+                last_message=last_message_box[0],
+                last_reply=last_reply_box[0],
+            )
+
+            if turn.role == "inject":
+                rendered = _render_turn_text(turn.content, render_context)
+                rendered_turns.append(
+                    {
+                        **turn.model_dump(by_alias=True),
+                        "content": rendered,
+                    }
+                )
+                if rendered:
+                    inject_turn = ConversationTurn(role="system", content=rendered)
+                    transcript.append(inject_turn)
+                    if recorder is not None and scenario_run_id is not None:
+                        recorder.record_turn(
+                            scenario_run_id,
+                            turn_index=len(transcript) - 1,
+                            turn=inject_turn,
+                            source="inject",
+                        )
+                turn_index += 1
+                continue
+
+            scripted_user_turn_seen = True
+            rendered_guidance = _render_turn_text(turn.content, render_context)
+            generator_model: str | None = None
+            if turn.use_exact_message:
+                rendered_user_text = rendered_guidance
+                source = "user_exact"
+            else:
+                generator_model = persona_model
+                step = await generate_persona_step(
+                    persona,
+                    transcript,
+                    oai_client=oai_client,
+                    guidance=rendered_guidance or None,
+                    require_response=True,
+                )
+                if step.message is None:
+                    raise ValueError(
+                        "Persona simulator did not return a message for a required user turn."
+                    )
+                rendered_user_text = step.message
+                source = "user_guided"
+
+            rendered_turns.append(
+                {
+                    **turn.model_dump(by_alias=True),
+                    "content": rendered_user_text,
+                }
+            )
+            await submit_user_turn(
+                rendered_user_text,
+                source=source,
+                generator_model=generator_model,
+            )
+            turn_index += 1
+
+        # Continue after scripted turns until persona stops
+        if scripted_user_turn_seen:
+            while True:
+                step = await generate_persona_step(
+                    persona,
+                    transcript,
+                    oai_client=oai_client,
+                    require_response=False,
+                )
+                if step.status != "continue":
+                    break
+                if step.message is None:
+                    raise ValueError(
+                        "Persona simulator returned `continue` without a follow-up message."
+                    )
+
+                rendered_turns.append(
+                    {
+                        "role": "user",
+                        "content": step.message,
+                        "source": "user_generated",
+                    }
+                )
+                await submit_user_turn(
+                    step.message,
+                    source="user_generated",
+                    generator_model=persona_model,
+                )
+    except _ScenarioMaxTurnsExceeded as exc:
+        termination = ScenarioTermination(
+            reason="max_turns_exceeded",
+            message=str(exc),
+            max_turns=exc.max_turns,
+        )
+
+    return termination
+
+
+_RESETS_REQUIRING_REINIT: frozenset[str] = frozenset({"new", "fresh_agent"})
+
+
+async def _maybe_close_scenario(
+    adapter: EndpointAdapter,
+    *,
+    base_context: dict[str, object],
+    session_state: dict[str, object],
+    transcript: list[ConversationTurn],
+    last_message: ConversationTurn | None,
+    last_reply: AdapterReply | None,
+) -> None:
+    """Close the current scenario on *adapter* if any interaction occurred."""
+    if session_state or last_message is not None or last_reply is not None:
+        close_context = _build_run_context(
+            base_context=base_context,
+            session_state=session_state,
+            transcript=transcript,
+            last_message=last_message,
+            last_reply=last_reply,
+        )
+        await adapter.close_scenario(close_context)
+
+
+def _clear_session_state(
+    transcript: list[ConversationTurn],
+    last_message_box: list[ConversationTurn | None],
+    last_reply_box: list[AdapterReply | None],
+) -> None:
+    """Reset per-session mutable state for *new* or *fresh_agent* resets."""
+    transcript.clear()
+    last_message_box[0] = None
+    last_reply_box[0] = None
+
+
 async def run_scenario(
     adapter: EndpointAdapter,
     scenario: Scenario,
@@ -205,6 +454,7 @@ async def run_scenario(
     oai_client: openai.AsyncClient,
     recorder: RunRecorder | None = None,
     scenario_ordinal: int | None = None,
+    adapter_factory: Callable[[], EndpointAdapter] | None = None,
 ) -> ScenarioRunResult:
     transcript: list[ConversationTurn] = []
     checkpoints: list[CheckpointResult] = []
@@ -229,13 +479,11 @@ async def run_scenario(
         "defaults": defaults,
     }
 
-    session_state: dict[str, object] = {}
-    last_message: ConversationTurn | None = None
-    last_reply: AdapterReply | None = None
-    user_turn_count = 0
+    last_message_box: list[ConversationTurn | None] = [None]
+    last_reply_box: list[AdapterReply | None] = [None]
+    user_turn_count_box: list[int] = [0]
     max_turns = _resolve_max_turns(scenario, defaults)
     persona_model = resolve_persona_model(persona)
-    scripted_user_turn_seen = False
     scenario_run_id = (
         recorder.record_scenario_started(
             scenario=scenario,
@@ -247,220 +495,122 @@ async def run_scenario(
         else None
     )
 
+    sessions = scenario.effective_sessions()
+
+    # Pre-render the system prompt once (it only depends on base_context
+    # which is constant across sessions).
+    rendered_system_prompt: str | None = None
+    if isinstance(system_prompt, str) and system_prompt.strip():
+        rendered_system_prompt = render_template(system_prompt, base_context)
+
     try:
-        await adapter.health_check(dict(base_context))
-
-        try:
-            session_state = await adapter.open_scenario(dict(base_context))
-
-            async def submit_user_turn(
-                user_text: str,
-                *,
-                source: str,
-                generator_model: str | None = None,
-            ) -> None:
-                nonlocal last_message, last_reply, user_turn_count
-
-                user_turn_count = _increment_user_turn_count(
-                    user_turn_count,
-                    scenario_id=scenario.id,
-                    max_turns=max_turns,
-                )
-                last_message = ConversationTurn(role="user", content=user_text)
-                transcript.append(last_message)
-                if recorder is not None and scenario_run_id is not None:
-                    recorder.record_turn(
-                        scenario_run_id,
-                        turn_index=len(transcript) - 1,
-                        turn=last_message,
-                        source=source,
-                        generator_model=generator_model,
-                    )
-
-                reply_context = _build_run_context(
+        # If no sessions, fall back to legacy empty-scenario handling
+        if not sessions:
+            await adapter.health_check(dict(base_context))
+            session_state: dict[str, object] = {}
+            try:
+                session_state = await adapter.open_scenario(dict(base_context))
+            finally:
+                await _maybe_close_scenario(
+                    adapter,
                     base_context=base_context,
                     session_state=session_state,
                     transcript=transcript,
-                    last_message=last_message,
-                    last_reply=last_reply,
+                    last_message=last_message_box[0],
+                    last_reply=last_reply_box[0],
                 )
-                adapter_reply = await adapter.send_user_turn(reply_context)
-                last_reply = adapter_reply
+        else:
+            current_adapter = adapter
+            session_state = {}
 
-                assistant_turn = ConversationTurn(
-                    role="assistant",
-                    content=adapter_reply.assistant_text,
-                )
-                transcript.append(assistant_turn)
-                assistant_turn_index = len(transcript) - 1
-                if recorder is not None and scenario_run_id is not None:
-                    recorder.record_turn(
-                        scenario_run_id,
-                        turn_index=assistant_turn_index,
-                        turn=assistant_turn,
-                        source="assistant",
-                    )
-                    recorder.record_assistant_reply(
-                        scenario_run_id,
-                        turn_index=assistant_turn_index,
-                        reply=adapter_reply,
-                    )
-                if adapter_reply.tool_calls:
-                    tool_calls_by_turn[assistant_turn_index] = list(
-                        adapter_reply.tool_calls
-                    )
+            for session_idx, session in enumerate(sessions):
+                is_first = session_idx == 0
+                reset = session.reset
 
-            try:
-                if isinstance(system_prompt, str) and system_prompt.strip():
-                    system_turn = ConversationTurn(
-                        role="system",
-                        content=render_template(system_prompt, base_context),
-                    )
-                    transcript.append(system_turn)
-                    if recorder is not None and scenario_run_id is not None:
-                        recorder.record_turn(
-                            scenario_run_id,
-                            turn_index=len(transcript) - 1,
-                            turn=system_turn,
-                            source="system_prompt",
-                        )
-
-                turn_index = 0
-                while turn_index < len(scenario.turns):
-                    turn = scenario.turns[turn_index]
-                    render_context = _build_run_context(
+                # Handle reset policy
+                if not is_first and reset in _RESETS_REQUIRING_REINIT:
+                    # Close the previous session
+                    await _maybe_close_scenario(
+                        current_adapter,
                         base_context=base_context,
                         session_state=session_state,
                         transcript=transcript,
-                        last_message=last_message,
-                        last_reply=last_reply,
+                        last_message=last_message_box[0],
+                        last_reply=last_reply_box[0],
                     )
 
-                    if turn.role == "checkpoint":
-                        rendered_turns.append(turn.model_dump(by_alias=True))
-                        checkpoint_result = _evaluate_checkpoint_turn(
-                            turn.assert_, last_reply
+                    if reset == "fresh_agent" and adapter_factory is not None:
+                        current_adapter = adapter_factory()
+
+                    _clear_session_state(
+                        transcript, last_message_box, last_reply_box,
+                    )
+                    session_state = {}
+
+                # Health check and open for each new session
+                if is_first or reset in _RESETS_REQUIRING_REINIT:
+                    await current_adapter.health_check(dict(base_context))
+                    session_state = await current_adapter.open_scenario(
+                        dict(base_context)
+                    )
+
+                # Inject system prompt at the start of each session
+                # (for fresh_agent/new, the context is cleared so we re-inject)
+                if is_first or reset in _RESETS_REQUIRING_REINIT:
+                    if rendered_system_prompt is not None:
+                        system_turn = ConversationTurn(
+                            role="system",
+                            content=rendered_system_prompt,
                         )
-                        checkpoints.append(checkpoint_result)
+                        transcript.append(system_turn)
                         if recorder is not None and scenario_run_id is not None:
-                            recorder.record_checkpoint(
+                            recorder.record_turn(
                                 scenario_run_id,
-                                checkpoint_index=len(checkpoints) - 1,
-                                preceding_turn_index=len(transcript) - 1
-                                if transcript
-                                else None,
-                                assertions=turn.assert_,
-                                result=checkpoint_result,
-                            )
-                        turn_index += 1
-                        continue
-
-                    if turn.role == "inject":
-                        rendered = _render_turn_text(turn.content, render_context)
-                        rendered_turns.append(
-                            {
-                                **turn.model_dump(by_alias=True),
-                                "content": rendered,
-                            }
-                        )
-                        if rendered:
-                            inject_turn = ConversationTurn(role="system", content=rendered)
-                            transcript.append(inject_turn)
-                            if recorder is not None and scenario_run_id is not None:
-                                recorder.record_turn(
-                                    scenario_run_id,
-                                    turn_index=len(transcript) - 1,
-                                    turn=inject_turn,
-                                    source="inject",
-                                )
-                        turn_index += 1
-                        continue
-
-                    scripted_user_turn_seen = True
-                    rendered_guidance = _render_turn_text(turn.content, render_context)
-                    generator_model: str | None = None
-                    if turn.use_exact_message:
-                        rendered_user_text = rendered_guidance
-                        source = "user_exact"
-                    else:
-                        generator_model = persona_model
-                        step = await generate_persona_step(
-                            persona,
-                            transcript,
-                            oai_client=oai_client,
-                            guidance=rendered_guidance or None,
-                            require_response=True,
-                        )
-                        if step.message is None:
-                            raise ValueError(
-                                "Persona simulator did not return a message for a required user turn."
-                            )
-                        rendered_user_text = step.message
-                        source = "user_guided"
-
-                    rendered_turns.append(
-                        {
-                            **turn.model_dump(by_alias=True),
-                            "content": rendered_user_text,
-                        }
-                    )
-                    await submit_user_turn(
-                        rendered_user_text,
-                        source=source,
-                        generator_model=generator_model,
-                    )
-                    turn_index += 1
-
-                if scripted_user_turn_seen:
-                    while True:
-                        step = await generate_persona_step(
-                            persona,
-                            transcript,
-                            oai_client=oai_client,
-                            require_response=False,
-                        )
-                        if step.status != "continue":
-                            break
-                        if step.message is None:
-                            raise ValueError(
-                                "Persona simulator returned `continue` without a follow-up message."
+                                turn_index=len(transcript) - 1,
+                                turn=system_turn,
+                                source="system_prompt",
                             )
 
-                        rendered_turns.append(
-                            {
-                                "role": "user",
-                                "content": step.message,
-                                "source": "user_generated",
-                            }
-                        )
-                        await submit_user_turn(
-                            step.message,
-                            source="user_generated",
-                            generator_model=persona_model,
-                        )
-            except _ScenarioMaxTurnsExceeded as exc:
-                termination = ScenarioTermination(
-                    reason="max_turns_exceeded",
-                    message=str(exc),
-                    max_turns=exc.max_turns,
-                )
-        finally:
-            if session_state or last_message is not None or last_reply is not None:
-                close_context = _build_run_context(
+                session_termination = await _run_session_turns(
+                    adapter=current_adapter,
+                    session=session,
+                    scenario=scenario,
+                    persona=persona,
                     base_context=base_context,
                     session_state=session_state,
                     transcript=transcript,
-                    last_message=last_message,
-                    last_reply=last_reply,
+                    checkpoints=checkpoints,
+                    tool_calls_by_turn=tool_calls_by_turn,
+                    rendered_turns=rendered_turns,
+                    last_message_box=last_message_box,
+                    last_reply_box=last_reply_box,
+                    user_turn_count_box=user_turn_count_box,
+                    max_turns=max_turns,
+                    persona_model=persona_model,
+                    oai_client=oai_client,
+                    recorder=recorder,
+                    scenario_run_id=scenario_run_id,
                 )
-                await adapter.close_scenario(close_context)
+                if session_termination is not None:
+                    termination = session_termination
+                    break
+
+            # Close the final session
+            await _maybe_close_scenario(
+                current_adapter,
+                base_context=base_context,
+                session_state=session_state,
+                transcript=transcript,
+                last_message=last_message_box[0],
+                last_reply=last_reply_box[0],
+            )
 
         rubric_context = _build_run_context(
             base_context=base_context,
-            session_state=session_state,
+            session_state=session_state if sessions else {},
             transcript=transcript,
-            last_message=last_message,
-            last_reply=last_reply,
+            last_message=last_message_box[0],
+            last_reply=last_reply_box[0],
         )
         rubric_context["turns"] = rendered_turns
         rubric_context["termination"] = (
@@ -577,27 +727,46 @@ async def run_suite(
             progress_callback(
                 RunProgressEvent(kind="suite_started", scenario_total=scenario_total)
             )
+        def _make_adapter() -> EndpointAdapter:
+            if adapter_factory is not None:
+                return adapter_factory(endpoint_config)
+            return build_endpoint_adapter(endpoint_config)
+
         prepared_runs: list[_PreparedScenarioRun] = []
         for scenario_ordinal, item in enumerate(selected_scenarios):
-            persona = persona_by_id.get(item.persona)
-            if persona is None:
+            # Resolve persona: scenario-level, then defaults, then error
+            persona_id = item.persona
+            if persona_id is None and scenario_collection.metadata.defaults is not None:
+                persona_id = scenario_collection.metadata.defaults.persona
+            if persona_id is None:
                 raise AgentProbeConfigError(
-                    f"Scenario {item.id} references unknown persona `{item.persona}`."
-                )
-            rubric_item = rubric_by_id.get(item.rubric)
-            if rubric_item is None:
-                raise AgentProbeConfigError(
-                    f"Scenario {item.id} references unknown rubric `{item.rubric}`."
+                    f"Scenario {item.id} has no persona and no default persona is set."
                 )
 
-            adapter = (
-                adapter_factory(endpoint_config)
-                if adapter_factory is not None
-                else build_endpoint_adapter(endpoint_config)
-            )
+            persona = persona_by_id.get(persona_id)
+            if persona is None:
+                raise AgentProbeConfigError(
+                    f"Scenario {item.id} references unknown persona `{persona_id}`."
+                )
+
+            # Resolve rubric: scenario-level, then defaults, then error
+            rubric_id = item.rubric
+            if rubric_id is None and scenario_collection.metadata.defaults is not None:
+                rubric_id = scenario_collection.metadata.defaults.rubric
+            if rubric_id is None:
+                raise AgentProbeConfigError(
+                    f"Scenario {item.id} has no rubric and no default rubric is set."
+                )
+
+            rubric_item = rubric_by_id.get(rubric_id)
+            if rubric_item is None:
+                raise AgentProbeConfigError(
+                    f"Scenario {item.id} references unknown rubric `{rubric_id}`."
+                )
+
             prepared_runs.append(
                 _PreparedScenarioRun(
-                    adapter=adapter,
+                    adapter_factory=_make_adapter,
                     scenario=item,
                     persona=persona,
                     rubric=rubric_item,
@@ -751,8 +920,9 @@ async def _run_prepared_scenario(
     oai_client: openai.AsyncClient,
     recorder: RunRecorder | None,
 ) -> ScenarioRunResult:
+    adapter = prepared.adapter_factory()
     return await run_scenario(
-        prepared.adapter,
+        adapter,
         prepared.scenario,
         prepared.persona,
         prepared.rubric,
@@ -760,6 +930,7 @@ async def _run_prepared_scenario(
         oai_client=oai_client,
         recorder=recorder,
         scenario_ordinal=prepared.ordinal,
+        adapter_factory=prepared.adapter_factory,
     )
 
 

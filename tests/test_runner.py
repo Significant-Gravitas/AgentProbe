@@ -853,8 +853,9 @@ scenarios:
         oai_client: openai.AsyncClient,
         recorder: object | None = None,
         scenario_ordinal: int | None = None,
+        adapter_factory: object | None = None,
     ) -> ScenarioRunResult:
-        del adapter, persona, rubric, defaults, oai_client, recorder
+        del adapter, persona, rubric, defaults, oai_client, recorder, adapter_factory
         if scenario.id == "smoke-scenario":
             await asyncio.sleep(0.05)
             return ScenarioRunResult(
@@ -1034,3 +1035,470 @@ scenarios:
         ("scenario_started", "smoke-scenario"),
         ("scenario_finished", "smoke-scenario"),
     ]
+
+
+# =========================================================================
+# Multi-session memory tests
+# =========================================================================
+
+from agentprobe.data.scenarios import Session, FailureMode
+
+
+def build_simple_rubric() -> Rubric:
+    """A rubric that doesn't reference injected_data template variables."""
+    return Rubric(
+        id="memory-test",
+        name="Memory Test",
+        pass_threshold=0.7,
+        meta_prompt="Judge behavior: {{ expectations.expected_behavior }}",
+        judge=JudgeConfig(
+            provider="openai",
+            model="anthropic/claude-opus-4.6",
+            temperature=0.0,
+            max_tokens=500,
+        ),
+        dimensions=[
+            RubricDimension(
+                id="task_completion",
+                name="Task Completion",
+                weight=1.0,
+                scale=RubricScale(
+                    type="likert", points=5, labels={1: "bad", 5: "good"}
+                ),
+                judge_prompt="Did the agent complete the task?",
+            )
+        ],
+    )
+
+
+def build_multi_session_scenario(
+    *,
+    sessions: list[dict[str, object]],
+    scenario_id: str = "multi-session-test",
+) -> Scenario:
+    return Scenario.model_validate(
+        {
+            "id": scenario_id,
+            "name": "Multi-Session Test",
+            "persona": "business-traveler",
+            "rubric": "memory-test",
+            "context": {
+                "system_prompt": "You are a helpful agent.",
+            },
+            "sessions": sessions,
+            "expectations": {
+                "expected_behavior": "Agent handles multi-session correctly.",
+                "expected_outcome": "resolved",
+            },
+        }
+    )
+
+
+@pytest.mark.anyio
+async def test_run_scenario_multi_session_fresh_agent_clears_transcript():
+    """fresh_agent reset creates a new adapter and clears transcript so
+    memory backend is the only persistent channel."""
+    adapter_count = [0]
+    adapters: list[FakeAdapter] = []
+
+    def adapter_factory():
+        adapter_count[0] += 1
+        a = FakeAdapter(
+            [AdapterReply(assistant_text=f"Reply from adapter {adapter_count[0]}.")]
+        )
+        adapters.append(a)
+        return a
+
+    first_adapter = adapter_factory()
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            # S1: one scripted turn
+            build_persona_step("continue", "Seed fact: my assistant is Sarah."),
+            build_persona_step("completed"),
+            # S2: one scripted turn (fresh_agent)
+            build_persona_step("continue", "Who is my assistant?"),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    scenario = build_multi_session_scenario(
+        sessions=[
+            {
+                "id": "s1",
+                "time_offset": "0h",
+                "reset": "none",
+                "turns": [
+                    {"role": "user", "content": "My assistant is Sarah."},
+                ],
+            },
+            {
+                "id": "s2",
+                "time_offset": "48h",
+                "reset": "fresh_agent",
+                "turns": [
+                    {"role": "user", "content": "Who is my assistant?"},
+                ],
+            },
+        ],
+    )
+
+    result = await run_scenario(
+        first_adapter,
+        scenario,
+        build_persona(),
+        build_simple_rubric(),
+        defaults=ScenarioDefaults(max_turns=10),
+        oai_client=cast(openai.AsyncClient, oai_client),
+        adapter_factory=adapter_factory,
+    )
+
+    # adapter_factory was called for the fresh_agent session
+    assert adapter_count[0] >= 2
+    # The second adapter should have received the S2 turn
+    assert len(adapters[-1].send_calls) == 1
+    # Transcript was cleared between sessions, so the final transcript
+    # should only contain the S2 system prompt + S2 turns
+    user_turns = [t for t in result.transcript if t.role == "user"]
+    assert len(user_turns) == 1
+
+
+@pytest.mark.anyio
+async def test_run_scenario_multi_session_none_reset_keeps_context():
+    """reset: none continues same context across sessions."""
+    adapter = FakeAdapter(
+        [
+            AdapterReply(assistant_text="Got it, Sarah is your assistant."),
+            AdapterReply(assistant_text="Your assistant is Sarah."),
+        ]
+    )
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "My assistant is Sarah."),
+            build_persona_step("completed"),
+            build_persona_step("continue", "Who is my assistant?"),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    scenario = build_multi_session_scenario(
+        sessions=[
+            {
+                "id": "s1",
+                "time_offset": "0h",
+                "reset": "none",
+                "turns": [
+                    {"role": "user", "content": "My assistant is Sarah."},
+                ],
+            },
+            {
+                "id": "s2",
+                "time_offset": "24h",
+                "reset": "none",
+                "turns": [
+                    {"role": "user", "content": "Who is my assistant?"},
+                ],
+            },
+        ],
+    )
+
+    result = await run_scenario(
+        adapter,
+        scenario,
+        build_persona(),
+        build_simple_rubric(),
+        defaults=ScenarioDefaults(max_turns=10),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    # Both sessions share the same transcript (none resets nothing)
+    user_turns = [t for t in result.transcript if t.role == "user"]
+    assert len(user_turns) == 2
+    assert len(adapter.send_calls) == 2
+
+
+@pytest.mark.anyio
+async def test_run_scenario_backward_compat_flat_turns():
+    """Scenario with flat turns: (no sessions:) still works via
+    effective_sessions() wrapping."""
+    adapter = FakeAdapter(
+        [AdapterReply(assistant_text="I can help with that.")]
+    )
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Hello there."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    scenario = build_scenario(
+        turns=[{"role": "user", "content": "Hello there."}]
+    )
+
+    result = await run_scenario(
+        adapter,
+        scenario,
+        build_persona(),
+        build_rubric(),
+        defaults=ScenarioDefaults(max_turns=5),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    assert result.passed is True
+    user_turns = [t for t in result.transcript if t.role == "user"]
+    assert len(user_turns) == 1
+
+
+@pytest.mark.anyio
+async def test_multi_session_checkpoint_inside_session():
+    """Checkpoints inside a session's turns work correctly."""
+    adapter = FakeAdapter(
+        [
+            AdapterReply(
+                assistant_text="Using api.openai.com with Send Web Request.",
+                tool_calls=[],
+            ),
+        ]
+    )
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Call the OpenAI images API."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    scenario = build_multi_session_scenario(
+        sessions=[
+            {
+                "id": "s1",
+                "time_offset": "0h",
+                "reset": "none",
+                "turns": [
+                    {"role": "user", "content": "Call the OpenAI images API."},
+                    {
+                        "role": "checkpoint",
+                        "assert": [
+                            {
+                                "response_contains_any": [
+                                    "api.openai.com",
+                                    "Send Web Request",
+                                ]
+                            }
+                        ],
+                    },
+                ],
+            },
+        ],
+    )
+
+    result = await run_scenario(
+        adapter,
+        scenario,
+        build_persona(),
+        build_simple_rubric(),
+        defaults=ScenarioDefaults(max_turns=5),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    assert len(result.checkpoints) == 1
+    assert result.checkpoints[0].passed is True
+
+
+@pytest.mark.anyio
+async def test_multi_session_three_sessions_with_mixed_resets():
+    """Three-session scenario: seed -> override (fresh_agent) -> probe (fresh_agent)."""
+    adapter_count = [0]
+
+    def adapter_factory():
+        adapter_count[0] += 1
+        return FakeAdapter(
+            [AdapterReply(assistant_text=f"Reply {adapter_count[0]}.")]
+        )
+
+    first_adapter = adapter_factory()
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            # S1
+            build_persona_step("continue", "Set price to $2500."),
+            build_persona_step("completed"),
+            # S2
+            build_persona_step("continue", "Price is now $3000."),
+            build_persona_step("completed"),
+            # S3
+            build_persona_step("continue", "What's the price?"),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    scenario = build_multi_session_scenario(
+        sessions=[
+            {
+                "id": "s1",
+                "time_offset": "0h",
+                "reset": "none",
+                "turns": [{"role": "user", "content": "Price is $2500."}],
+            },
+            {
+                "id": "s2",
+                "time_offset": "504h",
+                "reset": "fresh_agent",
+                "turns": [{"role": "user", "content": "Price is now $3000."}],
+            },
+            {
+                "id": "s3",
+                "time_offset": "48h",
+                "reset": "fresh_agent",
+                "turns": [{"role": "user", "content": "What's the Growth price?"}],
+            },
+        ],
+    )
+
+    result = await run_scenario(
+        first_adapter,
+        scenario,
+        build_persona(),
+        build_simple_rubric(),
+        defaults=ScenarioDefaults(max_turns=10),
+        oai_client=cast(openai.AsyncClient, oai_client),
+        adapter_factory=adapter_factory,
+    )
+
+    # 3 adapters total: first + 2 fresh_agent resets
+    assert adapter_count[0] == 3
+    # Final transcript only contains S3 content
+    user_turns = [t for t in result.transcript if t.role == "user"]
+    assert len(user_turns) == 1
+
+
+def test_scenario_effective_sessions_wraps_flat_turns():
+    """effective_sessions() wraps flat turns into a single synthetic session."""
+    scenario = build_scenario(
+        turns=[
+            {"role": "user", "content": "Hello"},
+            {"role": "user", "content": "World"},
+        ]
+    )
+    sessions = scenario.effective_sessions()
+    assert len(sessions) == 1
+    assert sessions[0].id == "__flat__"
+    assert sessions[0].reset == "none"
+    assert len(sessions[0].turns) == 2
+
+
+def test_scenario_effective_sessions_returns_explicit_sessions():
+    """effective_sessions() returns sessions directly when present."""
+    scenario = Scenario.model_validate(
+        {
+            "id": "test",
+            "name": "Test",
+            "persona": "business-traveler",
+            "rubric": "customer-support",
+            "sessions": [
+                {"id": "s1", "reset": "none", "turns": [{"role": "user", "content": "A"}]},
+                {"id": "s2", "reset": "fresh_agent", "turns": [{"role": "user", "content": "B"}]},
+            ],
+            "expectations": {"expected_behavior": "Test.", "expected_outcome": "resolved"},
+        }
+    )
+    sessions = scenario.effective_sessions()
+    assert len(sessions) == 2
+    assert sessions[0].id == "s1"
+    assert sessions[1].id == "s2"
+    assert sessions[1].reset == "fresh_agent"
+
+
+def test_failure_modes_parsing():
+    """failure_modes parsed as FailureMode objects."""
+    scenario = Scenario.model_validate(
+        {
+            "id": "test-fm",
+            "name": "Failure Modes Test",
+            "persona": "business-traveler",
+            "rubric": "customer-support",
+            "turns": [{"role": "user", "content": "Hello"}],
+            "expectations": {
+                "expected_behavior": "Test.",
+                "expected_outcome": "resolved",
+                "failure_modes": [
+                    {"name": "retention_fail", "description": "Agent forgot the fact"},
+                    {"name": "fabrication", "description": "Agent made something up"},
+                ],
+            },
+        }
+    )
+    assert len(scenario.expectations.failure_modes) == 2
+    assert scenario.expectations.failure_modes[0].name == "retention_fail"
+    assert scenario.expectations.failure_modes[1].name == "fabrication"
+
+
+def test_tester_note_parsed():
+    """tester_note field is preserved on expectations."""
+    scenario = Scenario.model_validate(
+        {
+            "id": "test-note",
+            "name": "Tester Note Test",
+            "persona": "business-traveler",
+            "rubric": "customer-support",
+            "turns": [{"role": "user", "content": "Hello"}],
+            "expectations": {
+                "expected_behavior": "Test.",
+                "expected_outcome": "resolved",
+                "tester_note": "Watch for recency bias.",
+            },
+        }
+    )
+    assert scenario.expectations.tester_note == "Watch for recency bias."
+
+
+def test_scenario_defaults_persona_rubric():
+    """ScenarioDefaults now supports persona and rubric fields."""
+    defaults = ScenarioDefaults.model_validate(
+        {
+            "max_turns": 10,
+            "timeout_seconds": 30,
+            "persona": "smb-founder",
+            "rubric": "multi-session-memory",
+        }
+    )
+    assert defaults.persona == "smb-founder"
+    assert defaults.rubric == "multi-session-memory"
+
+
+def test_session_model_fields():
+    """Session model correctly parses all fields."""
+    session = Session.model_validate(
+        {
+            "id": "s1-seed",
+            "time_offset": "48h",
+            "reset": "fresh_agent",
+            "turns": [
+                {"role": "user", "content": "Hello"},
+            ],
+        }
+    )
+    assert session.id == "s1-seed"
+    assert session.time_offset == "48h"
+    assert session.reset == "fresh_agent"
+    assert len(session.turns) == 1
+
+
+def test_scenario_persona_rubric_optional():
+    """Scenario persona and rubric are now optional (can come from defaults)."""
+    scenario = Scenario.model_validate(
+        {
+            "id": "no-persona",
+            "name": "No Persona",
+            "turns": [{"role": "user", "content": "Hello"}],
+            "expectations": {
+                "expected_behavior": "Test.",
+                "expected_outcome": "resolved",
+            },
+        }
+    )
+    assert scenario.persona is None
+    assert scenario.rubric is None
+
