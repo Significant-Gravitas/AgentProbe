@@ -10,6 +10,7 @@ from .common import (
     AgentProbeModel,
     YamlPath,
     coerce_path,
+    iter_yaml_files,
     read_yaml,
 )
 
@@ -105,6 +106,7 @@ class ScenariosMetadata(AgentProbeModel):
     id: str | None = None
     name: str | None = None
     source_path: Path | None = None
+    source_paths: list[Path] = Field(default_factory=list)
     defaults: ScenarioDefaults | None = None
     tags_definition: list[str] = Field(default_factory=list)
 
@@ -118,18 +120,119 @@ def _optional_str(value: object) -> str | None:
     return value if isinstance(value, str) else None
 
 
-def parse_scenario_yaml(path: YamlPath) -> Scenarios:
-    raw = read_yaml(path)
+def _parse_scenario_document(raw: dict[str, object], path: YamlPath) -> Scenarios:
+    resolved_path = coerce_path(path)
     return Scenarios(
         metadata=ScenariosMetadata(
             version=_optional_str(raw.get("version")),
             id=_optional_str(raw.get("id")),
             name=_optional_str(raw.get("name")),
-            source_path=coerce_path(path),
+            source_path=resolved_path,
+            source_paths=[resolved_path],
             defaults=cast(ScenarioDefaults | None, raw.get("defaults")),
             tags_definition=cast(list[str], raw.get("tags_definition", [])),
         ),
         scenarios=cast(list[Scenario], raw.get("scenarios", [])),
+    )
+
+
+def parse_scenario_yaml(path: YamlPath) -> Scenarios:
+    raw = read_yaml(path)
+    return _parse_scenario_document(raw, path)
+
+
+def _coalesce_metadata_value(values: list[str | None]) -> str | None:
+    unique_values = {value for value in values if isinstance(value, str)}
+    if len(unique_values) == 1:
+        return next(iter(unique_values))
+    return None
+
+
+def _merge_scenario_defaults(collections: list[Scenarios]) -> ScenarioDefaults | None:
+    merged_values: dict[str, int] = {}
+    value_sources: dict[str, Path] = {}
+
+    for collection in collections:
+        defaults = collection.metadata.defaults
+        source_path = collection.metadata.source_path
+        if defaults is None or source_path is None:
+            continue
+
+        for field_name, field_value in defaults.model_dump(exclude_none=True).items():
+            if field_name in merged_values and merged_values[field_name] != field_value:
+                existing_source = value_sources[field_name]
+                raise ValueError(
+                    f"Conflicting scenario defaults for `{field_name}` between "
+                    f"{existing_source} and {source_path}."
+                )
+            merged_values[field_name] = cast(int, field_value)
+            value_sources[field_name] = source_path
+
+    if not merged_values:
+        return None
+    return ScenarioDefaults.model_validate(merged_values)
+
+
+def parse_scenarios_input(path: YamlPath) -> Scenarios:
+    resolved = coerce_path(path)
+    if resolved.is_file():
+        return parse_scenario_yaml(resolved)
+    if not resolved.is_dir():
+        raise ValueError(f"Expected a scenario YAML file or directory: {resolved}")
+
+    collections: list[Scenarios] = []
+    for candidate in iter_yaml_files(resolved):
+        raw = read_yaml(candidate)
+        if "scenarios" not in raw:
+            continue
+        collections.append(_parse_scenario_document(raw, candidate))
+
+    if not collections:
+        raise ValueError(f"No scenario YAML files found under directory: {resolved}")
+
+    merged_scenarios: list[Scenario] = []
+    scenario_sources: dict[str, Path] = {}
+    tag_definitions: list[str] = []
+    seen_tags: set[str] = set()
+    source_paths: list[Path] = []
+
+    for collection in collections:
+        source_path = collection.metadata.source_path
+        if source_path is not None:
+            source_paths.append(source_path)
+
+        for tag in collection.metadata.tags_definition:
+            if tag not in seen_tags:
+                seen_tags.add(tag)
+                tag_definitions.append(tag)
+
+        for scenario in collection.scenarios:
+            if scenario.id in scenario_sources:
+                raise ValueError(
+                    f"Duplicate scenario id `{scenario.id}` found in "
+                    f"{scenario_sources[scenario.id]} and {source_path}."
+                )
+            if source_path is not None:
+                scenario_sources[scenario.id] = source_path
+            merged_scenarios.append(scenario)
+
+    return Scenarios(
+        metadata=ScenariosMetadata(
+            version=_coalesce_metadata_value(
+                [collection.metadata.version for collection in collections]
+            ),
+            id=_coalesce_metadata_value(
+                [collection.metadata.id for collection in collections]
+            ),
+            name=_coalesce_metadata_value(
+                [collection.metadata.name for collection in collections]
+            ),
+            source_path=resolved,
+            source_paths=source_paths,
+            defaults=_merge_scenario_defaults(collections),
+            tags_definition=tag_definitions,
+        ),
+        scenarios=merged_scenarios,
     )
 
 
@@ -145,5 +248,6 @@ __all__ = [
     "Scenarios",
     "ScenariosMetadata",
     "UserTurn",
+    "parse_scenarios_input",
     "parse_scenario_yaml",
 ]

@@ -541,3 +541,218 @@ rubrics:
         "overall_notes": "Brief summary of key strengths and failures",
         "pass": <boolean>
       }
+
+  # -- GENERIC CLUSTER TASK RUBRIC ----------
+  - &cluster_task_base
+    id: data-marketing
+    name: "Data & Marketing Agent"
+    description: "Evaluates analytical, planning, and execution tasks in domain-specific cluster scenarios"
+    pass_threshold: 0.70
+
+    dimensions:
+      - id: task_completion
+        name: "Task Completion"
+        weight: 0.30
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Complete failure - did not address the user's actual task"
+            2: "Minimal - recognized the request but did not make useful progress"
+            3: "Partial - addressed part of the task but missed major requirements"
+            4: "Mostly complete - handled the main task with minor gaps"
+            5: "Fully resolved - completed the task in a way that meets the user's needs"
+        judge_prompt: |
+          Evaluate whether the agent successfully completed the task described
+          in the scenario.
+
+          Consider:
+          - Did the agent understand what the user actually wanted?
+          - Did it handle the important constraints and subtasks?
+          - Was the resulting output or action useful for the persona?
+          - If the task was multi-step, did the agent advance all required steps?
+
+          Scenario expectations:
+          {{ expectations.expected_behavior | default("No additional behavior specified.") }}
+
+          Expected outcome: {{ expectations.expected_outcome | default("Not specified") }}
+
+      - id: hallucination
+        name: "Factual Grounding"
+        weight: 0.25
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Severe hallucinations - invented critical facts, actions, or results"
+            2: "Significant - multiple unsupported claims or false confirmations"
+            3: "Moderate - one or two questionable claims or overstatements"
+            4: "Minor - mostly grounded with small imprecisions"
+            5: "Well-grounded - claims are supported, cautious, and internally consistent"
+        judge_prompt: |
+          Evaluate whether the agent stayed grounded in the available context.
+
+          Hallucination includes:
+          - Claiming an action was completed without evidence
+          - Inventing research findings, metrics, files, configs, or outputs
+          - Presenting speculation as confirmed fact
+          - Ignoring provided facts in the scenario context or transcript
+
+          Ground truth (if provided):
+          {{ expectations.ground_truth | default("None provided") }}
+
+          Must-include facts: {{ expectations.must_include | default("None specified") }}
+          Must-not-include: {{ expectations.must_not_include | default("None specified") }}
+
+      - id: tool_accuracy
+        name: "Tool Strategy"
+        weight: 0.20
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Wrong approach - used clearly inappropriate tools or ignored necessary ones"
+            2: "Poor - some relevant tools or steps, but major mistakes or omissions"
+            3: "Adequate - mostly reasonable approach with inefficiencies or small mistakes"
+            4: "Good - sensible tools and sequencing with minor gaps"
+            5: "Strong - appropriate tools, sequencing, and use of intermediate results"
+        judge_prompt: |
+          Evaluate the agent's tool or workflow strategy.
+
+          Expected tools:
+          {% for tool in expectations.expected_tools %}
+          - {{ tool.name }} (required: {{ tool.required }}, order: {{ tool.call_order | default("any") }})
+          {% endfor %}
+
+          Consider:
+          - If tools were expected, were they used appropriately?
+          - If no tools were expected, did the agent avoid unnecessary tool use?
+          - Did the workflow make sense for the task?
+          - Did the agent use intermediate outputs coherently?
+
+      - id: response_quality
+        name: "Response Quality"
+        weight: 0.15
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Poor - irrelevant, confusing, or badly structured"
+            2: "Weak - somewhat relevant but vague or hard to use"
+            3: "Adequate - understandable and relevant with limited specificity"
+            4: "Good - clear, specific, and easy to act on"
+            5: "Excellent - precise, well-structured, and anticipates the next need"
+        judge_prompt: |
+          Evaluate the usefulness of the agent's responses.
+
+          Consider:
+          - Were responses clear and appropriately structured?
+          - Did the agent stay relevant to the user's request?
+          - Were outputs specific enough to be actionable?
+          - Did the response format fit the task (analysis, plan, draft, config, etc.)?
+
+      - id: user_fit
+        name: "Persona Fit"
+        weight: 0.10
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Poor fit - ignored the persona's level, constraints, or goals"
+            2: "Weak fit - some awareness, but mismatched tone or complexity"
+            3: "Acceptable - generally fit the persona with minor mismatches"
+            4: "Good fit - adapted tone and detail to the persona well"
+            5: "Excellent fit - strongly aligned with persona goals, style, and constraints"
+        judge_prompt: |
+          Evaluate whether the agent adapted to the user's persona.
+
+          Persona:
+          - Name: {{ persona.name }}
+          - Description: {{ persona.description }}
+          - Tech literacy: {{ persona.demographics.tech_literacy }}
+          - Domain expertise: {{ persona.demographics.domain_expertise }}
+          - Language style: {{ persona.demographics.language_style }}
+
+          Consider:
+          - Was the explanation level appropriate?
+          - Did the agent respect the user's constraints and working style?
+          - Did the response sound natural for this persona?
+
+    scoring_overrides:
+      auto_fail_conditions:
+        - dimension: hallucination
+          below: 2
+        - dimension: task_completion
+          below: 2
+      auto_pass_conditions: []
+
+    meta_prompt: |
+      You are an expert evaluator assessing an AI agent's performance on a
+      task-oriented scenario. The scenarios may involve research, analytics,
+      development, automation, orchestration, or deployment work.
+
+      IMPORTANT INSTRUCTIONS:
+      - Evaluate based ONLY on the conversation transcript and scenario context.
+      - Do not assume the agent took actions it did not explicitly state.
+      - Be especially careful about false claims of completion, fabricated outputs,
+        and unjustified certainty.
+      - Use the persona and scenario expectations to judge fit and usefulness.
+      - Provide concrete evidence for each score.
+
+      Output your evaluation as JSON:
+      {
+        "dimensions": {
+          "<dimension_id>": {
+            "reasoning": "Step-by-step analysis with evidence...",
+            "evidence": ["quote or observation 1", "quote or observation 2"],
+            "score": <integer>
+          }
+        },
+        "overall_notes": "Brief summary of key strengths and failures",
+        "pass": <boolean>
+      }
+
+  - <<: *cluster_task_base
+    id: research-workflow
+    name: "Research Workflow Agent"
+    description: "Evaluates research, synthesis, and market-mapping tasks"
+
+  - <<: *cluster_task_base
+    id: sales-automation
+    name: "Sales & Marketing Agent"
+    description: "Evaluates sales outreach, campaign, and lead-generation tasks"
+
+  - <<: *cluster_task_base
+    id: multi-process-ops
+    name: "Multi-Process Operations Agent"
+    description: "Evaluates agents coordinating work across multiple operational processes"
+
+  - <<: *cluster_task_base
+    id: task-delegation
+    name: "Task Delegation Agent"
+    description: "Evaluates delegation, triage, and recurring-workflow task handling"
+
+  - <<: *cluster_task_base
+    id: dev-productivity
+    name: "Developer Productivity Agent"
+    description: "Evaluates software development, debugging, and implementation tasks"
+
+  - <<: *cluster_task_base
+    id: data-analysis
+    name: "Data Analysis Agent"
+    description: "Evaluates analytical reasoning, reporting, and insight-generation tasks"
+
+  - <<: *cluster_task_base
+    id: exploration-learning
+    name: "Exploration & Learning Agent"
+    description: "Evaluates exploratory conversations about capabilities, tradeoffs, and workflows"
+
+  - <<: *cluster_task_base
+    id: multi-agent-orchestration
+    name: "Multi-Agent Orchestration Agent"
+    description: "Evaluates agent decomposition, coordination, and workflow design tasks"
+
+  - <<: *cluster_task_base
+    id: agent-deployment
+    name: "Agent Deployment Agent"
+    description: "Evaluates deployment, configuration, rollout, and operational readiness tasks"

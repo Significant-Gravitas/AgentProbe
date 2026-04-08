@@ -51,7 +51,23 @@ ConversationHistory: TypeAlias = (
 )
 
 
-def _simulator_json_schema() -> dict[str, object]:
+def _simulator_json_schema(*, require_response: bool) -> dict[str, object]:
+    if require_response:
+        return {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": (
+                        "The next natural-language user message for this required turn."
+                    ),
+                }
+            },
+            "required": ["message"],
+            "additionalProperties": False,
+        }
+
     return {
         "oneOf": [
             {
@@ -101,7 +117,8 @@ def _simulator_json_schema() -> dict[str, object]:
 
 def _simulator_instructions(persona: Persona, *, require_response: bool) -> str:
     guidance = (
-        "You must return `status: \"continue\"` with a non-empty `message` for this turn.\n"
+        "A response is required for this turn.\n"
+        "Return exactly one natural-language user message in the `message` field.\n"
         if require_response
         else (
             "Return `status: \"completed\"` when the persona's task is done.\n"
@@ -291,7 +308,10 @@ def _parse_persona_payload(
         except json.JSONDecodeError:
             continue
         if isinstance(parsed, dict):
-            return _normalize_persona_payload(parsed)
+            return _normalize_persona_payload(
+                parsed,
+                require_response=require_response,
+            )
 
     fallback = _coerce_plaintext_persona_payload(
         normalized,
@@ -303,13 +323,35 @@ def _parse_persona_payload(
     raise ValueError("Persona simulator returned invalid JSON output.")
 
 
-def _normalize_persona_payload(parsed: dict[str, object]) -> dict[str, object]:
+def _normalize_persona_payload(
+    parsed: dict[str, object], *, require_response: bool
+) -> dict[str, object]:
+    if require_response:
+        return _normalize_required_response_payload(parsed)
+
     normalized = dict(parsed)
     status = normalized.get("status")
     if isinstance(status, str) and status != "continue":
         message = normalized.get("message")
         if _is_terminal_message_placeholder(message):
             normalized["message"] = None
+        elif isinstance(message, str):
+            stripped = message.strip()
+            if _looks_like_terminal_acknowledgement(stripped):
+                normalized["message"] = None
+            else:
+                return {"status": "continue", "message": stripped}
+    return normalized
+
+
+def _normalize_required_response_payload(parsed: dict[str, object]) -> dict[str, object]:
+    normalized = dict(parsed)
+
+    for key in ("message", "response", "content", "text"):
+        value = normalized.get(key)
+        if isinstance(value, str) and value.strip():
+            return {"status": "continue", "message": value.strip()}
+
     return normalized
 
 
@@ -325,6 +367,29 @@ def _is_terminal_message_placeholder(message: object) -> bool:
     if normalized.lower() in {"null", "none", "n/a", "na", "nil"}:
         return True
     return not any(char.isalnum() for char in normalized)
+
+
+def _looks_like_terminal_acknowledgement(message: str) -> bool:
+    lowered = message.strip().lower()
+    terminal_markers = (
+        "thanks, that's all",
+        "thanks that's all",
+        "that is all",
+        "that's all",
+        "all set",
+        "we're all set",
+        "we are all set",
+        "nothing else",
+        "nothing more",
+        "no further questions",
+        "no more questions",
+        "no thanks",
+        "i'm good",
+        "im good",
+        "we're good",
+        "we are good",
+    )
+    return any(marker in lowered for marker in terminal_markers)
 
 
 def _persona_json_candidates(payload: str) -> list[str]:
@@ -438,27 +503,39 @@ async def generate_persona_step(
     Returns:
         Structured persona decision and, when continuing, the next user message.
     """
-    schema = _simulator_json_schema()
-    response = await oai_client.responses.create(
-        model=_resolve_persona_model(persona),
-        instructions=_simulator_instructions(
-            persona, require_response=require_response
-        ),
-        input=_build_simulator_input(
-            history,
-            guidance=guidance,
-            require_response=require_response,
-        ),
-        text={
-            "format": {
-                "type": "json_schema",
-                "name": "persona_step",
-                "description": "Structured persona continuation decision for an agent evaluation.",
-                "schema": schema,
-                "strict": True,
-            }
-        },
-    )
+    schema = _simulator_json_schema(require_response=require_response)
+    model = _resolve_persona_model(persona)
+    try:
+        response = await oai_client.responses.create(
+            model=model,
+            instructions=_simulator_instructions(
+                persona, require_response=require_response
+            ),
+            input=_build_simulator_input(
+                history,
+                guidance=guidance,
+                require_response=require_response,
+            ),
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "persona_step",
+                    "description": "Structured persona continuation decision for an agent evaluation.",
+                    "schema": schema,
+                    "strict": True,
+                }
+            },
+        )
+    except openai.AuthenticationError as exc:
+        raise openai.AuthenticationError(
+            message=(
+                f"Persona simulator authentication failed for model '{model}'. "
+                "Set OPENAI_API_KEY (and OPENAI_BASE_URL for OpenRouter or other providers) "
+                "environment variables before running agentprobe."
+            ),
+            response=exc.response,
+            body=exc.body,
+        ) from exc
 
     return _parse_persona_step(
         _extract_output_text(response),

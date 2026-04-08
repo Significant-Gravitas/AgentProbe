@@ -395,7 +395,12 @@ class HttpEndpointAdapter:
 
             resolved = self._autogpt_auth_resolver()
         except Exception as exc:  # pragma: no cover - network/auth failure path
-            raise AgentProbeRuntimeError(f"AutoGPT auth failed: {exc}") from exc
+            raise AgentProbeRuntimeError(
+                f"AutoGPT auth failed: {exc}. "
+                "Verify the backend is running at the configured URL "
+                "(AUTOGPT_BACKEND_URL or default http://localhost:8006) "
+                "and that AUTOGPT_JWT_SECRET is set correctly."
+            ) from exc
 
         headers = getattr(resolved, "headers", None)
         if not isinstance(headers, dict):

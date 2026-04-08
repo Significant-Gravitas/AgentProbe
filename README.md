@@ -133,6 +133,16 @@ agentprobe run \
   --rubric /path/to/rubric.yaml
 ```
 
+You can also point `--scenarios` at a directory. AgentProbe will load every YAML file under that directory with a top-level `scenarios:` document and merge them into one run:
+
+```bash
+agentprobe run \
+  --endpoint /path/to/endpoints.yaml \
+  --scenarios /path/to/scenario-folder \
+  --personas /path/to/personas.yaml \
+  --rubric /path/to/rubric.yaml
+```
+
 Run a single scenario or tag subset:
 
 ```bash

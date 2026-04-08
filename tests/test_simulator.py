@@ -116,6 +116,8 @@ async def test_generate_persona_step_uses_env_default_model_and_guidance(monkeyp
     assert text_format["type"] == "json_schema"
     assert text_format["name"] == "persona_step"
     assert text_format["strict"] is True
+    schema = cast(dict[str, object], text_format["schema"])
+    assert schema["required"] == ["message"]
 
 
 @pytest.mark.anyio
@@ -194,16 +196,51 @@ async def test_generate_persona_step_normalizes_placeholder_terminal_message(
 
 
 @pytest.mark.anyio
-async def test_generate_persona_step_rejects_meaningful_terminal_message():
+async def test_generate_persona_step_normalizes_terminal_acknowledgement_message():
     client = FakeClient([persona_response("completed", "Thanks, that's all.")])
 
-    with pytest.raises(ValueError, match="omit `message`"):
-        await generate_persona_step(
-            build_persona(),
-            [{"role": "user", "content": "Hello"}],
-            oai_client=cast(openai.AsyncClient, client),
-            require_response=False,
-        )
+    result = await generate_persona_step(
+        build_persona(),
+        [{"role": "user", "content": "Hello"}],
+        oai_client=cast(openai.AsyncClient, client),
+        require_response=False,
+    )
+
+    assert result == PersonaStep(status="completed", message=None)
+
+
+@pytest.mark.anyio
+async def test_generate_persona_step_coerces_conversational_terminal_message_to_continue():
+    client = FakeClient([persona_response("completed", "How complicated would that be?")])
+
+    result = await generate_persona_step(
+        build_persona(),
+        [{"role": "assistant", "content": "I can create the posts."}],
+        oai_client=cast(openai.AsyncClient, client),
+        require_response=False,
+    )
+
+    assert result == PersonaStep(
+        status="continue",
+        message="How complicated would that be?",
+    )
+
+
+@pytest.mark.anyio
+async def test_generate_persona_step_coerces_required_response_message_to_continue():
+    client = FakeClient([persona_response("completed", "I need the CRM record for Sarah.")])
+
+    result = await generate_persona_step(
+        build_persona(),
+        [{"role": "assistant", "content": "What should I look up?"}],
+        oai_client=cast(openai.AsyncClient, client),
+        require_response=True,
+    )
+
+    assert result == PersonaStep(
+        status="continue",
+        message="I need the CRM record for Sarah.",
+    )
 
 
 @pytest.mark.anyio

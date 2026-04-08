@@ -8,7 +8,7 @@ from .common import YamlObject, YamlPath, iter_yaml_files, read_yaml
 from .endpoints import Endpoints, parse_endpoints_yaml
 from .personas import Persona, Personas, parse_persona_yaml
 from .rubrics import Rubric, Rubrics, parse_rubrics_yaml
-from .scenarios import Scenario, Scenarios, parse_scenario_yaml
+from .scenarios import Scenario, Scenarios, parse_scenario_yaml, parse_scenarios_input
 
 
 class Collection:
@@ -149,6 +149,7 @@ __all__ = [
     "parse_endpoints_yaml",
     "parse_persona_yaml",
     "parse_rubrics_yaml",
+    "parse_scenarios_input",
     "parse_scenario_yaml",
     "process_yaml_files",
 ]

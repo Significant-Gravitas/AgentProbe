@@ -99,6 +99,33 @@ def _score_percent(value: object) -> int:
     return max(0, min(100, int(round(float(value) * 100))))
 
 
+_CREDENTIAL_ERROR_PATTERNS = (
+    "401",
+    "403",
+    "unauthorized",
+    "authentication",
+    "credential",
+    "api key",
+    "api_key",
+    "apikey",
+    "invalid key",
+    "invalid token",
+    "access denied",
+    "permission denied",
+    "token expired",
+    "auth failed",
+)
+
+
+def _is_credential_error(error: object) -> bool:
+    if not isinstance(error, dict):
+        return False
+    message = str(error.get("message", "")).lower()
+    error_type = str(error.get("type", "")).lower()
+    combined = f"{error_type} {message}"
+    return any(pattern in combined for pattern in _CREDENTIAL_ERROR_PATTERNS)
+
+
 def _status_tone(passed: object) -> str:
     if passed is True:
         return "success"
@@ -236,6 +263,8 @@ def _prepare_scenario_view(scenario: dict[str, Any], index: int) -> dict[str, An
     judge = scenario.get("judge") or {}
     error = scenario.get("error")
 
+    tags = scenario.get("tags") or []
+
     return {
         **scenario,
         "index": index,
@@ -243,6 +272,9 @@ def _prepare_scenario_view(scenario: dict[str, Any], index: int) -> dict[str, An
         "nav_label": f"{index + 1}. {scenario.get('scenario_name') or scenario.get('scenario_id')}",
         "status_label": _status_label(scenario.get("passed")),
         "status_tone": _status_tone(scenario.get("passed")),
+        "is_credential_error": _is_credential_error(error),
+        "tags": tags,
+        "tags_csv": ",".join(str(t) for t in tags),
         "score_label": _format_score(overall_score),
         "score_percent": _score_percent(overall_score),
         "threshold_label": _format_score(pass_threshold),
@@ -266,9 +298,24 @@ def _prepare_run_view(run: dict[str, Any]) -> dict[str, Any]:
     ]
     aggregate_counts = run.get("aggregate_counts") or {}
 
+    credential_error_count = sum(
+        1
+        for s in run.get("scenarios", [])
+        if _is_credential_error(s.get("error"))
+    )
+
+    all_tags: list[str] = []
+    seen_tags: set[str] = set()
+    for s in scenarios:
+        for tag in s.get("tags") or []:
+            if tag not in seen_tags:
+                seen_tags.add(tag)
+                all_tags.append(tag)
+
     return {
         **run,
         "scenarios": scenarios,
+        "all_tags": sorted(all_tags),
         "run_id_short": str(run.get("run_id", ""))[:8],
         "started_at_label": _format_timestamp(run.get("started_at")),
         "completed_at_label": _format_timestamp(run.get("completed_at")),
@@ -278,6 +325,7 @@ def _prepare_run_view(run: dict[str, Any]) -> dict[str, Any]:
         "scenario_passed_count": aggregate_counts.get("scenario_passed_count", 0),
         "scenario_failed_count": aggregate_counts.get("scenario_failed_count", 0),
         "scenario_errored_count": aggregate_counts.get("scenario_errored_count", 0),
+        "credential_error_count": credential_error_count,
     }
 
 
@@ -381,10 +429,22 @@ _TEMPLATE = _ENV.from_string(
             <div class="rounded-[1.5rem] border border-amber-950/10 bg-report-gold px-5 py-5 text-report-ink">
               <div class="text-xs uppercase tracking-[0.24em] text-black/55">Failed</div>
               <div class="mt-3 font-display text-4xl font-bold">{{ run.scenario_failed_count }}</div>
+              {% if run.credential_error_count > 0 %}
+              <div class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-black/10 px-2.5 py-1 text-xs font-semibold text-report-ember">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
+                {{ run.credential_error_count }} credential
+              </div>
+              {% endif %}
             </div>
             <div class="rounded-[1.5rem] border border-rose-950/10 bg-report-ember px-5 py-5 text-white">
               <div class="text-xs uppercase tracking-[0.24em] text-white/70">Errored</div>
               <div class="mt-3 font-display text-4xl font-bold">{{ run.scenario_errored_count }}</div>
+              {% if run.credential_error_count > 0 %}
+              <div class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
+                {{ run.credential_error_count }} credential
+              </div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -395,18 +455,41 @@ _TEMPLATE = _ENV.from_string(
           <section class="rounded-[1.75rem] border border-black/10 bg-white/80 p-5 shadow-panel backdrop-blur">
             <h2 class="font-display text-lg font-bold">Scenarios</h2>
             <div class="mt-4 space-y-3">
+              <input
+                id="scenario-search"
+                type="text"
+                placeholder="Search scenarios..."
+                class="w-full rounded-xl border border-black/10 bg-black/[0.03] px-3 py-2 text-sm outline-none transition placeholder:text-black/40 focus:border-black/25 focus:bg-white"
+              />
+              {% if run.all_tags %}
+              <select
+                id="scenario-tag-filter"
+                class="w-full rounded-xl border border-black/10 bg-black/[0.03] px-3 py-2 text-sm outline-none transition focus:border-black/25 focus:bg-white"
+              >
+                <option value="">All tags</option>
+                {% for tag in run.all_tags %}
+                <option value="{{ tag }}">{{ tag }}</option>
+                {% endfor %}
+              </select>
+              {% endif %}
+            </div>
+            <div id="scenario-list" class="mt-4 space-y-3">
               {% for scenario in run.scenarios %}
               <button
                 type="button"
                 data-scenario-button="{{ scenario.dom_id }}"
+                data-scenario-tags="{{ scenario.tags_csv }}"
+                data-scenario-name="{{ scenario.nav_label|lower }}"
+                data-persona="{{ scenario.persona_id|lower }}"
+                data-rubric="{{ scenario.rubric_id|lower }}"
                 class="scenario-nav w-full rounded-2xl border border-black/10 bg-black/[0.03] px-4 py-3 text-left transition hover:border-black/20 hover:bg-black/[0.05]"
               >
                 <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <div class="text-sm font-semibold">{{ scenario.nav_label }}</div>
-                    <div class="mt-1 text-xs text-black/55">{{ scenario.persona_id }} • {{ scenario.rubric_id }}</div>
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold scenario-label">{{ scenario.nav_label }}</div>
+                    <div class="mt-1 text-xs scenario-meta text-black/55">{{ scenario.persona_id }} • {{ scenario.rubric_id }}</div>
                   </div>
-                  <div class="rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]
+                  <div data-tone="{{ scenario.status_tone }}" class="shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] scenario-badge
                     {% if scenario.status_tone == 'success' %}
                       bg-emerald-100 text-emerald-800
                     {% elif scenario.status_tone == 'danger' %}
@@ -418,8 +501,14 @@ _TEMPLATE = _ENV.from_string(
                     {{ scenario.status_label }}
                   </div>
                 </div>
-                <div class="mt-4">
-                  <div class="flex items-center justify-between text-xs text-black/55">
+                {% if scenario.is_credential_error %}
+                <div class="mt-2 inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700">
+                  <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
+                  Credential error
+                </div>
+                {% endif %}
+                <div class="mt-3">
+                  <div class="flex items-center justify-between text-xs scenario-score text-black/55">
                     <span>Score</span>
                     <span>{{ scenario.score_label }}</span>
                   </div>
@@ -433,6 +522,7 @@ _TEMPLATE = _ENV.from_string(
               </button>
               {% endfor %}
             </div>
+            <div id="scenario-no-results" class="mt-4 hidden text-center text-sm text-black/45">No matching scenarios</div>
           </section>
 
           <section class="rounded-[1.75rem] border border-black/10 bg-white/80 p-5 shadow-panel backdrop-blur">
@@ -744,6 +834,10 @@ _TEMPLATE = _ENV.from_string(
       const scoreOpeners = [...document.querySelectorAll("[data-open-tab]")];
       const defaultScenario = scenarioPanels[0]?.dataset.scenarioPanel;
 
+      const searchInput = document.getElementById("scenario-search");
+      const tagFilter = document.getElementById("scenario-tag-filter");
+      const noResults = document.getElementById("scenario-no-results");
+
       function updateScenarioNav(activeScenario) {
         scenarioButtons.forEach((button) => {
           const active = button.dataset.scenarioButton === activeScenario;
@@ -751,6 +845,28 @@ _TEMPLATE = _ENV.from_string(
           button.classList.toggle("text-white", active);
           button.classList.toggle("border-transparent", active);
           button.classList.toggle("shadow-lg", active);
+
+          /* Fix child text visibility when selected */
+          button.querySelectorAll(".scenario-meta, .scenario-score").forEach((el) => {
+            el.classList.toggle("text-black/55", !active);
+            el.classList.toggle("text-white/70", active);
+          });
+          button.querySelectorAll(".scenario-label").forEach((el) => {
+            el.classList.toggle("text-white", active);
+          });
+          button.querySelectorAll(".scenario-badge").forEach((el) => {
+            if (active) {
+              el.classList.add("bg-white/20", "text-white");
+              el.classList.remove("bg-emerald-100", "text-emerald-800", "bg-rose-100", "text-rose-800", "bg-slate-100", "text-slate-700");
+            } else {
+              el.classList.remove("bg-white/20", "text-white");
+              /* Restore original badge colors from data attribute */
+              const tone = el.dataset.tone;
+              if (tone === "success") { el.classList.add("bg-emerald-100", "text-emerald-800"); }
+              else if (tone === "danger") { el.classList.add("bg-rose-100", "text-rose-800"); }
+              else { el.classList.add("bg-slate-100", "text-slate-700"); }
+            }
+          });
         });
       }
 
@@ -783,6 +899,40 @@ _TEMPLATE = _ENV.from_string(
         updateScenarioPanels(activeScenario);
         setTab(activeScenario, preferredTab);
       }
+
+      /* Search and tag filter */
+      function filterScenarios() {
+        const query = (searchInput?.value || "").toLowerCase().trim();
+        const selectedTag = tagFilter?.value || "";
+        let visibleCount = 0;
+
+        scenarioButtons.forEach((button) => {
+          const name = button.dataset.scenarioName || "";
+          const persona = button.dataset.persona || "";
+          const rubric = button.dataset.rubric || "";
+          const tags = button.dataset.scenarioTags || "";
+
+          const matchesSearch = !query ||
+            name.includes(query) ||
+            persona.includes(query) ||
+            rubric.includes(query) ||
+            tags.toLowerCase().includes(query);
+
+          const matchesTag = !selectedTag ||
+            tags.split(",").includes(selectedTag);
+
+          const visible = matchesSearch && matchesTag;
+          button.classList.toggle("hidden", !visible);
+          if (visible) visibleCount++;
+        });
+
+        if (noResults) {
+          noResults.classList.toggle("hidden", visibleCount > 0);
+        }
+      }
+
+      if (searchInput) searchInput.addEventListener("input", filterScenarios);
+      if (tagFilter) tagFilter.addEventListener("change", filterScenarios);
 
       scenarioButtons.forEach((button) => {
         button.addEventListener("click", () => setScenario(button.dataset.scenarioButton));

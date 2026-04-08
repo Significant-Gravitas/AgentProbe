@@ -221,6 +221,50 @@ def test_run_command_forwards_parallel_flag(monkeypatch, tmp_path: Path):
     assert "PASS smoke-scenario score=0.80" in result.output
 
 
+def test_run_command_accepts_scenarios_directory(monkeypatch, tmp_path: Path):
+    async def fake_run_suite(**kwargs: object) -> RunResult:
+        assert kwargs["scenarios"] == scenarios_dir
+        return RunResult(
+            passed=True,
+            exit_code=0,
+            results=[
+                ScenarioRunResult(
+                    scenario_id="smoke-scenario",
+                    scenario_name="Smoke",
+                    persona_id="business-traveler",
+                    rubric_id="customer-support",
+                    passed=True,
+                    overall_score=0.8,
+                )
+            ],
+        )
+
+    monkeypatch.setattr("agentprobe.cli.run_suite", fake_run_suite)
+    paths = create_dummy_paths(tmp_path)
+    scenarios_dir = tmp_path / "scenarios"
+    scenarios_dir.mkdir()
+    (scenarios_dir / "smoke.yaml").write_text("scenarios: []", encoding="utf-8")
+    runner = CliRunner()
+
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--endpoint",
+            str(paths["endpoint"]),
+            "--scenarios",
+            str(scenarios_dir),
+            "--personas",
+            str(paths["personas"]),
+            "--rubric",
+            str(paths["rubric"]),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "PASS smoke-scenario score=0.80" in result.output
+
+
 def test_run_command_returns_config_error_exit_code(monkeypatch, tmp_path: Path):
     async def fake_run_suite(**kwargs: object) -> RunResult:
         raise AgentProbeConfigError("bad config")

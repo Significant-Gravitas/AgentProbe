@@ -291,6 +291,78 @@ async def test_run_scenario_uses_exact_messages_only_when_requested():
 
 
 @pytest.mark.anyio
+async def test_run_scenario_accepts_required_response_with_terminal_status_and_message():
+    adapter = FakeAdapter([AdapterReply(assistant_text="I can help with that.")])
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("completed", "I need to land before noon."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    await run_scenario(
+        adapter,
+        build_scenario(turns=[{"role": "user", "content": "Ask to land before noon."}]),
+        build_persona(),
+        build_rubric(),
+        defaults=ScenarioDefaults(max_turns=2),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    first_message = cast(ConversationTurn, adapter.send_calls[0]["last_message"])
+    assert first_message.content == "I need to land before noon."
+
+
+@pytest.mark.anyio
+async def test_run_scenario_accepts_generated_follow_up_with_terminal_status_and_message():
+    adapter = FakeAdapter(
+        [
+            AdapterReply(assistant_text="I wrote the posts."),
+            AdapterReply(assistant_text="It is straightforward."),
+        ]
+    )
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step(
+                "continue",
+                "Please create posts for Twitter, LinkedIn, and Instagram.",
+            ),
+            build_persona_step("completed", "How complicated would that be?"),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    result = await run_scenario(
+        adapter,
+        build_scenario(
+            turns=[
+                {
+                    "role": "user",
+                    "content": "Please create posts for Twitter, LinkedIn, and Instagram.",
+                }
+            ]
+        ),
+        build_persona(),
+        build_rubric(),
+        defaults=ScenarioDefaults(max_turns=3),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    assert len(adapter.send_calls) == 2
+    follow_up = cast(ConversationTurn, adapter.send_calls[1]["last_message"])
+    assert follow_up.content == "How complicated would that be?"
+    assert [turn.role for turn in result.transcript] == [
+        "system",
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+    ]
+
+
+@pytest.mark.anyio
 async def test_run_scenario_records_checkpoint_failures_without_stopping():
     adapter = FakeAdapter(
         [
@@ -615,6 +687,173 @@ scenarios:
 
 
 @pytest.mark.anyio
+async def test_run_suite_merges_scenarios_from_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text(
+        """
+personas:
+  - id: business-traveler
+    name: Business Traveler
+    demographics:
+      role: business customer
+      tech_literacy: high
+      domain_expertise: intermediate
+      language_style: terse
+    personality:
+      patience: 2
+      assertiveness: 4
+      detail_orientation: 5
+      cooperativeness: 4
+      emotional_intensity: 2
+    behavior:
+      opening_style: Be direct.
+      follow_up_style: Answer follow-up questions directly.
+      escalation_triggers: []
+      topic_drift: none
+      clarification_compliance: high
+    system_prompt: You are a direct business traveler.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: Customer Support
+    pass_threshold: 0.7
+    meta_prompt: Judge behavior.
+    dimensions:
+      - id: task_completion
+        name: Task Completion
+        weight: 1.0
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: bad
+            5: good
+        judge_prompt: Check task completion.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    scenarios_dir = tmp_path / "scenarios"
+    scenarios_dir.mkdir()
+    (scenarios_dir / "smoke.yaml").write_text(
+        """
+defaults:
+  max_turns: 1
+scenarios:
+  - id: smoke-scenario
+    name: Smoke
+    tags: [smoke]
+    persona: business-traveler
+    rubric: customer-support
+    turns:
+      - role: user
+        content: Hello smoke
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+    (scenarios_dir / "regression.yaml").write_text(
+        """
+scenarios:
+  - id: regression-scenario
+    name: Regression
+    tags: [regression]
+    persona: business-traveler
+    rubric: customer-support
+    turns:
+      - role: user
+        content: Hello regression
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    observed_defaults: list[tuple[str, int | None]] = []
+
+    async def fake_run_scenario(
+        adapter: FakeAdapter,
+        scenario: Scenario,
+        persona: Persona,
+        rubric: Rubric,
+        *,
+        defaults: ScenarioDefaults | None = None,
+        oai_client: openai.AsyncClient,
+        recorder: object | None = None,
+        scenario_ordinal: int | None = None,
+        dry_run: bool = False,
+    ) -> ScenarioRunResult:
+        del adapter, persona, rubric, oai_client, recorder, scenario_ordinal, dry_run
+        observed_defaults.append(
+            (scenario.id, defaults.max_turns if defaults is not None else None)
+        )
+        return ScenarioRunResult(
+            scenario_id=scenario.id,
+            scenario_name=scenario.name,
+            persona_id=scenario.persona,
+            rubric_id=scenario.rubric,
+            passed=True,
+            overall_score=0.8,
+        )
+
+    monkeypatch.setattr("agentprobe.runner.run_scenario", fake_run_scenario)
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="Handled.")])
+
+    result = await run_suite(
+        endpoint=endpoint_path,
+        scenarios=scenarios_dir,
+        personas=personas_path,
+        rubric=rubric_path,
+        adapter_factory=adapter_factory,
+        oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+    )
+
+    assert result.exit_code == 0
+    assert [item.scenario_id for item in result.results] == [
+        "regression-scenario",
+        "smoke-scenario",
+    ]
+    assert observed_defaults == [
+        ("regression-scenario", 1),
+        ("smoke-scenario", 1),
+    ]
+
+
+@pytest.mark.anyio
 async def test_run_suite_emits_progress_events(tmp_path: Path):
     endpoint_path = tmp_path / "endpoint.yaml"
     endpoint_path.write_text(
@@ -853,8 +1092,9 @@ scenarios:
         oai_client: openai.AsyncClient,
         recorder: object | None = None,
         scenario_ordinal: int | None = None,
+        dry_run: bool = False,
     ) -> ScenarioRunResult:
-        del adapter, persona, rubric, defaults, oai_client, recorder
+        del adapter, persona, rubric, defaults, oai_client, recorder, dry_run
         if scenario.id == "smoke-scenario":
             await asyncio.sleep(0.05)
             return ScenarioRunResult(

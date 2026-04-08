@@ -24,7 +24,7 @@ from .data.scenarios import (
     CheckpointAssertion,
     Scenario,
     ScenarioDefaults,
-    parse_scenario_yaml,
+    parse_scenarios_input,
 )
 from .errors import AgentProbeConfigError, AgentProbeRuntimeError
 from .judge import RubricScore, judge
@@ -205,7 +205,20 @@ async def run_scenario(
     oai_client: openai.AsyncClient,
     recorder: RunRecorder | None = None,
     scenario_ordinal: int | None = None,
+    dry_run: bool = False,
 ) -> ScenarioRunResult:
+    if dry_run:
+        return ScenarioRunResult(
+            scenario_id=scenario.id,
+            scenario_name=scenario.name,
+            persona_id=persona.id,
+            rubric_id=rubric.id,
+            passed=True,
+            overall_score=0.0,
+            transcript=[],
+            checkpoints=[],
+        )
+
     transcript: list[ConversationTurn] = []
     checkpoints: list[CheckpointResult] = []
     tool_calls_by_turn: dict[int, list[ToolCallRecord]] = {}
@@ -520,6 +533,7 @@ async def run_suite(
     recorder: RunRecorder | None = None,
     progress_callback: RunProgressCallback | None = None,
     parallel: bool = False,
+    dry_run: bool = False,
 ) -> RunResult:
     run_id = (
         recorder.record_run_started(
@@ -536,7 +550,10 @@ async def run_suite(
 
     try:
         endpoint_config = parse_endpoints_yaml(endpoint)
-        scenario_collection = parse_scenario_yaml(scenarios)
+        try:
+            scenario_collection = parse_scenarios_input(scenarios)
+        except (FileNotFoundError, ValueError) as exc:
+            raise AgentProbeConfigError(str(exc)) from exc
         persona_collection = parse_persona_yaml(personas)
         rubric_collection = parse_rubrics_yaml(rubric)
 
@@ -627,6 +644,7 @@ async def run_suite(
                         defaults=scenario_collection.metadata.defaults,
                         oai_client=oai_client,
                         recorder=recorder,
+                        dry_run=dry_run,
                     )
                 )
                 for prepared in prepared_runs
@@ -692,6 +710,7 @@ async def run_suite(
                         defaults=scenario_collection.metadata.defaults,
                         oai_client=oai_client,
                         recorder=recorder,
+                        dry_run=dry_run,
                     )
                 except Exception as exc:
                     if progress_callback is not None:
@@ -750,6 +769,7 @@ async def _run_prepared_scenario(
     defaults: ScenarioDefaults | None,
     oai_client: openai.AsyncClient,
     recorder: RunRecorder | None,
+    dry_run: bool = False,
 ) -> ScenarioRunResult:
     return await run_scenario(
         prepared.adapter,
@@ -760,6 +780,7 @@ async def _run_prepared_scenario(
         oai_client=oai_client,
         recorder=recorder,
         scenario_ordinal=prepared.ordinal,
+        dry_run=dry_run,
     )
 
 
@@ -769,6 +790,7 @@ async def _run_prepared_scenario_capturing_errors(
     defaults: ScenarioDefaults | None,
     oai_client: openai.AsyncClient,
     recorder: RunRecorder | None,
+    dry_run: bool = False,
 ) -> _ScenarioExecutionOutcome:
     try:
         result = await _run_prepared_scenario(
@@ -776,6 +798,7 @@ async def _run_prepared_scenario_capturing_errors(
             defaults=defaults,
             oai_client=oai_client,
             recorder=recorder,
+            dry_run=dry_run,
         )
     except Exception as exc:
         return _ScenarioExecutionOutcome(prepared=prepared, error=exc)

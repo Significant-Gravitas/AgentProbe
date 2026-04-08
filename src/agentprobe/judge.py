@@ -173,22 +173,33 @@ async def judge(
 
     judge_config = _judge_config(rubric)
     schema = _judge_json_schema(rubric)
-    api_response = await oai_client.responses.create(
-        model=judge_config.model,
-        instructions=_judge_instructions(rubric, schema),
-        input=f"Response to evaluate:\n\n{response}",
-        text={
-            "format": {
-                "type": "json_schema",
-                "name": "rubric_score",
-                "description": "Structured rubric evaluation for an agent response.",
-                "schema": schema,
-                "strict": True,
-            }
-        },
-        temperature=judge_config.temperature,
-        max_output_tokens=judge_config.max_tokens,
-    )
+    try:
+        api_response = await oai_client.responses.create(
+            model=judge_config.model,
+            instructions=_judge_instructions(rubric, schema),
+            input=f"Response to evaluate:\n\n{response}",
+            text={
+                "format": {
+                    "type": "json_schema",
+                    "name": "rubric_score",
+                    "description": "Structured rubric evaluation for an agent response.",
+                    "schema": schema,
+                    "strict": True,
+                }
+            },
+            temperature=judge_config.temperature,
+            max_output_tokens=judge_config.max_tokens,
+        )
+    except openai.AuthenticationError as exc:
+        raise openai.AuthenticationError(
+            message=(
+                f"Judge authentication failed for model '{judge_config.model}'. "
+                "Set OPENAI_API_KEY (and OPENAI_BASE_URL for OpenRouter or other providers) "
+                "environment variables before running agentprobe."
+            ),
+            response=exc.response,
+            body=exc.body,
+        ) from exc
 
     score = _parse_rubric_score(_extract_response_text(api_response))
     score.validate_dimensions(rubric)

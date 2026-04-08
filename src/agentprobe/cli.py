@@ -151,9 +151,9 @@ def validate(data_path: Path) -> None:
 @click.option(
     "--scenarios",
     "scenarios_path",
-    type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path),
+    type=click.Path(exists=True, file_okay=True, dir_okay=True, path_type=Path),
     required=True,
-    help="Path to the scenarios YAML.",
+    help="Path to a scenarios YAML file or a directory of scenario YAML files.",
 )
 @click.option(
     "--personas",
@@ -180,6 +180,12 @@ def validate(data_path: Path) -> None:
     is_flag=True,
     help="Run matching scenarios concurrently.",
 )
+@click.option(
+    "--dry-run",
+    "dry_run",
+    is_flag=True,
+    help="Validate configuration and resolve scenarios without opening sessions or sending messages.",
+)
 def run(
     endpoint_path: Path,
     scenarios_path: Path,
@@ -188,6 +194,7 @@ def run(
     scenario_id: str | None,
     tags: str | None,
     parallel: bool,
+    dry_run: bool,
 ) -> None:
     db_url = _suite_db_url(
         endpoint_path,
@@ -209,6 +216,7 @@ def run(
                 recorder=recorder,
                 progress_callback=_print_run_progress,
                 parallel=parallel,
+                dry_run=dry_run,
             )
 
     try:
