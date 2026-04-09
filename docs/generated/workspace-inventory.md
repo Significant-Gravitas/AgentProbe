@@ -1,0 +1,108 @@
+# Workspace Inventory
+
+Generated: 2026-04-09T12:42:10.082215+00:00
+
+```text
+  AGENTS.md
+  README.md
+  agentprobe-report-185fe23350d24afaa5a715a91e8e6897.html
+  agentprobe-report-3ad0e661ff124c689f9ffc908ee007a4.html
+  agentprobe-report-5ef78206420d436ebc9f73ef9b2c2eda.html
+  agentprobe-report-690404950ec34e91b5892d0dea000dda.html
+  agentprobe-report-6a96d3f549914e54b2bc182f644f4c9b.html
+  agentprobe-report-a6101312338847f4a868cff5d4440aec.html
+  agentprobe-report-d02d106ea256469d882f23af1b7e71bb.html
+  agentprobe-report-d656991ec11f4f6a852a3db15004a617.html
+  agentprobe-report-founders-simple.html
+  agentprobe-report-security-testing.html
+  agentprobe-spec-v0.2.md
+data/
+  data/adversarial-scenarios.yaml
+  data/autogpt-endpoint.yaml
+data/cluster_scenarios/
+  data/cluster_scenarios/cluster_01_founder_operations.yaml
+  data/cluster_scenarios/cluster_01_founder_operations_simple.yaml
+  data/cluster_scenarios/cluster_02_software_development.yaml
+  data/cluster_scenarios/cluster_03_multi_process_ops.yaml
+  data/cluster_scenarios/cluster_04_data_marketing_ops.yaml
+  data/cluster_scenarios/cluster_05_research_workflow.yaml
+  data/cluster_scenarios/cluster_06_sales_marketing.yaml
+  data/cluster_scenarios/cluster_07_data_analysis.yaml
+  data/cluster_scenarios/cluster_08_task_delegation.yaml
+  data/cluster_scenarios/cluster_09_exploration_learning.yaml
+  data/cluster_scenarios/cluster_10_multi_agent_builder.yaml
+  data/cluster_scenarios/cluster_11_agent_deployment.yaml
+  data/openclaw-endpoints.yaml
+  data/opencode-endpoints.yaml
+  data/personas.yaml
+  data/rubric.yaml
+  data/scenarios.yaml
+docs/
+  docs/ARCHITECTURE.md
+  docs/HARNESS.md
+  docs/QUALITY_SCORE.md
+  docs/README.md
+docs/behaviours/
+  docs/behaviours/README.md
+  docs/behaviours/current-state.md
+  docs/behaviours/e2e-checklist.md
+  docs/behaviours/platform.md
+docs/exec-plans/
+  docs/exec-plans/README.md
+docs/exec-plans/active/
+docs/exec-plans/completed/
+docs/generated/
+  docs/generated/workspace-inventory.md
+docs/playbooks/
+  pyproject.toml
+scripts/
+  scripts/check-agents-drift.py
+  scripts/check-behaviour-docs.py
+  scripts/check-doc-links.py
+  scripts/check-generated-docs.sh
+  scripts/fast-feedback.sh
+  scripts/generate-workspace-docs.py
+  scripts/refresh-quality-score.py
+  scripts/validate-repo.sh
+  scripts/validate-setup.sh
+  skills-lock.json
+src/
+src/agentprobe/
+  src/agentprobe/__init__.py
+  src/agentprobe/__main__.py
+  src/agentprobe/adapters.py
+  src/agentprobe/cli.py
+src/agentprobe/data/
+  src/agentprobe/data/__init__.py
+  src/agentprobe/data/common.py
+  src/agentprobe/data/endpoints.py
+  src/agentprobe/data/personas.py
+  src/agentprobe/data/rubrics.py
+  src/agentprobe/data/scenarios.py
+  src/agentprobe/db.py
+src/agentprobe/endpoints/
+  src/agentprobe/endpoints/__init__.py
+  src/agentprobe/endpoints/_common.py
+  src/agentprobe/endpoints/autogpt.py
+  src/agentprobe/endpoints/autogpt_auth.py
+  src/agentprobe/endpoints/openclaw.py
+  src/agentprobe/endpoints/opencode.py
+  src/agentprobe/errors.py
+  src/agentprobe/judge.py
+  src/agentprobe/rendering.py
+  src/agentprobe/report.py
+  src/agentprobe/runner.py
+  src/agentprobe/simulator.py
+tests/
+  tests/test_adapters.py
+  tests/test_autogpt_auth.py
+  tests/test_cli.py
+  tests/test_db.py
+  tests/test_endpoint_configuration.py
+  tests/test_judge.py
+  tests/test_openclaw_runner.py
+  tests/test_report.py
+  tests/test_runner.py
+  tests/test_simulator.py
+  uv.lock
+```

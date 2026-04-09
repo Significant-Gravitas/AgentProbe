@@ -1,0 +1,54 @@
+name: Automerge
+
+on:
+  pull_request_review:
+    types: [submitted]
+  check_suite:
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    # Only run for PRs that are approved and all checks pass
+    if: >
+      github.event.review.state == 'approved' ||
+      github.event.check_suite.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check automerge eligibility
+        id: eligible
+        run: |
+          # Stage 1: No automerge — human merge required
+          # Uncomment Stage 2 when the repo is stable enough:
+          #
+          # ELIGIBLE_PATHS=(
+          #   "docs/"
+          #   "tests/"
+          #   "**/*.test.*"
+          # )
+          #
+          # PROTECTED_PATHS=(
+          #   "**/auth/**"
+          #   "**/.env*"
+          #   "**/credentials*"
+          #   "**/secrets*"
+          #   ".github/**"
+          #   "AGENTS.md"
+          #   "docs/HARNESS.md"
+          #   "src/agentprobe/endpoints/autogpt_auth.py"
+          # )
+
+          echo "eligible=false" >> "$GITHUB_OUTPUT"
+          echo "Stage 1: automerge disabled. Human merge required."
+
+      # Uncomment when ready for Stage 2:
+      # - name: Auto-merge
+      #   if: steps.eligible.outputs.eligible == 'true'
+      #   run: gh pr merge --auto --squash "${{ github.event.pull_request.number }}"
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

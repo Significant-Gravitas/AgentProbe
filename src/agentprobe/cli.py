@@ -4,6 +4,7 @@ import asyncio
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 import click
 import openai
@@ -54,7 +55,7 @@ def _db_url_from_path(db_path: Path | None) -> str | None:
     return f"sqlite:///{db_path.expanduser().resolve()}"
 
 
-def _openai_client_kwargs() -> dict[str, str]:
+def _openai_client_kwargs() -> dict[str, Any]:
     openrouter_api_key = os.getenv("OPEN_ROUTER_API_KEY", "").strip()
     if not openrouter_api_key:
         raise AgentProbeConfigError(

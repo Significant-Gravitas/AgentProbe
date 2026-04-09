@@ -22,7 +22,7 @@ from .data.endpoints import (
     WebSocketConnection,
 )
 from .errors import AgentProbeConfigError, AgentProbeRuntimeError
-from .rendering import render_json_template, render_optional_template, render_template
+from .rendering import render_json_template, render_template
 
 
 class ToolCallRecord(AgentProbeModel):

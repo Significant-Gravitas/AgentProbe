@@ -299,9 +299,7 @@ def _prepare_run_view(run: dict[str, Any]) -> dict[str, Any]:
     aggregate_counts = run.get("aggregate_counts") or {}
 
     credential_error_count = sum(
-        1
-        for s in run.get("scenarios", [])
-        if _is_credential_error(s.get("error"))
+        1 for s in run.get("scenarios", []) if _is_credential_error(s.get("error"))
     )
 
     all_tags: list[str] = []

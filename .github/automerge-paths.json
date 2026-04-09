@@ -1,0 +1,15 @@
+{
+  "stage": 1,
+  "eligible_paths": [],
+  "protected_paths": [
+    "**/auth/**",
+    "**/.env*",
+    "**/credentials*",
+    "**/secrets*",
+    ".github/**",
+    "AGENTS.md",
+    "docs/HARNESS.md",
+    "src/agentprobe/endpoints/autogpt_auth.py"
+  ],
+  "notes": "Stage 1: no automerge. Graduate to Stage 2 after repo is stable."
+}

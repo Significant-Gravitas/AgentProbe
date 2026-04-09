@@ -1,0 +1,41 @@
+name: Nightly Baseline
+
+on:
+  schedule:
+    - cron: '30 4 * * *'  # 4:30 AM UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Run full test suite
+        id: tests
+        continue-on-error: true
+        run: uv run pytest --tb=short
+
+      - name: Open fix-forward PR on failure
+        if: steps.tests.outcome == 'failure'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: 'fix: nightly baseline failure'
+          body: |
+            The nightly baseline suite failed.
+            See the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+          branch: fix/nightly-baseline
+          delete-branch: true

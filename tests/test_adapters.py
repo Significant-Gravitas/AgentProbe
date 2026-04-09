@@ -98,9 +98,7 @@ async def test_http_adapter_handles_autogpt_auth_and_sse(monkeypatch):
         assert request.headers["Authorization"] == "Bearer fake-token"
 
         if request.method == "POST" and request.url.path == "/api/chat/sessions":
-            assert json.loads(request.content.decode("utf-8")) == {
-                "dry_run": False
-            }
+            assert json.loads(request.content.decode("utf-8")) == {"dry_run": True}
             return httpx.Response(200, json={"id": "chat-123"})
         if (
             request.method == "POST"

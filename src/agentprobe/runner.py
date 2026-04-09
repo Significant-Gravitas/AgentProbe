@@ -377,7 +377,9 @@ async def run_scenario(
                             }
                         )
                         if rendered:
-                            inject_turn = ConversationTurn(role="system", content=rendered)
+                            inject_turn = ConversationTurn(
+                                role="system", content=rendered
+                            )
                             transcript.append(inject_turn)
                             if recorder is not None and scenario_run_id is not None:
                                 recorder.record_turn(
@@ -689,9 +691,7 @@ async def run_suite(
 
             if first_error is not None:
                 raise first_error
-            results = [
-                results_by_ordinal[index] for index in range(len(prepared_runs))
-            ]
+            results = [results_by_ordinal[index] for index in range(len(prepared_runs))]
         else:
             for prepared in prepared_runs:
                 if progress_callback is not None:
