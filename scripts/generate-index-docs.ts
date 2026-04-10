@@ -5,9 +5,8 @@
  * file and subdirectory link sections so they stay current.
  */
 
-import { execFileSync } from "child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { dirname, join, posix } from "path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "fs";
+import { dirname, join } from "path";
 
 const REPO_ROOT = join(dirname(new URL(import.meta.url).pathname), "..");
 const DOCS_DIR = "docs";
@@ -17,37 +16,30 @@ const END_FILES = "<!-- AUTO-GENERATED FILE LINKS END -->";
 const START_DIRS = "<!-- AUTO-GENERATED SUBDIR LINKS START -->";
 const END_DIRS = "<!-- AUTO-GENERATED SUBDIR LINKS END -->";
 
-const tracked = execFileSync("git", ["ls-files"], {
-  cwd: REPO_ROOT,
-  encoding: "utf8",
-})
-  .split("\n")
-  .filter((p) => p && p.startsWith(`${DOCS_DIR}/`));
-
-const directories = new Set([DOCS_DIR]);
-for (const path of tracked) {
-  const parts = path.split("/");
-  if (parts.length <= 1) continue;
-  let current = "";
-  for (let i = 0; i < parts.length - 1; i++) {
-    current = current ? `${current}/${parts[i]}` : parts[i];
-    if (current === DOCS_DIR || current.startsWith(`${DOCS_DIR}/`)) {
-      directories.add(current);
-    }
+function walkDocDirectories(dir: string): string[] {
+  const directories = [dir];
+  for (const name of readdirSync(join(REPO_ROOT, dir)).sort()) {
+    const rel = `${dir}/${name}`;
+    const full = join(REPO_ROOT, rel);
+    if (!statSync(full).isDirectory() || name.startsWith(".")) continue;
+    directories.push(...walkDocDirectories(rel));
   }
+  return directories;
 }
 
+const directories = new Set(walkDocDirectories(DOCS_DIR));
+
 function collectFor(dir: string): { files: string[]; subdirs: string[] } {
-  const prefix = `${dir}/`;
-  const files = tracked
-    .filter((p) => p.startsWith(prefix))
-    .map((p) => p.slice(prefix.length))
-    .filter((p) => p && !p.includes("/") && p !== INDEX_NAME)
+  const fullDir = join(REPO_ROOT, dir);
+  const entries = readdirSync(fullDir).sort();
+  const files = entries
+    .filter((name) => name.endsWith(".md") && name !== INDEX_NAME)
     .sort();
 
-  const subdirs = [...directories]
-    .filter((c) => c !== dir)
-    .filter((c) => c.startsWith(`${dir}/`) && !c.slice(dir.length + 1).includes("/"))
+  const subdirs = entries
+    .filter((name) => statSync(join(fullDir, name)).isDirectory())
+    .filter((name) => !name.startsWith("."))
+    .map((name) => `${dir}/${name}`)
     .sort();
 
   return { files, subdirs };

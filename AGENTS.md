@@ -1,71 +1,75 @@
 # AgentProbe
 
-Python CLI for running repeatable agent evaluations against HTTP, WebSocket, and local harness endpoints.
+Agent-first repository for a Bun + TypeScript CLI that runs repeatable agent
+evaluations against HTTP, WebSocket, and local harness endpoints.
 
 ## Stack
 
-- Frontend: N/A (CLI tool)
-- Backend: Python 3.11+, Click, httpx, OpenAI SDK, Pydantic, SQLAlchemy
-- Database: SQLite (via SQLAlchemy)
-- Package manager: uv (Hatch build backend)
+- Runtime contract: Bun + TypeScript
+- Current baseline: mixed-language during migration; repo workflows stay Bun-first
+- Database contract: SQLite for local run history
+- Primary quality gates: docs validation, Bun tests, generated-doc freshness
 
 ## Repo map
 
 ```text
 AgentProbe/
-├── src/agentprobe/   # Package source — CLI, runner, simulator, judge, adapters, endpoints
-├── tests/            # pytest test suite
-├── data/             # Sample endpoint, scenario, persona, and rubric YAML
-├── docs/             # Deep docs — start with docs/README.md
-├── scripts/          # All standard commands live here
-└── .github/          # Workflows and PR template
+├── src/               # Runtime code and future TypeScript migration target
+├── tests/             # Bun e2e harness and legacy baseline tests
+├── data/              # Sample endpoints, scenarios, personas, and rubrics
+├── docs/              # Source-of-truth knowledge base — start with docs/README.md
+├── scripts/           # Validation, doc generation, and repo automation
+├── .github/           # CI, PR template, and automation workflows
+└── package.json       # Bun entrypoints for repo workflows
 ```
 
-## Docs
+## Start here
 
-| What                     | Where                          |
-|--------------------------|--------------------------------|
-| Architecture             | `docs/ARCHITECTURE.md`         |
-| Agent operating contract | `docs/HARNESS.md`              |
-| Repo health              | `docs/QUALITY_SCORE.md`        |
-| Product behavior spec    | `docs/behaviours/platform.md`  |
-| Execution plans          | `docs/exec-plans/`             |
+| Need | Source of truth |
+| --- | --- |
+| Overall docs map | `docs/README.md` |
+| Architecture and layers | `docs/ARCHITECTURE.md` |
+| Agent-first operating principles | `docs/DESIGN.md` |
+| Product behavior contract | `docs/product-specs/platform.md` |
+| Planning workflow and debt tracking | `docs/PLANS.md`, `docs/exec-plans/` |
+| Reliability, metrics, and latency budgets | `docs/RELIABILITY.md` |
+| Security and boundary rules | `docs/SECURITY.md` |
+| PR/validation contract | `docs/HARNESS.md` |
 
 ## Standard commands
 
 ```bash
-# Install dependencies
-uv sync --group dev
+# Validate docs, indexes, and generated artifacts
+bun run docs:validate
 
-# Run tests
-uv run pytest
+# Refresh docs indexes and generated inventories
+bun run docs:index
+bun run docs:workspace
+bun run docs:quality
 
-# Type check
-uv run pyright
+# Run the Bun-owned test surfaces
+bun run test
+bun run test:e2e
 
-# Format check
-uvx ruff format --check .
-
-# Validate repo structure and docs
-./scripts/validate-repo.sh
-
-# Fast feedback loop (run before every PR)
-./scripts/fast-feedback.sh
+# Run the repo-wide fast feedback loop before a PR
+bun run fast-feedback
 ```
 
 ## Environment
 
-- `OPEN_ROUTER_API_KEY`: required for persona simulation and rubric judging
-- `AGENTPROBE_PERSONA_MODEL`: optional override, defaults to `moonshotai/kimi-k2.5`
-- `OPENCLAW_GATEWAY_URL`: defaults to `ws://127.0.0.1:18789`
-- `AUTOGPT_BACKEND_URL`: defaults to `http://localhost:8006`
+- `OPEN_ROUTER_API_KEY`: required for evaluation-time persona/judge traffic
+- `AGENTPROBE_PERSONA_MODEL`: optional persona model override
+- `OPENCLAW_GATEWAY_URL`: default OpenClaw gateway URL
+- `AUTOGPT_BACKEND_URL`: default local AutoGPT backend URL
 
-## Rules
+## Hard rules
 
-1. Run `./scripts/fast-feedback.sh` before opening a PR. If it fails, fix it.
-2. Do not edit generated files in `docs/generated/` by hand — run the generator.
-3. Keep this file under 140 lines. Put detail in `docs/`.
-4. When behavior changes, update `docs/behaviours/platform.md` first.
-5. Every PR must follow the PR template.
-6. Use `uv run` to execute project commands — never install globally.
-7. Sample YAML lives in `data/` and is not bundled into the wheel.
+1. Keep this file short. Put durable detail in `docs/`, not here.
+2. Treat `docs/` as the system of record. If context only exists in chat, it does not exist.
+3. Update `docs/product-specs/platform.md` before implementation when behavior changes.
+4. Do not edit generated files in `docs/generated/` by hand; run the generator instead.
+5. Prefer Bun entrypoints (`bun run ...`) for repo workflows, even while the migration is mixed.
+6. Enforce boundary validation at config, YAML, SDK, and network edges; do not rely on guessed shapes.
+7. Preserve layered boundaries and typed SDK/provider interfaces. No transport logic in higher-level business logic.
+8. Structured logs, metrics, and spans are required for debugging and latency enforcement on critical paths.
+9. Every PR must follow the template and leave enough evidence for the next agent to continue cleanly.

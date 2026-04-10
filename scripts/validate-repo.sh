@@ -29,8 +29,8 @@ bun "$SCRIPT_DIR/check-index-docs.ts" || ERRORS=$((ERRORS + 1))
 echo "Checking AGENTS.md drift..."
 bun "$SCRIPT_DIR/check-agents-drift.ts" || ERRORS=$((ERRORS + 1))
 
-# 6. Check behaviour doc consistency
-echo "Checking behaviour docs..."
+# 6. Check product spec consistency
+echo "Checking product specs..."
 bun "$SCRIPT_DIR/check-behaviour-docs.ts" || ERRORS=$((ERRORS + 1))
 
 # 7. Check generated docs freshness

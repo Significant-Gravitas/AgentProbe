@@ -3,7 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "docs:index": "bun scripts/generate-index-docs.ts",
+    "docs:workspace": "bun scripts/generate-workspace-docs.ts",
+    "docs:quality": "bun scripts/refresh-quality-score.ts",
+    "docs:validate": "./scripts/validate-repo.sh",
+    "fast-feedback": "./scripts/fast-feedback.sh",
     "test": "bun test",
-    "test:e2e": "bun test tests/e2e"
+    "test:e2e": "bun test tests/e2e",
+    "validate:setup": "./scripts/validate-setup.sh"
   }
 }

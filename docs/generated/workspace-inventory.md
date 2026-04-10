@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-04-10T10:34:34.304Z
+Generated: 2026-04-10T10:56:29.947Z
 
 ```text
   AGENTS.md
@@ -31,16 +31,18 @@ data/cluster_scenarios/
   data/scenarios.yaml
 docs/
   docs/ARCHITECTURE.md
+  docs/DESIGN.md
   docs/HARNESS.md
   docs/INDEX.md
+  docs/PLANS.md
+  docs/PRODUCT_SENSE.md
   docs/QUALITY_SCORE.md
   docs/README.md
-docs/behaviours/
-  docs/behaviours/INDEX.md
-  docs/behaviours/README.md
-  docs/behaviours/current-state.md
-  docs/behaviours/e2e-checklist.md
-  docs/behaviours/platform.md
+  docs/RELIABILITY.md
+  docs/SECURITY.md
+docs/design-docs/
+  docs/design-docs/INDEX.md
+  docs/design-docs/core-beliefs.md
 docs/exec-plans/
   docs/exec-plans/INDEX.md
   docs/exec-plans/README.md
@@ -48,11 +50,24 @@ docs/exec-plans/active/
   docs/exec-plans/active/INDEX.md
 docs/exec-plans/completed/
   docs/exec-plans/completed/INDEX.md
+  docs/exec-plans/tech-debt-tracker.md
 docs/generated/
   docs/generated/INDEX.md
   docs/generated/workspace-inventory.md
 docs/playbooks/
   docs/playbooks/INDEX.md
+docs/product-specs/
+  docs/product-specs/INDEX.md
+  docs/product-specs/README.md
+  docs/product-specs/current-state.md
+  docs/product-specs/e2e-checklist.md
+  docs/product-specs/platform.md
+docs/references/
+  docs/references/INDEX.md
+  docs/references/bun-typescript.md
+  docs/references/encoding.md
+  docs/references/observability.md
+  docs/references/quality-gates.md
   package.json
   pyproject.toml
 scripts/

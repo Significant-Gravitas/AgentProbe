@@ -1,0 +1,10 @@
+# E2E Test Checklist
+
+Derived from `platform.md`. Every scenario should have a coverage owner.
+
+| Scenario | Test file | Status |
+| --- | --- | --- |
+| YAML validation succeeds for well-formed data | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
+| Evaluation run records ordered results and artifacts | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
+| HTML report renders from recorded run history | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
+| Reliability signals exist for critical command paths | `docs/RELIABILITY.md` + future performance checks | ⏳ planned |
