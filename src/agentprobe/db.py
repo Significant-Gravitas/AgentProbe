@@ -148,6 +148,7 @@ class ScenarioRunRow(Base):
     scenario_name: Mapped[str] = mapped_column(String(255), nullable=False)
     persona_id: Mapped[str] = mapped_column(String(255), nullable=False)
     rubric_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    user_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     tags_json: Mapped[Any | None] = mapped_column(JSON, nullable=True)
     priority: Mapped[str | None] = mapped_column(String(32), nullable=True)
     expectations_json: Mapped[Any | None] = mapped_column(JSON, nullable=True)
@@ -748,6 +749,7 @@ class SqliteRunRecorder:
         persona: Persona,
         rubric: Rubric,
         ordinal: int | None,
+        user_id: str | None = None,
     ) -> int:
         now = _utc_now()
         with Session(self._engine) as session:
@@ -761,6 +763,7 @@ class SqliteRunRecorder:
                 scenario_name=scenario.name,
                 persona_id=persona.id,
                 rubric_id=rubric.id,
+                user_id=user_id,
                 tags_json=_redact_value(scenario.tags),
                 priority=scenario.priority,
                 expectations_json=_redact_value(scenario.expectations),
@@ -1063,6 +1066,7 @@ def _serialize_scenario(row: ScenarioRunRow, *, include_trace: bool) -> dict[str
         "scenario_name": row.scenario_name,
         "persona_id": row.persona_id,
         "rubric_id": row.rubric_id,
+        "user_id": row.user_id,
         "tags": row.tags_json,
         "priority": row.priority,
         "expectations": row.expectations_json,

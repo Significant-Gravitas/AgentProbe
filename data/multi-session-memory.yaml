@@ -65,12 +65,14 @@ scenarios:
       - id: s2-probe
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 2
         turns:
           - role: user
             content: "Who should I CC on outgoing client proposals?"
             use_exact_message: true
           - role: user
             content: "Add this new lead to our CRM: Rachel Torres, rachel@greenbuildstudios.com, GreenBuild Studios, Director."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -96,6 +98,7 @@ scenarios:
       - id: s1-natural-work
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
             content: "Draft a client proposal for NovaTech -- they're interested in our consulting package. Our fiscal year ends in March, so mention we have bandwidth for a Q2 start. Oh and make sure to bcc billing@acme.co on it."
@@ -107,19 +110,26 @@ scenarios:
       - id: s2-probe
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 6
         turns:
           - role: user
             content: "When does our fiscal year end?"
+            use_exact_message: true
           - role: user
             content: "Who's our main competitor?"
+            use_exact_message: true
           - role: user
             content: "Where do we ship out of?"
+            use_exact_message: true
           - role: user
             content: "What's our billing email?"
+            use_exact_message: true
           - role: user
             content: "What's our typical sales cycle length?"
+            use_exact_message: true
           - role: user
             content: "What font do we use for client docs?"
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -152,8 +162,10 @@ scenarios:
       - id: s1-teach
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               I want you to generate images by calling OpenAI's API directly, not
               through any built-in image-generation block. Use the Send Web Request
@@ -173,6 +185,7 @@ scenarios:
       - id: s2-apply-cold
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Generate an image of a cat wearing sunglasses on a beach."
@@ -204,8 +217,10 @@ scenarios:
       - id: s1-teach
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Here's how I always onboard new clients, remember this for next time.
               Step 1: add them to HubSpot. Step 2: create a Notion page in the
@@ -217,6 +232,7 @@ scenarios:
       - id: s2-apply-cold
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "New client: BrightPath Education, contact Lisa Park, lisa@brightpath.edu, COO, Growth plan, starts April 1. Onboard her."
@@ -253,8 +269,10 @@ scenarios:
       - id: s1-build
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Help me put together our weekly report. Four sections in this order:
               Wins, Numbers, Blockers, Next Week. Tone is casual but informative,
@@ -275,6 +293,7 @@ scenarios:
       - id: s2-trigger
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Run the weekly report."
@@ -306,19 +325,25 @@ scenarios:
       - id: s1-accumulate
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "Send a quick email to james@urbanfit.co letting him know the proposal is coming Friday. Use my Gmail, not SMTP."
           - role: user
+            use_exact_message: true
             content: "Now scrape freshpaws.com/pricing -- use Firecrawl, I've had bad luck with basic scrape on them."
           - role: user
+            use_exact_message: true
             content: "Finally, store the pricing info we pulled as a page in Notion, under the Competitive Research section. We keep all that kind of thing in Notion, not Airtable."
 
       - id: s2-ambiguous
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Scrape the latest pricing from freshpaws.com, store it somewhere I can find it later, and email me a summary."
 
     expectations:
@@ -350,17 +375,22 @@ scenarios:
       - id: s1-walk-through
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "I'm uploading a messy CSV of leads. Clean it up -- dedupe by email, normalize phone numbers to E.164 format, capitalize names properly, drop any rows with no email at all, and for rows where the company column is empty, flag them but don't drop them. Walk me through what you'd do."
           - role: user
+            use_exact_message: true
             content: "Wait -- you deduped by name. Do it by email, people have nicknames."
           - role: user
+            use_exact_message: true
             content: "Good. And don't drop the empty-company rows, flag them so I can review. OK that's the process, lock it in."
 
       - id: s2-reapply
         time_offset: "240h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "I just uploaded a new messy lead CSV. Clean it up the way we usually do."
@@ -395,6 +425,7 @@ scenarios:
       - id: s1-initial-pref
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
             content: "For outreach emails, keep them tight -- under 100 words, skip the pleasantries, get to the point. Draft one now for a prospect at a local cafe chain."
@@ -404,13 +435,16 @@ scenarios:
       - id: s2-override
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "I've been getting pushback on my outreach emails -- apparently they come across as cold. Let's go back to warmer, longer ones. Aim for around 200 words, friendly opener, a bit of small talk before the ask. That's the new standard."
+            use_exact_message: true
 
       - id: s3-probe
         time_offset: "96h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
@@ -445,6 +479,7 @@ scenarios:
       - id: s1-establish
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
             content: "Add these 2 contacts to HubSpot: Sarah Kim, sarah@brightcafe.com, Bright Cafe, Owner. James Patel, james@urbanfit.co, UrbanFit, CEO."
@@ -454,13 +489,16 @@ scenarios:
       - id: s2-migrate
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "We migrated off HubSpot last week -- we're on Airtable now. The base is called 'CRM 2026' with a Contacts table. Use that going forward for all CRM stuff."
+            use_exact_message: true
 
       - id: s3-probe
         time_offset: "24h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Add this lead: Marcus Lee, marcus@northstar.io, NorthStar, CTO."
@@ -491,20 +529,25 @@ scenarios:
       - id: s1-initial
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a quote for NovaTech on our Growth plan. Our pricing is $2,500/mo for Growth. One year commitment."
+            use_exact_message: true
 
       - id: s2-price-change
         time_offset: "504h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Heads up, we raised prices last week. Growth is $3,000/mo now. Standard is unchanged. Update your notes."
+            use_exact_message: true
 
       - id: s3-new-quote
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a quote for a new prospect, BrightPath Education, on the Growth plan. One year commitment."
@@ -542,6 +585,7 @@ scenarios:
       - id: s1-onboard-both
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
             content: "Onboard a new client: BrightPath Education, Lisa Park, lisa@brightpath.edu, COO, Growth plan, starts April 1. Add to HubSpot and create a Notion page."
@@ -551,6 +595,7 @@ scenarios:
       - id: s2-ambiguous
         time_offset: "96h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Send the usual follow-up to Bright."
@@ -581,6 +626,7 @@ scenarios:
       - id: s1-generic-ops
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
             content: "Add these 3 contacts to HubSpot: Sarah Kim, sarah@brightcafe.com, Bright Cafe, Owner. James Patel, james@urbanfit.co, UrbanFit, CEO. Maria Gonzalez, maria@greenleafco.com, Greenleaf Co, Founder."
@@ -592,6 +638,7 @@ scenarios:
       - id: s2-neutral-request
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
@@ -626,6 +673,7 @@ scenarios:
       - id: s1-establish
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
             content: "Sarah is my assistant -- sarah@acme.co. CC her on client stuff."
@@ -635,16 +683,20 @@ scenarios:
       - id: s2-update
         time_offset: "1008h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Quick update: Sarah left last month. Marcus is my new assistant -- marcus@acme.co."
+            use_exact_message: true
 
       - id: s3-probe
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a proposal email to the team at NovaTech and CC my assistant."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -672,6 +724,7 @@ scenarios:
       - id: s1-original
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: |
@@ -684,6 +737,7 @@ scenarios:
       - id: s2-replace
         time_offset: "504h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: |
@@ -692,13 +746,16 @@ scenarios:
               to our Airtable Refunds base (not the spreadsheet), and NO more
               Slack notification -- a manager reviews the Airtable view weekly.
               Use this new process for all refund requests going forward.
+            use_exact_message: true
 
       - id: s3-apply
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "We just got a refund request from sarah@brightcafe.com -- she ordered a 5lb bag and it arrived damaged. Handle it."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -729,6 +786,7 @@ scenarios:
       - id: s1-interrupted
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
             content: "I need to send outreach emails to three prospects: rachel@greenbuildstudios.com (sustainable construction), david@novatech.io (inventory automation), and lisa@brightpath.edu (education tech). Draft the first one for Rachel -- mention we work with sustainable businesses."
@@ -740,6 +798,7 @@ scenarios:
       - id: s2-resume
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Let's pick up where we left off."
@@ -771,6 +830,7 @@ scenarios:
       - id: s1-create-and-log
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Create a Google Sheet called 'March 2026 Expenses' with columns: Date, Vendor, Category, Amount, Notes. Then log these 3 expenses: Mar 5 Adobe Software $54.99 'Creative Cloud'; Mar 8 AWS Infrastructure $312.40 'monthly'; Mar 12 Zoom Software $14.99 'Pro plan'."
@@ -778,6 +838,7 @@ scenarios:
       - id: s2-add-more
         time_offset: "96h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Log two more expenses to the March sheet: Mar 18 Notion Software $10.00 'team plan'; Mar 22 Office Depot Supplies $47.85 'printer ink'."
@@ -785,9 +846,11 @@ scenarios:
       - id: s3-summary
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Give me a summary of March expenses so far -- total, breakdown by category, largest item."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -823,6 +886,7 @@ scenarios:
       - id: s1-contractor-agreement
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: |
@@ -835,12 +899,14 @@ scenarios:
       - id: s2-vendor-form
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: |
               A new supplier sent us a vendor onboarding form. They need: legal
               entity name, entity type, state of registration, EIN, and name and
               title of authorized signer. Fill it out.
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -867,6 +933,7 @@ scenarios:
       - id: s1-mention-in-passing
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Log a lunch expense: Mar 14, Verde Kitchen, Meals & Entertainment, $87.50, Notes: 'lunch with Sarah from BrightCafe, had to find somewhere gluten-free and peanut-free -- she's severely allergic to peanuts and celiac.' Add it to the March expenses sheet."
@@ -874,16 +941,20 @@ scenarios:
       - id: s2-gift-for-brightcafe
         time_offset: "504h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Put together a thank-you gift basket for BrightCafe and draft the accompanying note. Budget around $150."
+            use_exact_message: true
 
       - id: s3-gift-for-different-client
         time_offset: "24h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Put together a similar gift basket for our other client, Greenleaf Co. Same budget, around $150."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -918,6 +989,7 @@ scenarios:
       - id: s1-first-quote
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a quote for UrbanFit -- they want 60 units of our Premium Blend 5lb. Our wholesale tier is $24.99/unit at 50+ units, retail is $34.99, and we do a 10% discount for first-time wholesale buyers. UrbanFit is a returning customer so no first-time discount. One year terms."
@@ -925,16 +997,20 @@ scenarios:
       - id: s2-new-wholesale
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a quote for NorthStar. They want 75 units of Premium Blend 5lb. This is their first order with us."
+            use_exact_message: true
 
       - id: s3-small-retail-probe
         time_offset: "24h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a quote for a small order -- 5 units of Premium Blend 5lb for a customer named GreenBuild Studios. They've never ordered before."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -965,6 +1041,7 @@ scenarios:
       - id: s1-automation-setup
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Help me set up an inventory restock alert. When stock of any product drops below 20 units, post a message to the #ops Slack channel. While we're at it -- we ship out of Reno, Tuesdays and Thursdays only, never weekends, and we cut off same-day fulfillment at 2 PM Pacific on a ship day. Consider that when we're setting up anything related to fulfillment."
@@ -972,9 +1049,11 @@ scenarios:
       - id: s2-customer-eta-question
         time_offset: "240h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "A customer just emailed asking when their order will arrive. They placed it Monday at 4 PM Pacific. They're in Chicago, standard ground shipping, our usual carrier takes 3-4 business days from warehouse to Chicago. Draft a reply with the ETA."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1015,6 +1094,7 @@ scenarios:
       - id: s1-mention-in-debugging
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "I'm debugging an automation that keeps failing when it hits Notion. Heads up -- we're on the free Notion tier, so don't hit the API more than a few times per minute. Batch writes when you can. Rebuild the failing step with that in mind."
@@ -1022,9 +1102,11 @@ scenarios:
       - id: s2-bulk-operation
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Take the 40 leads from the lead_list.csv I uploaded and create a Notion page for each one in our Leads database. Each page should have: lead name, company, email, and a 'Status: New' field."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1063,6 +1145,7 @@ scenarios:
       - id: s1-teach-original
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: |
@@ -1071,23 +1154,28 @@ scenarios:
               with plan and start date. Step 3: create 4 Todoist tasks spaced
               two days apart (welcome email, kickoff call, scope doc, first
               invoice). Step 4: send welcome email via Gmail.
+            use_exact_message: true
 
       - id: s2-update-one-step
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: |
               Small change to our onboarding flow -- we're moving off Notion.
               Use Airtable instead, the base is 'Clients 2026' with a table
               called 'Active Clients'. Everything else stays the same.
+            use_exact_message: true
 
       - id: s3-apply-updated
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "New client: Marcus Lee at NorthStar, marcus@northstar.io, CTO, Standard plan, starts April 15. Onboard him."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1119,6 +1207,7 @@ scenarios:
       - id: s1-teach-original
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: |
@@ -1126,20 +1215,25 @@ scenarios:
               create a Notion page in Clients database. Step 3: create 4
               Todoist tasks spaced 2 days apart (welcome email, kickoff,
               scope doc, first invoice). Step 4: send welcome email via Gmail.
+            use_exact_message: true
 
       - id: s2-add-step
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Adding to our onboarding flow -- from now on, also CC legal@acme.co on the welcome email. Everything else stays the same."
+            use_exact_message: true
 
       - id: s3-apply
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "New client: David Chen at NovaTech, david@novatech.io, CEO, Growth plan, starts April 20. Onboard him."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1171,23 +1265,29 @@ scenarios:
       - id: s1-fact-one
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a quick update email to my accountant letting her know our fiscal year ends in March, same as last year, and we'll have everything ready for her by mid-April."
+            use_exact_message: true
 
       - id: s2-fact-two
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Log this in my Notion calendar note -- I always do board prep two weeks before fiscal year end. It takes about a week of focused work, and I need to block my calendar during that time."
+            use_exact_message: true
 
       - id: s3-synthesis-question
         time_offset: "720h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "When should I block calendar time for board prep this year?"
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1226,20 +1326,25 @@ scenarios:
       - id: s1-seed-facts
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Quick facts: company is Acme Co, LLC, Delaware, fiscal year ends March. My assistant is Sarah -- sarah@acme.co. Our main CRM is HubSpot. We ship from Reno, Tuesdays and Thursdays only. Our competitor is FreshPaws. Sales cycle is 6 weeks."
+            use_exact_message: true
 
       - id: s2-more-facts
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Pricing update for your records: Growth plan is $3,000/mo, Standard is $1,500/mo, wholesale tier kicks in at 50+ units with $24.99/unit."
+            use_exact_message: true
 
       - id: s3-introspect
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "What do you know about me and my business?"
@@ -1282,13 +1387,16 @@ scenarios:
       - id: s1-seed-partial
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Quick facts: company is Acme Co, my CRM is HubSpot, assistant is Sarah. We ship from Reno."
+            use_exact_message: true
 
       - id: s2-probe
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "What information about me or my business would be useful for you to have, that you don't currently?"
@@ -1329,6 +1437,7 @@ scenarios:
       - id: s1-passing-mention
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a contractor agreement for Devon Okafor, marketing site redesign, $120/hr, 3 month engagement. Our lawyer is Pat Nguyen at Hartwell & Co, pat@hartwellco.legal -- I'll have her review before I sign so make the draft clean. Use standard terms."
@@ -1336,6 +1445,7 @@ scenarios:
       - id: s2-filler-one
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Log 4 expenses to the April sheet: Adobe $54.99, AWS $312.40, Zoom $14.99, Notion $10.00. Categories are Software for all."
@@ -1343,6 +1453,7 @@ scenarios:
       - id: s3-filler-two
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Research GreenBuild Studios at greenbuildstudios.com and draft a partnership outreach email to their team."
@@ -1350,6 +1461,7 @@ scenarios:
       - id: s4-filler-three
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Post a tweet announcing we just hit 100 customers. Celebratory tone, relevant hashtags."
@@ -1357,9 +1469,11 @@ scenarios:
       - id: s5-probe
         time_offset: "960h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Loop in our lawyer on this -- I need them to review the attached supplier agreement before I sign."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1395,6 +1509,7 @@ scenarios:
       - id: s1-set-constraint
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "I'm in heads-down mode this week -- no meetings, no calls, push everything to next week at the earliest."
@@ -1402,16 +1517,20 @@ scenarios:
       - id: s2-during-window
         time_offset: "24h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "A prospect at rachel@greenbuildstudios.com just emailed asking for a 30-minute call this week to discuss our consulting services. Draft a reply."
+            use_exact_message: true
 
       - id: s3-after-window
         time_offset: "216h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "A different prospect at david@novatech.io wants a call this week to discuss our Growth plan. Draft a reply."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1446,6 +1565,7 @@ scenarios:
       - id: s1-set-status
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Heads up: we're temporarily out of stock on the Premium Blend 5lb -- should be back in stock by April 15. If any customer asks, let them know."
@@ -1453,16 +1573,20 @@ scenarios:
       - id: s2-during-stockout
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "A customer just emailed asking about Premium Blend 5lb availability -- they want to place a 10-unit order. Draft a reply."
+            use_exact_message: true
 
       - id: s3-after-stockout
         time_offset: "720h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "A customer just emailed asking about Premium Blend 5lb availability -- they want a 10-unit order. Draft a reply."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1501,6 +1625,7 @@ scenarios:
       - id: s1-one-off
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Draft a quick email to one of our board members about Q1 results. Just for this one, use a more formal tone than usual -- board members expect that level of formality."
@@ -1508,6 +1633,7 @@ scenarios:
       - id: s2-probe
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Draft an outreach email to a new prospect at rachel@greenbuildstudios.com about our consulting services."
@@ -1537,6 +1663,7 @@ scenarios:
       - id: s1-teach
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Quick planning note: our budget for the Q2 marketing push is $50K. Help me sketch out how to allocate it across channels."
@@ -1544,13 +1671,16 @@ scenarios:
       - id: s2-forget
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Actually, scratch what I said about the Q2 marketing budget. I don't want that number floating around in your memory. Forget it."
+            use_exact_message: true
 
       - id: s3-probe
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "What's our Q2 marketing budget?"

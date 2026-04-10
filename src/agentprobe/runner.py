@@ -51,6 +51,7 @@ class ScenarioRunResult(AgentProbeModel):
     scenario_name: str
     persona_id: str
     rubric_id: str
+    user_id: str | None = None
     passed: bool
     overall_score: float
     transcript: list[ConversationTurn] = Field(default_factory=list)
@@ -102,6 +103,7 @@ class _PreparedScenarioRun:
     rubric: Rubric
     ordinal: int
     total: int
+    user_id: str | None = None
 
     @property
     def index(self) -> int:
@@ -160,6 +162,7 @@ class RunRecorder(Protocol):
         persona: Persona,
         rubric: Rubric,
         ordinal: int | None,
+        user_id: str | None = None,
     ) -> int: ...
 
     def record_scenario_finished(
@@ -470,6 +473,7 @@ async def run_scenario(
     scenario_ordinal: int | None = None,
     dry_run: bool = False,
     adapter_factory: Callable[[], EndpointAdapter] | None = None,
+    user_id: str | None = None,
 ) -> ScenarioRunResult:
     if dry_run:
         return ScenarioRunResult(
@@ -477,6 +481,7 @@ async def run_scenario(
             scenario_name=scenario.name,
             persona_id=persona.id,
             rubric_id=rubric.id,
+            user_id=user_id,
             passed=True,
             overall_score=0.0,
             transcript=[],
@@ -509,6 +514,7 @@ async def run_scenario(
         "context": scenario.context,
         "defaults": defaults,
         "user_name": user_name,
+        "user_id": user_id,
         "copilot_mode": copilot_mode,
     }
 
@@ -528,6 +534,7 @@ async def run_scenario(
             persona=persona,
             rubric=rubric,
             ordinal=scenario_ordinal,
+            user_id=user_id,
         )
         if recorder is not None
         else None
@@ -593,11 +600,13 @@ async def run_scenario(
 
             if not is_first:
                 session_label = session.id or f"session-{session_idx + 1}"
+                user_id_part = f" user_id: {user_id}" if user_id else ""
                 boundary_turn = ConversationTurn(
                     role="system",
                     content=(
                         f"--- Session boundary: session_id: {session_label} "
-                        f"reset_policy: {session.reset} time_offset: {session.time_offset} ---"
+                        f"reset_policy: {session.reset} time_offset: {session.time_offset}"
+                        f"{user_id_part} ---"
                     ),
                 )
                 full_transcript.append(boundary_turn)
@@ -709,6 +718,7 @@ async def run_scenario(
             scenario_name=scenario.name,
             persona_id=persona.id,
             rubric_id=rubric.id,
+            user_id=user_id,
             passed=score.passed,
             overall_score=overall_score,
             transcript=full_transcript,
@@ -824,17 +834,36 @@ async def run_suite(
             def _make_adapter_factory(
                 ec: Endpoints = endpoint_config,
                 af: Callable[[Endpoints], EndpointAdapter] | None = adapter_factory,
-            ) -> Callable[[], EndpointAdapter]:
-                return lambda: af(ec) if af is not None else build_endpoint_adapter(ec)
+            ) -> tuple[Callable[[], EndpointAdapter], str]:
+                # Pin a stable user_id per scenario so fresh_agent resets
+                # create new sessions but authenticate as the SAME user.
+                # Without this, each adapter gets a new uuid4() and S2 sees
+                # an empty memory graph.
+                import uuid as _uuid
+                import os as _os
+                _pinned_user_id = _os.environ.get("AUTOGPT_USER_ID") or str(_uuid.uuid4())
+                logger.debug("Pinned user_id for scenario %s: %s", item.id, _pinned_user_id)
 
+                def _pinned_auth_resolver() -> object:
+                    from .endpoints.autogpt import resolve_auth as _resolve
+                    return _resolve(user_id=_pinned_user_id)
+
+                def _factory() -> EndpointAdapter:
+                    if af is not None:
+                        return af(ec)
+                    return build_endpoint_adapter(ec, autogpt_auth_resolver=_pinned_auth_resolver)
+                return _factory, _pinned_user_id
+
+            factory, pinned_user_id = _make_adapter_factory()
             prepared_runs.append(
                 _PreparedScenarioRun(
-                    adapter_factory=_make_adapter_factory(),
+                    adapter_factory=factory,
                     scenario=item,
                     persona=persona,
                     rubric=rubric_item,
                     ordinal=scenario_ordinal,
                     total=scenario_total,
+                    user_id=pinned_user_id,
                 )
             )
 
@@ -997,6 +1026,7 @@ async def _run_prepared_scenario(
         scenario_ordinal=prepared.ordinal,
         dry_run=dry_run,
         adapter_factory=prepared.adapter_factory,
+        user_id=prepared.user_id,
     )
 
 

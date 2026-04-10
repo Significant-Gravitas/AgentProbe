@@ -154,7 +154,8 @@ def _is_session_boundary(role: object, content: object) -> bool:
 _SESSION_BOUNDARY_RE = re.compile(
     r"session_id:\s*(?P<session_id>\S+)"
     r"|reset_policy:\s*(?P<reset_policy>\S+)"
-    r"|time_offset:\s*(?P<time_offset>\S+)",
+    r"|time_offset:\s*(?P<time_offset>\S+)"
+    r"|user_id:\s*(?P<user_id>\S+)",
 )
 
 
@@ -163,6 +164,7 @@ def _parse_session_boundary(content: str) -> dict[str, str]:
         "session_id": "",
         "reset_policy": "",
         "time_offset": "",
+        "user_id": "",
     }
     for match in _SESSION_BOUNDARY_RE.finditer(content):
         for key in fields:
@@ -325,6 +327,7 @@ def _prepare_scenario_view(scenario: dict[str, Any], index: int) -> dict[str, An
         "scenario_snapshot_pretty": _pretty_json(scenario.get("scenario_snapshot")),
         "started_at_label": _format_timestamp(scenario.get("started_at")),
         "completed_at_label": _format_timestamp(scenario.get("completed_at")),
+        "user_id": scenario.get("user_id") or "",
     }
 
 
@@ -646,7 +649,7 @@ _TEMPLATE = _ENV.from_string(
               </div>
 
               <div data-tab-panel="conversation" data-tab-scenario="{{ scenario.dom_id }}" class="tab-panel space-y-4">
-                <div class="grid gap-4 md:grid-cols-3">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <div class="rounded-2xl border border-black/10 bg-black/[0.03] p-4">
                     <div class="text-xs uppercase tracking-[0.2em] text-black/50">Started</div>
                     <div class="mt-2 text-sm font-semibold">{{ scenario.started_at_label }}</div>
@@ -661,6 +664,12 @@ _TEMPLATE = _ENV.from_string(
                       {{ scenario.counts.turn_count }} turns • {{ scenario.counts.tool_call_count }} tool calls • {{ scenario.counts.checkpoint_count }} checkpoints
                     </div>
                   </div>
+                  {% if scenario.user_id %}
+                  <div class="rounded-2xl border border-black/10 bg-black/[0.03] p-4">
+                    <div class="text-xs uppercase tracking-[0.2em] text-black/50">User ID</div>
+                    <div class="mt-2 text-sm font-semibold break-all">{{ scenario.user_id }}</div>
+                  </div>
+                  {% endif %}
                 </div>
 
                 {% if scenario.expectations_pretty %}
@@ -699,6 +708,12 @@ _TEMPLATE = _ENV.from_string(
                       <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
                         <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Time:</span>
                         {{ turn.session_boundary.time_offset }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.user_id %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">User:</span>
+                        <span class="break-all">{{ turn.session_boundary.user_id }}</span>
                       </span>
                       {% endif %}
                     </div>
