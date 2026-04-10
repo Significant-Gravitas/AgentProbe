@@ -23,6 +23,14 @@ processed, and fails fast if the suite contract is invalid
 to SQLite, preserves scenario ordering, and emits a summary that agents and
 humans can use to inspect pass/fail outcomes
 
+### AutoGPT preset forges auth tokens internally
+
+**Given** an AutoGPT preset endpoint configured for AgentProbe
+**When** the CLI prepares authenticated requests for that endpoint
+**Then** the CLI forges the bearer token locally, registers the user with the
+backend, extracts tool-call evidence from the backend SSE stream, and does not
+depend on a Supabase signup flow
+
 ### HTML report renders from recorded run history
 
 **Given** at least one completed run in the local run-history database

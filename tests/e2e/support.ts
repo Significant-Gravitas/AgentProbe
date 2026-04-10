@@ -6,7 +6,6 @@ import { delimiter, dirname, join, resolve } from "node:path";
 const THIS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(THIS_DIR, "..", "..");
 const FIXTURE_SUITE_DIR = join(REPO_ROOT, "tests", "e2e", "fixtures", "suite");
-const PYTHON_SHIM_DIR = join(REPO_ROOT, "tests", "e2e", "python");
 
 type JsonValue =
   | null
@@ -144,7 +143,7 @@ function normalizeJsonColumns(row: Record<string, unknown>): Record<string, unkn
 }
 
 async function assertProcessCompletes(
-  process: Bun.Subprocess<"pipe", "pipe", "inherit">,
+  process: Bun.Subprocess<"ignore", "pipe", "pipe">,
   timeoutMs: number,
 ): Promise<number> {
   const timer = setTimeout(() => {
@@ -191,11 +190,14 @@ export class FakeAutogptBackend {
   }
 
   static async start(): Promise<FakeAutogptBackend> {
-    const backend = new FakeAutogptBackend(
+    let backend!: FakeAutogptBackend;
+    backend = new FakeAutogptBackend(
       Bun.serve({
         hostname: "127.0.0.1",
         port: 0,
-        fetch: (request) => backend.handle(request),
+        fetch(request: Request): Promise<Response> {
+          return backend.handle(request);
+        },
       }),
     );
     return backend;
@@ -351,12 +353,11 @@ export async function runAgentprobe(
     AUTOGPT_BACKEND_URL: options.backendUrl,
     AGENTPROBE_E2E_OPENAI_SCRIPT: options.workspace.openAiScriptPath,
     AGENTPROBE_E2E_OPENAI_LOG: options.workspace.openAiLogPath,
-    PYTHONPATH: buildEnvPath(PYTHON_SHIM_DIR, Bun.env.PYTHONPATH),
   };
 
   const process = Bun.spawn({
     cmd: [
-      "uv",
+      "bun",
       "run",
       "agentprobe",
       "--data-path",
@@ -389,7 +390,7 @@ export async function readOpenAiLog(path: string): Promise<OpenAiLogEntry[]> {
     .trim()
     .split("\n")
     .filter(Boolean)
-    .map((line) => JSON.parse(line) as OpenAiLogEntry);
+    .map((line: string) => JSON.parse(line) as OpenAiLogEntry);
 }
 
 export function queryRows(

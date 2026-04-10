@@ -6,7 +6,7 @@ evaluations against HTTP, WebSocket, and local harness endpoints.
 ## Stack
 
 - Runtime contract: Bun + TypeScript
-- Current baseline: mixed-language during migration; repo workflows stay Bun-first
+- Runtime baseline: TypeScript-only; repo workflows stay Bun-first
 - Database contract: SQLite for local run history
 - Primary quality gates: docs validation, Bun tests, generated-doc freshness
 
@@ -14,8 +14,8 @@ evaluations against HTTP, WebSocket, and local harness endpoints.
 
 ```text
 AgentProbe/
-├── src/               # Runtime code and future TypeScript migration target
-├── tests/             # Bun e2e harness and legacy baseline tests
+├── src/               # Runtime code
+├── tests/             # Bun unit and e2e coverage
 ├── data/              # Sample endpoints, scenarios, personas, and rubrics
 ├── docs/              # Source-of-truth knowledge base — start with docs/README.md
 ├── scripts/           # Validation, doc generation, and repo automation
@@ -68,7 +68,7 @@ bun run fast-feedback
 2. Treat `docs/` as the system of record. If context only exists in chat, it does not exist.
 3. Update `docs/product-specs/platform.md` before implementation when behavior changes.
 4. Do not edit generated files in `docs/generated/` by hand; run the generator instead.
-5. Prefer Bun entrypoints (`bun run ...`) for repo workflows, even while the migration is mixed.
+5. Prefer Bun entrypoints (`bun run ...`) for repo workflows.
 6. Enforce boundary validation at config, YAML, SDK, and network edges; do not rely on guessed shapes.
 7. Preserve layered boundaries and typed SDK/provider interfaces. No transport logic in higher-level business logic.
 8. Structured logs, metrics, and spans are required for debugging and latency enforcement on critical paths.

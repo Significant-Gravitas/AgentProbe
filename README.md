@@ -2,11 +2,7 @@
 
 AgentProbe is an agent-first repository for a Bun + TypeScript CLI that runs
 repeatable evaluations against HTTP, WebSocket, and local harness endpoints.
-
-The repo is being migrated in-place, so some baseline implementation and test
-surfaces are still mixed-language. The documentation in this repository defines
-the target Bun-first contract and the engineering standards every future change
-should reinforce.
+The implementation, tests, and repo workflows are Bun-first and TypeScript-only.
 
 ## Why this repo is structured this way
 
@@ -70,12 +66,6 @@ bun run fast-feedback
 - Strong separation between CLI orchestration, domain logic, persistence, and
   external endpoint integrations
 
-## Current migration note
-
-This docs pass intentionally leads the implementation. The repository contract
-is Bun-first even where the legacy baseline has not yet been fully replaced.
-When there is a mismatch, update the implementation to meet the docs rather
-than relaxing the docs to match incidental legacy structure.
 - `data/`: sample endpoint, scenario, persona, and rubric YAML
 - `tests/`: test suite
 - `agentprobe-spec-v0.2.md`: working spec/reference document

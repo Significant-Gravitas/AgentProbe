@@ -1,12 +1,15 @@
 # Workspace Inventory
 
-Generated: 2026-04-10T10:56:29.947Z
+Generated: 2026-04-10T11:50:56.624Z
 
 ```text
   AGENTS.md
   CLAUDE.md
   README.md
+  agentprobe-report-29bcccb9aca2425b8be34621743fd339.html
+  agentprobe-report-2b71d247aa8b46ceb38dec77e2d7268b.html
   agentprobe-spec-v0.2.md
+  bun.lock
 data/
   data/adversarial-scenarios.yaml
   data/autogpt-endpoint.yaml
@@ -69,7 +72,6 @@ docs/references/
   docs/references/observability.md
   docs/references/quality-gates.md
   package.json
-  pyproject.toml
 scripts/
   scripts/check-agents-drift.ts
   scripts/check-behaviour-docs.ts
@@ -84,50 +86,52 @@ scripts/
   scripts/validate-setup.sh
   skills-lock.json
 src/
-src/agentprobe/
-  src/agentprobe/__init__.py
-  src/agentprobe/__main__.py
-  src/agentprobe/adapters.py
-  src/agentprobe/cli.py
-src/agentprobe/data/
-  src/agentprobe/data/__init__.py
-  src/agentprobe/data/common.py
-  src/agentprobe/data/endpoints.py
-  src/agentprobe/data/personas.py
-  src/agentprobe/data/rubrics.py
-  src/agentprobe/data/scenarios.py
-  src/agentprobe/db.py
-src/agentprobe/endpoints/
-  src/agentprobe/endpoints/__init__.py
-  src/agentprobe/endpoints/_common.py
-  src/agentprobe/endpoints/autogpt.py
-  src/agentprobe/endpoints/autogpt_auth.py
-  src/agentprobe/endpoints/openclaw.py
-  src/agentprobe/endpoints/opencode.py
-  src/agentprobe/errors.py
-  src/agentprobe/judge.py
-  src/agentprobe/rendering.py
-  src/agentprobe/report.py
-  src/agentprobe/runner.py
-  src/agentprobe/simulator.py
+src/cli/
+  src/cli/main.ts
+src/domains/
+src/domains/evaluation/
+  src/domains/evaluation/judge.ts
+  src/domains/evaluation/run-suite.ts
+  src/domains/evaluation/simulator.ts
+src/domains/reporting/
+  src/domains/reporting/render-report.ts
+src/domains/validation/
+  src/domains/validation/load-suite.ts
+src/providers/
+src/providers/observability/
+src/providers/persistence/
+  src/providers/persistence/sqlite-run-history.ts
+src/providers/sdk/
+  src/providers/sdk/adapters.ts
+  src/providers/sdk/autogpt-auth.ts
+  src/providers/sdk/http-endpoint.ts
+  src/providers/sdk/openai-responses.ts
+  src/providers/sdk/openclaw.ts
+  src/providers/sdk/preset-config.ts
+src/shared/
+src/shared/testing/
+src/shared/types/
+  src/shared/types/contracts.ts
+src/shared/utils/
+  src/shared/utils/errors.ts
+  src/shared/utils/json.ts
+  src/shared/utils/template.ts
 tests/
 tests/e2e/
   tests/e2e/cli.e2e.test.ts
 tests/e2e/fixtures/
 tests/e2e/fixtures/suite/
-tests/e2e/python/
-  tests/e2e/python/sitecustomize.py
   tests/e2e/support.ts
-  tests/test_adapters.py
-  tests/test_autogpt_auth.py
-  tests/test_cli.py
-  tests/test_db.py
-  tests/test_endpoint_configuration.py
-  tests/test_judge.py
-  tests/test_openclaw_runner.py
-  tests/test_report.py
-  tests/test_runner.py
-  tests/test_simulator.py
+tests/unit/
+  tests/unit/adapters.test.ts
+  tests/unit/autogpt-auth.test.ts
+  tests/unit/db.test.ts
+  tests/unit/endpoint-config.test.ts
+  tests/unit/judge.test.ts
+  tests/unit/openclaw.test.ts
+  tests/unit/report.test.ts
+  tests/unit/runner.test.ts
+  tests/unit/simulator.test.ts
+  tests/unit/support.ts
   tsconfig.json
-  uv.lock
 ```

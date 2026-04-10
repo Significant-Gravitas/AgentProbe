@@ -56,7 +56,7 @@ src/
     └── utils/        # Small deterministic helpers only
 ```
 
-The exact directory layout can evolve during migration, but the dependency
+The exact directory layout can evolve over time, but the dependency
 direction and boundary rules are mandatory regardless of file names.
 
 ## TypeScript engineering standards

@@ -16,7 +16,7 @@ import {
   type E2EWorkspace,
 } from "./support.ts";
 
-describe("bun e2e baseline for the python cli", () => {
+describe("bun e2e baseline for the typescript cli", () => {
   let backend: FakeAutogptBackend;
   let workspace: E2EWorkspace;
 
