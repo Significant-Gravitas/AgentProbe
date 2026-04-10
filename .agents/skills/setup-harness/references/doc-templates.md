@@ -70,6 +70,44 @@ Target: 100–140 lines. This is the entry point for any agent working in the re
 
 ---
 
+## Generic INDEX.md
+
+Create one of these in every committed directory. Keep the top two sections
+hand-authored, and let the generated inventory sections be refreshed by script.
+
+```markdown
+# {{DIRECTORY_NAME}} Index
+
+## Purpose
+
+{{What belongs in this directory and how it fits into the repo.}}
+
+## File conventions
+
+- {{Filename pattern or grouping rule}}
+- {{Required content structure or frontmatter, if any}}
+- {{What should not be committed here}}
+
+## Files
+
+- [{{FILE_1}}]({{FILE_1}}) — {{What it is for}}
+- [{{FILE_2}}]({{FILE_2}}) — {{What it is for}}
+
+## Subdirectories
+
+- [{{SUBDIR_A}}/INDEX.md]({{SUBDIR_A}}/INDEX.md) — {{What lives there}}
+- [{{SUBDIR_B}}/INDEX.md]({{SUBDIR_B}}/INDEX.md) — {{What lives there}}
+```
+
+Rules:
+- Every non-generated directory tracked in git must have an `INDEX.md`.
+- `INDEX.md` must link to every file in the same directory except itself.
+- `INDEX.md` must link to each child directory's `INDEX.md`.
+- The "Purpose" and "File conventions" sections explain what files belong there
+  and what format they should follow.
+
+---
+
 ## docs/README.md
 
 ```markdown
@@ -344,3 +382,26 @@ Each plan should include:
 3. Dependencies — what blocks what
 4. Validation — how we know it's done
 ```
+
+---
+
+## Suggested directory contracts
+
+Use these expectations when writing the hand-authored sections of each
+directory's `INDEX.md`:
+
+- Repo root: explain top-level entrypoints, which files are policy docs versus
+  project docs, and point to each major directory's `INDEX.md`.
+- `docs/`: explain that long-lived repo documentation lives here, written in
+  Markdown with stable relative links.
+- `docs/behaviours/`: explain that behavior specs are Markdown, `platform.md`
+  is the source of truth, and summary docs must stay derivable from it.
+- `docs/exec-plans/`: explain plan-doc structure and that child directories
+  split active work from completed work.
+- `docs/exec-plans/active/`: explain naming by workstream/date and required
+  sections: Goal, Steps, Dependencies, Validation.
+- `docs/exec-plans/completed/`: explain that completed plans retain the same
+  structure plus outcome/shipping notes.
+- `docs/generated/`: explain files are script-generated and not edited by hand.
+- `docs/playbooks/`: explain operational runbooks are Markdown and should
+  include trigger, steps, validation, and rollback/escalation guidance.

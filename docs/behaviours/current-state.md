@@ -1,6 +1,6 @@
 # Current State
 
-Last validated against `platform.md`: 2026-04-09
+Last validated against `platform.md`: 2026-04-10
 
 ## Implemented scenarios
 
@@ -10,6 +10,5 @@ Last validated against `platform.md`: 2026-04-09
 
 ## Known gaps
 
-- No end-to-end integration tests that exercise the full run pipeline against a mock endpoint
-- Parallel execution (`--parallel`) has limited test coverage
-- Tag-based scenario filtering (`--tags`) not tested in isolation
+- Core `validate` / `run` / `report` platform scenarios now have Bun-owned end-to-end coverage against a fake AutoGPT backend
+- OpenClaw helper commands remain covered by Python tests rather than the Bun end-to-end baseline

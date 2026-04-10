@@ -18,7 +18,6 @@ AgentProbe/
 ├── data/             # Sample endpoint, scenario, persona, and rubric YAML
 ├── docs/             # Deep docs — start with docs/README.md
 ├── scripts/          # All standard commands live here
-├── dist/             # Built wheel artifacts
 └── .github/          # Workflows and PR template
 ```
 

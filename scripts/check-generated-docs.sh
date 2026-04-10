@@ -18,7 +18,7 @@ else
 fi
 
 # Regenerate
-python3 "$SCRIPT_DIR/generate-workspace-docs.py" > /dev/null 2>&1
+bun "$SCRIPT_DIR/generate-workspace-docs.ts" > /dev/null 2>&1
 
 # Compare
 if [ -d "$REPO_ROOT/docs/generated" ]; then
@@ -38,7 +38,7 @@ fi
 if [ "$STALE" = "false" ]; then
   echo "Generated docs are up to date."
 else
-  echo "ERROR: Generated docs are stale. Run: python3 scripts/generate-workspace-docs.py"
+  echo "ERROR: Generated docs are stale. Run: bun scripts/generate-workspace-docs.ts"
   # Restore original
   if [ -d "$TEMP_DIR/before" ]; then
     rm -rf "$REPO_ROOT/docs/generated"

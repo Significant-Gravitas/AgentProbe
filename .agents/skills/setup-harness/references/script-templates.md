@@ -32,15 +32,19 @@ fi
 echo "Checking doc links..."
 node "$SCRIPT_DIR/check-doc-links.mjs" || ERRORS=$((ERRORS + 1))
 
-# 3. Check AGENTS.md drift
+# 3. Check directory indexes
+echo "Checking directory indexes..."
+node "$SCRIPT_DIR/check-index-docs.mjs" || ERRORS=$((ERRORS + 1))
+
+# 4. Check AGENTS.md drift
 echo "Checking AGENTS.md drift..."
 node "$SCRIPT_DIR/check-agents-drift.mjs" || ERRORS=$((ERRORS + 1))
 
-# 4. Check behaviour doc consistency
+# 5. Check behaviour doc consistency
 echo "Checking behaviour docs..."
 node "$SCRIPT_DIR/check-behaviour-docs.mjs" || ERRORS=$((ERRORS + 1))
 
-# 5. Check generated docs freshness
+# 6. Check generated docs freshness
 echo "Checking generated docs..."
 bash "$SCRIPT_DIR/check-generated-docs.sh" || ERRORS=$((ERRORS + 1))
 
@@ -240,6 +244,214 @@ const lines = [
 mkdirSync(join(REPO_ROOT, 'docs', 'generated'), { recursive: true });
 writeFileSync(OUTPUT, lines.join('\n'));
 console.log(`Wrote ${OUTPUT}`);
+```
+
+---
+
+## scripts/generate-index-docs.mjs
+
+```javascript
+#!/usr/bin/env node
+
+/**
+ * Refreshes INDEX.md files for every committed directory.
+ * Keeps the hand-authored Purpose/File conventions sections, then rewrites the
+ * file and subdirectory link sections so they stay current.
+ */
+
+import { execFileSync } from 'child_process';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, join, posix } from 'path';
+
+const REPO_ROOT = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
+const INDEX_NAME = 'INDEX.md';
+const START_FILES = '<!-- AUTO-GENERATED FILE LINKS START -->';
+const END_FILES = '<!-- AUTO-GENERATED FILE LINKS END -->';
+const START_DIRS = '<!-- AUTO-GENERATED SUBDIR LINKS START -->';
+const END_DIRS = '<!-- AUTO-GENERATED SUBDIR LINKS END -->';
+
+const tracked = execFileSync('git', ['ls-files'], { cwd: REPO_ROOT, encoding: 'utf8' })
+  .split('\n')
+  .filter(Boolean)
+  .filter(path => !path.startsWith('.git/'));
+
+const directories = new Set(['.']);
+for (const path of tracked) {
+  const parts = path.split('/');
+  if (parts.length === 1) continue;
+  let current = '';
+  for (let i = 0; i < parts.length - 1; i += 1) {
+    current = current ? `${current}/${parts[i]}` : parts[i];
+    directories.add(current);
+  }
+}
+
+function relLink(baseDir, target) {
+  const from = baseDir === '.' ? '' : `${baseDir}/`;
+  const relative = posix.relative(from || '.', target);
+  return relative === '' ? './' : relative;
+}
+
+function collectFor(dir) {
+  const prefix = dir === '.' ? '' : `${dir}/`;
+  const files = tracked
+    .filter(path => path.startsWith(prefix))
+    .map(path => path.slice(prefix.length))
+    .filter(path => path && !path.includes('/'))
+    .filter(path => path !== INDEX_NAME)
+    .sort();
+
+  const subdirs = [...directories]
+    .filter(candidate => candidate !== dir)
+    .filter(candidate => {
+      if (dir === '.') return !candidate.includes('/');
+      return candidate.startsWith(`${dir}/`) && !candidate.slice(dir.length + 1).includes('/');
+    })
+    .sort();
+
+  return { files, subdirs };
+}
+
+function defaultContent(dir) {
+  const title = dir === '.' ? 'Repository Index' : `${dir.split('/').slice(-1)[0]} Index`;
+  return `# ${title}
+
+## Purpose
+
+Describe what belongs in this directory.
+
+## File conventions
+
+- Describe the file types stored here.
+- Describe naming/content format expectations.
+- Describe what should not be committed here.
+
+## Files
+
+${START_FILES}
+${END_FILES}
+
+## Subdirectories
+
+${START_DIRS}
+${END_DIRS}
+`;
+}
+
+function replaceSection(content, start, end, lines) {
+  const pattern = new RegExp(`${start}[\\s\\S]*?${end}`);
+  const body = [start, ...lines, end].join('\n');
+  return pattern.test(content) ? content.replace(pattern, body) : `${content.trim()}\n\n${body}\n`;
+}
+
+for (const dir of directories) {
+  const indexPath = join(REPO_ROOT, dir, INDEX_NAME);
+  mkdirSync(dirname(indexPath), { recursive: true });
+  const current = existsSync(indexPath) ? readFileSync(indexPath, 'utf8') : defaultContent(dir);
+  const { files, subdirs } = collectFor(dir);
+  const fileLines = files.length
+    ? files.map(name => `- [${name}](${relLink(dir, dir === '.' ? name : `${dir}/${name}`)})`)
+    : ['- No tracked files in this directory yet.'];
+  const dirLines = subdirs.length
+    ? subdirs.map(name => `- [${name.split('/').slice(-1)[0]}/INDEX.md](${relLink(dir, `${name}/INDEX.md`)})`)
+    : ['- No tracked subdirectories.'];
+
+  let next = replaceSection(current, START_FILES, END_FILES, fileLines);
+  next = replaceSection(next, START_DIRS, END_DIRS, dirLines);
+  writeFileSync(indexPath, next.endsWith('\n') ? next : `${next}\n`);
+  console.log(`Updated ${join(dir, INDEX_NAME)}`);
+}
+```
+
+---
+
+## scripts/check-index-docs.mjs
+
+```javascript
+#!/usr/bin/env node
+
+/**
+ * Verifies every committed directory has an INDEX.md and that each index links
+ * to all sibling files and child directory INDEX.md files.
+ */
+
+import { execFileSync } from 'child_process';
+import { existsSync, readFileSync } from 'fs';
+import { join, posix } from 'path';
+
+const REPO_ROOT = new URL('..', import.meta.url).pathname.replace(/\/$/, '');
+const INDEX_NAME = 'INDEX.md';
+
+const tracked = execFileSync('git', ['ls-files'], { cwd: REPO_ROOT, encoding: 'utf8' })
+  .split('\n')
+  .filter(Boolean);
+
+const directories = new Set(['.']);
+for (const path of tracked) {
+  const parts = path.split('/');
+  if (parts.length === 1) continue;
+  let current = '';
+  for (let i = 0; i < parts.length - 1; i += 1) {
+    current = current ? `${current}/${parts[i]}` : parts[i];
+    directories.add(current);
+  }
+}
+
+let failed = false;
+
+function expectedEntries(dir) {
+  const prefix = dir === '.' ? '' : `${dir}/`;
+  const files = tracked
+    .filter(path => path.startsWith(prefix))
+    .map(path => path.slice(prefix.length))
+    .filter(path => path && !path.includes('/'))
+    .filter(path => path !== INDEX_NAME)
+    .sort();
+
+  const subdirs = [...directories]
+    .filter(candidate => candidate !== dir)
+    .filter(candidate => {
+      if (dir === '.') return !candidate.includes('/');
+      return candidate.startsWith(`${dir}/`) && !candidate.slice(dir.length + 1).includes('/');
+    })
+    .sort();
+
+  return { files, subdirs };
+}
+
+for (const dir of [...directories].sort()) {
+  const indexPath = join(REPO_ROOT, dir, INDEX_NAME);
+  if (!existsSync(indexPath)) {
+    console.error(`Missing ${dir === '.' ? INDEX_NAME : `${dir}/${INDEX_NAME}`}`);
+    failed = true;
+    continue;
+  }
+
+  const content = readFileSync(indexPath, 'utf8');
+  if (!/^## Purpose\b/m.test(content) || !/^## File conventions\b/m.test(content)) {
+    console.error(`Incomplete directory contract in ${dir === '.' ? INDEX_NAME : `${dir}/${INDEX_NAME}`}`);
+    failed = true;
+  }
+
+  const { files, subdirs } = expectedEntries(dir);
+  for (const file of files) {
+    if (!content.includes(`(${file})`) && !content.includes(`](${posix.relative(dir === '.' ? '.' : `${dir}/`, dir === '.' ? file : `${dir}/${file}`)})`)) {
+      console.error(`Missing file link for ${dir === '.' ? file : `${dir}/${file}`} in ${dir === '.' ? INDEX_NAME : `${dir}/${INDEX_NAME}`}`);
+      failed = true;
+    }
+  }
+
+  for (const child of subdirs) {
+    const rel = posix.relative(dir === '.' ? '.' : `${dir}/`, `${child}/INDEX.md`);
+    if (!content.includes(`(${rel})`)) {
+      console.error(`Missing child index link for ${child}/INDEX.md in ${dir === '.' ? INDEX_NAME : `${dir}/${INDEX_NAME}`}`);
+      failed = true;
+    }
+  }
+}
+
+if (failed) process.exit(1);
+console.log('All directory indexes are present and up to date.');
 ```
 
 ---

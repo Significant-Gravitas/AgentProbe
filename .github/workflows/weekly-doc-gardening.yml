@@ -15,14 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - uses: oven-sh/setup-bun@v2
 
       - name: Refresh generated docs
         run: |
-          python3 scripts/generate-workspace-docs.py
-          python3 scripts/refresh-quality-score.py
+          bun scripts/generate-workspace-docs.ts
+          bun scripts/refresh-quality-score.ts
 
       - name: Check for changes
         id: changes
