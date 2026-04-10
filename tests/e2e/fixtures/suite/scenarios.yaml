@@ -1,0 +1,33 @@
+version: "1.0"
+
+defaults:
+  persona: e2e-customer
+  rubric: e2e-rubric
+  max_turns: 4
+
+tags_definition:
+  - smoke
+  - regression
+
+scenarios:
+  - id: refund-smoke
+    name: "Refund smoke question"
+    description: "Confirms the CLI can run a simple recorded evaluation."
+    tags: [smoke]
+    turns:
+      - role: user
+        content: "Ask whether you can still get a refund for order R-100."
+    expectations:
+      expected_behavior: "Explain the refund window and confirm the order is still eligible."
+      expected_outcome: resolved
+
+  - id: billing-followup
+    name: "Billing escalation follow-up"
+    description: "Exercises filtering and parallel ordering with a second scenario."
+    tags: [regression]
+    turns:
+      - role: user
+        content: "Explain that you were charged twice for invoice INV-200."
+    expectations:
+      expected_behavior: "Acknowledge the duplicate charge and offer a billing escalation path."
+      expected_outcome: escalated

@@ -29,6 +29,7 @@ uv run pyright
 # 5. Tests
 echo "--- Tests ---"
 uv run pytest
+bun test
 
 echo ""
 echo "Fast feedback passed."

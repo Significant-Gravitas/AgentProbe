@@ -19,17 +19,21 @@ fi
 
 # 2. Check markdown links
 echo "Checking doc links..."
-python3 "$SCRIPT_DIR/check-doc-links.py" || ERRORS=$((ERRORS + 1))
+bun "$SCRIPT_DIR/check-doc-links.ts" || ERRORS=$((ERRORS + 1))
 
-# 3. Check AGENTS.md drift
+# 3. Check docs directory indexes
+echo "Checking docs directory indexes..."
+bun "$SCRIPT_DIR/check-index-docs.ts" || ERRORS=$((ERRORS + 1))
+
+# 5. Check AGENTS.md drift
 echo "Checking AGENTS.md drift..."
-python3 "$SCRIPT_DIR/check-agents-drift.py" || ERRORS=$((ERRORS + 1))
+bun "$SCRIPT_DIR/check-agents-drift.ts" || ERRORS=$((ERRORS + 1))
 
-# 4. Check behaviour doc consistency
+# 6. Check behaviour doc consistency
 echo "Checking behaviour docs..."
-python3 "$SCRIPT_DIR/check-behaviour-docs.py" || ERRORS=$((ERRORS + 1))
+bun "$SCRIPT_DIR/check-behaviour-docs.ts" || ERRORS=$((ERRORS + 1))
 
-# 5. Check generated docs freshness
+# 7. Check generated docs freshness
 echo "Checking generated docs..."
 bash "$SCRIPT_DIR/check-generated-docs.sh" || ERRORS=$((ERRORS + 1))
 

@@ -1,20 +1,11 @@
 # Workspace Inventory
 
-Generated: 2026-04-09T12:42:10.082215+00:00
+Generated: 2026-04-10T10:34:34.304Z
 
 ```text
   AGENTS.md
+  CLAUDE.md
   README.md
-  agentprobe-report-185fe23350d24afaa5a715a91e8e6897.html
-  agentprobe-report-3ad0e661ff124c689f9ffc908ee007a4.html
-  agentprobe-report-5ef78206420d436ebc9f73ef9b2c2eda.html
-  agentprobe-report-690404950ec34e91b5892d0dea000dda.html
-  agentprobe-report-6a96d3f549914e54b2bc182f644f4c9b.html
-  agentprobe-report-a6101312338847f4a868cff5d4440aec.html
-  agentprobe-report-d02d106ea256469d882f23af1b7e71bb.html
-  agentprobe-report-d656991ec11f4f6a852a3db15004a617.html
-  agentprobe-report-founders-simple.html
-  agentprobe-report-security-testing.html
   agentprobe-spec-v0.2.md
 data/
   data/adversarial-scenarios.yaml
@@ -32,6 +23,7 @@ data/cluster_scenarios/
   data/cluster_scenarios/cluster_09_exploration_learning.yaml
   data/cluster_scenarios/cluster_10_multi_agent_builder.yaml
   data/cluster_scenarios/cluster_11_agent_deployment.yaml
+  data/multi-session-memory.yaml
   data/openclaw-endpoints.yaml
   data/opencode-endpoints.yaml
   data/personas.yaml
@@ -40,29 +32,39 @@ data/cluster_scenarios/
 docs/
   docs/ARCHITECTURE.md
   docs/HARNESS.md
+  docs/INDEX.md
   docs/QUALITY_SCORE.md
   docs/README.md
 docs/behaviours/
+  docs/behaviours/INDEX.md
   docs/behaviours/README.md
   docs/behaviours/current-state.md
   docs/behaviours/e2e-checklist.md
   docs/behaviours/platform.md
 docs/exec-plans/
+  docs/exec-plans/INDEX.md
   docs/exec-plans/README.md
 docs/exec-plans/active/
+  docs/exec-plans/active/INDEX.md
 docs/exec-plans/completed/
+  docs/exec-plans/completed/INDEX.md
 docs/generated/
+  docs/generated/INDEX.md
   docs/generated/workspace-inventory.md
 docs/playbooks/
+  docs/playbooks/INDEX.md
+  package.json
   pyproject.toml
 scripts/
-  scripts/check-agents-drift.py
-  scripts/check-behaviour-docs.py
-  scripts/check-doc-links.py
+  scripts/check-agents-drift.ts
+  scripts/check-behaviour-docs.ts
+  scripts/check-doc-links.ts
   scripts/check-generated-docs.sh
+  scripts/check-index-docs.ts
   scripts/fast-feedback.sh
-  scripts/generate-workspace-docs.py
-  scripts/refresh-quality-score.py
+  scripts/generate-index-docs.ts
+  scripts/generate-workspace-docs.ts
+  scripts/refresh-quality-score.ts
   scripts/validate-repo.sh
   scripts/validate-setup.sh
   skills-lock.json
@@ -94,6 +96,13 @@ src/agentprobe/endpoints/
   src/agentprobe/runner.py
   src/agentprobe/simulator.py
 tests/
+tests/e2e/
+  tests/e2e/cli.e2e.test.ts
+tests/e2e/fixtures/
+tests/e2e/fixtures/suite/
+tests/e2e/python/
+  tests/e2e/python/sitecustomize.py
+  tests/e2e/support.ts
   tests/test_adapters.py
   tests/test_autogpt_auth.py
   tests/test_cli.py
@@ -104,5 +113,6 @@ tests/
   tests/test_report.py
   tests/test_runner.py
   tests/test_simulator.py
+  tsconfig.json
   uv.lock
 ```

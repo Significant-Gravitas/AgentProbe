@@ -1,0 +1,28 @@
+version: "1.0"
+
+judge:
+  provider: openai
+  model: test-judge-model
+  temperature: 0.0
+  max_tokens: 512
+
+rubrics:
+  - id: e2e-rubric
+    name: "E2E Rubric"
+    description: "Small deterministic rubric for bun:test end-to-end coverage."
+    pass_threshold: 0.70
+    dimensions:
+      - id: task_completion
+        name: "Task Completion"
+        weight: 1.0
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Did not help"
+            5: "Fully helped"
+        judge_prompt: |
+          Evaluate whether the assistant fulfilled the scenario expectation.
+          {{ expectations.expected_behavior }}
+    meta_prompt: |
+      Score the transcript using the provided rubric and return structured JSON.

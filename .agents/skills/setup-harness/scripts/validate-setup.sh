@@ -95,11 +95,13 @@ echo ""
 # --- Core documents ---
 echo "── Core documents ──"
 check_file "AGENTS.md"            "AGENTS.md (router)"
+check_file "INDEX.md"             "INDEX.md (root directory contract)"
 check_file "README.md"            "README.md"
 echo ""
 
 # --- Docs structure ---
 echo "── Docs ──"
+check_file "docs/INDEX.md"              "docs/INDEX.md (directory contract)"
 check_file "docs/README.md"             "docs/README.md (index)"
 check_file "docs/ARCHITECTURE.md"       "docs/ARCHITECTURE.md"
 check_file "docs/HARNESS.md"            "docs/HARNESS.md (agent contract)"
@@ -108,6 +110,7 @@ echo ""
 
 # --- Behaviour docs ---
 echo "── Behaviour docs ──"
+check_file "docs/behaviours/INDEX.md"         "docs/behaviours/INDEX.md"
 check_file "docs/behaviours/README.md"        "docs/behaviours/README.md"
 check_file "docs/behaviours/platform.md"      "docs/behaviours/platform.md (spec)"
 check_file "docs/behaviours/current-state.md" "docs/behaviours/current-state.md"
@@ -116,14 +119,19 @@ echo ""
 
 # --- Exec plans ---
 echo "── Exec plans ──"
+check_file "docs/exec-plans/INDEX.md"    "docs/exec-plans/INDEX.md"
 check_file "docs/exec-plans/README.md"   "docs/exec-plans/README.md"
+check_file "docs/exec-plans/active/INDEX.md"    "docs/exec-plans/active/INDEX.md"
 check_dir  "docs/exec-plans/active"      "docs/exec-plans/active/"
+check_file "docs/exec-plans/completed/INDEX.md" "docs/exec-plans/completed/INDEX.md"
 check_dir  "docs/exec-plans/completed"   "docs/exec-plans/completed/"
 echo ""
 
 # --- Generated / playbooks dirs ---
 echo "── Generated & playbooks ──"
+check_file "docs/generated/INDEX.md" "docs/generated/INDEX.md"
 check_dir "docs/generated"   "docs/generated/"
+check_file "docs/playbooks/INDEX.md" "docs/playbooks/INDEX.md"
 check_dir "docs/playbooks"   "docs/playbooks/"
 echo ""
 
@@ -132,6 +140,8 @@ echo "── Scripts (core) ──"
 check_executable "scripts/validate-repo.sh"          "validate-repo.sh"
 check_executable "scripts/fast-feedback.sh"          "fast-feedback.sh"
 check_file       "scripts/generate-workspace-docs.mjs" "generate-workspace-docs.mjs"
+check_file       "scripts/generate-index-docs.mjs"     "generate-index-docs.mjs"
+check_file       "scripts/check-index-docs.mjs"        "check-index-docs.mjs"
 check_file       "scripts/refresh-quality-score.mjs"    "refresh-quality-score.mjs"
 check_file       "scripts/check-doc-links.mjs"          "check-doc-links.mjs"
 check_file       "scripts/check-agents-drift.mjs"       "check-agents-drift.mjs"

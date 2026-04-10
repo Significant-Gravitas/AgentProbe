@@ -1,0 +1,9 @@
+{
+  "name": "agentprobe",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "test:e2e": "bun test tests/e2e"
+  }
+}

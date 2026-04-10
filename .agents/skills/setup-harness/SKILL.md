@@ -1,5 +1,5 @@
 ---
-name: bootstrap
+name: setup-harness
 description: >
   Bootstrap a new project repository for agent-first development.
   Use this skill whenever the user wants to set up a new repo, scaffold a project,
@@ -58,6 +58,15 @@ Read `references/doc-templates.md` for the content templates. Customize every
 template using the project details from Phase 1 — never leave placeholder text
 that says "TODO" or "fill this in."
 
+Every directory under `docs/` must include an `INDEX.md`. Each index explains:
+- what belongs in that directory
+- what filename/content format files in that directory should follow
+- links to every file in that directory
+- links to each child directory's `INDEX.md`
+
+`INDEX.md` files belong only in `docs/` and its subdirectories — not in
+source code, scripts, config, or other top-level directories.
+
 ### File creation order
 
 1. **`AGENTS.md`** — the router file. 100–140 lines max. Contains: what the
@@ -65,35 +74,56 @@ that says "TODO" or "fill this in."
    and a few hard rules. This is NOT a manual — it points agents to the right
    doc for the right task.
 
-2. **`README.md`** — standard project readme for humans.
+2. **`CLAUDE.md`** — symlink to AGENTS.md. Run `ln -s AGENTS.md CLAUDE.md`.
+   This ensures Claude Code reads the same router file without duplicating
+   content. Add `CLAUDE.md` to the repo (git tracks symlinks).
 
-3. **`docs/README.md`** — docs index. Tells agents where to look next.
+3. **`README.md`** — standard project readme for humans.
 
-4. **`docs/ARCHITECTURE.md`** — module boundaries and dependency direction.
+4. **`docs/INDEX.md`** — docs directory contract and full file/subdirectory
+   index.
+
+5. **`docs/README.md`** — docs index. Tells agents where to look next.
+
+6. **`docs/ARCHITECTURE.md`** — module boundaries and dependency direction.
    Short. Updated whenever structure changes.
 
-5. **`docs/HARNESS.md`** — the operating contract: what commands to run, what
+7. **`docs/HARNESS.md`** — the operating contract: what commands to run, what
    every PR must include, what qualifies for automerge, what needs human
    review, how failures escalate.
 
-6. **`docs/QUALITY_SCORE.md`** — repo health summary. Tracks incidents and
+8. **`docs/QUALITY_SCORE.md`** — repo health summary. Tracks incidents and
    points at the next cleanup targets.
 
-7. **`docs/behaviours/README.md`** — index for behavior specs.
+9. **`docs/behaviours/INDEX.md`** — behavior docs directory contract and full
+    file index.
 
-8. **`docs/behaviours/platform.md`** — canonical product behavior spec.
+10. **`docs/behaviours/README.md`** — index for behavior specs.
+
+11. **`docs/behaviours/platform.md`** — canonical product behavior spec.
    Start with 2–3 concrete scenarios based on what the user described.
 
-9. **`docs/behaviours/current-state.md`** — summary of what's implemented.
+12. **`docs/behaviours/current-state.md`** — summary of what's implemented.
 
-10. **`docs/behaviours/e2e-checklist.md`** — checklist derived from platform.md.
+13. **`docs/behaviours/e2e-checklist.md`** — checklist derived from platform.md.
 
-11. **`docs/exec-plans/README.md`** — index for execution plans, with
+14. **`docs/exec-plans/INDEX.md`** — execution plans directory contract, file
+    format expectations, and links to child directory indexes.
+
+15. **`docs/exec-plans/README.md`** — index for execution plans, with
     `active/` and `completed/` subdirectories.
 
-12. **`docs/generated/`** — empty directory (will hold generated docs later).
+16. **`docs/exec-plans/active/INDEX.md`** — explains how active plans are named
+    and structured.
 
-13. **`docs/playbooks/`** — empty directory for operational playbooks.
+17. **`docs/exec-plans/completed/INDEX.md`** — explains how completed plans are
+    archived and linked back to shipped work.
+
+18. **`docs/generated/INDEX.md`** — explains that generated docs are refreshed
+    by script and should not be edited by hand.
+
+19. **`docs/playbooks/INDEX.md`** — explains what operational playbooks belong
+    here and the format they should use.
 
 After creating these, pause and tell the user: "Core docs are scaffolded.
 Want to review before I add scripts?"
@@ -109,7 +139,8 @@ Adapt each script to the project's actual stack.
 
 1. **`scripts/validate-repo.sh`** — the single command that checks repo truth.
    Runs: markdown link checks, no-absolute-local-path checks, AGENTS.md drift
-   checks, behavior snapshot consistency, generated-doc freshness.
+   checks, behavior snapshot consistency, generated-doc freshness, index
+   coverage, and index freshness.
 
 2. **`scripts/fast-feedback.sh`** — standard short loop for normal PRs.
    Runs: validate-repo, stack-specific static checks, frontend type/lint/build
@@ -125,21 +156,29 @@ Adapt each script to the project's actual stack.
 5. **`scripts/generate-workspace-docs.mjs`** — generates a workspace inventory
    so the repo map can be checked mechanically.
 
-6. **`scripts/refresh-quality-score.mjs`** — regenerates quality summary from
+6. **`scripts/generate-index-docs.mjs`** — refreshes `INDEX.md` files under
+   `docs/` so links to files and child directory indexes stay current.
+
+7. **`scripts/check-index-docs.mjs`** — fails if any directory under `docs/`
+   is missing an `INDEX.md`, or if any index is stale, missing file links, or
+   missing child-directory index links.
+
+8. **`scripts/refresh-quality-score.mjs`** — regenerates quality summary from
    current repo state.
 
-7. **`scripts/check-doc-links.mjs`** — validates markdown links in docs/.
+9. **`scripts/check-doc-links.mjs`** — validates markdown links in docs/ and
+   all `INDEX.md` files.
 
-8. **`scripts/check-agents-drift.mjs`** — checks that AGENTS.md repo map
+10. **`scripts/check-agents-drift.mjs`** — checks that AGENTS.md repo map
    matches actual directory structure.
 
-9. **`scripts/check-behaviour-docs.mjs`** — validates that current-state.md
-   and e2e-checklist.md are consistent with platform.md.
+11. **`scripts/check-behaviour-docs.mjs`** — validates that current-state.md
+    and e2e-checklist.md are consistent with platform.md.
 
-10. **`scripts/check-generated-docs.sh`** — CI gate: fails if generated docs
+12. **`scripts/check-generated-docs.sh`** — CI gate: fails if generated docs
     are stale.
 
-11. **`scripts/validate-setup.sh`** — verifies the bootstrap itself is complete.
+13. **`scripts/validate-setup.sh`** — verifies the bootstrap itself is complete.
     Checks that all expected docs, scripts, workflows, and directories exist.
     Copy this from the skill's bundled `scripts/validate-setup.sh`. It accepts
     `--has-frontend` and `--has-harness` flags to adjust expectations.
@@ -246,10 +285,13 @@ After all phases complete:
    script, workflow, and directory — any missing items are reported as failures.
    Fix anything it flags before continuing.
 
-2. Run `scripts/validate-repo.sh` to verify doc links, drift checks, etc.
-3. Run `scripts/fast-feedback.sh` to confirm the feedback loop works.
-4. Summarize what was created, linking to each key file.
-5. Suggest the Day 0 → Week 1 sequence from the reference docs for next steps.
+2. Run `node scripts/generate-index-docs.mjs` so all indexes are normalized
+   before validation.
+3. Run `scripts/validate-repo.sh` to verify doc links, drift checks, index
+   freshness, etc.
+4. Run `scripts/fast-feedback.sh` to confirm the feedback loop works.
+5. Summarize what was created, linking to each key file.
+6. Suggest the Day 0 → Week 1 sequence from the reference docs for next steps.
 
 Tell the user: "The repo is bootstrapped. A new agent can now read AGENTS.md
 and find everything it needs."
