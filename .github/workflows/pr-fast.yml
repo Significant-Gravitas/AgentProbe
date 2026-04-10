@@ -13,16 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - uses: oven-sh/setup-bun@v2
 
-      - uses: astral-sh/setup-uv@v6
-
       - name: Install dependencies
-        run: uv sync --group dev
+        run: bun install --frozen-lockfile
 
       - name: Fast feedback
         run: ./scripts/fast-feedback.sh

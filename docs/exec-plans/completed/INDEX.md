@@ -10,6 +10,7 @@ historical reference and post-mortems.
 - Same structure as active plans, plus an Outcome section documenting
   what actually shipped and any deviations from the plan.
 - Link back to relevant PRs and issues.
+- Preserve the decisions that mattered so future cleanup work can reuse them.
 - Do not modify completed plans after archival except to fix broken links.
 
 ## Files

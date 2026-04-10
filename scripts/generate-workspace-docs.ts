@@ -4,8 +4,8 @@
  * Output: docs/generated/workspace-inventory.md
  */
 
-import { readdirSync, statSync, writeFileSync, mkdirSync } from "fs";
-import { join, dirname, relative } from "path";
+import { mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
 
 const REPO_ROOT = join(dirname(new URL(import.meta.url).pathname), "..");
 const OUTPUT = join(REPO_ROOT, "docs", "generated", "workspace-inventory.md");
@@ -45,7 +45,7 @@ function walk(dir: string, depth = 0, maxDepth = 3): Entry[] {
     const stat = statSync(full);
     const rel = relative(REPO_ROOT, full);
     if (stat.isDirectory()) {
-      entries.push({ path: rel + "/", type: "dir" });
+      entries.push({ path: `${rel}/`, type: "dir" });
       entries.push(...walk(full, depth + 1, maxDepth));
     } else {
       entries.push({ path: rel, type: "file" });

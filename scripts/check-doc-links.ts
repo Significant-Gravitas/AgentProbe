@@ -4,8 +4,8 @@
  * Exits non-zero if any link target is missing.
  */
 
-import { existsSync, readFileSync, readdirSync, statSync } from "fs";
-import { join, dirname, resolve } from "path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 
 const REPO_ROOT = join(dirname(new URL(import.meta.url).pathname), "..");
 const LINK_RE = /\[([^\]]*)\]\(([^)]+)\)/g;
@@ -14,19 +14,25 @@ let errors = 0;
 
 function checkFile(filePath: string): void {
   const content = readFileSync(filePath, "utf8");
-  let match: RegExpExecArray | null;
   // Reset lastIndex for global regex
   LINK_RE.lastIndex = 0;
-  while ((match = LINK_RE.exec(content)) !== null) {
+  while (true) {
+    const match = LINK_RE.exec(content);
+    if (!match) {
+      break;
+    }
     const target = match[2];
     if (
       target.startsWith("http") ||
       target.startsWith("#") ||
       target.startsWith("mailto:")
-    )
+    ) {
       continue;
+    }
     const targetPath = target.split("#")[0];
-    if (!targetPath) continue;
+    if (!targetPath) {
+      continue;
+    }
     const resolved = resolve(dirname(filePath), targetPath);
     if (!existsSync(resolved)) {
       console.error(`BROKEN LINK: ${filePath} -> ${target}`);

@@ -3,7 +3,8 @@
 ## Purpose
 
 Operational playbooks for recurring tasks, incident response, and
-maintenance procedures. Each playbook is a self-contained runbook.
+maintenance procedures. Each playbook is a self-contained runbook that an agent
+or human can execute without external tribal knowledge.
 
 ## File conventions
 
