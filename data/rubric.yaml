@@ -756,3 +756,97 @@ rubrics:
     id: agent-deployment
     name: "Agent Deployment Agent"
     description: "Evaluates deployment, configuration, rollout, and operational readiness tasks"
+
+  # -- MULTI-SESSION MEMORY RUBRIC -----------
+  - id: multi-session-memory
+    name: "Multi-Session Memory"
+    description: "Evaluates memory persistence, recall accuracy, and context separation across session boundaries"
+    pass_threshold: 0.65
+
+    meta_prompt: |
+      You are judging an AI agent's memory system across multiple sessions.
+      The scenario seeded facts in an earlier session, then probed recall in a later session
+      after a full agent restart (fresh_agent reset — no context window, only persistent memory).
+
+      Expected behavior: {{ expectations.expected_behavior }}
+      {% if expectations.tester_note %}Tester note: {{ expectations.tester_note }}{% endif %}
+      {% if expectations.failure_modes %}
+      Known failure modes to watch for:
+      {% for fm in expectations.failure_modes %}- {{ fm.name }}: {{ fm.description }}
+      {% endfor %}{% endif %}
+
+    judge:
+      provider: openai
+      model: anthropic/claude-opus-4.6
+      temperature: 0.0
+      max_tokens: 4096
+
+    dimensions:
+      - id: retention_accuracy
+        name: "Retention Accuracy"
+        weight: 0.35
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "No recall — agent forgot all seeded facts"
+            2: "Minimal — recalled one fact or vague fragments"
+            3: "Partial — recalled some facts but missed key ones"
+            4: "Good — recalled most facts with minor gaps"
+            5: "Complete — all seeded facts recalled accurately"
+        judge_prompt: |
+          Did the agent recall facts from the seed session without being reminded?
+          Consider: names, preferences, tools, workflows, relationships, and policies
+          that were mentioned in earlier sessions.
+
+      - id: fabrication_detection
+        name: "Fabrication Detection"
+        weight: 0.30
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Severe fabrication — confidently stated multiple false facts"
+            2: "Moderate fabrication — invented one or more facts"
+            3: "Minor fabrication — embellished or mixed up details"
+            4: "Clean — no fabrication, but hedged unnecessarily"
+            5: "Perfect — no fabrication, appropriate confidence"
+        judge_prompt: |
+          Did the agent invent facts that were never stated in any session?
+          Fabrication is worse than forgetting. A confident wrong answer is a critical failure.
+          Check whether recalled facts match what was actually seeded.
+
+      - id: context_separation
+        name: "Context Separation"
+        weight: 0.20
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Complete bleed — treated all contexts as equivalent"
+            2: "Significant bleed — mixed facts from different contexts"
+            3: "Partial separation — mostly correct but leaked some context"
+            4: "Good separation — correctly distinguished contexts with minor confusion"
+            5: "Perfect — correctly scoped all facts to their proper context"
+        judge_prompt: |
+          Did the agent correctly separate facts from different contexts?
+          For example: fiction vs reality, competitor research vs own business,
+          hypothetical scenarios vs standing facts, client data vs user's own data.
+          Memory should not bleed between scopes.
+
+      - id: temporal_reasoning
+        name: "Temporal Reasoning"
+        weight: 0.15
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "No temporal awareness — used outdated facts as current"
+            2: "Poor — mixed old and new values without distinction"
+            3: "Partial — recognized updates but didn't fully apply them"
+            4: "Good — used most recent values, noted changes"
+            5: "Perfect — correctly applied temporal ordering to all facts"
+        judge_prompt: |
+          When facts were updated across sessions, did the agent use the most recent value?
+          Consider: updated preferences, corrected information, superseded decisions.
+          The agent should respect the temporal order of information.

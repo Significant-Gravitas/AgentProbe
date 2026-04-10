@@ -818,16 +818,26 @@ scenarios:
         recorder: object | None = None,
         scenario_ordinal: int | None = None,
         dry_run: bool = False,
+        adapter_factory: object | None = None,
     ) -> ScenarioRunResult:
-        del adapter, persona, rubric, oai_client, recorder, scenario_ordinal, dry_run
+        persona_id = persona.id
+        rubric_id = rubric.id
+        del (
+            adapter,
+            oai_client,
+            recorder,
+            scenario_ordinal,
+            dry_run,
+            adapter_factory,
+        )
         observed_defaults.append(
             (scenario.id, defaults.max_turns if defaults is not None else None)
         )
         return ScenarioRunResult(
             scenario_id=scenario.id,
             scenario_name=scenario.name,
-            persona_id=scenario.persona,
-            rubric_id=scenario.rubric,
+            persona_id=persona_id,
+            rubric_id=rubric_id,
             passed=True,
             overall_score=0.8,
         )
@@ -1097,15 +1107,25 @@ scenarios:
         recorder: object | None = None,
         scenario_ordinal: int | None = None,
         dry_run: bool = False,
+        adapter_factory: object | None = None,
     ) -> ScenarioRunResult:
-        del adapter, persona, rubric, defaults, oai_client, recorder, dry_run
+        persona_id = persona.id
+        rubric_id = rubric.id
+        del (
+            adapter,
+            defaults,
+            oai_client,
+            recorder,
+            dry_run,
+            adapter_factory,
+        )
         if scenario.id == "smoke-scenario":
             await asyncio.sleep(0.05)
             return ScenarioRunResult(
                 scenario_id=scenario.id,
                 scenario_name=scenario.name,
-                persona_id=scenario.persona,
-                rubric_id=scenario.rubric,
+                persona_id=persona_id,
+                rubric_id=rubric_id,
                 passed=True,
                 overall_score=0.8,
             )
@@ -1114,8 +1134,8 @@ scenarios:
         return ScenarioRunResult(
             scenario_id=scenario.id,
             scenario_name=scenario.name,
-            persona_id=scenario.persona,
-            rubric_id=scenario.rubric,
+            persona_id=persona_id,
+            rubric_id=rubric_id,
             passed=True,
             overall_score=0.9,
         )

@@ -10,3 +10,4 @@ data/cluster_scenarios
 agentprobe-report-*.html
 .mypy_cache/
 .ruff_cache/
+.env
