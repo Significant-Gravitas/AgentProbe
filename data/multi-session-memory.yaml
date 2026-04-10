@@ -7,6 +7,10 @@ defaults:
   timeout_seconds: 30
   persona: smb-founder
   rubric: multi-session-memory
+  user_name: "Jordan Rivera"
+  # copilot_mode: fast | extended_thinking
+  # To benchmark both modes, run the suite twice with each value.
+  copilot_mode: "fast"
 
 # Multi-Session Memory Evaluation
 #
@@ -53,6 +57,7 @@ scenarios:
       - id: s1-seed
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
             content: "Quick housekeeping before we get into it: my assistant is Sarah -- you can CC her on client stuff. Our CRM is HubSpot, and our standing rule is invoices go out on the 1st of the month. Now, log a new contact: Marcus Lee, marcus@northstar.io, NorthStar, CTO."
@@ -63,6 +68,7 @@ scenarios:
         turns:
           - role: user
             content: "Who should I CC on outgoing client proposals?"
+            use_exact_message: true
           - role: user
             content: "Add this new lead to our CRM: Rachel Torres, rachel@greenbuildstudios.com, GreenBuild Studios, Director."
 
@@ -380,6 +386,7 @@ scenarios:
     description: "Updated preference cleanly replaces the old one and doesn't ghost back later"
     tags: [multi_session, memory, rigidity, anti_rigidity]
     priority: critical
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -429,6 +436,7 @@ scenarios:
     description: "Agent drops old tool entirely once told it's replaced, doesn't hedge by using both"
     tags: [multi_session, memory, rigidity]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -462,6 +470,7 @@ scenarios:
         Agent uses Airtable, the right base ('CRM 2026'), the right table
         ('Contacts'). Does not touch HubSpot at all. No clarifying questions.
       expected_outcome: resolved
+      must_not_include: ["HubSpot", "hubspot"]
       failure_modes:
         - stale_tool: Uses HubSpot
         - hedge: Uses both HubSpot and Airtable "to be safe"
@@ -473,6 +482,7 @@ scenarios:
     description: "Updated fact cleanly replaces old, no compromise between values"
     tags: [multi_session, memory, rigidity, temporal]
     priority: critical
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -504,6 +514,10 @@ scenarios:
         Quote shows $3,000/mo. Does not mention old pricing. Does not average
         to $2,750 or any other intermediate value.
       expected_outcome: resolved
+      ground_truth: |
+        Current correct price: Growth plan is $3,000/mo (updated in S2).
+        Old price was $2,500/mo (superseded). Any value other than $3,000 is wrong.
+      must_not_include: ["$2,500", "2500", "$2,750", "2750"]
       failure_modes:
         - stale_fact: Quote shows $2,500
         - averaging: Quote shows $2,750 or another intermediate (vector-store pathology)
@@ -519,6 +533,7 @@ scenarios:
     description: "Genuinely ambiguous user reference should produce a clarifying question, not a guess"
     tags: [multi_session, memory, abstention]
     priority: high
+    rubric: memory-abstention
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -539,6 +554,7 @@ scenarios:
         turns:
           - role: user
             content: "Send the usual follow-up to Bright."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -556,6 +572,7 @@ scenarios:
     description: "Generic history should not be over-interpreted as preference signal"
     tags: [multi_session, memory, abstention, anti_rigidity]
     priority: high
+    rubric: memory-abstention
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -578,6 +595,7 @@ scenarios:
         turns:
           - role: user
             content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -599,6 +617,7 @@ scenarios:
     description: "Outdated fact about a team member gets replaced when the user updates it"
     tags: [multi_session, memory, temporal]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -632,6 +651,7 @@ scenarios:
         Email is CC'd to Marcus at marcus@acme.co. Sarah is not mentioned
         or included.
       expected_outcome: resolved
+      must_not_include: ["Sarah", "sarah@acme.co"]
       failure_modes:
         - stale: CC's Sarah
         - both: CC's both Sarah and Marcus
@@ -643,6 +663,7 @@ scenarios:
     description: "Entire procedure replaced cleanly when user says 'use this going forward'"
     tags: [multi_session, memory, temporal, distillation]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -684,6 +705,7 @@ scenarios:
         Uses Zendesk for the customer reply, logs to Airtable Refunds base,
         does NOT post to Slack. None of the original workflow's steps appear.
       expected_outcome: resolved
+      must_not_include: ["Slack", "#support", "Google Sheet", "email template"]
       failure_modes:
         - slack_persists: Posts to Slack (the negation that's easiest to lose)
         - spreadsheet_persists: Logs to the Google Sheet instead of Airtable
@@ -721,6 +743,7 @@ scenarios:
         turns:
           - role: user
             content: "Let's pick up where we left off."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -791,6 +814,7 @@ scenarios:
     description: "Entity facts learned in one form-shaped task surface in another"
     tags: [multi_session, memory, cross_domain]
     priority: critical
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -834,6 +858,7 @@ scenarios:
     description: "Constraint about one entity applied correctly in a new context, but not generalized to others"
     tags: [multi_session, memory, cross_domain, negative_probe]
     priority: critical
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -884,6 +909,7 @@ scenarios:
     description: "Multi-part pricing rules applied correctly across different prospect scenarios"
     tags: [multi_session, memory, cross_domain, negative_probe]
     priority: high
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -930,6 +956,7 @@ scenarios:
     description: "Fact learned in setup context must be combined with new inputs to produce the right answer"
     tags: [multi_session, memory, cross_domain, reasoning, complex]
     priority: critical
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -957,6 +984,11 @@ scenarios:
         "Friday to Monday" or names a specific day with an appropriate hedge.
         No clarifying questions about the shipping schedule.
       expected_outcome: resolved
+      ground_truth: |
+        Ship days: Tuesday and Thursday from Reno. Cutoff: 2 PM Pacific.
+        Order placed Monday 4 PM -> missed Monday (not a ship day anyway).
+        Next ship day: Tuesday. Transit: 3-4 business days to Chicago.
+        Expected arrival: Friday to following Monday.
       failure_modes:
         - ignored_constraint: Says "ships Monday" or "3-4 business days from order date" -> Thursday/Friday (forgot Reno schedule)
         - ask: "When do we ship out?"
@@ -974,6 +1006,7 @@ scenarios:
     description: "A learned rate-limit constraint changes later behavior without producing a visible artifact"
     tags: [multi_session, memory, cross_domain, negative_constraint, agent_generation]
     priority: medium
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1021,6 +1054,7 @@ scenarios:
     description: "Tool in an existing procedure swapped without breaking surrounding steps"
     tags: [multi_session, memory, procedural_update]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1076,6 +1110,7 @@ scenarios:
     description: "Additive update to a distilled procedure"
     tags: [multi_session, memory, procedural_update]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1127,6 +1162,7 @@ scenarios:
     description: "Agent combines two facts from different sessions to answer a derived question"
     tags: [multi_session, memory, compositional, high_signal]
     priority: high
+    rubric: memory-compositional
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1181,6 +1217,7 @@ scenarios:
     description: "Agent produces a coherent, accurate, non-fabricated summary of what it knows"
     tags: [multi_session, memory, introspection]
     priority: medium
+    rubric: memory-introspection
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1206,6 +1243,7 @@ scenarios:
         turns:
           - role: user
             content: "What do you know about me and my business?"
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1214,6 +1252,11 @@ scenarios:
         competitor, pricing tiers. Organized by category or importance,
         not a flat dump. Does not include facts not present in S1/S2.
       expected_outcome: resolved
+      ground_truth: |
+        Facts seeded: Acme Co LLC, Delaware, fiscal year ends March,
+        assistant Sarah (sarah@acme.co), CRM is HubSpot, ships from Reno
+        Tues/Thurs, competitor FreshPaws, sales cycle 6 weeks.
+        Pricing: Growth $3,000/mo, Standard $1,500/mo, wholesale 50+ at $24.99/unit.
       failure_modes:
         - fabrication: Lists facts never mentioned (worst failure -- erodes trust)
         - omission: Misses obvious things like company name
@@ -1230,6 +1273,7 @@ scenarios:
     description: "Agent names actual missing information, not generic or false gaps"
     tags: [multi_session, memory, introspection, stretch_goal]
     priority: low
+    rubric: memory-introspection
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1248,6 +1292,7 @@ scenarios:
         turns:
           - role: user
             content: "What information about me or my business would be useful for you to have, that you don't currently?"
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1275,6 +1320,7 @@ scenarios:
     description: "Fact mentioned once, in passing, retrieved much later when relevant"
     tags: [multi_session, memory, long_tail]
     priority: high
+    rubric: memory-hygiene
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1340,6 +1386,7 @@ scenarios:
     description: "Temporary constraint applies during its window and not after"
     tags: [multi_session, memory, hygiene, decay]
     priority: medium
+    rubric: memory-hygiene
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1390,6 +1437,7 @@ scenarios:
     description: "Temporary status fact does not persist beyond its expected expiry"
     tags: [multi_session, memory, hygiene, decay]
     priority: medium
+    rubric: memory-hygiene
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1444,6 +1492,7 @@ scenarios:
     description: "A 'just for this one' instruction does not become a default"
     tags: [multi_session, memory, negative, anti_rigidity]
     priority: high
+    rubric: memory-abstention
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1462,6 +1511,7 @@ scenarios:
         turns:
           - role: user
             content: "Draft an outreach email to a new prospect at rachel@greenbuildstudios.com about our consulting services."
+            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -1478,6 +1528,7 @@ scenarios:
     description: "When the user says 'forget that,' the fact does not resurface"
     tags: [multi_session, memory, negative]
     priority: high
+    rubric: memory-abstention
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1503,6 +1554,7 @@ scenarios:
         turns:
           - role: user
             content: "What's our Q2 marketing budget?"
+            use_exact_message: true
 
     expectations:
       expected_behavior: |

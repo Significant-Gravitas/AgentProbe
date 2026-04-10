@@ -280,7 +280,7 @@ class HttpEndpointAdapter:
             for event in events
             if isinstance(event, dict)
         ]
-        assistant_text = "\n".join(chunk for chunk in assistant_chunks if chunk).strip()
+        assistant_text = "".join(chunk for chunk in assistant_chunks if chunk).strip()
         return (
             _ParsedResponse(
                 assistant_text=assistant_text,

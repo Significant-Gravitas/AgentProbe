@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
 
+import httpx
 import openai
 
 from pydantic import ConfigDict, Field
 
 from .data.common import AgentProbeModel
 from .data.rubrics import JudgeConfig, Rubric
+
+logger = logging.getLogger(__name__)
 
 
 class JudgeDimensionScore(AgentProbeModel):
@@ -24,6 +29,7 @@ class RubricScore(AgentProbeModel):
     dimensions: dict[str, JudgeDimensionScore] = Field(default_factory=dict)
     overall_notes: str = ""
     passed: bool = Field(alias="pass")
+    failure_mode_detected: str | None = None
 
     def validate_dimensions(self, rubric: Rubric) -> None:
         expected_ids = {dimension.id for dimension in rubric.dimensions}
@@ -90,8 +96,12 @@ def _judge_json_schema(rubric: Rubric) -> dict[str, object]:
                 "type": "boolean",
                 "description": "Whether the evaluated response passes the rubric.",
             },
+            "failure_mode_detected": {
+                "type": ["string", "null"],
+                "description": "If a named failure mode from the scenario's failure_modes list was observed, name it here. Otherwise null.",
+            },
         },
-        "required": ["dimensions", "overall_notes", "pass"],
+        "required": ["dimensions", "overall_notes", "pass", "failure_mode_detected"],
         "additionalProperties": False,
     }
 
@@ -103,6 +113,10 @@ def _judge_instructions(rubric: Rubric, schema: dict[str, object]) -> str:
         f"{rubric.to_prompt_markdown()}\n\n"
         "Return structured output matching the requested schema exactly. "
         f"The `dimensions` object must contain exactly these rubric dimension ids: {dimension_ids}.\n\n"
+        "If the rubric's meta_prompt or scenario includes a `failure_modes` list, check "
+        "whether the response exhibits any of those named failure modes. Set "
+        "`failure_mode_detected` to the matching failure mode name if one is observed, "
+        "or null if none apply.\n\n"
         "JSON schema:\n"
         f"{json.dumps(schema, indent=2, sort_keys=True)}"
     )
@@ -173,36 +187,73 @@ async def judge(
 
     judge_config = _judge_config(rubric)
     schema = _judge_json_schema(rubric)
-    try:
-        api_response = await oai_client.responses.create(
-            model=judge_config.model,
-            instructions=_judge_instructions(rubric, schema),
-            input=f"Response to evaluate:\n\n{response}",
-            text={
-                "format": {
-                    "type": "json_schema",
-                    "name": "rubric_score",
-                    "description": "Structured rubric evaluation for an agent response.",
-                    "schema": schema,
-                    "strict": True,
-                }
-            },
-            temperature=judge_config.temperature,
-            max_output_tokens=judge_config.max_tokens,
-        )
-    except openai.AuthenticationError as exc:
-        raise openai.AuthenticationError(
-            message=(
-                f"Judge authentication failed for model '{judge_config.model}'. "
-                "Set a valid OPEN_ROUTER_API_KEY before running agentprobe."
-            ),
-            response=exc.response,
-            body=exc.body,
-        ) from exc
 
-    score = _parse_rubric_score(_extract_response_text(api_response))
-    score.validate_dimensions(rubric)
-    return score
+    max_attempts = 3
+    last_exception: Exception | None = None
+
+    for attempt in range(1, max_attempts + 1):
+        try:
+            try:
+                api_response = await oai_client.responses.create(
+                    model=judge_config.model,
+                    instructions=_judge_instructions(rubric, schema),
+                    input=f"Response to evaluate:\n\n{response}",
+                    text={
+                        "format": {
+                            "type": "json_schema",
+                            "name": "rubric_score",
+                            "description": "Structured rubric evaluation for an agent response.",
+                            "schema": schema,
+                            "strict": True,
+                        }
+                    },
+                    temperature=judge_config.temperature,
+                    max_output_tokens=judge_config.max_tokens,
+                )
+            except openai.AuthenticationError as exc:
+                raise openai.AuthenticationError(
+                    message=(
+                        f"Judge authentication failed for model '{judge_config.model}'. "
+                        "Set a valid OPEN_ROUTER_API_KEY before running agentprobe."
+                    ),
+                    response=exc.response,
+                    body=exc.body,
+                ) from exc
+
+            score = _parse_rubric_score(_extract_response_text(api_response))
+            score.validate_dimensions(rubric)
+            return score
+
+        except (json.JSONDecodeError, ValueError) as exc:
+            last_exception = exc
+            if attempt < max_attempts:
+                logger.warning(
+                    "Judge attempt %d/%d failed with %s: %s — retrying",
+                    attempt,
+                    max_attempts,
+                    type(exc).__name__,
+                    exc,
+                )
+                continue
+        except (openai.APIError, httpx.HTTPStatusError) as exc:
+            if isinstance(exc, openai.AuthenticationError):
+                raise
+            status_code = getattr(exc, 'status_code', 0)
+            if status_code and 400 <= status_code < 500 and status_code != 429:
+                raise  # Non-retryable client errors
+            last_exception = exc
+            if attempt < max_attempts:
+                logger.warning(
+                    "Judge attempt %d/%d failed with %s: %s — retrying in 2s",
+                    attempt,
+                    max_attempts,
+                    type(exc).__name__,
+                    exc,
+                )
+                await asyncio.sleep(2)
+                continue
+
+    raise last_exception  # type: ignore[misc]
 
 
 __all__ = [

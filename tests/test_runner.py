@@ -363,6 +363,86 @@ async def test_run_scenario_accepts_generated_follow_up_with_terminal_status_and
 
 
 @pytest.mark.anyio
+async def test_run_scenario_session_max_turns_stops_only_that_session():
+    adapter = FakeAdapter(
+        [
+            AdapterReply(assistant_text="I stored the contact."),
+            AdapterReply(assistant_text="You should CC Sarah."),
+        ]
+    )
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "One more follow-up question."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    scenario = Scenario.model_validate(
+        {
+            "id": "memory-two-session",
+            "name": "Memory Two Session",
+            "persona": "business-traveler",
+            "rubric": "customer-support",
+            "context": {
+                "system_prompt": "You are a travel assistant.",
+                "injected_data": {"booking_id": "FLT-29481"},
+            },
+            "sessions": [
+                {
+                    "id": "s1",
+                    "time_offset": "0h",
+                    "reset": "none",
+                    "max_turns": 1,
+                    "turns": [
+                        {
+                            "role": "user",
+                            "content": "Store the contact in HubSpot.",
+                            "use_exact_message": True,
+                        }
+                    ],
+                },
+                {
+                    "id": "s2",
+                    "time_offset": "48h",
+                    "reset": "new",
+                    "turns": [
+                        {
+                            "role": "user",
+                            "content": "Who should I CC on proposals?",
+                            "use_exact_message": True,
+                        }
+                    ],
+                },
+            ],
+            "expectations": {
+                "expected_behavior": "Reach the second session after capping the first.",
+                "expected_outcome": "resolved",
+            },
+        }
+    )
+
+    result = await run_scenario(
+        adapter,
+        scenario,
+        build_persona(),
+        build_rubric(),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    assert [
+        cast(ConversationTurn, call["last_message"]).content for call in adapter.send_calls
+    ] == [
+        "Store the contact in HubSpot.",
+        "Who should I CC on proposals?",
+    ]
+    assert "One more follow-up question." not in [
+        turn.content for turn in result.transcript
+    ]
+    assert result.passed is True
+
+
+@pytest.mark.anyio
 async def test_run_scenario_records_checkpoint_failures_without_stopping():
     adapter = FakeAdapter(
         [

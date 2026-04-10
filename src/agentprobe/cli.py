@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 from pathlib import Path
 
@@ -201,6 +202,11 @@ def validate(data_path: Path) -> None:
     is_flag=True,
     help="Validate configuration and resolve scenarios without opening sessions or sending messages.",
 )
+@click.option(
+    "-v", "--verbose",
+    count=True,
+    help="Increase log verbosity. -v for INFO, -vv for DEBUG.",
+)
 def run(
     endpoint_path: Path,
     scenarios_path: Path,
@@ -210,7 +216,19 @@ def run(
     tags: str | None,
     parallel: bool,
     dry_run: bool,
+    verbose: int,
 ) -> None:
+    if verbose >= 2:
+        log_level = logging.DEBUG
+    elif verbose >= 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.WARNING
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s %(name)s %(levelname)s %(message)s",
+        datefmt="%H:%M:%S",
+    )
     db_url = _suite_db_url(
         endpoint_path,
         scenarios_path,

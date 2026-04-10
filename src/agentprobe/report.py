@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -142,7 +143,38 @@ def _status_label(passed: object) -> str:
     return "PENDING"
 
 
-def _role_tone(role: object) -> str:
+def _is_session_boundary(role: object, content: object) -> bool:
+    return (
+        str(role or "").strip().lower() == "system"
+        and isinstance(content, str)
+        and content.startswith("--- Session boundary")
+    )
+
+
+_SESSION_BOUNDARY_RE = re.compile(
+    r"session_id:\s*(?P<session_id>\S+)"
+    r"|reset_policy:\s*(?P<reset_policy>\S+)"
+    r"|time_offset:\s*(?P<time_offset>\S+)",
+)
+
+
+def _parse_session_boundary(content: str) -> dict[str, str]:
+    fields: dict[str, str] = {
+        "session_id": "",
+        "reset_policy": "",
+        "time_offset": "",
+    }
+    for match in _SESSION_BOUNDARY_RE.finditer(content):
+        for key in fields:
+            value = match.group(key)
+            if value is not None:
+                fields[key] = value
+    return fields
+
+
+def _role_tone(role: object, content: object = None) -> str:
+    if _is_session_boundary(role, content):
+        return "session_boundary"
     normalized = str(role or "").strip().lower()
     if normalized == "assistant":
         return "assistant"
@@ -151,7 +183,9 @@ def _role_tone(role: object) -> str:
     return "system"
 
 
-def _role_label(role: object) -> str:
+def _role_label(role: object, content: object = None) -> str:
+    if _is_session_boundary(role, content):
+        return "Session Boundary"
     normalized = str(role or "").strip().lower()
     if normalized == "assistant":
         return "Assistant"
@@ -206,18 +240,21 @@ def _build_turn_rows(scenario: dict[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for turn in scenario.get("turns", []):
         turn_index = int(turn.get("turn_index", -1))
-        rows.append(
-            {
-                **turn,
-                "created_at_label": _format_timestamp(turn.get("created_at")),
-                "role_label": _role_label(turn.get("role")),
-                "tone": _role_tone(turn.get("role")),
-                "tool_calls": tool_calls_by_turn.get(turn_index, []),
-                "target_events": target_events_by_turn.get(turn_index, []),
-                "checkpoints": checkpoints_by_turn.get(turn_index, []),
-                "usage_pretty": _pretty_json(turn.get("usage")),
-            }
-        )
+        role = turn.get("role")
+        content = turn.get("content")
+        row: dict[str, Any] = {
+            **turn,
+            "created_at_label": _format_timestamp(turn.get("created_at")),
+            "role_label": _role_label(role, content),
+            "tone": _role_tone(role, content),
+            "tool_calls": tool_calls_by_turn.get(turn_index, []),
+            "target_events": target_events_by_turn.get(turn_index, []),
+            "checkpoints": checkpoints_by_turn.get(turn_index, []),
+            "usage_pretty": _pretty_json(turn.get("usage")),
+        }
+        if _is_session_boundary(role, content):
+            row["session_boundary"] = _parse_session_boundary(str(content))
+        rows.append(row)
 
     leading = checkpoints_by_turn.get(None, [])
     if leading:
@@ -635,6 +672,38 @@ _TEMPLATE = _ENV.from_string(
 
                 <div class="space-y-4">
                   {% for turn in scenario.turn_rows %}
+                  {% if turn.tone == 'session_boundary' %}
+                  <article class="rounded-[1.5rem] bg-indigo-50 border-l-4 border-indigo-400 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <div class="flex items-center gap-3">
+                        <span class="rounded-full bg-indigo-100 text-indigo-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em]">
+                          {{ turn.role_label }}
+                        </span>
+                      </div>
+                      <div class="text-xs text-black/45">Turn {{ turn.turn_index if turn.turn_index >= 0 else "–" }} • {{ turn.created_at_label }}</div>
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center gap-4 text-sm font-semibold text-indigo-900">
+                      {% if turn.session_boundary.session_id %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Session:</span>
+                        {{ turn.session_boundary.session_id }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.reset_policy %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Reset:</span>
+                        {{ turn.session_boundary.reset_policy }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.time_offset %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Time:</span>
+                        {{ turn.session_boundary.time_offset }}
+                      </span>
+                      {% endif %}
+                    </div>
+                  </article>
+                  {% else %}
                   <article class="rounded-[1.5rem] border border-black/10 p-4
                     {% if turn.tone == 'assistant' %}
                       bg-emerald-50/70
@@ -745,6 +814,7 @@ _TEMPLATE = _ENV.from_string(
                     </div>
                     {% endif %}
                   </article>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
