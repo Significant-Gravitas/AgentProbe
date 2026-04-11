@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,7 @@ from .endpoints.openclaw import (
     openclaw_history,
 )
 from .errors import AgentProbeConfigError, AgentProbeRuntimeError
+from .dashboard import DashboardServer, DashboardState
 from .report import write_run_report
 from .runner import (
     RunResult,
@@ -202,6 +204,24 @@ def validate(data_path: Path) -> None:
     is_flag=True,
     help="Validate configuration and resolve scenarios without opening sessions or sending messages.",
 )
+@click.option(
+    "--repeat",
+    type=click.IntRange(min=1),
+    default=1,
+    show_default=True,
+    help="Run each matching scenario N times (each with a fresh user).",
+)
+@click.option(
+    "--dashboard",
+    "dashboard_enabled",
+    is_flag=True,
+    help="Open a live dashboard in the browser.",
+)
+@click.option(
+    "-v", "--verbose",
+    count=True,
+    help="Increase log verbosity. -v for INFO, -vv for DEBUG.",
+)
 def run(
     endpoint_path: Path,
     scenarios_path: Path,
@@ -211,13 +231,45 @@ def run(
     tags: str | None,
     parallel: bool,
     dry_run: bool,
+    repeat: int,
+    dashboard_enabled: bool,
+    verbose: int,
 ) -> None:
+    if verbose >= 2:
+        log_level = logging.DEBUG
+    elif verbose >= 1:
+        log_level = logging.INFO
+    else:
+        log_level = logging.WARNING
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s %(name)s %(levelname)s %(message)s",
+        datefmt="%H:%M:%S",
+    )
     db_url = _suite_db_url(
         endpoint_path,
         scenarios_path,
         personas_path,
         rubric_path,
     )
+
+    dash_state: DashboardState | None = None
+    dash_server: DashboardServer | None = None
+    if dashboard_enabled:
+        dash_state = DashboardState(db_url=db_url)
+        try:
+            dash_server = DashboardServer(dash_state)
+            dash_server.start()
+            import webbrowser
+            webbrowser.open(dash_server.url)
+        except FileNotFoundError as exc:
+            click.echo(f"Dashboard unavailable: {exc}", err=True)
+            dash_server = None
+
+    def _progress(event: RunProgressEvent) -> None:
+        _print_run_progress(event)
+        if dash_state is not None:
+            dash_state.update(event)
 
     async def execute(recorder: SqliteRunRecorder) -> RunResult:
         async with openai.AsyncClient(**_openai_client_kwargs()) as oai_client:
@@ -230,9 +282,10 @@ def run(
                 tags=tags,
                 oai_client=oai_client,
                 recorder=recorder,
-                progress_callback=_print_run_progress,
+                progress_callback=_progress,
                 parallel=parallel,
                 dry_run=dry_run,
+                repeat=repeat,
             )
 
     try:

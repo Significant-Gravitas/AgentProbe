@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal, Protocol
 import openai
+
+logger = logging.getLogger(__name__)
 
 from pydantic import Field
 
@@ -26,6 +30,7 @@ from .data.scenarios import (
     ScenarioDefaults,
     Session,
     parse_scenarios_input,
+    parse_time_offset,
 )
 from .errors import AgentProbeConfigError, AgentProbeRuntimeError
 from .judge import RubricScore, judge
@@ -46,6 +51,7 @@ class ScenarioRunResult(AgentProbeModel):
     scenario_name: str
     persona_id: str
     rubric_id: str
+    user_id: str | None = None
     passed: bool
     overall_score: float
     transcript: list[ConversationTurn] = Field(default_factory=list)
@@ -64,6 +70,7 @@ class RunProgressEvent:
     kind: Literal[
         "suite_started", "scenario_started", "scenario_finished", "scenario_error"
     ]
+    run_id: str | None = None
     scenario_id: str | None = None
     scenario_name: str | None = None
     scenario_index: int | None = None
@@ -97,10 +104,18 @@ class _PreparedScenarioRun:
     rubric: Rubric
     ordinal: int
     total: int
+    user_id: str | None = None
+    iteration: int = 1
 
     @property
     def index(self) -> int:
         return self.ordinal + 1
+
+    @property
+    def display_id(self) -> str:
+        if self.iteration > 1:
+            return f"{self.scenario.id}#{self.iteration}"
+        return self.scenario.id
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,6 +170,7 @@ class RunRecorder(Protocol):
         persona: Persona,
         rubric: Rubric,
         ordinal: int | None,
+        user_id: str | None = None,
     ) -> int: ...
 
     def record_scenario_finished(
@@ -228,6 +244,7 @@ async def _run_session_turns(
     scenario_run_id: int | None,
     persona_model: str,
     max_turns: int | None,
+    stop_session_on_max_turns: bool = False,
 ) -> ScenarioTermination | None:
     """Execute all turns in a single session. Returns termination if max_turns exceeded."""
     scripted_user_turn_seen = False
@@ -257,6 +274,11 @@ async def _run_session_turns(
                 generator_model=generator_model,
             )
 
+        logger.debug(
+            "[%s] Turn %d → user (%s): %s",
+            scenario.id, state.user_turn_count, source,
+            (user_text[:80] + "...") if len(user_text) > 80 else user_text,
+        )
         reply_context = _build_run_context(
             base_context=base_context,
             session_state=session_state,
@@ -266,6 +288,13 @@ async def _run_session_turns(
         )
         adapter_reply = await adapter.send_user_turn(reply_context)
         state.last_reply = adapter_reply
+        reply_preview = (adapter_reply.assistant_text or "")[:80]
+        logger.debug(
+            "[%s] Turn %d ← assistant: %s%s",
+            scenario.id, state.user_turn_count,
+            reply_preview,
+            "..." if len(adapter_reply.assistant_text or "") > 80 else "",
+        )
 
         assistant_turn = ConversationTurn(
             role="assistant",
@@ -405,6 +434,14 @@ async def _run_session_turns(
                     generator_model=persona_model,
                 )
     except _ScenarioMaxTurnsExceeded as exc:
+        if stop_session_on_max_turns:
+            logger.info(
+                "[%s] Session %s reached max_turns=%s; continuing to the next session.",
+                scenario.id,
+                session.id or "__flat__",
+                exc.max_turns,
+            )
+            return None
         return ScenarioTermination(
             reason="max_turns_exceeded",
             message=str(exc),
@@ -444,6 +481,7 @@ async def run_scenario(
     scenario_ordinal: int | None = None,
     dry_run: bool = False,
     adapter_factory: Callable[[], EndpointAdapter] | None = None,
+    user_id: str | None = None,
 ) -> ScenarioRunResult:
     if dry_run:
         return ScenarioRunResult(
@@ -451,6 +489,7 @@ async def run_scenario(
             scenario_name=scenario.name,
             persona_id=persona.id,
             rubric_id=rubric.id,
+            user_id=user_id,
             passed=True,
             overall_score=0.0,
             transcript=[],
@@ -471,6 +510,9 @@ async def run_scenario(
         dict(scenario.context.injected_data) if scenario.context is not None else {}
     )
 
+    user_name = scenario.context.user_name if scenario.context is not None else None
+    copilot_mode = scenario.context.copilot_mode if scenario.context is not None else None
+
     base_context: dict[str, object] = {
         **injected_data,
         "scenario": scenario,
@@ -479,6 +521,9 @@ async def run_scenario(
         "expectations": scenario.expectations,
         "context": scenario.context,
         "defaults": defaults,
+        "user_name": user_name,
+        "user_id": user_id,
+        "copilot_mode": copilot_mode,
     }
 
     state = _SessionState()
@@ -497,6 +542,7 @@ async def run_scenario(
             persona=persona,
             rubric=rubric,
             ordinal=scenario_ordinal,
+            user_id=user_id,
         )
         if recorder is not None
         else None
@@ -504,11 +550,37 @@ async def run_scenario(
 
     sessions = scenario.effective_sessions()
 
+    if scenario.base_date:
+        try:
+            base_date = datetime.strptime(scenario.base_date, "%Y-%m-%d")
+        except ValueError:
+            import warnings
+            warnings.warn(
+                f"Invalid base_date '{scenario.base_date}' — expected YYYY-MM-DD format. "
+                f"Falling back to current time.",
+                stacklevel=2,
+            )
+            base_date = datetime.now()
+    else:
+        base_date = datetime.now()
+
+    logger.info(
+        "[%s] Starting scenario — %d session(s), max_turns=%s, copilot_mode=%s",
+        scenario.id, len(sessions), max_turns,
+        base_context.get("copilot_mode", "default"),
+    )
+
     try:
         try:
             for session_idx, session in enumerate(sessions):
                 is_first = session_idx == 0
                 reset = session.reset
+                session_label = session.id or f"session-{session_idx + 1}"
+                logger.info(
+                    "[%s] Session %d/%d: %s (reset=%s, time_offset=%s)",
+                    scenario.id, session_idx + 1, len(sessions),
+                    session_label, reset, session.time_offset,
+                )
 
                 if not is_first and reset in _RESETS_REQUIRING_REINIT:
                     await _maybe_close_scenario(
@@ -519,19 +591,30 @@ async def run_scenario(
                         state=state,
                     )
                     if reset == "fresh_agent" and adapter_factory is not None:
+                        logger.info("[%s] Creating fresh adapter for session %s", scenario.id, session_label)
                         current_adapter = adapter_factory()
+                    elif reset == "fresh_agent" and adapter_factory is None:
+                        import warnings
+
+                        warnings.warn(
+                            "fresh_agent reset requested but no adapter_factory provided"
+                            " — degrading to 'new' behavior. Results may be invalid.",
+                            stacklevel=2,
+                        )
                     state.last_message = None
                     state.last_reply = None
+                    state.user_turn_count = 0
                     session_state = {}
                     session_transcript = []
 
                 if not is_first:
-                    session_label = session.id or f"session-{session_idx + 1}"
+                    user_id_part = f" user_id: {user_id}" if user_id else ""
                     boundary_turn = ConversationTurn(
                         role="system",
                         content=(
-                            f"--- Session boundary: {session_label} "
-                            f"(reset={session.reset}, time_offset={session.time_offset}) ---"
+                            f"--- Session boundary: session_id: {session_label} "
+                            f"reset_policy: {session.reset} time_offset: {session.time_offset}"
+                            f"{user_id_part} ---"
                         ),
                     )
                     full_transcript.append(boundary_turn)
@@ -564,6 +647,11 @@ async def run_scenario(
                                 source="system_prompt",
                             )
 
+                session_date = base_date + parse_time_offset(session.time_offset)
+                base_context["current_date"] = session_date.strftime("%Y-%m-%d %H:%M")
+
+                effective_max_turns = session.max_turns if session.max_turns is not None else max_turns
+
                 termination = await _run_session_turns(
                     session,
                     current_adapter,
@@ -582,7 +670,8 @@ async def run_scenario(
                     recorder=recorder,
                     scenario_run_id=scenario_run_id,
                     persona_model=persona_model,
-                    max_turns=max_turns,
+                    max_turns=effective_max_turns,
+                    stop_session_on_max_turns=session.max_turns is not None,
                 )
                 if termination is not None:
                     break
@@ -618,8 +707,14 @@ async def run_scenario(
             tool_calls_by_turn,
             termination=termination,
         )
+        logger.info("[%s] Sending transcript (%d turns) to judge...", scenario.id, len(full_transcript))
         score = await judge(rendered_rubric, transcript_text, oai_client)
         overall_score = _overall_score(rendered_rubric, score)
+        logger.info(
+            "[%s] Judge result: passed=%s, overall_score=%.2f, failure_mode=%s",
+            scenario.id, score.passed, overall_score,
+            score.failure_mode_detected or "none",
+        )
         if recorder is not None and scenario_run_id is not None:
             recorder.record_judge_result(
                 scenario_run_id,
@@ -633,6 +728,7 @@ async def run_scenario(
             scenario_name=scenario.name,
             persona_id=persona.id,
             rubric_id=rubric.id,
+            user_id=user_id,
             passed=score.passed,
             overall_score=overall_score,
             transcript=full_transcript,
@@ -661,6 +757,7 @@ async def run_suite(
     progress_callback: RunProgressCallback | None = None,
     parallel: bool = False,
     dry_run: bool = False,
+    repeat: int = 1,
 ) -> RunResult:
     run_id = (
         recorder.record_run_started(
@@ -716,51 +813,77 @@ async def run_suite(
                 tags=tags,
             )
 
-        scenario_total = len(selected_scenarios)
+        effective_repeat = max(1, repeat)
+        scenario_total = len(selected_scenarios) * effective_repeat
         if progress_callback is not None:
             progress_callback(
-                RunProgressEvent(kind="suite_started", scenario_total=scenario_total)
+                RunProgressEvent(kind="suite_started", scenario_total=scenario_total, run_id=run_id)
             )
         prepared_runs: list[_PreparedScenarioRun] = []
-        for scenario_ordinal, item in enumerate(selected_scenarios):
-            resolved_persona_id = item.persona
-            if resolved_persona_id is None:
-                raise AgentProbeConfigError(
-                    f"Scenario {item.id} has no persona (and no default was provided)."
-                )
-            persona = persona_by_id.get(resolved_persona_id)
-            if persona is None:
-                raise AgentProbeConfigError(
-                    f"Scenario {item.id} references unknown persona `{resolved_persona_id}`."
-                )
+        ordinal_counter = 0
+        for item in selected_scenarios:
+            for iteration in range(1, effective_repeat + 1):
+                resolved_persona_id = item.persona
+                if resolved_persona_id is None:
+                    raise AgentProbeConfigError(
+                        f"Scenario {item.id} has no persona (and no default was provided)."
+                    )
+                persona = persona_by_id.get(resolved_persona_id)
+                if persona is None:
+                    raise AgentProbeConfigError(
+                        f"Scenario {item.id} references unknown persona `{resolved_persona_id}`."
+                    )
 
-            resolved_rubric_id = item.rubric
-            if resolved_rubric_id is None:
-                raise AgentProbeConfigError(
-                    f"Scenario {item.id} has no rubric (and no default was provided)."
-                )
-            rubric_item = rubric_by_id.get(resolved_rubric_id)
-            if rubric_item is None:
-                raise AgentProbeConfigError(
-                    f"Scenario {item.id} references unknown rubric `{resolved_rubric_id}`."
-                )
+                resolved_rubric_id = item.rubric
+                if resolved_rubric_id is None:
+                    raise AgentProbeConfigError(
+                        f"Scenario {item.id} has no rubric (and no default was provided)."
+                    )
+                rubric_item = rubric_by_id.get(resolved_rubric_id)
+                if rubric_item is None:
+                    raise AgentProbeConfigError(
+                        f"Scenario {item.id} references unknown rubric `{resolved_rubric_id}`."
+                    )
 
-            def _make_adapter_factory(
-                ec: Endpoints = endpoint_config,
-                af: Callable[[Endpoints], EndpointAdapter] | None = adapter_factory,
-            ) -> Callable[[], EndpointAdapter]:
-                return lambda: af(ec) if af is not None else build_endpoint_adapter(ec)
+                def _make_adapter_factory(
+                    ec: Endpoints = endpoint_config,
+                    af: Callable[[Endpoints], EndpointAdapter] | None = adapter_factory,
+                    _item: Scenario = item,
+                ) -> tuple[Callable[[], EndpointAdapter], str]:
+                    # Pin a stable user_id per scenario+iteration so fresh_agent resets
+                    # create new sessions but authenticate as the SAME user within the
+                    # scenario. Each (iteration, scenario) gets its own fresh uuid so
+                    # --repeat iterations remain memory-independent — we intentionally
+                    # ignore AUTOGPT_USER_ID here to prevent ambient env from collapsing
+                    # all iterations onto one memory graph.
+                    import uuid as _uuid
+                    _pinned_user_id = str(_uuid.uuid4())
+                    logger.debug("Pinned user_id for scenario %s: %s", _item.id, _pinned_user_id)
 
-            prepared_runs.append(
-                _PreparedScenarioRun(
-                    adapter_factory=_make_adapter_factory(),
-                    scenario=item,
-                    persona=persona,
-                    rubric=rubric_item,
-                    ordinal=scenario_ordinal,
-                    total=scenario_total,
+                    def _pinned_auth_resolver() -> object:
+                        from .endpoints.autogpt import resolve_auth as _resolve
+                        return _resolve(user_id=_pinned_user_id)
+
+                    def _factory() -> EndpointAdapter:
+                        if af is not None:
+                            return af(ec)
+                        return build_endpoint_adapter(ec, autogpt_auth_resolver=_pinned_auth_resolver)
+                    return _factory, _pinned_user_id
+
+                factory, pinned_user_id = _make_adapter_factory()
+                prepared_runs.append(
+                    _PreparedScenarioRun(
+                        adapter_factory=factory,
+                        scenario=item,
+                        persona=persona,
+                        rubric=rubric_item,
+                        ordinal=ordinal_counter,
+                        total=scenario_total,
+                        user_id=pinned_user_id,
+                        iteration=iteration,
+                    )
                 )
-            )
+                ordinal_counter += 1
 
         results: list[ScenarioRunResult] = []
         if parallel:
@@ -769,7 +892,7 @@ async def run_suite(
                     progress_callback(
                         RunProgressEvent(
                             kind="scenario_started",
-                            scenario_id=prepared.scenario.id,
+                            scenario_id=prepared.display_id,
                             scenario_name=prepared.scenario.name,
                             scenario_index=prepared.index,
                             scenario_total=prepared.total,
@@ -798,7 +921,7 @@ async def run_suite(
                         progress_callback(
                             RunProgressEvent(
                                 kind="scenario_error",
-                                scenario_id=prepared.scenario.id,
+                                scenario_id=prepared.display_id,
                                 scenario_name=prepared.scenario.name,
                                 scenario_index=prepared.index,
                                 scenario_total=prepared.total,
@@ -817,7 +940,7 @@ async def run_suite(
                     progress_callback(
                         RunProgressEvent(
                             kind="scenario_finished",
-                            scenario_id=scenario_result.scenario_id,
+                            scenario_id=prepared.display_id,
                             scenario_name=scenario_result.scenario_name,
                             scenario_index=prepared.index,
                             scenario_total=prepared.total,
@@ -835,7 +958,7 @@ async def run_suite(
                     progress_callback(
                         RunProgressEvent(
                             kind="scenario_started",
-                            scenario_id=prepared.scenario.id,
+                            scenario_id=prepared.display_id,
                             scenario_name=prepared.scenario.name,
                             scenario_index=prepared.index,
                             scenario_total=prepared.total,
@@ -854,7 +977,7 @@ async def run_suite(
                         progress_callback(
                             RunProgressEvent(
                                 kind="scenario_error",
-                                scenario_id=prepared.scenario.id,
+                                scenario_id=prepared.display_id,
                                 scenario_name=prepared.scenario.name,
                                 scenario_index=prepared.index,
                                 scenario_total=prepared.total,
@@ -867,7 +990,7 @@ async def run_suite(
                     progress_callback(
                         RunProgressEvent(
                             kind="scenario_finished",
-                            scenario_id=scenario_result.scenario_id,
+                            scenario_id=prepared.display_id,
                             scenario_name=scenario_result.scenario_name,
                             scenario_index=prepared.index,
                             scenario_total=prepared.total,
@@ -919,6 +1042,7 @@ async def _run_prepared_scenario(
         scenario_ordinal=prepared.ordinal,
         dry_run=dry_run,
         adapter_factory=prepared.adapter_factory,
+        user_id=prepared.user_id,
     )
 
 
@@ -1042,6 +1166,12 @@ def _evaluate_checkpoint_turn(
                 "Assistant response did not contain any required checkpoint text."
             )
 
+        for forbidden in assertion.response_must_not_contain:
+            if forbidden.lower() in (last_reply.assistant_text or "").lower():
+                failures.append(
+                    f"Response contains forbidden string: {forbidden!r}"
+                )
+
     return CheckpointResult(passed=not failures, failures=failures)
 
 
@@ -1087,13 +1217,30 @@ def _overall_score(rubric: Rubric, score: RubricScore) -> float:
     total_weight = sum(dimension.weight for dimension in rubric.dimensions) or 1.0
     weighted_total = 0.0
 
+    dimension_scores: dict[str, float] = {}
     for dimension in rubric.dimensions:
         dimension_score = score.dimensions[dimension.id].score
         scale_points = dimension.scale.points or 1
         normalized = float(dimension_score) / float(scale_points)
         weighted_total += normalized * dimension.weight
+        dimension_scores[dimension.id] = dimension_score
 
-    return weighted_total / total_weight
+    overall_score = weighted_total / total_weight
+
+    if rubric.pass_threshold is not None and overall_score < rubric.pass_threshold:
+        score.passed = False
+
+    if rubric.scoring_overrides is not None:
+        for condition in rubric.scoring_overrides.auto_fail_conditions:
+            dim_score = dimension_scores.get(condition.dimension)
+            if dim_score is None:
+                continue
+            if condition.below is not None and dim_score < condition.below:
+                score.passed = False
+            if condition.above is not None and dim_score > condition.above:
+                score.passed = False
+
+    return overall_score
 
 
 __all__ = [

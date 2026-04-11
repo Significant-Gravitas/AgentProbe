@@ -365,6 +365,86 @@ async def test_run_scenario_accepts_generated_follow_up_with_terminal_status_and
 
 
 @pytest.mark.anyio
+async def test_run_scenario_session_max_turns_stops_only_that_session():
+    adapter = FakeAdapter(
+        [
+            AdapterReply(assistant_text="I stored the contact."),
+            AdapterReply(assistant_text="You should CC Sarah."),
+        ]
+    )
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "One more follow-up question."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+
+    scenario = Scenario.model_validate(
+        {
+            "id": "memory-two-session",
+            "name": "Memory Two Session",
+            "persona": "business-traveler",
+            "rubric": "customer-support",
+            "context": {
+                "system_prompt": "You are a travel assistant.",
+                "injected_data": {"booking_id": "FLT-29481"},
+            },
+            "sessions": [
+                {
+                    "id": "s1",
+                    "time_offset": "0h",
+                    "reset": "none",
+                    "max_turns": 1,
+                    "turns": [
+                        {
+                            "role": "user",
+                            "content": "Store the contact in HubSpot.",
+                            "use_exact_message": True,
+                        }
+                    ],
+                },
+                {
+                    "id": "s2",
+                    "time_offset": "48h",
+                    "reset": "new",
+                    "turns": [
+                        {
+                            "role": "user",
+                            "content": "Who should I CC on proposals?",
+                            "use_exact_message": True,
+                        }
+                    ],
+                },
+            ],
+            "expectations": {
+                "expected_behavior": "Reach the second session after capping the first.",
+                "expected_outcome": "resolved",
+            },
+        }
+    )
+
+    result = await run_scenario(
+        adapter,
+        scenario,
+        build_persona(),
+        build_rubric(),
+        oai_client=cast(openai.AsyncClient, oai_client),
+    )
+
+    assert [
+        cast(ConversationTurn, call["last_message"]).content for call in adapter.send_calls
+    ] == [
+        "Store the contact in HubSpot.",
+        "Who should I CC on proposals?",
+    ]
+    assert "One more follow-up question." not in [
+        turn.content for turn in result.transcript
+    ]
+    assert result.passed is True
+
+
+@pytest.mark.anyio
 async def test_run_scenario_records_checkpoint_failures_without_stopping():
     adapter = FakeAdapter(
         [
@@ -819,16 +899,20 @@ scenarios:
         scenario_ordinal: int | None = None,
         dry_run: bool = False,
         adapter_factory: object | None = None,
+        user_id: str | None = None,
     ) -> ScenarioRunResult:
         persona_id = persona.id
         rubric_id = rubric.id
         del (
             adapter,
+            persona,
+            rubric,
             oai_client,
             recorder,
             scenario_ordinal,
             dry_run,
             adapter_factory,
+            user_id,
         )
         observed_defaults.append(
             (scenario.id, defaults.max_turns if defaults is not None else None)
@@ -865,6 +949,169 @@ scenarios:
         ("regression-scenario", 1),
         ("smoke-scenario", 1),
     ]
+
+
+@pytest.mark.anyio
+async def test_run_suite_repeat_generates_distinct_user_ids_per_iteration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text(
+        """
+personas:
+  - id: business-traveler
+    name: Business Traveler
+    demographics:
+      role: business customer
+      tech_literacy: high
+      domain_expertise: intermediate
+      language_style: terse
+    personality:
+      patience: 2
+      assertiveness: 4
+      detail_orientation: 5
+      cooperativeness: 4
+      emotional_intensity: 2
+    behavior:
+      opening_style: Be direct.
+      follow_up_style: Answer follow-up questions directly.
+      escalation_triggers: []
+      topic_drift: none
+      clarification_compliance: high
+    system_prompt: You are a direct business traveler.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: Customer Support
+    pass_threshold: 0.7
+    meta_prompt: Judge behavior.
+    dimensions:
+      - id: task_completion
+        name: Task Completion
+        weight: 1.0
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: bad
+            5: good
+        judge_prompt: Check task completion.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+defaults:
+  max_turns: 1
+scenarios:
+  - id: repeat-scenario
+    name: Repeat
+    persona: business-traveler
+    rubric: customer-support
+    turns:
+      - role: user
+        content: Hello repeat
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    # Set the env var that used to collapse iterations onto one user — the
+    # regression guard is that run_suite must ignore it and still hand each
+    # iteration a fresh uuid.
+    monkeypatch.setenv("AUTOGPT_USER_ID", "should-be-ignored-by-run-suite")
+
+    observed_user_ids: list[str | None] = []
+
+    async def fake_run_scenario(
+        adapter: FakeAdapter,
+        scenario: Scenario,
+        persona: Persona,
+        rubric: Rubric,
+        *,
+        defaults: ScenarioDefaults | None = None,
+        oai_client: openai.AsyncClient,
+        recorder: object | None = None,
+        scenario_ordinal: int | None = None,
+        dry_run: bool = False,
+        adapter_factory: object | None = None,
+        user_id: str | None = None,
+    ) -> ScenarioRunResult:
+        persona_id = persona.id
+        rubric_id = rubric.id
+        del (
+            adapter,
+            persona,
+            rubric,
+            defaults,
+            oai_client,
+            recorder,
+            scenario_ordinal,
+            dry_run,
+            adapter_factory,
+        )
+        observed_user_ids.append(user_id)
+        return ScenarioRunResult(
+            scenario_id=scenario.id,
+            scenario_name=scenario.name,
+            persona_id=persona_id,
+            rubric_id=rubric_id,
+            user_id=user_id,
+            passed=True,
+            overall_score=0.9,
+        )
+
+    monkeypatch.setattr("agentprobe.runner.run_scenario", fake_run_scenario)
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="Handled.")])
+
+    result = await run_suite(
+        endpoint=endpoint_path,
+        scenarios=scenarios_path,
+        personas=personas_path,
+        rubric=rubric_path,
+        adapter_factory=adapter_factory,
+        oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+        repeat=3,
+    )
+
+    assert result.exit_code == 0
+    assert len(observed_user_ids) == 3
+    assert all(uid is not None for uid in observed_user_ids)
+    assert "should-be-ignored-by-run-suite" not in observed_user_ids
+    assert len(set(observed_user_ids)) == 3
 
 
 @pytest.mark.anyio
@@ -1108,16 +1355,20 @@ scenarios:
         scenario_ordinal: int | None = None,
         dry_run: bool = False,
         adapter_factory: object | None = None,
+        user_id: str | None = None,
     ) -> ScenarioRunResult:
         persona_id = persona.id
         rubric_id = rubric.id
         del (
             adapter,
+            persona,
+            rubric,
             defaults,
             oai_client,
             recorder,
             dry_run,
             adapter_factory,
+            user_id,
         )
         if scenario.id == "smoke-scenario":
             await asyncio.sleep(0.05)
@@ -1300,3 +1551,672 @@ scenarios:
         ("scenario_started", "smoke-scenario"),
         ("scenario_finished", "smoke-scenario"),
     ]
+
+
+# ---------------------------------------------------------------------------
+# Gap-coverage tests (added to guarantee every behavior introduced on this
+# branch is exercised, so the TS port can mirror them 1-1).
+# ---------------------------------------------------------------------------
+
+
+def test_prepared_scenario_run_display_id_suffixes_iterations() -> None:
+    from agentprobe.runner import _PreparedScenarioRun
+
+    def factory():  # pragma: no cover - never invoked
+        raise AssertionError
+
+    scenario = build_scenario(turns=[{"role": "user", "content": "hi"}])
+    persona = build_persona()
+    rubric = build_rubric()
+
+    first = _PreparedScenarioRun(
+        adapter_factory=factory,
+        scenario=scenario,
+        persona=persona,
+        rubric=rubric,
+        ordinal=0,
+        total=2,
+        iteration=1,
+    )
+    second = _PreparedScenarioRun(
+        adapter_factory=factory,
+        scenario=scenario,
+        persona=persona,
+        rubric=rubric,
+        ordinal=1,
+        total=2,
+        iteration=2,
+    )
+    assert first.display_id == scenario.id
+    assert second.display_id == f"{scenario.id}#2"
+    assert first.index == 1 and second.index == 2
+
+
+@pytest.mark.anyio
+async def test_run_scenario_warns_on_invalid_base_date_and_falls_back():
+    adapter = FakeAdapter(
+        [AdapterReply(assistant_text="Handled.")],
+    )
+    oai_client = FakeOpenAIClient(
+        create_responses=[
+            build_persona_step("continue", "Please change booking FLT-29481."),
+            build_persona_step("completed"),
+            build_score(),
+        ]
+    )
+    scenario = Scenario.model_validate(
+        {
+            "id": "bad-base-date",
+            "name": "Bad base date",
+            "persona": "business-traveler",
+            "rubric": "customer-support",
+            "base_date": "not-a-date",
+            "context": {
+                "system_prompt": "You are a travel assistant.",
+                "injected_data": {"booking_id": "FLT-29481"},
+            },
+            "turns": [{"role": "user", "content": None}],
+            "expectations": {
+                "expected_behavior": "Help.",
+                "expected_outcome": "resolved",
+            },
+        }
+    )
+
+    with pytest.warns(UserWarning, match="Invalid base_date"):
+        result = await run_scenario(
+            adapter,
+            scenario,
+            build_persona(),
+            build_rubric(),
+            defaults=ScenarioDefaults(max_turns=1),
+            oai_client=cast(openai.AsyncClient, oai_client),
+        )
+    assert result.scenario_id == "bad-base-date"
+
+
+@pytest.mark.anyio
+async def test_run_scenario_dry_run_returns_placeholder_result():
+    scenario = build_scenario(turns=[{"role": "user", "content": "hi"}])
+    adapter = FakeAdapter([])  # adapter should never be touched under dry_run
+    oai_client = FakeOpenAIClient()
+    result = await run_scenario(
+        adapter,
+        scenario,
+        build_persona(),
+        build_rubric(),
+        oai_client=cast(openai.AsyncClient, oai_client),
+        dry_run=True,
+        user_id="fixed-user",
+    )
+    assert result.passed is True
+    assert result.overall_score == 0.0
+    assert result.user_id == "fixed-user"
+    assert result.transcript == []
+    # Dry-run short-circuits before any adapter call.
+    assert adapter.health_calls == []
+    assert adapter.open_calls == []
+
+
+@pytest.mark.anyio
+async def test_run_suite_missing_persona_raises_config_error(tmp_path: Path):
+    from agentprobe.errors import AgentProbeConfigError
+
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text("personas: []", encoding="utf-8")
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: CS
+    pass_threshold: 0.7
+    meta_prompt: Judge.
+    dimensions:
+      - id: task_completion
+        name: TC
+        weight: 1.0
+        scale: {type: likert, points: 5, labels: {1: bad, 5: good}}
+        judge_prompt: Check.
+""".strip(),
+        encoding="utf-8",
+    )
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+scenarios:
+  - id: orphan
+    name: Orphan
+    rubric: customer-support
+    turns:
+      - {role: user, content: hi}
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="x")])
+
+    with pytest.raises(AgentProbeConfigError, match="has no persona"):
+        await run_suite(
+            endpoint=endpoint_path,
+            scenarios=scenarios_path,
+            personas=personas_path,
+            rubric=rubric_path,
+            adapter_factory=adapter_factory,
+            oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+        )
+
+
+@pytest.mark.anyio
+async def test_run_suite_unknown_persona_raises_config_error(tmp_path: Path):
+    from agentprobe.errors import AgentProbeConfigError
+
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text("personas: []", encoding="utf-8")
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: CS
+    pass_threshold: 0.7
+    meta_prompt: Judge.
+    dimensions:
+      - id: task_completion
+        name: TC
+        weight: 1.0
+        scale: {type: likert, points: 5, labels: {1: bad, 5: good}}
+        judge_prompt: Check.
+""".strip(),
+        encoding="utf-8",
+    )
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+scenarios:
+  - id: ghost
+    name: Ghost
+    persona: does-not-exist
+    rubric: customer-support
+    turns:
+      - {role: user, content: hi}
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="x")])
+
+    with pytest.raises(AgentProbeConfigError, match="unknown persona"):
+        await run_suite(
+            endpoint=endpoint_path,
+            scenarios=scenarios_path,
+            personas=personas_path,
+            rubric=rubric_path,
+            adapter_factory=adapter_factory,
+            oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+        )
+
+
+@pytest.mark.anyio
+async def test_run_suite_missing_rubric_and_unknown_rubric_raise_config_error(
+    tmp_path: Path,
+):
+    from agentprobe.errors import AgentProbeConfigError
+
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text(
+        """
+personas:
+  - id: p
+    name: P
+    demographics: {role: x, tech_literacy: high, domain_expertise: basic, language_style: terse}
+    personality: {patience: 2, assertiveness: 2, detail_orientation: 2, cooperativeness: 2, emotional_intensity: 2}
+    behavior: {opening_style: Hi., follow_up_style: Yes., escalation_triggers: [], topic_drift: none, clarification_compliance: high}
+    system_prompt: P.
+""".strip(),
+        encoding="utf-8",
+    )
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: CS
+    pass_threshold: 0.7
+    meta_prompt: Judge.
+    dimensions:
+      - id: task_completion
+        name: TC
+        weight: 1.0
+        scale: {type: likert, points: 5, labels: {1: bad, 5: good}}
+        judge_prompt: Check.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="x")])
+
+    # Scenario with no rubric and no defaults rubric
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+scenarios:
+  - id: no-rubric
+    name: No rubric
+    persona: p
+    turns:
+      - {role: user, content: hi}
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+    with pytest.raises(AgentProbeConfigError, match="has no rubric"):
+        await run_suite(
+            endpoint=endpoint_path,
+            scenarios=scenarios_path,
+            personas=personas_path,
+            rubric=rubric_path,
+            adapter_factory=adapter_factory,
+            oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+        )
+
+    # Scenario referencing an unknown rubric id
+    scenarios_path.write_text(
+        """
+scenarios:
+  - id: ghost-rubric
+    name: Ghost rubric
+    persona: p
+    rubric: nope
+    turns:
+      - {role: user, content: hi}
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+    with pytest.raises(AgentProbeConfigError, match="unknown rubric"):
+        await run_suite(
+            endpoint=endpoint_path,
+            scenarios=scenarios_path,
+            personas=personas_path,
+            rubric=rubric_path,
+            adapter_factory=adapter_factory,
+            oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+        )
+
+
+@pytest.mark.anyio
+async def test_run_suite_without_adapter_factory_builds_from_endpoint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text(
+        """
+personas:
+  - id: p
+    name: P
+    demographics: {role: x, tech_literacy: high, domain_expertise: basic, language_style: terse}
+    personality: {patience: 2, assertiveness: 2, detail_orientation: 2, cooperativeness: 2, emotional_intensity: 2}
+    behavior: {opening_style: Hi., follow_up_style: Yes., escalation_triggers: [], topic_drift: none, clarification_compliance: high}
+    system_prompt: P.
+""".strip(),
+        encoding="utf-8",
+    )
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: CS
+    pass_threshold: 0.7
+    meta_prompt: Judge.
+    dimensions:
+      - id: task_completion
+        name: TC
+        weight: 1.0
+        scale: {type: likert, points: 5, labels: {1: bad, 5: good}}
+        judge_prompt: Check.
+""".strip(),
+        encoding="utf-8",
+    )
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+defaults: {max_turns: 1}
+scenarios:
+  - id: s
+    name: S
+    persona: p
+    rubric: customer-support
+    turns:
+      - {role: user, content: hi}
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    built_with: list[dict[str, object]] = []
+    fake_adapter = FakeAdapter([AdapterReply(assistant_text="x")])
+
+    def fake_build_endpoint_adapter(endpoint_config, autogpt_auth_resolver=None):
+        built_with.append({"resolver": autogpt_auth_resolver})
+        return fake_adapter
+
+    monkeypatch.setattr(
+        "agentprobe.runner.build_endpoint_adapter", fake_build_endpoint_adapter
+    )
+
+    async def fake_run_scenario(
+        adapter,
+        scenario,
+        persona,
+        rubric,
+        *,
+        defaults=None,
+        oai_client,
+        recorder=None,
+        scenario_ordinal=None,
+        dry_run=False,
+        adapter_factory=None,
+        user_id=None,
+    ) -> ScenarioRunResult:
+        # Invoke the factory once to hit the no-adapter-factory fallback path.
+        built_adapter = adapter_factory() if adapter_factory else adapter
+        assert built_adapter is fake_adapter
+        return ScenarioRunResult(
+            scenario_id=scenario.id,
+            scenario_name=scenario.name,
+            persona_id=persona.id,
+            rubric_id=rubric.id,
+            user_id=user_id,
+            passed=True,
+            overall_score=1.0,
+        )
+
+    monkeypatch.setattr("agentprobe.runner.run_scenario", fake_run_scenario)
+
+    result = await run_suite(
+        endpoint=endpoint_path,
+        scenarios=scenarios_path,
+        personas=personas_path,
+        rubric=rubric_path,
+        oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+    )
+    assert result.exit_code == 0
+    assert len(built_with) >= 1
+    # Also invoke the resolver closure so its body (which imports resolve_auth)
+    # is executed; we stub resolve_auth to avoid touching the real AutoGPT module.
+    resolver = built_with[-1]["resolver"]
+    assert callable(resolver)
+    monkeypatch.setattr(
+        "agentprobe.endpoints.autogpt.resolve_auth",
+        lambda user_id: {"user_id": user_id},
+    )
+    assert resolver() == {"user_id": result.results[0].user_id}
+
+
+def test_evaluate_checkpoint_turn_response_must_not_contain() -> None:
+    from agentprobe.data.scenarios import CheckpointAssertion
+    from agentprobe.runner import _evaluate_checkpoint_turn
+
+    reply = AdapterReply(assistant_text="Sorry, I cannot help with that.")
+    result = _evaluate_checkpoint_turn(
+        [CheckpointAssertion(response_must_not_contain=["cannot help"])],
+        reply,
+    )
+    assert result.passed is False
+    assert any("cannot help" in f for f in result.failures)
+
+    ok = _evaluate_checkpoint_turn(
+        [CheckpointAssertion(response_must_not_contain=["never said"])],
+        reply,
+    )
+    assert ok.passed is True
+
+
+def test_overall_score_scoring_overrides_below_and_above_flip_passed() -> None:
+    from agentprobe.data.rubrics import ScoreThreshold, ScoringOverrides
+    from agentprobe.runner import _overall_score
+
+    base_rubric = build_rubric()
+
+    # Passing score; then auto-fail because below threshold
+    rubric_below = base_rubric.model_copy(
+        update={
+            "scoring_overrides": ScoringOverrides(
+                auto_fail_conditions=[
+                    ScoreThreshold(dimension="task_completion", below=5)
+                ]
+            )
+        }
+    )
+    score = build_score(score=4, passed=True)
+    overall = _overall_score(rubric_below, score)
+    assert overall == pytest.approx(0.8)
+    assert score.passed is False
+
+    # Auto-fail because above threshold
+    rubric_above = base_rubric.model_copy(
+        update={
+            "scoring_overrides": ScoringOverrides(
+                auto_fail_conditions=[
+                    ScoreThreshold(dimension="task_completion", above=3)
+                ]
+            )
+        }
+    )
+    score2 = build_score(score=4, passed=True)
+    _overall_score(rubric_above, score2)
+    assert score2.passed is False
+
+    # Condition pointing to an unknown dimension is a no-op (the `continue`
+    # branch). We should still return a sane overall_score and leave passed.
+    rubric_unknown = base_rubric.model_copy(
+        update={
+            "scoring_overrides": ScoringOverrides(
+                auto_fail_conditions=[
+                    ScoreThreshold(dimension="not-a-dimension", below=10)
+                ]
+            )
+        }
+    )
+    score3 = build_score(score=4, passed=True)
+    _overall_score(rubric_unknown, score3)
+    assert score3.passed is True
+
+
+@pytest.mark.anyio
+async def test_run_suite_parallel_emits_scenario_error_event_and_raises(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text(
+        """
+personas:
+  - id: p
+    name: P
+    demographics: {role: x, tech_literacy: high, domain_expertise: basic, language_style: terse}
+    personality: {patience: 2, assertiveness: 2, detail_orientation: 2, cooperativeness: 2, emotional_intensity: 2}
+    behavior: {opening_style: Hi., follow_up_style: Yes., escalation_triggers: [], topic_drift: none, clarification_compliance: high}
+    system_prompt: P.
+""".strip(),
+        encoding="utf-8",
+    )
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: CS
+    pass_threshold: 0.7
+    meta_prompt: Judge.
+    dimensions:
+      - id: task_completion
+        name: TC
+        weight: 1.0
+        scale: {type: likert, points: 5, labels: {1: bad, 5: good}}
+        judge_prompt: Check.
+""".strip(),
+        encoding="utf-8",
+    )
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+defaults: {max_turns: 1}
+scenarios:
+  - id: boom
+    name: Boom
+    persona: p
+    rubric: customer-support
+    turns:
+      - {role: user, content: hi}
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    async def fake_run_scenario(*args, **kwargs) -> ScenarioRunResult:
+        raise RuntimeError("scenario explosion")
+
+    monkeypatch.setattr("agentprobe.runner.run_scenario", fake_run_scenario)
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="x")])
+
+    events: list[RunProgressEvent] = []
+    with pytest.raises(RuntimeError, match="scenario explosion"):
+        await run_suite(
+            endpoint=endpoint_path,
+            scenarios=scenarios_path,
+            personas=personas_path,
+            rubric=rubric_path,
+            adapter_factory=adapter_factory,
+            oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+            progress_callback=events.append,
+            parallel=True,
+            repeat=2,
+        )
+
+    kinds = [e.kind for e in events]
+    assert "scenario_error" in kinds
+    # repeat=2 → second iteration display_id carries #2 suffix
+    error_events = [e for e in events if e.kind == "scenario_error"]
+    assert any(e.scenario_id == "boom#2" for e in error_events)
+    assert all(isinstance(e.error, RuntimeError) for e in error_events)

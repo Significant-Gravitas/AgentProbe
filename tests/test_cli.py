@@ -491,3 +491,155 @@ def test_report_command_writes_html(monkeypatch, tmp_path: Path):
         "output_path": output_path,
         "db_url": f"sqlite:///{db_path.resolve()}",
     }
+
+
+# ---------------------------------------------------------------------------
+# Gap-coverage tests for the --dashboard flag, verbose flag, and --repeat.
+# ---------------------------------------------------------------------------
+
+
+def _invoke_run_with_args(
+    monkeypatch,
+    tmp_path: Path,
+    *,
+    extra_args: list[str],
+    captured_kwargs: dict[str, object] | None = None,
+):
+    async def fake_run_suite(**kwargs: object) -> RunResult:
+        if captured_kwargs is not None:
+            captured_kwargs.update(kwargs)
+        # Exercise the progress callback so dashboard state updates run.
+        cb = kwargs.get("progress_callback")
+        if callable(cb):
+            cb(RunProgressEvent(kind="suite_started", scenario_total=1))
+            cb(
+                RunProgressEvent(
+                    kind="scenario_finished",
+                    scenario_id="s1",
+                    scenario_name="S1",
+                    passed=True,
+                    overall_score=0.9,
+                )
+            )
+        return RunResult(
+            passed=True,
+            exit_code=0,
+            results=[
+                ScenarioRunResult(
+                    scenario_id="s1",
+                    scenario_name="S1",
+                    persona_id="p",
+                    rubric_id="r",
+                    passed=True,
+                    overall_score=0.9,
+                )
+            ],
+        )
+
+    monkeypatch.setattr("agentprobe.cli.run_suite", fake_run_suite)
+    paths = create_dummy_paths(tmp_path)
+    runner = CliRunner()
+    return runner.invoke(
+        cli,
+        [
+            "run",
+            "--endpoint", str(paths["endpoint"]),
+            "--scenarios", str(paths["scenarios"]),
+            "--personas", str(paths["personas"]),
+            "--rubric", str(paths["rubric"]),
+            *extra_args,
+        ],
+    )
+
+
+def test_run_command_dashboard_flag_starts_server_and_opens_browser(
+    monkeypatch, tmp_path: Path
+):
+    from agentprobe.dashboard import DashboardState
+
+    started: list[str] = []
+    opened: list[str] = []
+    update_calls: list[object] = []
+
+    class FakeDashboardServer:
+        def __init__(self, state: DashboardState) -> None:
+            self.state = state
+            self.url = "http://127.0.0.1:12345"
+            # Patch state.update to record calls so we know _progress wired it.
+            orig = state.update
+
+            def tracked(event: RunProgressEvent) -> None:
+                update_calls.append(event.kind)
+                orig(event)
+
+            state.update = tracked  # type: ignore[method-assign]
+
+        def start(self) -> None:
+            started.append(self.url)
+
+        def shutdown(self) -> None:
+            started.append("shutdown")
+
+    monkeypatch.setattr("agentprobe.cli.DashboardServer", FakeDashboardServer)
+    monkeypatch.setattr(
+        "webbrowser.open", lambda url: (opened.append(url), True)[1]
+    )
+
+    result = _invoke_run_with_args(
+        monkeypatch, tmp_path, extra_args=["--dashboard"]
+    )
+    assert result.exit_code == 0, result.output
+    assert started == ["http://127.0.0.1:12345"]
+    assert opened == ["http://127.0.0.1:12345"]
+    assert "suite_started" in update_calls
+    assert "scenario_finished" in update_calls
+
+
+def test_run_command_dashboard_flag_handles_missing_build(monkeypatch, tmp_path: Path):
+    class BrokenDashboardServer:
+        def __init__(self, state) -> None:
+            raise FileNotFoundError("no build")
+
+    monkeypatch.setattr("agentprobe.cli.DashboardServer", BrokenDashboardServer)
+    monkeypatch.setattr("webbrowser.open", lambda url: True)
+
+    result = _invoke_run_with_args(
+        monkeypatch, tmp_path, extra_args=["--dashboard"]
+    )
+    # Should not crash; just warns and proceeds.
+    assert result.exit_code == 0, result.output
+    assert "Dashboard unavailable" in result.output + (result.stderr or "")
+
+
+def test_run_command_verbose_flags_select_log_level(monkeypatch, tmp_path: Path):
+    import logging
+
+    captured: dict[str, object] = {}
+    orig_basic = logging.basicConfig
+
+    def spy_basic_config(**kwargs):
+        captured.setdefault("calls", []).append(kwargs.get("level"))
+        orig_basic(**kwargs)
+
+    monkeypatch.setattr("logging.basicConfig", spy_basic_config)
+
+    _invoke_run_with_args(monkeypatch, tmp_path, extra_args=["-v"])
+    _invoke_run_with_args(monkeypatch, tmp_path, extra_args=["-vv"])
+    _invoke_run_with_args(monkeypatch, tmp_path, extra_args=[])
+
+    levels = captured["calls"]
+    assert logging.INFO in levels
+    assert logging.DEBUG in levels
+    assert logging.WARNING in levels
+
+
+def test_run_command_repeat_option_forwards_to_run_suite(monkeypatch, tmp_path: Path):
+    captured: dict[str, object] = {}
+    result = _invoke_run_with_args(
+        monkeypatch,
+        tmp_path,
+        extra_args=["--repeat", "4"],
+        captured_kwargs=captured,
+    )
+    assert result.exit_code == 0, result.output
+    assert captured["repeat"] == 4

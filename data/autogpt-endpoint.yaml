@@ -35,7 +35,8 @@ endpoints:
     body_template: |
       {
         "message": {{ last_message.content | tojson }},
-        "is_user_message": true
+        "is_user_message": true{% if copilot_mode is defined and copilot_mode %},
+        "mode": {{ copilot_mode | tojson }}{% endif %}
       }
 
 session:

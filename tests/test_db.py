@@ -558,3 +558,17 @@ async def test_sqlite_run_recorder_persists_runtime_errors_and_scenario_state(
         "type": "AgentProbeRuntimeError",
         "message": "endpoint down",
     }
+
+
+def test_latest_run_for_suite_accepts_naive_datetime_cutoff(tmp_path: Path) -> None:
+    from datetime import datetime
+
+    db_url = db_url_for(tmp_path)
+    init_db(db_url)
+    # No matching rows; the branch under test is the naive-tz normalization.
+    result = latest_run_for_suite(
+        "no-such-suite",
+        before_started_at=datetime(2099, 1, 1),  # naive datetime
+        db_url=db_url,
+    )
+    assert result is None

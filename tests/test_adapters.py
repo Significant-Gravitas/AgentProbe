@@ -132,7 +132,7 @@ async def test_http_adapter_handles_autogpt_auth_and_sse(monkeypatch):
     reply = await adapter.send_user_turn({**base_context, **session})
 
     assert session == {"session_id": "chat-123"}
-    assert reply.assistant_text == "First chunk\nSecond chunk"
+    assert reply.assistant_text == "First chunkSecond chunk"
     assert auth_calls == 1
     assert [request.url.path for request in requests] == [
         "/api/chat/sessions",

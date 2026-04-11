@@ -212,3 +212,50 @@ def test_write_run_report_uses_latest_discovered_database(monkeypatch, tmp_path:
 
     assert written == output_path.resolve()
     assert "Basic refund policy question" in output_path.read_text(encoding="utf-8")
+
+
+def test_render_run_report_parses_session_boundary_turn() -> None:
+    run = build_run()
+    scenario = run["scenarios"][0]  # type: ignore[index]
+    scenario["turns"] = [  # type: ignore[index]
+        scenario["turns"][0],  # type: ignore[index]
+        {
+            "turn_index": 1,
+            "role": "system",
+            "source": "session_boundary",
+            "content": (
+                "--- Session boundary: session_id: s2 "
+                "reset_policy: fresh_agent time_offset: +3d user_id: u-123 ---"
+            ),
+            "created_at": "2026-03-24T15:00:10+00:00",
+            "usage": None,
+        },
+        scenario["turns"][1],  # type: ignore[index]
+    ]
+    scenario["counts"]["turn_count"] = 3  # type: ignore[index]
+
+    html = render_run_report(run)
+    assert "Session Boundary" in html
+    # Parsed fields should surface in the rendered output somewhere.
+    assert "s2" in html
+    assert "fresh_agent" in html
+    assert "+3d" in html
+    assert "u-123" in html
+
+
+def test_parse_session_boundary_unit() -> None:
+    from agentprobe.report import _parse_session_boundary, _role_label, _role_tone
+
+    content = (
+        "--- Session boundary: session_id: s1 reset_policy: new "
+        "time_offset: +1h user_id: u-7 ---"
+    )
+    fields = _parse_session_boundary(content)
+    assert fields == {
+        "session_id": "s1",
+        "reset_policy": "new",
+        "time_offset": "+1h",
+        "user_id": "u-7",
+    }
+    assert _role_tone("system", content) == "session_boundary"
+    assert _role_label("system", content) == "Session Boundary"

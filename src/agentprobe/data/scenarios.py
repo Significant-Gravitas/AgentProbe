@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+from datetime import timedelta
 from pathlib import Path
 from typing import Literal, TypeAlias, cast
 
@@ -29,15 +31,37 @@ ExpectedOutcome: TypeAlias = Literal[
 ResetPolicy: TypeAlias = Literal["none", "new", "fresh_agent"]
 
 
+def parse_time_offset(offset: str) -> timedelta:
+    """Parse '48h', '7d', '0h' etc into timedelta."""
+    match = re.fullmatch(r"(\d+)(h|d|m)", offset.strip())
+    if not match:
+        return timedelta()
+    value, unit = int(match.group(1)), match.group(2)
+    if unit == "h":
+        return timedelta(hours=value)
+    elif unit == "d":
+        return timedelta(days=value)
+    elif unit == "m":
+        return timedelta(minutes=value)
+    return timedelta()  # pragma: no cover - regex above restricts unit to h|d|m
+
+
+CopilotMode: TypeAlias = Literal["fast", "extended_thinking"]
+
+
 class ScenarioDefaults(AgentProbeModel):
     max_turns: int | None = None
     timeout_seconds: int | None = None
     persona: str | None = None
     rubric: str | None = None
+    user_name: str | None = None
+    copilot_mode: CopilotMode | None = None
 
 
 class ScenarioContext(AgentProbeModel):
     system_prompt: str | None = None
+    user_name: str | None = None
+    copilot_mode: CopilotMode | None = None
     injected_data: dict[str, JsonValue] = Field(default_factory=dict)
 
 
@@ -46,6 +70,7 @@ class CheckpointAssertion(AgentProbeModel):
     with_args: dict[str, JsonValue] | None = None
     response_contains_any: list[str] = Field(default_factory=list)
     response_mentions: str | None = None
+    response_must_not_contain: list[str] = Field(default_factory=list)
 
 
 class UserTurn(AgentProbeModel):
@@ -106,6 +131,7 @@ class Session(AgentProbeModel):
     id: str | None = None
     time_offset: str = "0h"
     reset: ResetPolicy = "none"
+    max_turns: int | None = None
     turns: list[TurnType] = Field(default_factory=list)
 
 
@@ -119,6 +145,7 @@ class Scenario(AgentProbeModel):
     persona: str | None = None
     rubric: str | None = None
     max_turns: int | None = None
+    base_date: str | None = None
     priority: ScenarioPriority | None = None
     context: ScenarioContext | None = None
     turns: list[TurnType] = Field(default_factory=list)
@@ -196,6 +223,16 @@ def _parse_scenario_document(raw: dict[str, object], path: YamlPath) -> Scenario
                 payload["persona"] = defaults.persona
             if "rubric" not in payload and defaults.rubric is not None:
                 payload["rubric"] = defaults.rubric
+            if defaults.user_name is not None or defaults.copilot_mode is not None:
+                context = payload.get("context")
+                if context is None:
+                    context = {}
+                    payload["context"] = context
+                if isinstance(context, dict):
+                    if defaults.user_name is not None and "user_name" not in context:
+                        context["user_name"] = defaults.user_name
+                    if defaults.copilot_mode is not None and "copilot_mode" not in context:
+                        context["copilot_mode"] = defaults.copilot_mode
 
         expectations = payload.get("expectations")
         if isinstance(expectations, dict):
@@ -336,4 +373,5 @@ __all__ = [
     "UserTurn",
     "parse_scenarios_input",
     "parse_scenario_yaml",
+    "parse_time_offset",
 ]
