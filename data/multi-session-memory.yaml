@@ -728,11 +728,14 @@ scenarios:
         turns:
           - role: user
             content: |
-              Here's our refund process. When a customer requests a refund: use
-              the canned "Refund Approved" email template, log the refund to the
-              March 2026 Refunds Google Sheet, and post a notification to the
-              #support Slack channel with the customer name and amount. Use this
-              for all refund requests.
+              Build me a refund handler automation now. When a customer
+              requests a refund it should do three things: (1) reply to the
+              customer using our canned "Refund Approved" email template,
+              (2) log the refund to the March 2026 Refunds Google Sheet, and
+              (3) post a notification to the #support Discord channel with
+              the customer name and amount. Build and save it now as our
+              standard refund flow -- don't wait for confirmation.
+            use_exact_message: true
 
       - id: s2-replace
         time_offset: "504h"
@@ -742,10 +745,11 @@ scenarios:
           - role: user
             content: |
               We changed our refund process. From now on: handle the customer
-              reply through Zendesk instead of the email template, log the refund
-              to our Airtable Refunds base (not the spreadsheet), and NO more
-              Slack notification -- a manager reviews the Airtable view weekly.
-              Use this new process for all refund requests going forward.
+              reply by creating a page in our Notion "Support Tickets" database
+              instead of the email template, log the refund to our Airtable
+              Refunds base (not the spreadsheet), and NO more Discord
+              notification -- a manager reviews the Airtable view weekly. Use
+              this new process for all refund requests going forward.
             use_exact_message: true
 
       - id: s3-apply
@@ -759,14 +763,15 @@ scenarios:
 
     expectations:
       expected_behavior: |
-        Uses Zendesk for the customer reply, logs to Airtable Refunds base,
-        does NOT post to Slack. None of the original workflow's steps appear.
+        Creates a page in the Notion "Support Tickets" database for the
+        customer reply, logs to the Airtable Refunds base, does NOT post to
+        Discord. None of the original workflow's steps appear.
       expected_outcome: resolved
-      must_not_include: ["Slack", "#support", "Google Sheet", "email template"]
+      must_not_include: ["Discord", "#support", "Google Sheet", "email template"]
       failure_modes:
-        - slack_persists: Posts to Slack (the negation that's easiest to lose)
+        - discord_persists: Posts to Discord (the negation that's easiest to lose)
         - spreadsheet_persists: Logs to the Google Sheet instead of Airtable
-        - template_persists: Uses the old email template instead of Zendesk
+        - template_persists: Uses the old email template instead of Notion Support Tickets
         - partial_replacement: Only some steps replaced
 
   # =========================================================================
@@ -1044,7 +1049,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Help me set up an inventory restock alert. When stock of any product drops below 20 units, post a message to the #ops Slack channel. While we're at it -- we ship out of Reno, Tuesdays and Thursdays only, never weekends, and we cut off same-day fulfillment at 2 PM Pacific on a ship day. Consider that when we're setting up anything related to fulfillment."
+            content: "Help me set up an inventory restock alert. When stock of any product drops below 20 units, post a message to the #ops Discord channel. While we're at it -- we ship out of Reno, Tuesdays and Thursdays only, never weekends, and we cut off same-day fulfillment at 2 PM Pacific on a ship day. Consider that when we're setting up anything related to fulfillment."
 
       - id: s2-customer-eta-question
         time_offset: "240h"
@@ -1149,11 +1154,14 @@ scenarios:
         turns:
           - role: user
             content: |
-              Remember this onboarding flow for new clients. Step 1: add to
-              HubSpot. Step 2: create a page in our Notion Clients database
-              with plan and start date. Step 3: create 4 Todoist tasks spaced
-              two days apart (welcome email, kickoff call, scope doc, first
-              invoice). Step 4: send welcome email via Gmail.
+              Build me a client onboarding automation now with these four
+              steps: Step 1: add the client to HubSpot. Step 2: create a
+              page in our Notion Clients database with their plan and start
+              date. Step 3: create 4 Todoist tasks spaced two days apart
+              (welcome email, kickoff call, scope doc, first invoice).
+              Step 4: send the welcome email via Gmail. Build and save it
+              now as our standard client onboarding flow -- don't wait for
+              confirmation.
             use_exact_message: true
 
       - id: s2-update-one-step
@@ -1211,10 +1219,13 @@ scenarios:
         turns:
           - role: user
             content: |
-              Remember this onboarding flow. Step 1: add to HubSpot. Step 2:
-              create a Notion page in Clients database. Step 3: create 4
-              Todoist tasks spaced 2 days apart (welcome email, kickoff,
-              scope doc, first invoice). Step 4: send welcome email via Gmail.
+              Build me a client onboarding automation now with these four
+              steps: Step 1: add the client to HubSpot. Step 2: create a
+              Notion page in the Clients database. Step 3: create 4 Todoist
+              tasks spaced 2 days apart (welcome email, kickoff, scope doc,
+              first invoice). Step 4: send the welcome email via Gmail.
+              Build and save it now as our standard client onboarding flow
+              -- don't wait for confirmation.
             use_exact_message: true
 
       - id: s2-add-step
