@@ -238,7 +238,9 @@ async def test_run_scenario_renders_injected_data_and_uses_persona_generation():
     second_message = cast(ConversationTurn, adapter.send_calls[1]["last_message"])
     assert first_message.content == "Please change booking FLT-29481."
     assert second_message.content == "I need to land before noon."
-    assert "Please change booking FLT-29481." in str(simulator_calls(oai_client)[0]["input"])
+    assert "Please change booking FLT-29481." in str(
+        simulator_calls(oai_client)[0]["input"]
+    )
     assert [turn.role for turn in result.transcript] == [
         "system",
         "user",
@@ -587,7 +589,10 @@ async def test_run_scenario_continues_after_scripted_turns_until_stalled():
         build_scenario(
             turns=[
                 {"role": "user", "content": "Please change booking {{ booking_id }}."},
-                {"role": "user", "content": "Mention that arrival must be before noon."},
+                {
+                    "role": "user",
+                    "content": "Mention that arrival must be before noon.",
+                },
             ]
         ),
         build_persona(),
@@ -597,7 +602,8 @@ async def test_run_scenario_continues_after_scripted_turns_until_stalled():
     )
 
     assert [
-        cast(ConversationTurn, call["last_message"]).content for call in adapter.send_calls
+        cast(ConversationTurn, call["last_message"]).content
+        for call in adapter.send_calls
     ] == [
         "Please change booking FLT-29481.",
         "I need to land before noon.",
@@ -629,9 +635,7 @@ async def test_run_scenario_judges_when_continuation_exceeds_inherited_max_turns
     assert result.passed is False
     assert result.overall_score == pytest.approx(0.4)
     judge_call = oai_client.responses.create_calls[-1]
-    assert "Scenario flight-rebooking exceeded max_turns=1." in str(
-        judge_call["input"]
-    )
+    assert "Scenario flight-rebooking exceeded max_turns=1." in str(judge_call["input"])
     assert "Assistant: First reply." in str(judge_call["input"])
 
 
@@ -897,15 +901,27 @@ scenarios:
         adapter_factory: object | None = None,
         user_id: str | None = None,
     ) -> ScenarioRunResult:
-        del adapter, persona, rubric, oai_client, recorder, scenario_ordinal, dry_run, adapter_factory, user_id
+        persona_id = persona.id
+        rubric_id = rubric.id
+        del (
+            adapter,
+            persona,
+            rubric,
+            oai_client,
+            recorder,
+            scenario_ordinal,
+            dry_run,
+            adapter_factory,
+            user_id,
+        )
         observed_defaults.append(
             (scenario.id, defaults.max_turns if defaults is not None else None)
         )
         return ScenarioRunResult(
             scenario_id=scenario.id,
             scenario_name=scenario.name,
-            persona_id=scenario.persona,
-            rubric_id=scenario.rubric,
+            persona_id=persona_id,
+            rubric_id=rubric_id,
             passed=True,
             overall_score=0.8,
         )
@@ -1178,14 +1194,26 @@ scenarios:
         adapter_factory: object | None = None,
         user_id: str | None = None,
     ) -> ScenarioRunResult:
-        del adapter, persona, rubric, defaults, oai_client, recorder, dry_run, adapter_factory, user_id
+        persona_id = persona.id
+        rubric_id = rubric.id
+        del (
+            adapter,
+            persona,
+            rubric,
+            defaults,
+            oai_client,
+            recorder,
+            dry_run,
+            adapter_factory,
+            user_id,
+        )
         if scenario.id == "smoke-scenario":
             await asyncio.sleep(0.05)
             return ScenarioRunResult(
                 scenario_id=scenario.id,
                 scenario_name=scenario.name,
-                persona_id=scenario.persona,
-                rubric_id=scenario.rubric,
+                persona_id=persona_id,
+                rubric_id=rubric_id,
                 passed=True,
                 overall_score=0.8,
             )
@@ -1194,8 +1222,8 @@ scenarios:
         return ScenarioRunResult(
             scenario_id=scenario.id,
             scenario_name=scenario.name,
-            persona_id=scenario.persona,
-            rubric_id=scenario.rubric,
+            persona_id=persona_id,
+            rubric_id=rubric_id,
             passed=True,
             overall_score=0.9,
         )
@@ -1222,7 +1250,9 @@ scenarios:
         "smoke-scenario",
         "regression-scenario",
     ]
-    assert [(event.kind, event.scenario_id, event.scenario_index) for event in events] == [
+    assert [
+        (event.kind, event.scenario_id, event.scenario_index) for event in events
+    ] == [
         ("suite_started", None, None),
         ("scenario_started", "smoke-scenario", 1),
         ("scenario_started", "regression-scenario", 2),

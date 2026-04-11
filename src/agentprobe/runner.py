@@ -571,116 +571,118 @@ async def run_scenario(
     )
 
     try:
-        for session_idx, session in enumerate(sessions):
-            is_first = session_idx == 0
-            reset = session.reset
-            session_label = session.id or f"session-{session_idx + 1}"
-            logger.info(
-                "[%s] Session %d/%d: %s (reset=%s, time_offset=%s)",
-                scenario.id, session_idx + 1, len(sessions),
-                session_label, reset, session.time_offset,
-            )
-
-            if not is_first and reset in _RESETS_REQUIRING_REINIT:
-                await _maybe_close_scenario(
-                    current_adapter,
-                    base_context=base_context,
-                    session_state=session_state,
-                    session_transcript=session_transcript,
-                    state=state,
-                )
-                if reset == "fresh_agent" and adapter_factory is not None:
-                    logger.info("[%s] Creating fresh adapter for session %s", scenario.id, session_label)
-                    current_adapter = adapter_factory()
-                elif reset == "fresh_agent" and adapter_factory is None:
-                    import warnings
-
-                    warnings.warn(
-                        "fresh_agent reset requested but no adapter_factory provided"
-                        " — degrading to 'new' behavior. Results may be invalid.",
-                        stacklevel=2,
-                    )
-                state.last_message = None
-                state.last_reply = None
-                state.user_turn_count = 0
-                session_state = {}
-                session_transcript = []
-
-            if not is_first:
+        try:
+            for session_idx, session in enumerate(sessions):
+                is_first = session_idx == 0
+                reset = session.reset
                 session_label = session.id or f"session-{session_idx + 1}"
-                user_id_part = f" user_id: {user_id}" if user_id else ""
-                boundary_turn = ConversationTurn(
-                    role="system",
-                    content=(
-                        f"--- Session boundary: session_id: {session_label} "
-                        f"reset_policy: {session.reset} time_offset: {session.time_offset}"
-                        f"{user_id_part} ---"
-                    ),
+                logger.info(
+                    "[%s] Session %d/%d: %s (reset=%s, time_offset=%s)",
+                    scenario.id, session_idx + 1, len(sessions),
+                    session_label, reset, session.time_offset,
                 )
-                full_transcript.append(boundary_turn)
-                if recorder is not None and scenario_run_id is not None:
-                    recorder.record_turn(
-                        scenario_run_id,
-                        turn_index=len(full_transcript) - 1,
-                        turn=boundary_turn,
-                        source="session_boundary",
+
+                if not is_first and reset in _RESETS_REQUIRING_REINIT:
+                    await _maybe_close_scenario(
+                        current_adapter,
+                        base_context=base_context,
+                        session_state=session_state,
+                        session_transcript=session_transcript,
+                        state=state,
                     )
+                    if reset == "fresh_agent" and adapter_factory is not None:
+                        logger.info("[%s] Creating fresh adapter for session %s", scenario.id, session_label)
+                        current_adapter = adapter_factory()
+                    elif reset == "fresh_agent" and adapter_factory is None:
+                        import warnings
 
-            if is_first or reset in _RESETS_REQUIRING_REINIT:
-                await current_adapter.health_check(dict(base_context))
-                session_state = await current_adapter.open_scenario(dict(base_context))
+                        warnings.warn(
+                            "fresh_agent reset requested but no adapter_factory provided"
+                            " — degrading to 'new' behavior. Results may be invalid.",
+                            stacklevel=2,
+                        )
+                    state.last_message = None
+                    state.last_reply = None
+                    state.user_turn_count = 0
+                    session_state = {}
+                    session_transcript = []
 
-                if rendered_system_prompt is not None:
-                    system_turn = ConversationTurn(
+                if not is_first:
+                    user_id_part = f" user_id: {user_id}" if user_id else ""
+                    boundary_turn = ConversationTurn(
                         role="system",
-                        content=rendered_system_prompt,
+                        content=(
+                            f"--- Session boundary: session_id: {session_label} "
+                            f"reset_policy: {session.reset} time_offset: {session.time_offset}"
+                            f"{user_id_part} ---"
+                        ),
                     )
-                    session_transcript.append(system_turn)
-                    full_transcript.append(system_turn)
+                    full_transcript.append(boundary_turn)
                     if recorder is not None and scenario_run_id is not None:
                         recorder.record_turn(
                             scenario_run_id,
                             turn_index=len(full_transcript) - 1,
-                            turn=system_turn,
-                            source="system_prompt",
+                            turn=boundary_turn,
+                            source="session_boundary",
                         )
 
-            session_date = base_date + parse_time_offset(session.time_offset)
-            base_context["current_date"] = session_date.strftime("%Y-%m-%d %H:%M")
+                if is_first or reset in _RESETS_REQUIRING_REINIT:
+                    await current_adapter.health_check(dict(base_context))
+                    session_state = await current_adapter.open_scenario(
+                        dict(base_context)
+                    )
 
-            effective_max_turns = session.max_turns if session.max_turns is not None else max_turns
+                    if rendered_system_prompt is not None:
+                        system_turn = ConversationTurn(
+                            role="system",
+                            content=rendered_system_prompt,
+                        )
+                        session_transcript.append(system_turn)
+                        full_transcript.append(system_turn)
+                        if recorder is not None and scenario_run_id is not None:
+                            recorder.record_turn(
+                                scenario_run_id,
+                                turn_index=len(full_transcript) - 1,
+                                turn=system_turn,
+                                source="system_prompt",
+                            )
 
-            termination = await _run_session_turns(
-                session,
+                session_date = base_date + parse_time_offset(session.time_offset)
+                base_context["current_date"] = session_date.strftime("%Y-%m-%d %H:%M")
+
+                effective_max_turns = session.max_turns if session.max_turns is not None else max_turns
+
+                termination = await _run_session_turns(
+                    session,
+                    current_adapter,
+                    scenario=scenario,
+                    persona=persona,
+                    defaults=defaults,
+                    base_context=base_context,
+                    session_state=session_state,
+                    state=state,
+                    full_transcript=full_transcript,
+                    session_transcript=session_transcript,
+                    checkpoints=checkpoints,
+                    tool_calls_by_turn=tool_calls_by_turn,
+                    rendered_turns=rendered_turns,
+                    oai_client=oai_client,
+                    recorder=recorder,
+                    scenario_run_id=scenario_run_id,
+                    persona_model=persona_model,
+                    max_turns=effective_max_turns,
+                    stop_session_on_max_turns=session.max_turns is not None,
+                )
+                if termination is not None:
+                    break
+        finally:
+            await _maybe_close_scenario(
                 current_adapter,
-                scenario=scenario,
-                persona=persona,
-                defaults=defaults,
                 base_context=base_context,
                 session_state=session_state,
-                state=state,
-                full_transcript=full_transcript,
                 session_transcript=session_transcript,
-                checkpoints=checkpoints,
-                tool_calls_by_turn=tool_calls_by_turn,
-                rendered_turns=rendered_turns,
-                oai_client=oai_client,
-                recorder=recorder,
-                scenario_run_id=scenario_run_id,
-                persona_model=persona_model,
-                max_turns=effective_max_turns,
-                stop_session_on_max_turns=session.max_turns is not None,
+                state=state,
             )
-            if termination is not None:
-                break
-
-        await _maybe_close_scenario(
-            current_adapter,
-            base_context=base_context,
-            session_state=session_state,
-            session_transcript=session_transcript,
-            state=state,
-        )
 
         rubric_context = _build_run_context(
             base_context=base_context,
@@ -948,9 +950,7 @@ async def run_suite(
 
             if first_error is not None:
                 raise first_error
-            results = [
-                results_by_ordinal[index] for index in range(len(prepared_runs))
-            ]
+            results = [results_by_ordinal[index] for index in range(len(prepared_runs))]
         else:
             for prepared in prepared_runs:
                 if progress_callback is not None:

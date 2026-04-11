@@ -1,0 +1,52 @@
+preset: autogpt
+transport: http
+
+connection:
+  base_url: "${AUTOGPT_BACKEND_URL:?AUTOGPT_BACKEND_URL is required for bun e2e tests.}"
+  timeout_seconds: 30
+  max_retries: 1
+
+auth:
+  type: none
+
+endpoints:
+  register_user:
+    method: POST
+    url: "{{ base_url }}/api/auth/user"
+
+  create_session:
+    method: POST
+    url: "{{ base_url }}/api/chat/sessions"
+    body_template: |
+      {
+        "dry_run": true,
+        "title": "AgentProbe: {{ scenario.id }} / {{ persona.id }}"
+      }
+
+  send_message:
+    method: POST
+    url: "{{ base_url }}/api/chat/sessions/{{ session_id }}/stream"
+    body_template: |
+      {
+        "message": {{ last_message.content | tojson }},
+        "is_user_message": true
+      }
+
+session:
+  type: managed
+  create:
+    endpoint: create_session
+    session_id_path: "$.id"
+
+request:
+  endpoint: send_message
+
+response:
+  format: sse
+  content_path: "$.delta"
+
+health_check:
+  enabled: false
+
+logging:
+  log_raw_exchanges: true

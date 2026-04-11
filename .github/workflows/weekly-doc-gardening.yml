@@ -1,0 +1,43 @@
+name: Weekly Doc Gardening
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # 9 AM UTC every Monday
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Refresh generated docs
+        run: |
+          bun scripts/generate-workspace-docs.ts
+          bun scripts/refresh-quality-score.ts
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open maintenance PR
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: 'docs: refresh generated docs'
+          body: |
+            Weekly automated refresh of generated documentation.
+            Review the changes and merge if they look correct.
+          branch: docs/weekly-refresh
+          delete-branch: true

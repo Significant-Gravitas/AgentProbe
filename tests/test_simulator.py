@@ -11,6 +11,7 @@ from agentprobe.data.personas import Persona
 from agentprobe.simulator import (
     ConversationTurn,
     PersonaStep,
+    PersonaStepStatus,
     generate_next_step,
     generate_persona_step,
 )
@@ -165,7 +166,7 @@ async def test_generate_persona_step_ignores_checkpoint_turns():
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("status", ["completed", "stalled"])
-async def test_generate_persona_step_supports_stop_statuses(status: str):
+async def test_generate_persona_step_supports_stop_statuses(status: PersonaStepStatus):
     client = FakeClient([persona_response(status, None)])
 
     result = await generate_persona_step(
@@ -211,7 +212,9 @@ async def test_generate_persona_step_normalizes_terminal_acknowledgement_message
 
 @pytest.mark.anyio
 async def test_generate_persona_step_coerces_conversational_terminal_message_to_continue():
-    client = FakeClient([persona_response("completed", "How complicated would that be?")])
+    client = FakeClient(
+        [persona_response("completed", "How complicated would that be?")]
+    )
 
     result = await generate_persona_step(
         build_persona(),
@@ -228,7 +231,9 @@ async def test_generate_persona_step_coerces_conversational_terminal_message_to_
 
 @pytest.mark.anyio
 async def test_generate_persona_step_coerces_required_response_message_to_continue():
-    client = FakeClient([persona_response("completed", "I need the CRM record for Sarah.")])
+    client = FakeClient(
+        [persona_response("completed", "I need the CRM record for Sarah.")]
+    )
 
     result = await generate_persona_step(
         build_persona(),
@@ -355,7 +360,9 @@ async def test_generate_persona_step_falls_back_to_plaintext_for_required_respon
 
 @pytest.mark.anyio
 async def test_generate_persona_step_falls_back_to_continue_for_plaintext_follow_up():
-    client = FakeClient([SimpleNamespace(output_text="Can you also verify their company?")])
+    client = FakeClient(
+        [SimpleNamespace(output_text="Can you also verify their company?")]
+    )
 
     result = await generate_persona_step(
         build_persona(),
@@ -372,7 +379,9 @@ async def test_generate_persona_step_falls_back_to_continue_for_plaintext_follow
 
 @pytest.mark.anyio
 async def test_generate_persona_step_infers_completed_from_plaintext_follow_up():
-    client = FakeClient([SimpleNamespace(output_text="The task is complete. No further response.")])
+    client = FakeClient(
+        [SimpleNamespace(output_text="The task is complete. No further response.")]
+    )
 
     result = await generate_persona_step(
         build_persona(),

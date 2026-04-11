@@ -121,9 +121,9 @@ def _simulator_instructions(persona: Persona, *, require_response: bool) -> str:
         "Return exactly one natural-language user message in the `message` field.\n"
         if require_response
         else (
-            "Return `status: \"completed\"` when the persona's task is done.\n"
-            "Return `status: \"stalled\"` when the conversation is not moving forward.\n"
-            "Return `status: \"continue\"` only when the persona would naturally send another message.\n"
+            'Return `status: "completed"` when the persona\'s task is done.\n'
+            'Return `status: "stalled"` when the conversation is not moving forward.\n'
+            'Return `status: "continue"` only when the persona would naturally send another message.\n'
         )
     )
     return (
@@ -344,7 +344,9 @@ def _normalize_persona_payload(
     return normalized
 
 
-def _normalize_required_response_payload(parsed: dict[str, object]) -> dict[str, object]:
+def _normalize_required_response_payload(
+    parsed: dict[str, object],
+) -> dict[str, object]:
     normalized = dict(parsed)
 
     for key in ("message", "response", "content", "text"):

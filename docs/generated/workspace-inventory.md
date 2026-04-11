@@ -1,0 +1,118 @@
+# Workspace Inventory
+
+Generated: 2026-04-10T10:34:34.304Z
+
+```text
+  AGENTS.md
+  CLAUDE.md
+  README.md
+  agentprobe-spec-v0.2.md
+data/
+  data/adversarial-scenarios.yaml
+  data/autogpt-endpoint.yaml
+data/cluster_scenarios/
+  data/cluster_scenarios/cluster_01_founder_operations.yaml
+  data/cluster_scenarios/cluster_01_founder_operations_simple.yaml
+  data/cluster_scenarios/cluster_02_software_development.yaml
+  data/cluster_scenarios/cluster_03_multi_process_ops.yaml
+  data/cluster_scenarios/cluster_04_data_marketing_ops.yaml
+  data/cluster_scenarios/cluster_05_research_workflow.yaml
+  data/cluster_scenarios/cluster_06_sales_marketing.yaml
+  data/cluster_scenarios/cluster_07_data_analysis.yaml
+  data/cluster_scenarios/cluster_08_task_delegation.yaml
+  data/cluster_scenarios/cluster_09_exploration_learning.yaml
+  data/cluster_scenarios/cluster_10_multi_agent_builder.yaml
+  data/cluster_scenarios/cluster_11_agent_deployment.yaml
+  data/multi-session-memory.yaml
+  data/openclaw-endpoints.yaml
+  data/opencode-endpoints.yaml
+  data/personas.yaml
+  data/rubric.yaml
+  data/scenarios.yaml
+docs/
+  docs/ARCHITECTURE.md
+  docs/HARNESS.md
+  docs/INDEX.md
+  docs/QUALITY_SCORE.md
+  docs/README.md
+docs/behaviours/
+  docs/behaviours/INDEX.md
+  docs/behaviours/README.md
+  docs/behaviours/current-state.md
+  docs/behaviours/e2e-checklist.md
+  docs/behaviours/platform.md
+docs/exec-plans/
+  docs/exec-plans/INDEX.md
+  docs/exec-plans/README.md
+docs/exec-plans/active/
+  docs/exec-plans/active/INDEX.md
+docs/exec-plans/completed/
+  docs/exec-plans/completed/INDEX.md
+docs/generated/
+  docs/generated/INDEX.md
+  docs/generated/workspace-inventory.md
+docs/playbooks/
+  docs/playbooks/INDEX.md
+  package.json
+  pyproject.toml
+scripts/
+  scripts/check-agents-drift.ts
+  scripts/check-behaviour-docs.ts
+  scripts/check-doc-links.ts
+  scripts/check-generated-docs.sh
+  scripts/check-index-docs.ts
+  scripts/fast-feedback.sh
+  scripts/generate-index-docs.ts
+  scripts/generate-workspace-docs.ts
+  scripts/refresh-quality-score.ts
+  scripts/validate-repo.sh
+  scripts/validate-setup.sh
+  skills-lock.json
+src/
+src/agentprobe/
+  src/agentprobe/__init__.py
+  src/agentprobe/__main__.py
+  src/agentprobe/adapters.py
+  src/agentprobe/cli.py
+src/agentprobe/data/
+  src/agentprobe/data/__init__.py
+  src/agentprobe/data/common.py
+  src/agentprobe/data/endpoints.py
+  src/agentprobe/data/personas.py
+  src/agentprobe/data/rubrics.py
+  src/agentprobe/data/scenarios.py
+  src/agentprobe/db.py
+src/agentprobe/endpoints/
+  src/agentprobe/endpoints/__init__.py
+  src/agentprobe/endpoints/_common.py
+  src/agentprobe/endpoints/autogpt.py
+  src/agentprobe/endpoints/autogpt_auth.py
+  src/agentprobe/endpoints/openclaw.py
+  src/agentprobe/endpoints/opencode.py
+  src/agentprobe/errors.py
+  src/agentprobe/judge.py
+  src/agentprobe/rendering.py
+  src/agentprobe/report.py
+  src/agentprobe/runner.py
+  src/agentprobe/simulator.py
+tests/
+tests/e2e/
+  tests/e2e/cli.e2e.test.ts
+tests/e2e/fixtures/
+tests/e2e/fixtures/suite/
+tests/e2e/python/
+  tests/e2e/python/sitecustomize.py
+  tests/e2e/support.ts
+  tests/test_adapters.py
+  tests/test_autogpt_auth.py
+  tests/test_cli.py
+  tests/test_db.py
+  tests/test_endpoint_configuration.py
+  tests/test_judge.py
+  tests/test_openclaw_runner.py
+  tests/test_report.py
+  tests/test_runner.py
+  tests/test_simulator.py
+  tsconfig.json
+  uv.lock
+```

@@ -5,7 +5,6 @@ import base64
 import hashlib
 import json
 import threading
-from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 from types import SimpleNamespace
@@ -91,8 +90,6 @@ class FakeOpenClawGateway:
         )
 
         connected = False
-        current_device_id: str | None = None
-        current_role = "operator"
 
         async for raw_message in websocket:
             frame = json.loads(raw_message)
@@ -116,8 +113,8 @@ class FakeOpenClawGateway:
                 )
                 if ok:
                     connected = True
-                    current_device_id = params["device"]["id"]
-                    current_role = params.get("role", "operator")
+                    params["device"]["id"]
+                    params.get("role", "operator")
                 continue
 
             if not connected:
@@ -271,7 +268,7 @@ class FakeOpenClawGateway:
             params.get("device") if isinstance(params.get("device"), dict) else None
         )
         raw_client = params.get("client")
-        client: dict[str, Any] = raw_client if isinstance(raw_client, dict) else {}
+        raw_client if isinstance(raw_client, dict) else {}
         raw_role = params.get("role")
         role = raw_role if isinstance(raw_role, str) else "operator"
 

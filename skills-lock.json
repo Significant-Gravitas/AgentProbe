@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "setup-harness": {
+      "source": "Swiftyos/HarnessEngineeringSkills",
+      "sourceType": "github",
+      "computedHash": "51ec59b5e6073212c0f9af39e906be0fb8234e25dde26369d3cb8fbb01e66652"
+    }
+  }
+}
