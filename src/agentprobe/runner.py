@@ -821,8 +821,8 @@ async def run_suite(
             )
         prepared_runs: list[_PreparedScenarioRun] = []
         ordinal_counter = 0
-        for iteration in range(1, effective_repeat + 1):
-            for item in selected_scenarios:
+        for item in selected_scenarios:
+            for iteration in range(1, effective_repeat + 1):
                 resolved_persona_id = item.persona
                 if resolved_persona_id is None:
                     raise AgentProbeConfigError(
