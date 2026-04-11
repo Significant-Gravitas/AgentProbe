@@ -851,12 +851,13 @@ async def run_suite(
                     _item: Scenario = item,
                 ) -> tuple[Callable[[], EndpointAdapter], str]:
                     # Pin a stable user_id per scenario+iteration so fresh_agent resets
-                    # create new sessions but authenticate as the SAME user.
-                    # Without this, each adapter gets a new uuid4() and S2 sees
-                    # an empty memory graph.
+                    # create new sessions but authenticate as the SAME user within the
+                    # scenario. Each (iteration, scenario) gets its own fresh uuid so
+                    # --repeat iterations remain memory-independent — we intentionally
+                    # ignore AUTOGPT_USER_ID here to prevent ambient env from collapsing
+                    # all iterations onto one memory graph.
                     import uuid as _uuid
-                    import os as _os
-                    _pinned_user_id = _os.environ.get("AUTOGPT_USER_ID") or str(_uuid.uuid4())
+                    _pinned_user_id = str(_uuid.uuid4())
                     logger.debug("Pinned user_id for scenario %s: %s", _item.id, _pinned_user_id)
 
                     def _pinned_auth_resolver() -> object:

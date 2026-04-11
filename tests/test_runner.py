@@ -952,6 +952,169 @@ scenarios:
 
 
 @pytest.mark.anyio
+async def test_run_suite_repeat_generates_distinct_user_ids_per_iteration(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    endpoint_path = tmp_path / "endpoint.yaml"
+    endpoint_path.write_text(
+        """
+transport: http
+connection:
+  base_url: http://example.test
+request:
+  method: POST
+  url: "{{ base_url }}/chat"
+response:
+  format: text
+  content_path: "$"
+""".strip(),
+        encoding="utf-8",
+    )
+
+    personas_path = tmp_path / "personas.yaml"
+    personas_path.write_text(
+        """
+personas:
+  - id: business-traveler
+    name: Business Traveler
+    demographics:
+      role: business customer
+      tech_literacy: high
+      domain_expertise: intermediate
+      language_style: terse
+    personality:
+      patience: 2
+      assertiveness: 4
+      detail_orientation: 5
+      cooperativeness: 4
+      emotional_intensity: 2
+    behavior:
+      opening_style: Be direct.
+      follow_up_style: Answer follow-up questions directly.
+      escalation_triggers: []
+      topic_drift: none
+      clarification_compliance: high
+    system_prompt: You are a direct business traveler.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    rubric_path = tmp_path / "rubric.yaml"
+    rubric_path.write_text(
+        """
+judge:
+  provider: openai
+  model: anthropic/claude-opus-4.6
+  temperature: 0.0
+  max_tokens: 500
+rubrics:
+  - id: customer-support
+    name: Customer Support
+    pass_threshold: 0.7
+    meta_prompt: Judge behavior.
+    dimensions:
+      - id: task_completion
+        name: Task Completion
+        weight: 1.0
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: bad
+            5: good
+        judge_prompt: Check task completion.
+""".strip(),
+        encoding="utf-8",
+    )
+
+    scenarios_path = tmp_path / "scenarios.yaml"
+    scenarios_path.write_text(
+        """
+defaults:
+  max_turns: 1
+scenarios:
+  - id: repeat-scenario
+    name: Repeat
+    persona: business-traveler
+    rubric: customer-support
+    turns:
+      - role: user
+        content: Hello repeat
+    expectations:
+      expected_behavior: Help.
+      expected_outcome: resolved
+""".strip(),
+        encoding="utf-8",
+    )
+
+    # Set the env var that used to collapse iterations onto one user — the
+    # regression guard is that run_suite must ignore it and still hand each
+    # iteration a fresh uuid.
+    monkeypatch.setenv("AUTOGPT_USER_ID", "should-be-ignored-by-run-suite")
+
+    observed_user_ids: list[str | None] = []
+
+    async def fake_run_scenario(
+        adapter: FakeAdapter,
+        scenario: Scenario,
+        persona: Persona,
+        rubric: Rubric,
+        *,
+        defaults: ScenarioDefaults | None = None,
+        oai_client: openai.AsyncClient,
+        recorder: object | None = None,
+        scenario_ordinal: int | None = None,
+        dry_run: bool = False,
+        adapter_factory: object | None = None,
+        user_id: str | None = None,
+    ) -> ScenarioRunResult:
+        persona_id = persona.id
+        rubric_id = rubric.id
+        del (
+            adapter,
+            persona,
+            rubric,
+            defaults,
+            oai_client,
+            recorder,
+            scenario_ordinal,
+            dry_run,
+            adapter_factory,
+        )
+        observed_user_ids.append(user_id)
+        return ScenarioRunResult(
+            scenario_id=scenario.id,
+            scenario_name=scenario.name,
+            persona_id=persona_id,
+            rubric_id=rubric_id,
+            user_id=user_id,
+            passed=True,
+            overall_score=0.9,
+        )
+
+    monkeypatch.setattr("agentprobe.runner.run_scenario", fake_run_scenario)
+
+    def adapter_factory(endpoint: Endpoints) -> FakeAdapter:
+        return FakeAdapter([AdapterReply(assistant_text="Handled.")])
+
+    result = await run_suite(
+        endpoint=endpoint_path,
+        scenarios=scenarios_path,
+        personas=personas_path,
+        rubric=rubric_path,
+        adapter_factory=adapter_factory,
+        oai_client=cast(openai.AsyncClient, FakeOpenAIClient()),
+        repeat=3,
+    )
+
+    assert result.exit_code == 0
+    assert len(observed_user_ids) == 3
+    assert all(uid is not None for uid in observed_user_ids)
+    assert "should-be-ignored-by-run-suite" not in observed_user_ids
+    assert len(set(observed_user_ids)) == 3
+
+
+@pytest.mark.anyio
 async def test_run_suite_emits_progress_events(tmp_path: Path):
     endpoint_path = tmp_path / "endpoint.yaml"
     endpoint_path.write_text(
