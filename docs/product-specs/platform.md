@@ -44,10 +44,11 @@ judge-model calls
 
 **Given** valid endpoint, scenario, persona, and rubric YAML files with more
 than one selected scenario
-**When** the user runs an evaluation suite with `--parallel`
+**When** the user runs an evaluation suite with `--parallel` or
+`--parallel <limit>`
 **Then** the CLI overlaps scenario execution, emits progress for each selected
-scenario, and preserves the original scenario ordering in summaries and stored
-run history
+scenario, honors the requested concurrency cap when provided, and preserves the
+original scenario ordering in summaries and stored run history
 
 ### Multi-session memory scenarios preserve pinned identity and session controls
 

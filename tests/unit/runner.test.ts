@@ -803,6 +803,191 @@ describe("runner", () => {
     ).toHaveLength(2);
   });
 
+  test("runSuite honors parallel limits while preserving result ordering", async () => {
+    const root = makeTempDir("run-suite-parallel-limit");
+    const endpointPath = join(root, "endpoint.yaml");
+    const personasPath = join(root, "personas.yaml");
+    const rubricPath = join(root, "rubric.yaml");
+    const scenariosPath = join(root, "scenarios.yaml");
+
+    writeFileSync(
+      endpointPath,
+      [
+        "transport: http",
+        "connection:",
+        "  base_url: http://example.test",
+        "request:",
+        "  method: POST",
+        '  url: "{{ base_url }}/chat"',
+        "response:",
+        "  format: text",
+        '  content_path: "$"',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      personasPath,
+      [
+        "personas:",
+        "  - id: business-traveler",
+        '    name: "Business Traveler"',
+        "    demographics:",
+        "      role: business customer",
+        "      tech_literacy: high",
+        "      domain_expertise: intermediate",
+        "      language_style: terse",
+        "    personality:",
+        "      patience: 3",
+        "      assertiveness: 4",
+        "      detail_orientation: 4",
+        "      cooperativeness: 4",
+        "      emotional_intensity: 2",
+        "    behavior:",
+        '      opening_style: "Be direct."',
+        '      follow_up_style: "Be concise."',
+        "      escalation_triggers: []",
+        '      topic_drift: "none"',
+        '      clarification_compliance: "high"',
+        '    system_prompt: "You are direct."',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      rubricPath,
+      [
+        "judge:",
+        "  provider: openai",
+        "  model: anthropic/claude-opus-4.6",
+        "  temperature: 0.0",
+        "  max_tokens: 500",
+        "rubrics:",
+        "  - id: customer-support",
+        '    name: "Customer Support"',
+        "    pass_threshold: 0.7",
+        '    meta_prompt: "Judge behavior."',
+        "    dimensions:",
+        "      - id: task_completion",
+        '        name: "Task Completion"',
+        "        weight: 1.0",
+        "        scale:",
+        "          type: likert",
+        "          points: 5",
+        "          labels:",
+        '            1: "bad"',
+        '            5: "good"',
+        '        judge_prompt: "Check task completion."',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      scenariosPath,
+      [
+        "scenarios:",
+        "  - id: smoke-a",
+        '    name: "Smoke A"',
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello A"',
+        "        use_exact_message: true",
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "  - id: smoke-b",
+        '    name: "Smoke B"',
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello B"',
+        "        use_exact_message: true",
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "  - id: smoke-c",
+        '    name: "Smoke C"',
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello C"',
+        "        use_exact_message: true",
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const concurrency = {
+      active: 0,
+      max: 0,
+    };
+
+    const result = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      client: {
+        async create(request: {
+          text: { format: { name?: string } };
+        }): Promise<{ outputText: string }> {
+          if (request.text.format.name === "persona_step") {
+            return {
+              outputText: JSON.stringify(buildPersonaStep("completed")),
+            };
+          }
+          return {
+            outputText: JSON.stringify({
+              dimensions: {
+                task_completion: {
+                  reasoning: "The agent completed the request.",
+                  evidence: ["The transcript shows a direct answer."],
+                  score: 4,
+                },
+              },
+              overall_notes: "Solid answer.",
+              pass: true,
+              failure_mode_detected: null,
+            }),
+          };
+        },
+      } as never,
+      adapterFactory: (_endpoint: Endpoints) => ({
+        async healthCheck(): Promise<void> {},
+        async openScenario(): Promise<Record<string, unknown>> {
+          return {};
+        },
+        async sendUserTurn() {
+          concurrency.active += 1;
+          concurrency.max = Math.max(concurrency.max, concurrency.active);
+          try {
+            await Bun.sleep(25);
+            return adapterReply("Handled.");
+          } finally {
+            concurrency.active -= 1;
+          }
+        },
+        async closeScenario(): Promise<void> {},
+      }),
+      parallelLimit: 2,
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.results.map((item) => item.scenarioId)).toEqual([
+      "smoke-a",
+      "smoke-b",
+      "smoke-c",
+    ]);
+    expect(concurrency.max).toBe(2);
+  });
+
   test("runSuite emits repeat display ids, run ids, and distinct pinned users", async () => {
     const root = makeTempDir("run-suite-repeat");
     const endpointPath = join(root, "endpoint.yaml");

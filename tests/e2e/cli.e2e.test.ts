@@ -668,6 +668,7 @@ describe("bun e2e baseline for the typescript cli", () => {
         "--rubric",
         workspace.rubricPath,
         "--parallel",
+        "2",
       ],
       {
         backendUrl: backend.url,

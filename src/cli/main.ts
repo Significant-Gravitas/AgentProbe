@@ -131,6 +131,14 @@ function parseFlag(args: string[], name: string): boolean {
   return args.includes(name);
 }
 
+function parseIntegerValue(name: string, value: string): number {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || String(parsed) !== value.trim()) {
+    throw new AgentProbeConfigError(`${name} requires an integer value.`);
+  }
+  return parsed;
+}
+
 function parseOption(args: string[], name: string): string | undefined {
   const index = args.indexOf(name);
   if (index === -1) {
@@ -144,11 +152,33 @@ function parseIntegerOption(args: string[], name: string): number | undefined {
   if (value === undefined) {
     return undefined;
   }
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isFinite(parsed) || String(parsed) !== value.trim()) {
-    throw new AgentProbeConfigError(`${name} requires an integer value.`);
+  return parseIntegerValue(name, value);
+}
+
+function parseParallelOption(
+  args: string[],
+): { enabled: boolean; limit?: number } {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg !== "--parallel" && arg !== "--parrallel") {
+      continue;
+    }
+
+    const rawLimit = args[index + 1];
+    if (rawLimit === undefined || rawLimit.startsWith("--")) {
+      return { enabled: true };
+    }
+
+    const limit = parseIntegerValue("--parallel", rawLimit);
+    if (limit < 1) {
+      throw new AgentProbeConfigError(
+        "--parallel must be at least 1 when a limit is provided.",
+      );
+    }
+    return { enabled: true, limit };
   }
-  return parsed;
+
+  return { enabled: false };
 }
 
 function normalizeGlobalArgs(argv: string[]): GlobalCliOptions {
@@ -290,6 +320,7 @@ async function handleRun(args: string[]): Promise<number> {
   const dashboard = dashboardEnabled
     ? startDashboardServer({ dbUrl: recorder.dbUrl })
     : undefined;
+  const parallel = parseParallelOption(args);
 
   try {
     if (dashboard) {
@@ -318,7 +349,8 @@ async function handleRun(args: string[]): Promise<number> {
         dashboard?.state.handleProgress(event);
         printRunProgress(event);
       },
-      parallel: parseFlag(args, "--parallel") || parseFlag(args, "--parrallel"),
+      parallel: parallel.enabled,
+      parallelLimit: parallel.limit,
       dryRun: parseFlag(args, "--dry-run"),
       repeat,
     });

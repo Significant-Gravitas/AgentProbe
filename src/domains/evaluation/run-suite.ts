@@ -865,6 +865,7 @@ export async function runSuite(options: {
   recorder?: RunRecorder;
   progressCallback?: (event: RunProgressEvent) => void;
   parallel?: boolean;
+  parallelLimit?: number;
   dryRun?: boolean;
   repeat?: number;
 }): Promise<RunResult> {
@@ -1010,8 +1011,32 @@ export async function runSuite(options: {
     };
 
     let results: ScenarioRunResult[] = [];
-    if (options.parallel) {
-      preparedRuns.forEach((prepared) => {
+    const parallelEnabled =
+      options.parallel || options.parallelLimit !== undefined;
+    if (options.parallelLimit !== undefined && options.parallelLimit < 1) {
+      throw new AgentProbeConfigError(
+        "--parallel must be at least 1 when a limit is provided.",
+      );
+    }
+
+    if (parallelEnabled) {
+      const concurrencyLimit = Math.min(
+        preparedRuns.length,
+        Math.max(1, options.parallelLimit ?? preparedRuns.length),
+      );
+      const orderedResults = new Array<ScenarioRunResult | undefined>(
+        preparedRuns.length,
+      );
+      const failures: Error[] = [];
+      let nextPreparedIndex = 0;
+
+      const runNextPrepared = async (): Promise<void> => {
+        const prepared = preparedRuns[nextPreparedIndex];
+        nextPreparedIndex += 1;
+        if (!prepared) {
+          return;
+        }
+
         options.progressCallback?.({
           kind: "scenario_started",
           runId,
@@ -1020,45 +1045,47 @@ export async function runSuite(options: {
           scenarioIndex: prepared.ordinal + 1,
           scenarioTotal: prepared.total,
         });
-      });
 
-      const orderedResults = new Array<ScenarioRunResult>(preparedRuns.length);
-      const failures: Error[] = [];
+        try {
+          const result = await executePrepared(prepared);
+          orderedResults[prepared.ordinal] = result;
+          options.progressCallback?.({
+            kind: "scenario_finished",
+            runId,
+            scenarioId: prepared.displayId,
+            scenarioName: result.scenarioName,
+            scenarioIndex: prepared.ordinal + 1,
+            scenarioTotal: prepared.total,
+            passed: result.passed,
+            overallScore: result.overallScore,
+          });
+        } catch (error) {
+          const failure =
+            error instanceof Error ? error : new Error(String(error));
+          failures.push(failure);
+          options.progressCallback?.({
+            kind: "scenario_error",
+            runId,
+            scenarioId: prepared.displayId,
+            scenarioName: prepared.scenario.name,
+            scenarioIndex: prepared.ordinal + 1,
+            scenarioTotal: prepared.total,
+            error: failure,
+          });
+        }
+
+        await runNextPrepared();
+      };
+
       await Promise.all(
-        preparedRuns.map(async (prepared) => {
-          try {
-            const result = await executePrepared(prepared);
-            orderedResults[prepared.ordinal] = result;
-            options.progressCallback?.({
-              kind: "scenario_finished",
-              runId,
-              scenarioId: prepared.displayId,
-              scenarioName: result.scenarioName,
-              scenarioIndex: prepared.ordinal + 1,
-              scenarioTotal: prepared.total,
-              passed: result.passed,
-              overallScore: result.overallScore,
-            });
-          } catch (error) {
-            const failure =
-              error instanceof Error ? error : new Error(String(error));
-            failures.push(failure);
-            options.progressCallback?.({
-              kind: "scenario_error",
-              runId,
-              scenarioId: prepared.displayId,
-              scenarioName: prepared.scenario.name,
-              scenarioIndex: prepared.ordinal + 1,
-              scenarioTotal: prepared.total,
-              error: failure,
-            });
-          }
-        }),
+        Array.from({ length: concurrencyLimit }, () => runNextPrepared()),
       );
       if (failures.length > 0) {
         throw failures[0];
       }
-      results = orderedResults.filter(Boolean);
+      results = orderedResults.filter(
+        (item): item is ScenarioRunResult => item !== undefined,
+      );
     } else {
       for (const prepared of preparedRuns) {
         options.progressCallback?.({
