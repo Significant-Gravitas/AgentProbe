@@ -22,6 +22,9 @@ const reportEnvironment = new nunjucks.Environment(undefined, {
   lstripBlocks: true,
 });
 
+const SESSION_BOUNDARY_RE =
+  /session_id:\s*(?<session_id>\S+)|reset_policy:\s*(?<reset_policy>\S+)|time_offset:\s*(?<time_offset>\S+)|user_id:\s*(?<user_id>\S+)/g;
+
 function invocationCwd(): string {
   return resolve(process.env.INIT_CWD ?? process.env.PWD ?? process.cwd());
 }
@@ -186,7 +189,47 @@ function statusLabel(passed: unknown): "PASS" | "FAIL" | "PENDING" {
   return "PENDING";
 }
 
-function roleTone(role: unknown): "assistant" | "user" | "system" {
+function isSessionBoundary(role: unknown, content: unknown): boolean {
+  return (
+    String(role ?? "")
+      .trim()
+      .toLowerCase() === "system" &&
+    typeof content === "string" &&
+    content.startsWith("--- Session boundary")
+  );
+}
+
+function parseSessionBoundary(content: string): Record<string, string> {
+  const fields = {
+    session_id: "",
+    reset_policy: "",
+    time_offset: "",
+    user_id: "",
+  };
+  for (const match of content.matchAll(SESSION_BOUNDARY_RE)) {
+    if (match.groups?.session_id) {
+      fields.session_id = match.groups.session_id;
+    }
+    if (match.groups?.reset_policy) {
+      fields.reset_policy = match.groups.reset_policy;
+    }
+    if (match.groups?.time_offset) {
+      fields.time_offset = match.groups.time_offset;
+    }
+    if (match.groups?.user_id) {
+      fields.user_id = match.groups.user_id;
+    }
+  }
+  return fields;
+}
+
+function roleTone(
+  role: unknown,
+  content: unknown,
+): "assistant" | "user" | "system" | "session_boundary" {
+  if (isSessionBoundary(role, content)) {
+    return "session_boundary";
+  }
   const normalized = String(role ?? "")
     .trim()
     .toLowerCase();
@@ -199,7 +242,10 @@ function roleTone(role: unknown): "assistant" | "user" | "system" {
   return "system";
 }
 
-function roleLabel(role: unknown): string {
+function roleLabel(role: unknown, content: unknown): string {
+  if (isSessionBoundary(role, content)) {
+    return "Session Boundary";
+  }
   const normalized = String(role ?? "")
     .trim()
     .toLowerCase();
@@ -267,17 +313,24 @@ function buildTurnRows(scenario: ScenarioRecord): TemplateObject[] {
 
   const rows: TemplateObject[] = scenario.turns.map((turn) => {
     const turnIndex = numberValue(turn.turn_index) ?? -1;
-    return {
+    const row: TemplateObject = {
       ...turn,
       created_at_label: formatTimestamp(turn.created_at),
-      role_label: roleLabel(turn.role),
-      tone: roleTone(turn.role),
+      role_label: roleLabel(turn.role, turn.content),
+      tone: roleTone(turn.role, turn.content),
       turn_index_label: turnIndex >= 0 ? String(turnIndex) : "–",
       tool_calls: toolCallsByTurn.get(turnIndex) ?? [],
       target_events: targetEventsByTurn.get(turnIndex) ?? [],
       checkpoints: checkpointsByTurn.get(turnIndex) ?? [],
       usage_pretty: prettyJson(turn.usage),
     };
+    if (
+      typeof turn.content === "string" &&
+      isSessionBoundary(turn.role, turn.content)
+    ) {
+      row.session_boundary = parseSessionBoundary(turn.content);
+    }
+    return row;
   });
 
   const leading = checkpointsByTurn.get(null) ?? [];
@@ -344,6 +397,7 @@ function prepareScenarioView(
     scenario_snapshot_pretty: prettyJson(scenario.scenarioSnapshot),
     started_at_label: formatTimestamp(scenario.startedAt),
     completed_at_label: formatTimestamp(scenario.completedAt),
+    user_id: scenario.userId ?? "",
     scenario_id: scenario.scenarioId,
     scenario_name: scenario.scenarioName,
     persona_id: scenario.personaId,
@@ -682,7 +736,7 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
               </div>
 
               <div data-tab-panel="conversation" data-tab-scenario="{{ scenario.dom_id }}" class="tab-panel space-y-4">
-                <div class="grid gap-4 md:grid-cols-3">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <div class="rounded-2xl border border-black/10 bg-black/[0.03] p-4">
                     <div class="text-xs uppercase tracking-[0.2em] text-black/50">Started</div>
                     <div class="mt-2 text-sm font-semibold">{{ scenario.started_at_label }}</div>
@@ -697,6 +751,12 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
                       {{ scenario.counts.turn_count }} turns • {{ scenario.counts.tool_call_count }} tool calls • {{ scenario.counts.checkpoint_count }} checkpoints
                     </div>
                   </div>
+                  {% if scenario.user_id %}
+                  <div class="rounded-2xl border border-black/10 bg-black/[0.03] p-4">
+                    <div class="text-xs uppercase tracking-[0.2em] text-black/50">User ID</div>
+                    <div class="mt-2 text-sm font-semibold break-all">{{ scenario.user_id }}</div>
+                  </div>
+                  {% endif %}
                 </div>
 
                 {% if scenario.expectations_pretty %}
@@ -708,6 +768,44 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
 
                 <div class="space-y-4">
                   {% for turn in scenario.turn_rows %}
+                  {% if turn.tone == "session_boundary" %}
+                  <article class="rounded-[1.5rem] border-l-4 border-indigo-400 bg-indigo-50 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <div class="flex items-center gap-3">
+                        <span class="rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-indigo-800">
+                          {{ turn.role_label }}
+                        </span>
+                      </div>
+                      <div class="text-xs text-black/45">Turn {{ turn.turn_index_label }} • {{ turn.created_at_label }}</div>
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center gap-4 text-sm font-semibold text-indigo-900">
+                      {% if turn.session_boundary.session_id %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Session:</span>
+                        {{ turn.session_boundary.session_id }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.reset_policy %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Reset:</span>
+                        {{ turn.session_boundary.reset_policy }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.time_offset %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Time:</span>
+                        {{ turn.session_boundary.time_offset }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.user_id %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">User:</span>
+                        <span class="break-all">{{ turn.session_boundary.user_id }}</span>
+                      </span>
+                      {% endif %}
+                    </div>
+                  </article>
+                  {% else %}
                   <article class="rounded-[1.5rem] border border-black/10 p-4
                     {% if turn.tone == "assistant" %}
                       bg-emerald-50/70
@@ -818,6 +916,7 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
                     </div>
                     {% endif %}
                   </article>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>

@@ -5,8 +5,12 @@
       "src/**/*.ts",
       "tests/**/*.ts",
       "scripts/**/*.ts",
+      "dashboard/src/**/*.ts",
+      "dashboard/src/**/*.tsx",
       "package.json",
-      "tsconfig.json"
+      "tsconfig.json",
+      "dashboard/package.json",
+      "dashboard/tsconfig.json"
     ]
   },
   "formatter": {
@@ -14,7 +18,12 @@
     "indentStyle": "space"
   },
   "linter": {
-    "enabled": true
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noArrayIndexKey": "off"
+      }
+    }
   },
   "assist": {
     "enabled": true

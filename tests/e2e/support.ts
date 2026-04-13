@@ -18,6 +18,7 @@ type JsonValue =
 type RunOptions = {
   backendUrl: string;
   cwd?: string;
+  extraEnv?: Record<string, string | undefined>;
   suiteDir: string;
   workspace: E2EWorkspace;
   timeoutMs?: number;
@@ -369,6 +370,7 @@ export async function runAgentprobe(
     AUTOGPT_BACKEND_URL: options.backendUrl,
     AGENTPROBE_E2E_OPENAI_SCRIPT: options.workspace.openAiScriptPath,
     AGENTPROBE_E2E_OPENAI_LOG: options.workspace.openAiLogPath,
+    ...options.extraEnv,
   };
 
   const process = Bun.spawn({

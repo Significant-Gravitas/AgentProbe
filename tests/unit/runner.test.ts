@@ -6,6 +6,7 @@ import {
   runScenario,
   runSuite,
 } from "../../src/domains/evaluation/run-suite.ts";
+import { SqliteRunRecorder } from "../../src/providers/persistence/sqlite-run-history.ts";
 import type {
   Endpoints,
   RunProgressEvent,
@@ -18,6 +19,7 @@ import {
   buildRubric,
   buildScenario,
   buildScore,
+  FailingAdapter,
   FakeAdapter,
   FakeResponsesClient,
   makeTempDir,
@@ -336,6 +338,295 @@ describe("runner", () => {
     ).toBe(true);
   });
 
+  test("runScenario enforces response_must_not_contain assertions", async () => {
+    const adapter = new FakeAdapter([
+      adapterReply("Sorry, I cannot help with that refund today."),
+    ]);
+    const client = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+
+    const result = await runScenario(
+      adapter,
+      buildScenario({
+        turns: [
+          {
+            role: "user",
+            content: "Can you help with my refund?",
+            useExactMessage: true,
+          },
+          {
+            role: "checkpoint",
+            assertions: [
+              {
+                responseContainsAny: [],
+                responseMustNotContain: ["sorry"],
+              },
+            ],
+          },
+        ],
+      }),
+      buildPersona(),
+      buildRubric(),
+      {
+        client: asResponsesClient(client) as never,
+      },
+    );
+
+    expect(result.checkpoints[0]).toEqual({
+      passed: false,
+      failures: ['Response contains forbidden string: "sorry"'],
+    });
+  });
+
+  test("runScenario carries pinned user_id into the adapter context and transcript boundaries", async () => {
+    const adapter = new FakeAdapter(
+      [adapterReply("Stored it."), adapterReply("Sarah handles proposals.")],
+      { session_id: "session-1" },
+    );
+    const client = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+
+    const result = await runScenario(
+      adapter,
+      buildScenario({
+        turns: [],
+        sessions: [
+          {
+            id: "seed",
+            timeOffset: "0h",
+            reset: "none",
+            turns: [
+              {
+                role: "user",
+                content: "Remember Sarah handles proposals.",
+                useExactMessage: true,
+              },
+            ],
+          },
+          {
+            id: "probe",
+            timeOffset: "48h",
+            reset: "new",
+            turns: [
+              {
+                role: "user",
+                content: "Who handles proposals?",
+                useExactMessage: true,
+              },
+            ],
+          },
+        ],
+      }),
+      buildPersona(),
+      buildRubric(),
+      {
+        client: asResponsesClient(client) as never,
+        userId: "user-123",
+      },
+    );
+
+    expect(adapter.openCalls[0]?.user_id).toBe("user-123");
+    expect(adapter.sendCalls[0]?.user_id).toBe("user-123");
+    expect(result.userId).toBe("user-123");
+    expect(
+      result.transcript.find((turn) =>
+        turn.content?.includes("Session boundary"),
+      )?.content,
+    ).toContain(
+      "session_id: probe reset_policy: new time_offset: 48h user_id: user-123",
+    );
+  });
+
+  test("runScenario creates a new adapter on fresh_agent resets when a factory is provided", async () => {
+    const firstAdapter = new FakeAdapter([adapterReply("Stored it.")]);
+    const secondAdapter = new FakeAdapter([adapterReply("Remembered it.")]);
+    const adapters = [secondAdapter];
+    const client = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+
+    const result = await runScenario(
+      firstAdapter,
+      buildScenario({
+        id: "memory-scenario",
+        name: "Memory Scenario",
+        turns: [],
+        sessions: [
+          {
+            id: "seed",
+            timeOffset: "0h",
+            reset: "none",
+            turns: [
+              {
+                role: "user",
+                content: "Remember that Sarah handles proposals.",
+                useExactMessage: true,
+              },
+            ],
+          },
+          {
+            id: "probe",
+            timeOffset: "24h",
+            reset: "fresh_agent",
+            turns: [
+              {
+                role: "user",
+                content: "Who handles proposals?",
+                useExactMessage: true,
+              },
+            ],
+          },
+        ],
+      }),
+      buildPersona(),
+      buildRubric(),
+      {
+        client: asResponsesClient(client) as never,
+        adapterFactory: () => adapters.shift() ?? secondAdapter,
+      },
+    );
+
+    expect(sendMessages(firstAdapter)).toEqual([
+      "Remember that Sarah handles proposals.",
+    ]);
+    expect(sendMessages(secondAdapter)).toEqual(["Who handles proposals?"]);
+    expect(result.transcript.filter((turn) => turn.role === "assistant")).toHaveLength(2);
+  });
+
+  test("runScenario warns and degrades when fresh_agent is requested without an adapter factory", async () => {
+    const adapter = new FakeAdapter([
+      adapterReply("Stored it."),
+      adapterReply("I still know that."),
+    ]);
+    const client = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+    const originalConsoleError = console.error;
+    const errors: string[] = [];
+    console.error = ((...args: unknown[]) => {
+      errors.push(args.join(" "));
+    }) as typeof console.error;
+
+    try {
+      await runScenario(
+        adapter,
+        buildScenario({
+          turns: [],
+          sessions: [
+            {
+              id: "seed",
+              timeOffset: "0h",
+              reset: "none",
+              turns: [
+                {
+                  role: "user",
+                  content: "Remember this for later.",
+                  useExactMessage: true,
+                },
+              ],
+            },
+            {
+              id: "probe",
+              timeOffset: "24h",
+              reset: "fresh_agent",
+              turns: [
+                {
+                  role: "user",
+                  content: "What did I ask you to remember?",
+                  useExactMessage: true,
+                },
+              ],
+            },
+          ],
+        }),
+        buildPersona(),
+        buildRubric(),
+        {
+          client: asResponsesClient(client) as never,
+        },
+      );
+    } finally {
+      console.error = originalConsoleError;
+    }
+
+    expect(adapter.openCalls).toHaveLength(2);
+    expect(errors.join("\n")).toContain(
+      "fresh_agent reset requested but no adapter_factory provided",
+    );
+  });
+
+  test("runScenario treats session max_turns as a session-local cap", async () => {
+    const adapter = new FakeAdapter([
+      adapterReply("Stored it."),
+      adapterReply("You asked me to remember Sarah."),
+    ]);
+    const client = new FakeResponsesClient([
+      buildPersonaStep("continue", "One more follow-up in the same session."),
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+
+    const result = await runScenario(
+      adapter,
+      buildScenario({
+        turns: [],
+        sessions: [
+          {
+            id: "seed",
+            timeOffset: "0h",
+            reset: "none",
+            maxTurns: 1,
+            turns: [
+              {
+                role: "user",
+                content: "Remember Sarah for later.",
+                useExactMessage: true,
+              },
+            ],
+          },
+          {
+            id: "probe",
+            timeOffset: "24h",
+            reset: "new",
+            turns: [
+              {
+                role: "user",
+                content: "What did I ask you to remember?",
+                useExactMessage: true,
+              },
+            ],
+          },
+        ],
+      }),
+      buildPersona(),
+      buildRubric(),
+      {
+        defaults: { maxTurns: 5 },
+        client: asResponsesClient(client) as never,
+      },
+    );
+
+    expect(sendMessages(adapter)).toEqual([
+      "Remember Sarah for later.",
+      "What did I ask you to remember?",
+    ]);
+    expect(
+      result.transcript.some((turn) =>
+        turn.content?.includes("One more follow-up in the same session."),
+      ),
+    ).toBe(false);
+    expect(result.passed).toBe(true);
+  });
+
   test("runSuite filters tags, merges directories, emits progress, and preserves parallel order", async () => {
     const root = makeTempDir("run-suite");
     mkdirSync(root, { recursive: true });
@@ -509,6 +800,268 @@ describe("runner", () => {
     ).toHaveLength(2);
     expect(
       events.filter((event) => event.kind === "scenario_finished"),
+    ).toHaveLength(2);
+  });
+
+  test("runSuite emits repeat display ids, run ids, and distinct pinned users", async () => {
+    const root = makeTempDir("run-suite-repeat");
+    const endpointPath = join(root, "endpoint.yaml");
+    const personasPath = join(root, "personas.yaml");
+    const rubricPath = join(root, "rubric.yaml");
+    const scenariosPath = join(root, "scenarios.yaml");
+
+    writeFileSync(
+      endpointPath,
+      [
+        "transport: http",
+        "connection:",
+        "  base_url: http://example.test",
+        "request:",
+        "  method: POST",
+        '  url: "{{ base_url }}/chat"',
+        "response:",
+        "  format: text",
+        '  content_path: "$"',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      personasPath,
+      [
+        "personas:",
+        "  - id: business-traveler",
+        '    name: "Business Traveler"',
+        "    demographics:",
+        "      role: business customer",
+        "      tech_literacy: high",
+        "      domain_expertise: intermediate",
+        "      language_style: terse",
+        "    personality:",
+        "      patience: 2",
+        "      assertiveness: 4",
+        "      detail_orientation: 5",
+        "      cooperativeness: 4",
+        "      emotional_intensity: 2",
+        "    behavior:",
+        '      opening_style: "Be direct."',
+        '      follow_up_style: "Answer directly."',
+        "      escalation_triggers: []",
+        "      topic_drift: none",
+        "      clarification_compliance: high",
+        '    system_prompt: "You are a direct business traveler."',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      rubricPath,
+      [
+        "judge:",
+        "  provider: openai",
+        "  model: anthropic/claude-opus-4.6",
+        "  temperature: 0.0",
+        "  max_tokens: 500",
+        "rubrics:",
+        "  - id: customer-support",
+        '    name: "Customer Support"',
+        "    pass_threshold: 0.7",
+        '    meta_prompt: "Judge behavior."',
+        "    dimensions:",
+        "      - id: task_completion",
+        '        name: "Task Completion"',
+        "        weight: 1.0",
+        "        scale:",
+        "          type: likert",
+        "          points: 5",
+        "          labels:",
+        '            1: "bad"',
+        '            5: "good"',
+        '        judge_prompt: "Check task completion."',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      scenariosPath,
+      [
+        "scenarios:",
+        "  - id: smoke-scenario",
+        '    name: "Smoke"',
+        "    tags: [smoke]",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello smoke"',
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const events: RunProgressEvent[] = [];
+    const recorder = new SqliteRunRecorder(
+      `sqlite:///${join(root, "runs.sqlite3")}`,
+    );
+    const result = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      client: asResponsesClient(new FakeResponsesClient([])) as never,
+      recorder,
+      dryRun: true,
+      repeat: 2,
+      progressCallback: (event) => {
+        events.push(event);
+      },
+    });
+
+    expect(result.results.map((item) => item.scenarioId)).toEqual([
+      "smoke-scenario",
+      "smoke-scenario",
+    ]);
+    expect(new Set(result.results.map((item) => item.userId)).size).toBe(2);
+    expect(events[0]?.runId).toBe(result.runId);
+    expect(
+      events
+        .filter((event) => event.kind === "scenario_started")
+        .map((event) => event.scenarioId),
+    ).toEqual(["smoke-scenario", "smoke-scenario#2"]);
+  });
+
+  test("runSuite emits scenario_error events for parallel failures", async () => {
+    const root = makeTempDir("run-suite-parallel-error");
+    mkdirSync(root, { recursive: true });
+    const endpointPath = join(root, "endpoint.yaml");
+    const personasPath = join(root, "personas.yaml");
+    const rubricPath = join(root, "rubric.yaml");
+    const scenariosPath = join(root, "scenarios.yaml");
+
+    writeFileSync(
+      endpointPath,
+      [
+        "transport: http",
+        "connection:",
+        "  base_url: http://example.test",
+        "request:",
+        "  method: POST",
+        '  url: "{{ base_url }}/chat"',
+        "response:",
+        "  format: text",
+        '  content_path: "$"',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      personasPath,
+      [
+        "personas:",
+        "  - id: business-traveler",
+        '    name: "Business Traveler"',
+        "    demographics:",
+        "      role: business customer",
+        "      tech_literacy: high",
+        "      domain_expertise: intermediate",
+        "      language_style: terse",
+        "    personality:",
+        "      patience: 2",
+        "      assertiveness: 4",
+        "      detail_orientation: 5",
+        "      cooperativeness: 4",
+        "      emotional_intensity: 2",
+        "    behavior:",
+        '      opening_style: "Be direct."',
+        '      follow_up_style: "Answer directly."',
+        "      escalation_triggers: []",
+        "      topic_drift: none",
+        "      clarification_compliance: high",
+        '    system_prompt: "You are a direct business traveler."',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      rubricPath,
+      [
+        "judge:",
+        "  provider: openai",
+        "  model: anthropic/claude-opus-4.6",
+        "  temperature: 0.0",
+        "  max_tokens: 500",
+        "rubrics:",
+        "  - id: customer-support",
+        '    name: "Customer Support"',
+        "    pass_threshold: 0.7",
+        '    meta_prompt: "Judge behavior."',
+        "    dimensions:",
+        "      - id: task_completion",
+        '        name: "Task Completion"',
+        "        weight: 1.0",
+        "        scale:",
+        "          type: likert",
+        "          points: 5",
+        "          labels:",
+        '            1: "bad"',
+        '            5: "good"',
+        '        judge_prompt: "Check task completion."',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      scenariosPath,
+      [
+        "scenarios:",
+        "  - id: smoke-a",
+        '    name: "Smoke A"',
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello A"',
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "  - id: smoke-b",
+        '    name: "Smoke B"',
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello B"',
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const events: RunProgressEvent[] = [];
+
+    await expect(
+      runSuite({
+        endpoint: endpointPath,
+        scenarios: scenariosPath,
+        personas: personasPath,
+        rubric: rubricPath,
+        client: asResponsesClient(new FakeResponsesClient([])) as never,
+        adapterFactory: (_endpoint: Endpoints) =>
+          new FailingAdapter("endpoint down"),
+        progressCallback: (event) => {
+          events.push(event);
+        },
+        parallel: true,
+      }),
+    ).rejects.toThrow("endpoint down");
+
+    expect(
+      events.filter((event) => event.kind === "scenario_error"),
     ).toHaveLength(2);
   });
 });

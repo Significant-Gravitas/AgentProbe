@@ -192,7 +192,12 @@ export function buildRubric(overrides: Partial<Rubric> = {}): Rubric {
 }
 
 export function buildScore(
-  options: { dimensionId?: string; score?: number; passed?: boolean } = {},
+  options: {
+    dimensionId?: string;
+    score?: number;
+    passed?: boolean;
+    failureModeDetected?: string | null;
+  } = {},
 ): RubricScore {
   const score = options.score ?? 4;
   return {
@@ -205,6 +210,7 @@ export function buildScore(
     },
     overallNotes: "Solid answer.",
     passed: options.passed ?? score / 5 >= 0.7,
+    failureModeDetected: options.failureModeDetected,
   };
 }
 

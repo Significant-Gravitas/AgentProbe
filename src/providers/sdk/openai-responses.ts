@@ -13,6 +13,20 @@ import {
 
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
+export class OpenAiResponsesApiError extends AgentProbeRuntimeError {
+  constructor(
+    message: string,
+    readonly statusCode?: number,
+    readonly responseBody?: string,
+  ) {
+    super(message);
+  }
+}
+
+export class OpenAiResponsesAuthenticationError extends OpenAiResponsesApiError {
+  override name = "OpenAiResponsesAuthenticationError";
+}
+
 type FakeRule = {
   name?: string;
   kind?: string;
@@ -144,37 +158,62 @@ export class OpenAiResponsesClient {
       );
     }
 
-    const response = await fetch(`${this.baseUrl}/responses`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: request.model,
-        instructions: request.instructions,
-        input: request.input,
-        text: {
-          format: {
-            type: request.text.format.type,
-            name: request.text.format.name,
-            description: request.text.format.description,
-            schema: request.text.format.schema,
-            strict: request.text.format.strict,
-          },
+    let response: Response;
+    try {
+      response = await fetch(`${this.baseUrl}/responses`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
         },
-        temperature: request.temperature,
-        max_output_tokens: request.maxOutputTokens,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new AgentProbeRuntimeError(
-        `OpenRouter request failed (${response.status}): ${await response.text()}`,
+        body: JSON.stringify({
+          model: request.model,
+          instructions: request.instructions,
+          input: request.input,
+          text: {
+            format: {
+              type: request.text.format.type,
+              name: request.text.format.name,
+              description: request.text.format.description,
+              schema: request.text.format.schema,
+              strict: request.text.format.strict,
+            },
+          },
+          temperature: request.temperature,
+          max_output_tokens: request.maxOutputTokens,
+        }),
+      });
+    } catch (error) {
+      throw new OpenAiResponsesApiError(
+        `OpenRouter request failed before a response was received: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       );
     }
 
-    const payload = (await response.json()) as Record<string, unknown>;
+    if (!response.ok) {
+      const bodyText = await response.text();
+      const message = `OpenRouter request failed (${response.status}): ${bodyText}`;
+      if (response.status === 401 || response.status === 403) {
+        throw new OpenAiResponsesAuthenticationError(
+          message,
+          response.status,
+          bodyText,
+        );
+      }
+      throw new OpenAiResponsesApiError(message, response.status, bodyText);
+    }
+
+    let payload: Record<string, unknown>;
+    try {
+      payload = (await response.json()) as Record<string, unknown>;
+    } catch (error) {
+      throw new OpenAiResponsesApiError(
+        `OpenRouter response was not valid JSON: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
     const outputText =
       typeof payload.output_text === "string"
         ? payload.output_text

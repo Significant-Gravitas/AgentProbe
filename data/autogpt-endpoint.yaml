@@ -2,8 +2,8 @@
 # Based on /Users/swifty/work/AutoGPTResearch/research/copilot_smoke_test.py.
 #
 # AutoGPT auth is handled internally by the main AgentProbe CLI for this preset.
-# The CLI resolves a forged bearer token before sending requests, then
-# registers the user with the backend.
+# The CLI should call `agentprobe.endpoints.autogpt.resolve_auth()` before
+# sending requests, which acquires a token and registers the user.
 
 preset: autogpt
 transport: http
@@ -35,7 +35,8 @@ endpoints:
     body_template: |
       {
         "message": {{ last_message.content | tojson }},
-        "is_user_message": true
+        "is_user_message": true{% if copilot_mode is defined and copilot_mode %},
+        "mode": {{ copilot_mode | tojson }}{% endif %}
       }
 
 session:
@@ -50,9 +51,6 @@ request:
 response:
   format: sse
   content_path: "$.delta"
-
-tool_extraction:
-  format: custom
 
 health_check:
   enabled: false

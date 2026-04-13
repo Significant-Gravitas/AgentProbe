@@ -25,7 +25,7 @@ import {
 
 export const DEFAULT_DB_DIRNAME = ".agentprobe";
 export const DEFAULT_DB_FILENAME = "runs.sqlite3";
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 const REDACTED_VALUE = "[REDACTED]";
 const sensitiveExactKeys = new Set([
   "access_token",
@@ -195,6 +195,58 @@ function openDatabase(dbUrl?: string): Database {
   return new Database(resolveDbPath(dbUrl));
 }
 
+function tableColumns(database: Database, tableName: string): Set<string> {
+  const rows = database
+    .query(`pragma table_info(${tableName})`)
+    .all() as Array<{ name?: string }>;
+  return new Set(
+    rows.flatMap((row) =>
+      typeof row.name === "string" && row.name.trim() ? [row.name] : [],
+    ),
+  );
+}
+
+function ensureColumn(
+  database: Database,
+  tableName: string,
+  columnName: string,
+  definition: string,
+): void {
+  if (tableColumns(database, tableName).has(columnName)) {
+    return;
+  }
+  database.exec(`alter table ${tableName} add column ${columnName} ${definition}`);
+}
+
+function migrateDatabase(database: Database, currentVersion: number): void {
+  let version = currentVersion;
+  if (version < 2) {
+    ensureColumn(database, "scenario_runs", "user_id", "text");
+    database
+      .query("update meta set schema_version = ? where id = 1")
+      .run(2);
+    version = 2;
+  }
+
+  if (version !== SCHEMA_VERSION) {
+    throw new AgentProbeRuntimeError(
+      `Unsupported run-history schema version ${version}; expected ${SCHEMA_VERSION}.`,
+    );
+  }
+}
+
+function normalizeUtcTimestamp(value: string): number | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  const normalized = /(?:[zZ]|[+-]\d{2}:\d{2})$/.test(trimmed)
+    ? trimmed
+    : `${trimmed}Z`;
+  const timestamp = Date.parse(normalized);
+  return Number.isNaN(timestamp) ? undefined : timestamp;
+}
+
 export function initDb(dbUrl?: string): void {
   const database = openDatabase(dbUrl);
   try {
@@ -239,6 +291,7 @@ export function initDb(dbUrl?: string): void {
         scenario_name text not null,
         persona_id text not null,
         rubric_id text not null,
+        user_id text,
         tags_json text,
         priority text,
         expectations_json text,
@@ -336,6 +389,8 @@ export function initDb(dbUrl?: string): void {
           "insert into meta (id, schema_version, created_at) values (1, ?, ?)",
         )
         .run(SCHEMA_VERSION, utcNow());
+    } else if ((meta.schema_version ?? 0) < SCHEMA_VERSION) {
+      migrateDatabase(database, meta.schema_version ?? 0);
     } else if (meta.schema_version !== SCHEMA_VERSION) {
       throw new AgentProbeRuntimeError(
         `Unsupported run-history schema version ${meta.schema_version}; expected ${SCHEMA_VERSION}.`,
@@ -577,6 +632,7 @@ export class SqliteRunRecorder {
     persona: Persona;
     rubric: Rubric;
     ordinal?: number;
+    userId?: string;
   }): number {
     const now = utcNow();
     this.database
@@ -584,12 +640,12 @@ export class SqliteRunRecorder {
         `
           insert into scenario_runs (
             run_id, ordinal, scenario_id, scenario_name, persona_id, rubric_id,
-            tags_json, priority, expectations_json, scenario_snapshot_json,
+            user_id, tags_json, priority, expectations_json, scenario_snapshot_json,
             persona_snapshot_json, rubric_snapshot_json, status, pass_threshold,
             judge_provider, judge_model, judge_temperature, judge_max_tokens,
             turn_count, assistant_turn_count, tool_call_count, checkpoint_count,
             started_at, updated_at
-          ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?, ?, ?, ?, 0, 0, 0, 0, ?, ?)
+          ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?, ?, ?, ?, 0, 0, 0, 0, ?, ?)
         `,
       )
       .run(
@@ -599,6 +655,7 @@ export class SqliteRunRecorder {
         options.scenario.name,
         options.persona.id,
         options.rubric.id,
+        options.userId ?? null,
         encodeJson(redactValue(options.scenario.tags)),
         options.scenario.priority ?? null,
         encodeJson(redactValue(options.scenario.expectations)),
@@ -829,6 +886,7 @@ export class SqliteRunRecorder {
             dimensions: options.score.dimensions,
             overall_notes: options.score.overallNotes,
             pass: options.score.passed,
+            failure_mode_detected: options.score.failureModeDetected ?? null,
           }),
         ),
         utcNow(),
@@ -969,6 +1027,7 @@ function getScenarioRecords(
       scenarioName: String(row.scenario_name),
       personaId: String(row.persona_id),
       rubricId: String(row.rubric_id),
+      userId: typeof row.user_id === "string" ? row.user_id : null,
       tags: decodeJson<JsonValue>(row.tags_json),
       priority: typeof row.priority === "string" ? row.priority : null,
       expectations: decodeJson<JsonValue>(row.expectations_json),
@@ -1114,19 +1173,25 @@ export function latestRunForSuite(
 ): RunRecord | undefined {
   const database = openDatabase(options.dbUrl);
   try {
-    const row = options.beforeStartedAt
-      ? (database
-          .query(
-            "select id from runs where suite_fingerprint = ? and started_at < ? order by started_at desc limit 1",
-          )
-          .get(suiteFingerprint, options.beforeStartedAt) as {
-          id?: string;
-        } | null)
-      : (database
-          .query(
-            "select id from runs where suite_fingerprint = ? order by started_at desc limit 1",
-          )
-          .get(suiteFingerprint) as { id?: string } | null);
+    const rows = database
+      .query(
+        "select id, started_at from runs where suite_fingerprint = ? order by started_at desc",
+      )
+      .all(suiteFingerprint) as Array<{ id?: string; started_at?: string }>;
+    const cutoffTimestamp =
+      typeof options.beforeStartedAt === "string"
+        ? normalizeUtcTimestamp(options.beforeStartedAt)
+        : undefined;
+    const row =
+      cutoffTimestamp === undefined
+        ? rows[0]
+        : rows.find((candidate) => {
+            if (typeof candidate.started_at !== "string") {
+              return false;
+            }
+            const startedAt = normalizeUtcTimestamp(candidate.started_at);
+            return startedAt !== undefined && startedAt < cutoffTimestamp;
+          });
     if (!row?.id) {
       return undefined;
     }

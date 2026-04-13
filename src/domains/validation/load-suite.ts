@@ -96,6 +96,28 @@ function optionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
 
+export function parseTimeOffset(offset: string): number {
+  const match = /^(\d+)([hdm])$/.exec(offset.trim());
+  if (!match) {
+    return 0;
+  }
+  const amount = Number(match[1] ?? "0");
+  const unit = match[2];
+  if (!Number.isFinite(amount)) {
+    return 0;
+  }
+  if (unit === "d") {
+    return amount * 24 * 60 * 60 * 1000;
+  }
+  if (unit === "h") {
+    return amount * 60 * 60 * 1000;
+  }
+  if (unit === "m") {
+    return amount * 60 * 1000;
+  }
+  return 0;
+}
+
 function stringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -762,6 +784,8 @@ function parseScenarioDefaults(value: unknown): ScenarioDefaults | undefined {
     timeoutSeconds: optionalNumber(raw.timeout_seconds),
     persona: optionalString(raw.persona),
     rubric: optionalString(raw.rubric),
+    userName: optionalString(raw.user_name),
+    copilotMode: optionalString(raw.copilot_mode) as ScenarioDefaults["copilotMode"],
   };
 }
 
@@ -772,6 +796,8 @@ function parseScenarioContext(value: unknown): ScenarioContext | undefined {
   const raw = ensureObject(value, "scenario.context must be an object.");
   return {
     systemPrompt: optionalString(raw.system_prompt),
+    userName: optionalString(raw.user_name),
+    copilotMode: optionalString(raw.copilot_mode) as ScenarioContext["copilotMode"],
     injectedData:
       raw.injected_data &&
       typeof raw.injected_data === "object" &&
@@ -792,6 +818,7 @@ function parseCheckpointAssertion(value: unknown): CheckpointAssertion {
         ? (raw.with_args as CheckpointAssertion["withArgs"])
         : undefined,
     responseContainsAny: stringArray(raw.response_contains_any),
+    responseMustNotContain: stringArray(raw.response_must_not_contain),
     responseMentions: optionalString(raw.response_mentions),
   };
 }
@@ -903,6 +930,7 @@ function parseSession(value: unknown): Session {
     id: optionalString(raw.id),
     timeOffset: optionalString(raw.time_offset) ?? "0h",
     reset: (optionalString(raw.reset) ?? "none") as Session["reset"],
+    maxTurns: optionalNumber(raw.max_turns),
     turns: Array.isArray(raw.turns)
       ? raw.turns.map((item) => parseTurn(item))
       : [],
@@ -911,6 +939,30 @@ function parseSession(value: unknown): Session {
 
 function parseScenario(value: unknown, defaults?: ScenarioDefaults): Scenario {
   const raw = ensureObject(value, "scenario must be an object.");
+  const contextPayload =
+    raw.context && typeof raw.context === "object" && !Array.isArray(raw.context)
+      ? ({ ...(raw.context as Record<string, unknown>) } satisfies Record<
+          string,
+          unknown
+        >)
+      : undefined;
+
+  if (defaults?.userName !== undefined || defaults?.copilotMode !== undefined) {
+    const ensuredContext = contextPayload ?? {};
+    if (defaults?.userName !== undefined && ensuredContext.user_name === undefined) {
+      ensuredContext.user_name = defaults.userName;
+    }
+    if (
+      defaults?.copilotMode !== undefined &&
+      ensuredContext.copilot_mode === undefined
+    ) {
+      ensuredContext.copilot_mode = defaults.copilotMode;
+    }
+    if (Object.keys(ensuredContext).length > 0) {
+      raw.context = ensuredContext;
+    }
+  }
+
   return {
     id: ensureString(raw.id, "scenario.id is required."),
     name: ensureString(raw.name, "scenario.name is required."),
@@ -919,6 +971,7 @@ function parseScenario(value: unknown, defaults?: ScenarioDefaults): Scenario {
     persona: optionalString(raw.persona) ?? defaults?.persona,
     rubric: optionalString(raw.rubric) ?? defaults?.rubric,
     maxTurns: optionalNumber(raw.max_turns),
+    baseDate: optionalString(raw.base_date),
     priority: optionalString(raw.priority) as Scenario["priority"],
     context: parseScenarioContext(raw.context),
     turns: Array.isArray(raw.turns)

@@ -38,6 +38,7 @@ export type ClarificationCompliance = "low" | "medium" | "high";
 export type JudgeProvider = "anthropic" | "openai" | "custom";
 export type ScaleType = "likert" | "binary" | "numeric" | "rubric_levels";
 export type AggregationMode = "mean" | "median" | "majority_vote";
+export type CopilotMode = "fast" | "extended_thinking";
 
 export type ProcessedYamlFile = {
   path: string;
@@ -307,10 +308,14 @@ export type ScenarioDefaults = {
   timeoutSeconds?: number;
   persona?: string;
   rubric?: string;
+  userName?: string;
+  copilotMode?: CopilotMode;
 };
 
 export type ScenarioContext = {
   systemPrompt?: string;
+  userName?: string;
+  copilotMode?: CopilotMode;
   injectedData: Record<string, JsonValue>;
 };
 
@@ -318,6 +323,7 @@ export type CheckpointAssertion = {
   toolCalled?: string;
   withArgs?: Record<string, JsonValue>;
   responseContainsAny: string[];
+  responseMustNotContain?: string[];
   responseMentions?: string;
 };
 
@@ -369,6 +375,7 @@ export type Session = {
   id?: string;
   timeOffset: string;
   reset: ResetPolicy;
+  maxTurns?: number;
   turns: TurnType[];
 };
 
@@ -380,6 +387,7 @@ export type Scenario = {
   persona?: string;
   rubric?: string;
   maxTurns?: number;
+  baseDate?: string;
   priority?: ScenarioPriority;
   context?: ScenarioContext;
   turns: TurnType[];
@@ -445,6 +453,7 @@ export type RubricScore = {
   dimensions: Record<string, JudgeDimensionScore>;
   overallNotes: string;
   passed: boolean;
+  failureModeDetected?: string | null;
 };
 
 export type ScenarioRunResult = {
@@ -452,6 +461,7 @@ export type ScenarioRunResult = {
   scenarioName: string;
   personaId: string;
   rubricId: string;
+  userId?: string | null;
   passed: boolean;
   overallScore: number;
   transcript: ConversationTurn[];
@@ -476,6 +486,7 @@ export type RunProgressKind =
 
 export type RunProgressEvent = {
   kind: RunProgressKind;
+  runId?: string | null;
   scenarioId?: string | null;
   scenarioName?: string | null;
   scenarioIndex?: number | null;
@@ -523,6 +534,7 @@ export type ScenarioRecord = {
   scenarioName: string;
   personaId: string;
   rubricId: string;
+  userId?: string | null;
   tags?: JsonValue;
   priority?: string | null;
   expectations?: JsonValue;

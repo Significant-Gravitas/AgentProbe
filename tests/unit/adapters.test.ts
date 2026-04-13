@@ -153,6 +153,7 @@ describe("endpoint adapters", () => {
         expect(JSON.parse(bodyText)).toEqual({
           message: "Hello AutoGPT",
           is_user_message: true,
+          mode: "fast",
         });
         return new Response(
           [
@@ -190,6 +191,7 @@ describe("endpoint adapters", () => {
       scenario: { id: "demo" },
       persona: { id: "shopper" },
       last_message: { content: "Hello AutoGPT" },
+      copilot_mode: "fast",
     };
 
     const session = await adapter.openScenario(baseContext);

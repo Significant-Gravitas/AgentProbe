@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import type { ServerWebSocket } from "bun";
 
 import {
   ASSISTANT_REPLIES,
@@ -15,6 +16,307 @@ import {
   runAgentprobe,
   scenarioIds,
 } from "./support.ts";
+
+type JsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+type GatewaySession = {
+  sessionId: string;
+  label?: string;
+  messages: Array<Record<string, JsonValue>>;
+};
+
+type GatewaySocket = ServerWebSocket<{ nonce: string }>;
+
+function jwtSubject(authorization: string | undefined): string | undefined {
+  if (!authorization?.startsWith("Bearer ")) {
+    return undefined;
+  }
+  const [, payload] = authorization.slice("Bearer ".length).split(".");
+  if (!payload) {
+    return undefined;
+  }
+  const decoded = JSON.parse(
+    Buffer.from(payload, "base64url").toString("utf8"),
+  ) as { sub?: string };
+  return typeof decoded.sub === "string" ? decoded.sub : undefined;
+}
+
+async function waitForStderrMatch(
+  stream: ReadableStream<Uint8Array> | null | undefined,
+  pattern: RegExp,
+  timeoutMs = 10_000,
+): Promise<string> {
+  if (!stream) {
+    throw new Error("Expected a stderr stream.");
+  }
+
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  const timeoutAt = Date.now() + timeoutMs;
+
+  while (Date.now() < timeoutAt) {
+    const remaining = Math.max(1, timeoutAt - Date.now());
+    const read = await Promise.race([
+      reader.read(),
+      new Promise<never>((_resolve, reject) => {
+        setTimeout(() => reject(new Error("Timed out waiting for stderr output.")), remaining);
+      }),
+    ]);
+    if (read.done) {
+      break;
+    }
+    text += decoder.decode(read.value, { stream: true });
+    if (pattern.test(text)) {
+      return text;
+    }
+  }
+
+  throw new Error(`Timed out waiting for stderr match: ${pattern}`);
+}
+
+class FakeOpenClawGateway {
+  readonly sessions = new Map<string, GatewaySession>();
+  private readonly deviceTokens = new Map<string, string>();
+  private server?: ReturnType<typeof Bun.serve>;
+  private sessionCounter = 0;
+  private sessionIdCounter = 0;
+
+  async start(): Promise<void> {
+    const gateway = this;
+    this.server = Bun.serve<{ nonce: string }>({
+      hostname: "127.0.0.1",
+      port: 0,
+      fetch(req, server) {
+        const upgraded = server.upgrade(req, {
+          data: { nonce: `nonce-${crypto.randomUUID()}` },
+        });
+        if (upgraded) {
+          return undefined;
+        }
+        return new Response("upgrade failed", { status: 500 });
+      },
+      websocket: {
+        open(ws) {
+          ws.send(
+            JSON.stringify({
+              type: "event",
+              event: "connect.challenge",
+              payload: {
+                nonce: ws.data.nonce,
+                ts: 1_737_264_000_000,
+              },
+            }),
+          );
+        },
+        message(ws, raw) {
+          gateway.handleFrame(ws, raw);
+        },
+      },
+    });
+    await Bun.sleep(0);
+  }
+
+  async stop(): Promise<void> {
+    this.server?.stop(true);
+    this.server = undefined;
+    await Bun.sleep(0);
+  }
+
+  get url(): string {
+    return `ws://127.0.0.1:${this.server?.port ?? 0}`;
+  }
+
+  private handleFrame(ws: GatewaySocket, raw: string | Buffer): void {
+    const frame = JSON.parse(String(raw)) as Record<string, unknown>;
+    const method = frame.method;
+    const requestId =
+      typeof frame.id === "string" ? frame.id : crypto.randomUUID();
+    const params =
+      frame.params &&
+      typeof frame.params === "object" &&
+      !Array.isArray(frame.params)
+        ? (frame.params as Record<string, unknown>)
+        : {};
+
+    if (method === "connect") {
+      this.handleConnect(ws, requestId, params);
+      return;
+    }
+    if (method === "health") {
+      this.sendOk(ws, requestId, { status: "ok" });
+      return;
+    }
+    if (method === "sessions.create") {
+      const sessionKey =
+        typeof params.key === "string" && params.key.trim()
+          ? params.key.trim()
+          : `session-${++this.sessionCounter}`;
+      if (!this.sessions.has(sessionKey)) {
+        this.sessions.set(sessionKey, {
+          sessionId: `sess-${++this.sessionIdCounter}`,
+          label: typeof params.label === "string" ? params.label : undefined,
+          messages: [],
+        });
+      }
+      const session = this.sessions.get(sessionKey);
+      if (!session) {
+        this.sendError(ws, requestId, "INVALID_REQUEST", "unknown session");
+        return;
+      }
+      this.sendOk(ws, requestId, {
+        ok: true,
+        key: sessionKey,
+        sessionId: session.sessionId,
+        entry: {
+          sessionId: session.sessionId,
+          label: session.label ?? null,
+        },
+      });
+      return;
+    }
+    if (method === "chat.send") {
+      const sessionKey =
+        typeof params.sessionKey === "string" ? params.sessionKey : undefined;
+      const message =
+        typeof params.message === "string" ? params.message : undefined;
+      const session = sessionKey ? this.sessions.get(sessionKey) : undefined;
+      const runId = crypto.randomUUID();
+      if (!session || !message) {
+        this.sendError(
+          ws,
+          requestId,
+          "INVALID_REQUEST",
+          "invalid chat.send params",
+        );
+        return;
+      }
+      session.messages.push({
+        role: "user",
+        content: [{ type: "text", text: message }],
+      });
+      const reply = `Echo: ${message}`;
+      const assistantMessage = {
+        role: "assistant",
+        content: [{ type: "text", text: reply }],
+      } satisfies Record<string, JsonValue>;
+      session.messages.push(assistantMessage);
+      this.sendOk(ws, requestId, { runId, status: "started" });
+      ws.send(
+        JSON.stringify({
+          type: "event",
+          event: "chat",
+          payload: {
+            runId,
+            sessionKey,
+            seq: 0,
+            state: "final",
+            message: assistantMessage,
+          },
+        }),
+      );
+      return;
+    }
+    if (method === "chat.history") {
+      const sessionKey =
+        typeof params.sessionKey === "string" ? params.sessionKey : undefined;
+      const session = sessionKey ? this.sessions.get(sessionKey) : undefined;
+      if (!sessionKey || !session) {
+        this.sendError(ws, requestId, "INVALID_REQUEST", "unknown session");
+        return;
+      }
+      this.sendOk(ws, requestId, {
+        sessionId: session.sessionId,
+        messages: session.messages,
+      });
+      return;
+    }
+
+    this.sendError(
+      ws,
+      requestId,
+      "INVALID_REQUEST",
+      `unexpected method: ${String(method)}`,
+    );
+  }
+
+  private handleConnect(
+    ws: GatewaySocket,
+    requestId: string,
+    params: Record<string, unknown>,
+  ): void {
+    const device =
+      params.device &&
+      typeof params.device === "object" &&
+      !Array.isArray(params.device)
+        ? (params.device as Record<string, unknown>)
+        : {};
+    const auth =
+      params.auth &&
+      typeof params.auth === "object" &&
+      !Array.isArray(params.auth)
+        ? (params.auth as Record<string, unknown>)
+        : {};
+    const nonce = typeof device.nonce === "string" ? device.nonce : undefined;
+    if (nonce !== ws.data.nonce) {
+      this.sendError(ws, requestId, "INVALID_REQUEST", "nonce mismatch");
+      return;
+    }
+
+    const deviceId =
+      typeof device.id === "string"
+        ? device.id
+        : `device-${crypto.randomUUID()}`;
+    const token =
+      typeof auth.token === "string"
+        ? auth.token
+        : typeof auth.bootstrapToken === "string"
+          ? auth.bootstrapToken
+          : "";
+    if (token !== "shared-token" && !token.startsWith("device-token-")) {
+      this.sendError(ws, requestId, "AUTH_FAILED", "invalid token");
+      return;
+    }
+
+    const deviceToken =
+      this.deviceTokens.get(deviceId) ?? `device-token-${deviceId.slice(0, 8)}`;
+    this.deviceTokens.set(deviceId, deviceToken);
+    this.sendOk(ws, requestId, {
+      protocol: 3,
+      auth: { deviceToken, role: "operator", scopes: ["operator.read"] },
+    });
+  }
+
+  private sendOk(
+    ws: GatewaySocket,
+    id: string,
+    payload: Record<string, unknown>,
+  ): void {
+    ws.send(JSON.stringify({ type: "res", id, ok: true, payload }));
+  }
+
+  private sendError(
+    ws: GatewaySocket,
+    id: string,
+    code: string,
+    message: string,
+  ): void {
+    ws.send(
+      JSON.stringify({
+        type: "res",
+        id,
+        ok: false,
+        error: { code, message },
+      }),
+    );
+  }
+}
 
 describe("bun e2e baseline for the typescript cli", () => {
   let backend: FakeAutogptBackend;
@@ -389,5 +691,275 @@ describe("bun e2e baseline for the typescript cli", () => {
       { ordinal: 0, scenario_id: "refund-smoke" },
       { ordinal: 1, scenario_id: "billing-followup" },
     ]);
+  });
+
+  test("repeat mode uses distinct pinned AutoGPT users per iteration", async () => {
+    await workspace.writeOpenAiScript(buildOpenAiRules());
+
+    const result = await runAgentprobe(
+      [
+        "run",
+        "--endpoint",
+        workspace.endpointPath,
+        "--scenarios",
+        workspace.scenariosPath,
+        "--personas",
+        workspace.personasPath,
+        "--rubric",
+        workspace.rubricPath,
+        "--scenario-id",
+        "refund-smoke",
+        "--repeat",
+        "2",
+      ],
+      {
+        backendUrl: backend.url,
+        suiteDir: workspace.suiteDir,
+        workspace,
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stderr).toContain("RUN refund-smoke");
+    expect(result.stderr).toContain("RUN refund-smoke#2");
+
+    const scenarioRows = queryRows(
+      workspace.dbPath,
+      ["ordinal", "scenario_id", "user_id"],
+      "scenario_runs",
+      "ordinal ASC",
+    );
+    expect(scenarioRows).toEqual([
+      {
+        ordinal: 0,
+        scenario_id: "refund-smoke",
+        user_id: scenarioRows[0]?.user_id,
+      },
+      {
+        ordinal: 1,
+        scenario_id: "refund-smoke",
+        user_id: scenarioRows[1]?.user_id,
+      },
+    ]);
+    expect(scenarioRows[0]?.user_id).not.toBe(scenarioRows[1]?.user_id);
+
+    const subjects = backend.requestLog
+      .filter((entry) => entry.kind === "register_user")
+      .map((entry) => jwtSubject(entry.headers.authorization))
+      .filter((value): value is string => typeof value === "string");
+    expect(new Set(subjects).size).toBe(2);
+    expect(subjects).toEqual(
+      scenarioRows.map((row) => String(row.user_id)),
+    );
+  });
+
+  test("dashboard mode serves live state from the Bun dashboard server", async () => {
+    await workspace.writeOpenAiScript(buildOpenAiRules());
+    backend.enableSendBarrier(2);
+
+    const env = {
+      ...Bun.env,
+      OPEN_ROUTER_API_KEY: "e2e-openrouter-key",
+      AUTOGPT_BACKEND_URL: backend.url,
+      AGENTPROBE_E2E_OPENAI_SCRIPT: workspace.openAiScriptPath,
+      AGENTPROBE_E2E_OPENAI_LOG: workspace.openAiLogPath,
+      AGENTPROBE_DISABLE_BROWSER_OPEN: "1",
+    };
+    const process = Bun.spawn({
+      cmd: [
+        "bun",
+        "run",
+        "agentprobe",
+        "--data-path",
+        workspace.suiteDir,
+        "run",
+        "--endpoint",
+        workspace.endpointPath,
+        "--scenarios",
+        workspace.scenariosPath,
+        "--personas",
+        workspace.personasPath,
+        "--rubric",
+        workspace.rubricPath,
+        "--parallel",
+        "--dashboard",
+      ],
+      cwd: workspace.suiteDir,
+      env,
+      stdout: "pipe",
+      stderr: "pipe",
+      stdin: "ignore",
+    });
+
+    const stderr = await waitForStderrMatch(
+      process.stderr,
+      /Dashboard: (http:\/\/\S+)/,
+    );
+    const dashboardUrl = stderr.match(/Dashboard: (http:\/\/\S+)/)?.[1];
+    expect(dashboardUrl).toBeDefined();
+
+    const stateResponse = await fetch(`${dashboardUrl}/api/state`);
+    const state = (await stateResponse.json()) as {
+      total: number;
+      scenarios: Array<{ scenario_id: string }>;
+    };
+    expect(state.total).toBe(2);
+    expect(state.scenarios.map((scenario) => scenario.scenario_id)).toEqual([
+      "refund-smoke",
+      "billing-followup",
+    ]);
+
+    const exitCode = await Promise.race([
+      process.exited,
+      new Promise<number>((_resolve, reject) => {
+        setTimeout(() => reject(new Error("dashboard e2e timed out")), 30_000);
+      }),
+    ]);
+    const stdout = await new Response(process.stdout).text();
+
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain("Summary: 2 passed, 0 failed, 2 total");
+  });
+
+  test("openclaw commands create sessions, chat, and read history through the cli", async () => {
+    const gateway = new FakeOpenClawGateway();
+    await gateway.start();
+
+    try {
+      const endpointPath = join(workspace.rootDir, "openclaw-endpoint.yaml");
+      await writeFile(
+        endpointPath,
+        [
+          "preset: openclaw",
+          "transport: websocket",
+          "connection:",
+          `  url: "${gateway.url}"`,
+          "  timeout_seconds: 30",
+          "  max_retries: 1",
+          "websocket:",
+          "  connect:",
+          "    challenge_event: connect.challenge",
+          "    method: connect",
+          "    params:",
+          "      client:",
+          "        id: openclaw-probe",
+          '        version: "0.1.0"',
+          "        platform: typescript",
+          "        mode: probe",
+          "      role: operator",
+          "      scopes:",
+          "        - operator.read",
+          "        - operator.write",
+          "      auth:",
+          '        token: "shared-token"',
+          "health_check:",
+          "  enabled: true",
+          "",
+        ].join("\n"),
+        "utf8",
+      );
+
+      const createSession = await runAgentprobe(
+        [
+          "openclaw",
+          "create-session",
+          "--endpoint",
+          endpointPath,
+          "--session-key",
+          "support-1",
+          "--label",
+          "Support session",
+        ],
+        {
+          backendUrl: backend.url,
+          suiteDir: workspace.suiteDir,
+          workspace,
+          extraEnv: {
+            AGENTPROBE_STATE_DIR: workspace.rootDir,
+            OPENCLAW_GATEWAY_URL: gateway.url,
+            OPENCLAW_GATEWAY_TOKEN: "shared-token",
+          },
+        },
+      );
+
+      expect(createSession.exitCode).toBe(0);
+      const createSessionPayload = JSON.parse(createSession.stdout) as {
+        entry?: { label?: string; sessionId?: string };
+        key: string;
+        sessionId?: string;
+      };
+      expect(createSessionPayload.key).toBe("support-1");
+      expect(createSessionPayload.sessionId).toBe("sess-1");
+      expect(createSessionPayload.entry?.sessionId).toBe("sess-1");
+      expect(createSessionPayload.entry?.label).toBe("Support session");
+
+      const chat = await runAgentprobe(
+        [
+          "openclaw",
+          "chat",
+          "--endpoint",
+          endpointPath,
+          "--session-key",
+          "support-1",
+          "--message",
+          "from e2e",
+        ],
+        {
+          backendUrl: backend.url,
+          suiteDir: workspace.suiteDir,
+          workspace,
+          extraEnv: {
+            AGENTPROBE_STATE_DIR: workspace.rootDir,
+            OPENCLAW_GATEWAY_URL: gateway.url,
+            OPENCLAW_GATEWAY_TOKEN: "shared-token",
+          },
+        },
+      );
+
+      expect(chat.exitCode).toBe(0);
+      const chatPayload = JSON.parse(chat.stdout) as {
+        reply: string;
+        sessionKey: string;
+        status: string;
+      };
+      expect(chatPayload.status).toBe("ok");
+      expect(chatPayload.sessionKey).toBe("support-1");
+      expect(chatPayload.reply).toBe("Echo: from e2e");
+
+      const history = await runAgentprobe(
+        [
+          "openclaw",
+          "history",
+          "--endpoint",
+          endpointPath,
+          "--session-key",
+          "support-1",
+        ],
+        {
+          backendUrl: backend.url,
+          suiteDir: workspace.suiteDir,
+          workspace,
+          extraEnv: {
+            AGENTPROBE_STATE_DIR: workspace.rootDir,
+            OPENCLAW_GATEWAY_URL: gateway.url,
+            OPENCLAW_GATEWAY_TOKEN: "shared-token",
+          },
+        },
+      );
+
+      expect(history.exitCode).toBe(0);
+      const historyPayload = JSON.parse(history.stdout) as {
+        messages: Array<{ role: string }>;
+        sessionId: string;
+      };
+      expect(historyPayload.sessionId).toBe("sess-1");
+      expect(historyPayload.messages.map((message) => message.role)).toEqual([
+        "user",
+        "assistant",
+      ]);
+      expect(gateway.sessions.get("support-1")?.messages).toHaveLength(2);
+    } finally {
+      await gateway.stop();
+    }
   });
 });

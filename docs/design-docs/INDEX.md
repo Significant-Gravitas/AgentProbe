@@ -18,6 +18,7 @@ principles should survive across refactors and migrations.
 ## Files
 
 - [core-beliefs.md](core-beliefs.md) — Agent-first beliefs that define the repo contract
+- [frontend-react.md](frontend-react.md) — React performance mental model and codebase rules
 
 ## Subdirectories
 
@@ -25,6 +26,7 @@ principles should survive across refactors and migrations.
 
 <!-- AUTO-GENERATED FILE LINKS START -->
 - [core-beliefs.md](core-beliefs.md)
+- [frontend-react.md](frontend-react.md)
 <!-- AUTO-GENERATED FILE LINKS END -->
 
 <!-- AUTO-GENERATED SUBDIR LINKS START -->

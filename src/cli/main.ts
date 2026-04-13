@@ -1,8 +1,12 @@
 import { dirname, resolve } from "node:path";
 
 import { runSuite } from "../domains/evaluation/run-suite.ts";
+import { startDashboardServer } from "../domains/reporting/dashboard.ts";
 import { writeRunReport } from "../domains/reporting/render-report.ts";
-import { processYamlFiles } from "../domains/validation/load-suite.ts";
+import {
+  parseScenariosInput,
+  processYamlFiles,
+} from "../domains/validation/load-suite.ts";
 import {
   DEFAULT_DB_DIRNAME,
   DEFAULT_DB_FILENAME,
@@ -20,6 +24,19 @@ import {
   AgentProbeConfigError,
   AgentProbeRuntimeError,
 } from "../shared/utils/errors.ts";
+import { setLogLevel } from "../shared/utils/logging.ts";
+
+type GlobalCliOptions = {
+  args: string[];
+  dataPath?: string;
+  verbosity: 0 | 1 | 2;
+};
+
+type DashboardScenarioSeed = {
+  ordinal: number;
+  displayId: string;
+  scenarioName?: string | null;
+};
 
 function formatScore(score: number): string {
   return score.toFixed(2);
@@ -122,6 +139,120 @@ function parseOption(args: string[], name: string): string | undefined {
   return args[index + 1];
 }
 
+function parseIntegerOption(args: string[], name: string): number | undefined {
+  const value = parseOption(args, name);
+  if (value === undefined) {
+    return undefined;
+  }
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || String(parsed) !== value.trim()) {
+    throw new AgentProbeConfigError(`${name} requires an integer value.`);
+  }
+  return parsed;
+}
+
+function normalizeGlobalArgs(argv: string[]): GlobalCliOptions {
+  const args: string[] = [];
+  let dataPath: string | undefined;
+  let verbosity = 0;
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--data-path") {
+      dataPath = argv[index + 1];
+      index += 1;
+      continue;
+    }
+    if (arg === "-vv") {
+      verbosity = Math.max(verbosity, 2);
+      continue;
+    }
+    if (arg === "-v" || arg === "--verbose") {
+      verbosity = Math.min(2, verbosity + 1);
+      continue;
+    }
+    args.push(arg);
+  }
+
+  return {
+    args,
+    dataPath,
+    verbosity: verbosity >= 2 ? 2 : verbosity === 1 ? 1 : 0,
+  };
+}
+
+function applyVerbosityLevel(verbosity: 0 | 1 | 2): void {
+  if (verbosity >= 2) {
+    setLogLevel("debug");
+    return;
+  }
+  if (verbosity === 1) {
+    setLogLevel("info");
+    return;
+  }
+  setLogLevel("warn");
+}
+
+function selectDashboardScenarios(options: {
+  scenariosPath: string;
+  scenarioId?: string;
+  tags?: string;
+  repeat?: number;
+}): DashboardScenarioSeed[] {
+  const scenarioCollection = parseScenariosInput(options.scenariosPath);
+  const requestedTags = new Set(
+    (options.tags ?? "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
+  const selectedScenarios = scenarioCollection.scenarios.filter((scenario) => {
+    if (options.scenarioId && scenario.id !== options.scenarioId) {
+      return false;
+    }
+    if (requestedTags.size > 0 && !scenario.tags.some((tag) => requestedTags.has(tag))) {
+      return false;
+    }
+    return true;
+  });
+  const repeat = Math.max(1, options.repeat ?? 1);
+  let ordinal = 0;
+  return selectedScenarios.flatMap((scenario) =>
+    Array.from({ length: repeat }, (_unused, iterationIndex) => {
+      const iteration = iterationIndex + 1;
+      const seed = {
+        ordinal,
+        displayId: iteration > 1 ? `${scenario.id}#${iteration}` : scenario.id,
+        scenarioName: scenario.name,
+      };
+      ordinal += 1;
+      return seed;
+    }),
+  );
+}
+
+async function bestEffortOpenBrowser(url: string): Promise<void> {
+  if (Bun.env.AGENTPROBE_DISABLE_BROWSER_OPEN === "1") {
+    return;
+  }
+
+  const command =
+    process.platform === "darwin"
+      ? ["open", url]
+      : process.platform === "win32"
+        ? ["cmd", "/c", "start", "", url]
+        : ["xdg-open", url];
+  try {
+    const child = Bun.spawn({
+      cmd: command,
+      stdin: "ignore",
+      stdout: "ignore",
+      stderr: "ignore",
+    });
+    void child.exited.catch(() => {});
+  } catch {}
+}
+
 async function handleValidate(
   args: string[],
   globalDataPath?: string,
@@ -150,21 +281,52 @@ async function handleRun(args: string[]): Promise<number> {
   const recorder = new SqliteRunRecorder(
     suiteDbUrl([endpoint, scenarios, personas, rubric]),
   );
-  const result = await runSuite({
-    endpoint,
-    scenarios,
-    personas,
-    rubric,
-    scenarioId: parseOption(args, "--scenario-id"),
-    tags: parseOption(args, "--tags"),
-    client,
-    recorder,
-    progressCallback: printRunProgress,
-    parallel: parseFlag(args, "--parallel") || parseFlag(args, "--parrallel"),
-    dryRun: parseFlag(args, "--dry-run"),
-  });
-  printRunSummary(result);
-  return result.exitCode;
+  const repeat = parseIntegerOption(args, "--repeat");
+  if (repeat !== undefined && repeat < 1) {
+    throw new AgentProbeConfigError("--repeat must be at least 1.");
+  }
+
+  const dashboardEnabled = parseFlag(args, "--dashboard");
+  const dashboard = dashboardEnabled
+    ? startDashboardServer({ dbUrl: recorder.dbUrl })
+    : undefined;
+
+  try {
+    if (dashboard) {
+      dashboard.state.primeScenarios(
+        selectDashboardScenarios({
+          scenariosPath: scenarios,
+          scenarioId: parseOption(args, "--scenario-id"),
+          tags: parseOption(args, "--tags"),
+          repeat,
+        }),
+      );
+      console.error(`Dashboard: ${dashboard.url}`);
+      void bestEffortOpenBrowser(dashboard.url);
+    }
+
+    const result = await runSuite({
+      endpoint,
+      scenarios,
+      personas,
+      rubric,
+      scenarioId: parseOption(args, "--scenario-id"),
+      tags: parseOption(args, "--tags"),
+      client,
+      recorder,
+      progressCallback: (event) => {
+        dashboard?.state.handleProgress(event);
+        printRunProgress(event);
+      },
+      parallel: parseFlag(args, "--parallel") || parseFlag(args, "--parrallel"),
+      dryRun: parseFlag(args, "--dry-run"),
+      repeat,
+    });
+    printRunSummary(result);
+    return result.exitCode;
+  } finally {
+    dashboard?.stop();
+  }
 }
 
 async function handleReport(
@@ -240,12 +402,10 @@ async function handleOpenclaw(args: string[]): Promise<number> {
 }
 
 export async function executeCli(argv: string[]): Promise<number> {
-  let args = [...argv];
-  let globalDataPath: string | undefined;
-  if (args[0] === "--data-path") {
-    globalDataPath = args[1];
-    args = args.slice(2);
-  }
+  const normalized = normalizeGlobalArgs(argv);
+  applyVerbosityLevel(normalized.verbosity);
+  const args = normalized.args;
+  const globalDataPath = normalized.dataPath;
 
   const [command = "validate", ...rest] = args;
 

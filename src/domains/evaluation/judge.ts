@@ -1,3 +1,7 @@
+import {
+  OpenAiResponsesApiError,
+  OpenAiResponsesAuthenticationError,
+} from "../../providers/sdk/openai-responses.ts";
 import type { OpenAiResponsesClient } from "../../providers/sdk/openai-responses.ts";
 import type {
   JsonValue,
@@ -6,6 +10,27 @@ import type {
   RubricScore,
 } from "../../shared/types/contracts.ts";
 import { AgentProbeRuntimeError } from "../../shared/utils/errors.ts";
+
+const DEFAULT_RETRY_DELAY_MS = 2000;
+const MAX_JUDGE_ATTEMPTS = 3;
+
+function judgeRetryDelayMs(): number {
+  const raw = Bun.env.AGENTPROBE_JUDGE_RETRY_DELAY_MS?.trim();
+  if (!raw) {
+    return DEFAULT_RETRY_DELAY_MS;
+  }
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0
+    ? parsed
+    : DEFAULT_RETRY_DELAY_MS;
+}
+
+async function sleep(ms: number): Promise<void> {
+  if (ms <= 0) {
+    return;
+  }
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export function rubricToPromptMarkdown(rubric: Rubric): string {
   const lines = [
@@ -121,8 +146,13 @@ function judgeJsonSchema(rubric: Rubric): Record<string, unknown> {
         type: "boolean",
         description: "Whether the evaluated response passes the rubric.",
       },
+      failure_mode_detected: {
+        type: ["string", "null"],
+        description:
+          "Named failure mode detected in the response, or null when none apply.",
+      },
     },
-    required: ["dimensions", "overall_notes", "pass"],
+    required: ["dimensions", "overall_notes", "pass", "failure_mode_detected"],
     additionalProperties: false,
   };
 }
@@ -142,6 +172,7 @@ function judgeInstructions(
     "",
     "Return structured output matching the requested schema exactly.",
     `The \`dimensions\` object must contain exactly these rubric dimension ids: ${dimensionIds}.`,
+    "If the scenario defines failure modes, set `failure_mode_detected` to the matching named failure mode or null when none apply.",
     "",
     "JSON schema:",
     JSON.stringify(schema, null, 2),
@@ -193,6 +224,12 @@ function parseRubricScore(payload: string): RubricScore {
     overallNotes:
       typeof record.overall_notes === "string" ? record.overall_notes : "",
     passed: record.pass === true,
+    failureModeDetected:
+      typeof record.failure_mode_detected === "string"
+        ? record.failure_mode_detected
+        : record.failure_mode_detected === null
+          ? null
+          : undefined,
   };
 }
 
@@ -252,13 +289,58 @@ export async function judgeResponse(
     maxOutputTokens: rubric.judge.maxTokens,
   };
 
-  const response = await client.create(request);
-  if (!response.outputText.trim()) {
-    throw new AgentProbeRuntimeError(
-      "Judge response contained no text output.",
-    );
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_JUDGE_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await client.create(request);
+      if (!response.outputText.trim()) {
+        throw new AgentProbeRuntimeError(
+          "Judge response contained no text output.",
+        );
+      }
+      const score = parseRubricScore(response.outputText);
+      validateRubricScore(rubric, score);
+      return score;
+    } catch (error) {
+      lastError = error;
+      if (error instanceof OpenAiResponsesAuthenticationError) {
+        throw new AgentProbeRuntimeError(
+          `Judge authentication failed for model '${rubric.judge.model}'. Set a valid OPEN_ROUTER_API_KEY before running agentprobe.`,
+        );
+      }
+
+      if (error instanceof OpenAiResponsesApiError) {
+        const statusCode = error.statusCode;
+        if (statusCode && statusCode >= 400 && statusCode < 500 && statusCode !== 429) {
+          throw error;
+        }
+        if (attempt < MAX_JUDGE_ATTEMPTS) {
+          await sleep(judgeRetryDelayMs());
+          continue;
+        }
+        break;
+      }
+
+      if (
+        error instanceof SyntaxError ||
+        (error instanceof AgentProbeRuntimeError &&
+          /invalid JSON output|no text output|did not match rubric dimensions/i.test(
+            error.message,
+          ))
+      ) {
+        if (attempt < MAX_JUDGE_ATTEMPTS) {
+          continue;
+        }
+        break;
+      }
+
+      throw error;
+    }
   }
-  const score = parseRubricScore(response.outputText);
-  validateRubricScore(rubric, score);
-  return score;
+
+  throw (
+    lastError instanceof Error
+      ? lastError
+      : new AgentProbeRuntimeError(String(lastError))
+  );
 }

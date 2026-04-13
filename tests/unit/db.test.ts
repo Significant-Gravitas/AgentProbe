@@ -221,7 +221,7 @@ describe("sqlite recorder", () => {
       }
       expect(
         database.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 1 });
+      ).toEqual({ schema_version: 2 });
     } finally {
       database.close();
     }
@@ -251,6 +251,9 @@ describe("sqlite recorder", () => {
     expect(result.exitCode).toBe(0);
     expect(persisted?.runId).toBe(result.runId ?? undefined);
     expect(persisted?.status).toBe("completed");
+    expect(result.results[0]?.userId).toMatch(
+      /^[0-9a-f-]{36}$/i,
+    );
     expect(persisted?.aggregateCounts).toEqual({
       scenarioTotal: 1,
       scenarioPassedCount: 1,
@@ -265,6 +268,7 @@ describe("sqlite recorder", () => {
     }
     expect(scenario.status).toBe("completed");
     expect(scenario.passed).toBe(true);
+    expect(scenario.userId).toBe(result.results[0]?.userId ?? null);
     expect(scenario.counts).toEqual({
       turnCount: 3,
       assistantTurnCount: 1,
@@ -454,5 +458,160 @@ describe("sqlite recorder", () => {
       type: "AgentProbeRuntimeError",
       message: "endpoint down",
     });
+  });
+
+  test("normalizes naive timestamps when resolving latestRunForSuite cutoffs", () => {
+    const root = makeTempDir("db-cutoff");
+    const dbUrl = dbUrlFor(root);
+    const dbPath = join(root, DEFAULT_DB_FILENAME);
+    initDb(dbUrl);
+
+    const database = new Database(dbPath);
+    try {
+      database.query(
+        `insert into runs (
+          id, status, passed, exit_code, suite_fingerprint, started_at, updated_at,
+          completed_at, scenario_total, scenario_passed_count, scenario_failed_count,
+          scenario_errored_count
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).run(
+        "run-older",
+        "completed",
+        1,
+        0,
+        "suite-1",
+        "2026-04-10T10:00:00",
+        "2026-04-10T10:05:00",
+        "2026-04-10T10:05:00",
+        0,
+        0,
+        0,
+        0,
+      );
+      database.query(
+        `insert into runs (
+          id, status, passed, exit_code, suite_fingerprint, started_at, updated_at,
+          completed_at, scenario_total, scenario_passed_count, scenario_failed_count,
+          scenario_errored_count
+        ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).run(
+        "run-newer",
+        "completed",
+        1,
+        0,
+        "suite-1",
+        "2026-04-10T12:00:00",
+        "2026-04-10T12:05:00",
+        "2026-04-10T12:05:00",
+        0,
+        0,
+        0,
+        0,
+      );
+    } finally {
+      database.close();
+    }
+
+    const latest = latestRunForSuite("suite-1", {
+      dbUrl,
+      beforeStartedAt: "2026-04-10T11:00:00Z",
+    });
+
+    expect(latest?.runId).toBe("run-older");
+  });
+
+  test("migrates pre-user_id scenario_runs schemas in place", () => {
+    const root = makeTempDir("db-migration");
+    const dbPath = join(root, DEFAULT_DB_FILENAME);
+    const database = new Database(dbPath);
+    try {
+      database.exec(`
+        create table meta (
+          id integer primary key,
+          schema_version integer not null,
+          created_at text not null
+        );
+        insert into meta (id, schema_version, created_at) values (1, 1, '2026-04-10T10:00:00Z');
+
+        create table runs (
+          id text primary key,
+          status text not null,
+          passed integer,
+          exit_code integer,
+          filters_json text,
+          selected_scenario_ids_json text,
+          source_paths_json text,
+          suite_fingerprint text,
+          endpoint_config_hash text,
+          scenarios_config_hash text,
+          personas_config_hash text,
+          rubric_config_hash text,
+          transport text,
+          preset text,
+          endpoint_snapshot_json text,
+          final_error_json text,
+          scenario_total integer not null default 0,
+          scenario_passed_count integer not null default 0,
+          scenario_failed_count integer not null default 0,
+          scenario_errored_count integer not null default 0,
+          started_at text not null,
+          updated_at text not null,
+          completed_at text
+        );
+
+        create table scenario_runs (
+          id integer primary key autoincrement,
+          run_id text not null,
+          ordinal integer not null default 0,
+          scenario_id text not null,
+          scenario_name text not null,
+          persona_id text not null,
+          rubric_id text not null,
+          tags_json text,
+          priority text,
+          expectations_json text,
+          scenario_snapshot_json text,
+          persona_snapshot_json text,
+          rubric_snapshot_json text,
+          status text not null,
+          passed integer,
+          overall_score real,
+          pass_threshold real,
+          judge_provider text,
+          judge_model text,
+          judge_temperature real,
+          judge_max_tokens integer,
+          overall_notes text,
+          judge_output_json text,
+          turn_count integer not null default 0,
+          assistant_turn_count integer not null default 0,
+          tool_call_count integer not null default 0,
+          checkpoint_count integer not null default 0,
+          error_json text,
+          started_at text not null,
+          updated_at text not null,
+          completed_at text
+        );
+      `);
+    } finally {
+      database.close();
+    }
+
+    initDb(`sqlite:///${dbPath}`);
+
+    const migrated = new Database(dbPath);
+    try {
+      const columns = (
+        migrated.query("pragma table_info(scenario_runs)").all() as Array<{
+          name: string;
+        }>
+      ).map((row) => row.name);
+      expect(columns.includes("user_id")).toBe(true);
+      expect(
+        migrated.query("select schema_version from meta where id = 1").get(),
+      ).toEqual({ schema_version: 2 });
+    } finally {
+      migrated.close();
+    }
   });
 });
