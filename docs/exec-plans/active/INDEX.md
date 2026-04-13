@@ -8,7 +8,7 @@ currently being implemented across one or more PRs.
 ## File conventions
 
 - Name files by workstream and date: `<topic>-<YYYY-MM>.md`
-- Required sections: Goal, Steps, Dependencies, Validation.
+- Required sections: Goal, Steps, Dependencies, Validation, Decisions.
 - Remove the plan from here and move to `completed/` once all steps ship.
 - Do not commit draft or abandoned plans.
 

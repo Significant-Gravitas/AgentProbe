@@ -1,8 +1,10 @@
 .DS_Store
+.agentprobe/
+node_modules/
+.tmp-agentprobe-e2e-*/
 .venv/
 .pytest_cache/
 __pycache__/
-.agentprobe/
 *.pyc
 *.pyo
 *.pyd

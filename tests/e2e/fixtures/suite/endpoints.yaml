@@ -45,6 +45,9 @@ response:
   format: sse
   content_path: "$.delta"
 
+tool_extraction:
+  format: custom
+
 health_check:
   enabled: false
 
