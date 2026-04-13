@@ -19,6 +19,7 @@ jobs:
 
       - name: Refresh generated docs
         run: |
+          bun scripts/generate-index-docs.ts
           bun scripts/generate-workspace-docs.ts
           bun scripts/refresh-quality-score.ts
 

@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "Preserve",
     "moduleResolution": "Bundler",
     "strict": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "lib": ["ES2022"],
+    "types": ["bun-types", "node"],
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["tests/e2e/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

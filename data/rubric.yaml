@@ -775,17 +775,18 @@ rubrics:
       {% for fm in expectations.failure_modes %}- {{ fm.name }}: {{ fm.description }}
       {% endfor %}{% endif %}
 
-    judge:
+    judge: &memory_judge
       provider: openai
       model: anthropic/claude-opus-4.6
       temperature: 0.0
       max_tokens: 4096
 
     dimensions:
-      - id: retention_accuracy
+      - &dim_retention_accuracy
+        id: retention_accuracy
         name: "Retention Accuracy"
         weight: 0.35
-        scale:
+        scale: &scale_retention_accuracy
           type: likert
           points: 5
           labels:
@@ -794,15 +795,16 @@ rubrics:
             3: "Partial — recalled some facts but missed key ones"
             4: "Good — recalled most facts with minor gaps"
             5: "Complete — all seeded facts recalled accurately"
-        judge_prompt: |
+        judge_prompt: &prompt_retention_accuracy |
           Did the agent recall facts from the seed session without being reminded?
           Consider: names, preferences, tools, workflows, relationships, and policies
           that were mentioned in earlier sessions.
 
-      - id: fabrication_detection
+      - &dim_fabrication_detection
+        id: fabrication_detection
         name: "Fabrication Detection"
         weight: 0.30
-        scale:
+        scale: &scale_fabrication_detection
           type: likert
           points: 5
           labels:
@@ -811,15 +813,16 @@ rubrics:
             3: "Minor fabrication — embellished or mixed up details"
             4: "Clean — no fabrication, but hedged unnecessarily"
             5: "Perfect — no fabrication, appropriate confidence"
-        judge_prompt: |
+        judge_prompt: &prompt_fabrication_detection |
           Did the agent invent facts that were never stated in any session?
           Fabrication is worse than forgetting. A confident wrong answer is a critical failure.
           Check whether recalled facts match what was actually seeded.
 
-      - id: context_separation
+      - &dim_context_separation
+        id: context_separation
         name: "Context Separation"
         weight: 0.20
-        scale:
+        scale: &scale_context_separation
           type: likert
           points: 5
           labels:
@@ -828,16 +831,17 @@ rubrics:
             3: "Partial separation — mostly correct but leaked some context"
             4: "Good separation — correctly distinguished contexts with minor confusion"
             5: "Perfect — correctly scoped all facts to their proper context"
-        judge_prompt: |
+        judge_prompt: &prompt_context_separation |
           Did the agent correctly separate facts from different contexts?
           For example: fiction vs reality, competitor research vs own business,
           hypothetical scenarios vs standing facts, client data vs user's own data.
           Memory should not bleed between scopes.
 
-      - id: temporal_reasoning
+      - &dim_temporal_reasoning
+        id: temporal_reasoning
         name: "Temporal Reasoning"
         weight: 0.15
-        scale:
+        scale: &scale_temporal_reasoning
           type: likert
           points: 5
           labels:
@@ -846,7 +850,387 @@ rubrics:
             3: "Partial — recognized updates but didn't fully apply them"
             4: "Good — used most recent values, noted changes"
             5: "Perfect — correctly applied temporal ordering to all facts"
-        judge_prompt: |
+        judge_prompt: &prompt_temporal_reasoning |
           When facts were updated across sessions, did the agent use the most recent value?
           Consider: updated preferences, corrected information, superseded decisions.
           The agent should respect the temporal order of information.
+
+  # -- MEMORY: TEMPORAL RUBRIC ----------------
+  - id: memory-temporal
+    name: "Memory Temporal"
+    description: "Evaluates temporal reasoning for rigidity, temporal, and procedural-update scenarios"
+    pass_threshold: 0.70
+
+    judge: *memory_judge
+
+    meta_prompt: |
+      You are judging an AI agent's memory system with emphasis on temporal reasoning.
+      When facts are updated across sessions, the agent must use the most recent value.
+      Old values must be fully replaced, not averaged or hedged.
+
+      Expected behavior: {{ expectations.expected_behavior }}
+      {% if expectations.tester_note %}Tester note: {{ expectations.tester_note }}{% endif %}
+      {% if expectations.failure_modes %}
+      Known failure modes to watch for:
+      {% for fm in expectations.failure_modes %}- {{ fm.name }}: {{ fm.description }}
+      {% endfor %}{% endif %}
+
+    dimensions:
+      - id: temporal_reasoning
+        name: "Temporal Reasoning"
+        weight: 0.40
+        scale: *scale_temporal_reasoning
+        judge_prompt: |
+          When facts were updated across sessions, did the agent use the most recent value?
+          Old values must be fully replaced, not averaged or hedged.
+          Consider: updated preferences, corrected information, superseded decisions.
+          The agent should respect the temporal order of information.
+          A response that hedges between old and new values (e.g. "it was X but might be Y")
+          is a score of 2-3, not a pass.
+
+      - <<: *dim_retention_accuracy
+        weight: 0.25
+
+      - <<: *dim_fabrication_detection
+        weight: 0.25
+
+      - <<: *dim_context_separation
+        weight: 0.10
+
+    scoring_overrides:
+      auto_fail_conditions:
+        - dimension: temporal_reasoning
+          below: 2
+
+  # -- MEMORY: ABSTENTION RUBRIC --------------
+  - id: memory-abstention
+    name: "Memory Abstention"
+    description: "Evaluates abstention and negative-test scenarios where the agent should decline, clarify, or confirm absence"
+    pass_threshold: 0.70
+
+    judge: *memory_judge
+
+    meta_prompt: |
+      You are judging an AI agent's memory system in a scenario that tests abstention
+      or negative behavior. The agent may be asked about deleted facts, ambiguous data,
+      or facts that were never established. Correct behavior is to abstain, clarify, or
+      confirm absence rather than fabricate an answer.
+
+      Expected behavior: {{ expectations.expected_behavior }}
+      {% if expectations.tester_note %}Tester note: {{ expectations.tester_note }}{% endif %}
+      {% if expectations.failure_modes %}
+      Known failure modes to watch for:
+      {% for fm in expectations.failure_modes %}- {{ fm.name }}: {{ fm.description }}
+      {% endfor %}{% endif %}
+
+    dimensions:
+      - id: clarification_behavior
+        name: "Clarification Behavior"
+        weight: 0.40
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Proceeded silently without acknowledging ambiguity or honoring deletion"
+            2: "Showed minimal awareness but still produced a concrete (wrong) answer"
+            3: "Partially acknowledged ambiguity but did not ask or confirm clearly"
+            4: "Mostly correct — flagged the issue but could have been more explicit"
+            5: "Correctly identified ambiguity and asked, or correctly confirmed deletion/absence"
+        judge_prompt: |
+          Did the agent correctly handle ambiguity, deletion, or absence of facts?
+          For abstention tests: the agent should ask for clarification rather than guess.
+          For negative tests: the agent should confirm the fact was deleted or never stored,
+          not silently produce an answer.
+          Score 1 if the agent proceeded as if the fact existed when it should not have.
+          Score 5 if the agent correctly identified the ambiguity and asked, or correctly
+          confirmed that the fact was deleted or absent.
+
+      - id: fabrication_detection
+        name: "Fabrication Detection"
+        weight: 0.35
+        scale: *scale_fabrication_detection
+        judge_prompt: |
+          Did the agent invent facts that were never stated in any session?
+          Fabrication is worse than forgetting. A confident wrong answer is a critical failure.
+          Check whether recalled facts match what was actually seeded.
+          For negative tests, returning a fact that was explicitly deleted or never
+          established is fabrication. Treat it as score 1.
+
+      - id: retention_accuracy
+        name: "Retention Accuracy"
+        weight: 0.15
+        scale: *scale_retention_accuracy
+        judge_prompt: |
+          Did the agent recall facts from the seed session without being reminded?
+          For negative tests, NOT surfacing a deleted or out-of-scope fact is correct
+          behavior (score 5). Surfacing it is failure (score 1).
+          For abstention tests, partial recall is acceptable if the agent asks about
+          the ambiguous portion rather than guessing.
+
+      - <<: *dim_context_separation
+        weight: 0.10
+
+    scoring_overrides:
+      auto_fail_conditions:
+        - dimension: clarification_behavior
+          below: 2
+        - dimension: fabrication_detection
+          below: 2
+
+  # -- MEMORY: CROSS-DOMAIN RUBRIC ------------
+  - id: memory-crossdomain
+    name: "Memory Cross-Domain"
+    description: "Evaluates recall and application of facts across different domains or contexts"
+    pass_threshold: 0.70
+
+    judge: *memory_judge
+
+    meta_prompt: |
+      You are judging an AI agent's memory system in a cross-domain scenario.
+      The agent must recall facts from one domain and correctly apply them in a
+      different context. Entity-scoped constraints must not bleed across entities.
+
+      Expected behavior: {{ expectations.expected_behavior }}
+      {% if expectations.tester_note %}Tester note: {{ expectations.tester_note }}{% endif %}
+      {% if expectations.failure_modes %}
+      Known failure modes to watch for:
+      {% for fm in expectations.failure_modes %}- {{ fm.name }}: {{ fm.description }}
+      {% endfor %}{% endif %}
+
+    dimensions:
+      - <<: *dim_retention_accuracy
+        weight: 0.30
+
+      - id: derived_answer_accuracy
+        name: "Derived Answer Accuracy"
+        weight: 0.25
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Completely wrong — derived answer is incorrect or absent"
+            2: "Poor — attempted derivation but made significant errors"
+            3: "Partial — correct approach but wrong final answer"
+            4: "Mostly correct — right approach and nearly right answer"
+            5: "Perfect — retrieved the right facts and computed the correct derived answer"
+        judge_prompt: |
+          Did the agent correctly apply retrieved facts in a new context to produce
+          a specific, correct answer?
+          For arithmetic or scheduling questions, check the final number or date.
+          For cross-domain application, verify the agent used the right facts from
+          the right entity/context to derive its answer.
+          Score 1 if the answer is fabricated or completely wrong.
+          Score 5 if the agent retrieved both the relevant facts and computed the
+          correct derived answer.
+
+      - id: context_separation
+        name: "Context Separation"
+        weight: 0.25
+        scale: *scale_context_separation
+        judge_prompt: |
+          Did the agent correctly separate facts from different contexts?
+          For cross-domain scenarios, entity-scoped constraints must not bleed
+          across entities. Facts about entity A must not be applied to entity B.
+          Memory should not bleed between scopes.
+          Pay special attention to whether the agent confused similar facts from
+          different domains or entities.
+
+      - <<: *dim_fabrication_detection
+        weight: 0.20
+
+    scoring_overrides:
+      auto_fail_conditions: []
+
+  # -- MEMORY: COMPOSITIONAL RUBRIC -----------
+  - id: memory-compositional
+    name: "Memory Compositional"
+    description: "Evaluates the agent's ability to combine multiple stored facts to derive new answers"
+    pass_threshold: 0.75
+
+    judge: *memory_judge
+
+    meta_prompt: |
+      You are judging an AI agent's memory system in a compositional reasoning scenario.
+      The agent must combine multiple separately-stored facts to derive an answer that
+      was never explicitly stored. This tests inferential synthesis, not just recall.
+
+      Expected behavior: {{ expectations.expected_behavior }}
+      {% if expectations.tester_note %}Tester note: {{ expectations.tester_note }}{% endif %}
+      {% if expectations.failure_modes %}
+      Known failure modes to watch for:
+      {% for fm in expectations.failure_modes %}- {{ fm.name }}: {{ fm.description }}
+      {% endfor %}{% endif %}
+
+    dimensions:
+      - id: inferential_synthesis
+        name: "Inferential Synthesis"
+        weight: 0.40
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "No synthesis — asked for a fact it should already know, or gave up"
+            2: "Minimal — retrieved one fact but failed to combine with others"
+            3: "Partial — retrieved relevant facts but derived the wrong answer"
+            4: "Good — retrieved facts and mostly correct derivation with minor errors"
+            5: "Perfect — retrieved both facts and computed the correct derived answer"
+        judge_prompt: |
+          Did the agent combine multiple separately-stored facts to derive an answer
+          not explicitly stored?
+          Score 1 if agent asked for a fact it should already know or made no attempt
+          at synthesis. Score 5 if it retrieved both facts and computed the correct
+          derived answer.
+          Consider: did the agent identify which stored facts were relevant? Did it
+          correctly combine them (arithmetic, logic, scheduling, etc.)?
+
+      - <<: *dim_retention_accuracy
+        weight: 0.25
+
+      - <<: *dim_fabrication_detection
+        weight: 0.25
+
+      - <<: *dim_temporal_reasoning
+        weight: 0.10
+
+    scoring_overrides:
+      auto_fail_conditions:
+        - dimension: inferential_synthesis
+          below: 2
+
+  # -- MEMORY: INTROSPECTION RUBRIC -----------
+  - id: memory-introspection
+    name: "Memory Introspection"
+    description: "Evaluates the agent's ability to summarize, organize, and identify gaps in its own knowledge"
+    pass_threshold: 0.65
+
+    judge: *memory_judge
+
+    meta_prompt: |
+      You are judging an AI agent's memory introspection capabilities.
+      The agent may be asked to summarize what it knows, organize facts into categories,
+      or identify gaps in its knowledge. Fabricated facts in a summary are the worst failure.
+
+      Expected behavior: {{ expectations.expected_behavior }}
+      {% if expectations.tester_note %}Tester note: {{ expectations.tester_note }}{% endif %}
+      {% if expectations.failure_modes %}
+      Known failure modes to watch for:
+      {% for fm in expectations.failure_modes %}- {{ fm.name }}: {{ fm.description }}
+      {% endfor %}{% endif %}
+
+    dimensions:
+      - <<: *dim_retention_accuracy
+        weight: 0.30
+
+      - id: fabrication_detection
+        name: "Fabrication Detection"
+        weight: 0.30
+        scale: *scale_fabrication_detection
+        judge_prompt: |
+          Did the agent invent facts that were never stated in any session?
+          Fabrication is worse than forgetting. A confident wrong answer is a critical failure.
+          Check whether recalled facts match what was actually seeded.
+          Fabricated facts in a summary are the worst failure. Check every claimed fact
+          against the seed sessions. Any fact in the summary that was not seeded is fabrication.
+
+      - id: summary_structure
+        name: "Summary Structure"
+        weight: 0.20
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Unstructured dump — flat list with no organization"
+            2: "Minimal structure — some grouping but mostly disorganized"
+            3: "Partial — recognizable categories but inconsistent organization"
+            4: "Good — clear categories with minor organizational issues"
+            5: "Excellent — well-organized into logical categories, easy to scan"
+        judge_prompt: |
+          Did the agent organize its summary into logical categories rather than
+          a flat dump?
+          Score 1 for unstructured dumps or stream-of-consciousness listings.
+          Score 5 for clear, logical categories that make the information easy to
+          scan and verify.
+          Consider: are related facts grouped together? Is there a visible structure
+          (headings, bullets, thematic sections)?
+
+      - id: gap_accuracy
+        name: "Gap Accuracy"
+        weight: 0.20
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "Named known facts as gaps, or missed all actual gaps"
+            2: "Mostly wrong — identified some gaps but also mislabeled known facts"
+            3: "Partial — identified some real gaps but missed others"
+            4: "Good — correctly identified most gaps with minor misses"
+            5: "Perfect — accurately named all actual unknowns without mislabeling"
+        judge_prompt: |
+          For gap-identification scenarios: did the agent name actual unknowns?
+          Naming known facts as gaps is as bad as fabrication.
+          Score 1 if the agent claimed it did not know things it was actually told,
+          or if it failed to identify any real gaps.
+          Score 5 if it accurately distinguished what it knows from what it does not.
+          If the scenario did not ask about gaps, score based on whether the agent
+          volunteered accurate gap information or stayed silent (both acceptable, score 4-5).
+
+    scoring_overrides:
+      auto_fail_conditions:
+        - dimension: fabrication_detection
+          below: 2
+
+  # -- MEMORY: HYGIENE RUBRIC -----------------
+  - id: memory-hygiene
+    name: "Memory Hygiene"
+    description: "Evaluates time-bounded constraints, expiry logic, and long-tail recall accuracy"
+    pass_threshold: 0.70
+
+    judge: *memory_judge
+
+    meta_prompt: |
+      You are judging an AI agent's memory hygiene: how it handles time-bounded constraints,
+      expiry of temporary rules, and long-tail recall. Constraints should apply during their
+      valid window and stop applying after expiry.
+
+      Expected behavior: {{ expectations.expected_behavior }}
+      {% if expectations.tester_note %}Tester note: {{ expectations.tester_note }}{% endif %}
+      {% if expectations.failure_modes %}
+      Known failure modes to watch for:
+      {% for fm in expectations.failure_modes %}- {{ fm.name }}: {{ fm.description }}
+      {% endfor %}{% endif %}
+
+    dimensions:
+      - id: constraint_expiry
+        name: "Constraint Expiry"
+        weight: 0.35
+        scale:
+          type: likert
+          points: 5
+          labels:
+            1: "No expiry awareness — applied expired constraints or ignored active ones"
+            2: "Poor — inconsistent application of time-bounded rules"
+            3: "Partial — recognized some boundaries but missed others"
+            4: "Good — mostly correct with minor boundary errors"
+            5: "Perfect — constraints applied during valid window and stopped after expiry"
+        judge_prompt: |
+          Did time-bounded constraints apply during their valid window AND stop
+          applying after expiry?
+          Score each session boundary separately.
+          A constraint that was supposed to expire but is still enforced is a failure.
+          A constraint that should still be active but was dropped is also a failure.
+          Score 1 if the agent showed no awareness of time bounds.
+          Score 5 if every constraint was correctly scoped to its time window.
+
+      - <<: *dim_retention_accuracy
+        weight: 0.25
+
+      - <<: *dim_fabrication_detection
+        weight: 0.25
+
+      - <<: *dim_temporal_reasoning
+        weight: 0.15
+
+    scoring_overrides:
+      auto_fail_conditions:
+        - dimension: constraint_expiry
+          below: 2

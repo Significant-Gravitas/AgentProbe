@@ -2,17 +2,22 @@
 
 ## Commands agents must run
 
-| When                          | Command                      |
-|-------------------------------|------------------------------|
-| Before every PR               | `./scripts/fast-feedback.sh` |
-| To validate repo structure    | `./scripts/validate-repo.sh` |
+| When                       | Command                    |
+|----------------------------|----------------------------|
+| Before every PR            | `bun run fast-feedback`    |
+| To validate repo truth     | `bun run docs:validate`    |
+| To refresh docs indexes    | `bun run docs:index`       |
+| To refresh workspace docs  | `bun run docs:workspace`   |
+| To refresh quality score   | `bun run docs:quality`     |
 
 ## PR requirements
 
 Every PR must:
 - [ ] Pass `fast-feedback.sh`
 - [ ] Include a filled-out PR template
-- [ ] Update `docs/behaviours/platform.md` if behavior changed
+- [ ] Update `docs/product-specs/platform.md` first if behavior changed
+- [ ] Leave behind enough logs, metrics, tests, or screenshots for the next
+      agent to audit the change without reconstructing hidden context
 
 ## Automerge eligibility
 
@@ -35,10 +40,12 @@ These paths never automerge:
 - `.github/**`
 - `AGENTS.md`
 - `docs/HARNESS.md`
-- `src/agentprobe/endpoints/autogpt_auth.py`
+- `docs/SECURITY.md`
 
 ## Failure escalation
 
 1. If `fast-feedback.sh` fails: fix before merging. No exceptions.
 2. If nightly baseline breaks: an auto-PR is opened. Fix forward.
 3. If generated docs are stale: refresh and commit.
+4. If a change affects latency or observability-critical paths, attach evidence
+   that the documented budgets in `docs/RELIABILITY.md` still hold.

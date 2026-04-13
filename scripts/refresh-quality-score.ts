@@ -3,39 +3,80 @@
  * Regenerates docs/QUALITY_SCORE.md from current repo state.
  */
 
-import { existsSync, readdirSync, writeFileSync } from "fs";
-import { join, dirname } from "path";
+import { existsSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 const REPO_ROOT = join(dirname(new URL(import.meta.url).pathname), "..");
 
-function check(
-  name: string,
-  condition: boolean
-): { name: string; status: string; ok: boolean } {
-  return { name, status: condition ? "\u{1F7E2}" : "\u{1F7E1}", ok: condition };
+type Check = {
+  area: string;
+  ok: boolean;
+  notes: string;
+};
+
+function has(path: string): boolean {
+  return existsSync(join(REPO_ROOT, path));
 }
 
-const testsDir = join(REPO_ROOT, "tests");
-const hasTests =
-  existsSync(testsDir) &&
-  readdirSync(testsDir).some((f) => f.startsWith("test_") && f.endsWith(".py"));
+function row(area: string, required: string[], notes: string): Check {
+  const missing = required.filter((path) => !has(path));
+  return {
+    area,
+    ok: missing.length === 0,
+    notes: missing.length === 0 ? notes : `Missing: ${missing.join(", ")}`,
+  };
+}
 
-const checks = [
-  check("CI config", existsSync(join(REPO_ROOT, ".github", "workflows"))),
-  check("Test suite", hasTests),
-  check(
-    "Behaviour spec",
-    existsSync(join(REPO_ROOT, "docs", "behaviours", "platform.md"))
+const checks: Check[] = [
+  row(
+    "Knowledge base",
+    ["AGENTS.md", "docs/README.md", "docs/DESIGN.md", "docs/ARCHITECTURE.md"],
+    "Agent-first docs entrypoints present",
   ),
-  check("AGENTS.md", existsSync(join(REPO_ROOT, "AGENTS.md"))),
-  check("Harness doc", existsSync(join(REPO_ROOT, "docs", "HARNESS.md"))),
+  row(
+    "Product specs",
+    [
+      "docs/product-specs/platform.md",
+      "docs/product-specs/current-state.md",
+      "docs/product-specs/e2e-checklist.md",
+    ],
+    "Canonical behavior and coverage snapshots present",
+  ),
+  row(
+    "Planning",
+    [
+      "docs/PLANS.md",
+      "docs/exec-plans/README.md",
+      "docs/exec-plans/tech-debt-tracker.md",
+    ],
+    "Plans and debt tracking are versioned in-repo",
+  ),
+  row(
+    "Toolchain contract",
+    [
+      "package.json",
+      "docs/references/bun-typescript.md",
+      "docs/references/quality-gates.md",
+    ],
+    "Bun-first workflow and TypeScript standards documented",
+  ),
+  row(
+    "Reliability standards",
+    ["docs/RELIABILITY.md", "docs/references/observability.md"],
+    "Logging, metrics, spans, and latency budgets are documented",
+  ),
+  row(
+    "Generated docs",
+    ["docs/generated/INDEX.md", "docs/generated/workspace-inventory.md"],
+    "Generated inventories available and script-owned",
+  ),
 ];
 
 const date = new Date().toISOString().split("T")[0];
 const rows = checks
   .map(
     (c) =>
-      `| ${c.name.padEnd(18)} | ${c.status}     | ${c.ok ? "Present" : "Missing"} |`
+      `| ${c.area.padEnd(20)} | ${c.ok ? "\u{1F7E2}" : "\u{1F7E1}"} | ${c.notes} |`,
   )
   .join("\n");
 
@@ -45,8 +86,8 @@ Last updated: ${date}
 
 ## Health summary
 
-| Area               | Status | Notes                     |
-|--------------------|--------|---------------------------|
+| Area                 | Status | Notes |
+|----------------------|--------|-------|
 ${rows}
 
 ## Incidents
@@ -55,9 +96,9 @@ _No incidents yet._
 
 ## Next cleanup targets
 
-1. Expand test coverage
-2. Fill out remaining behavior scenarios
-3. Add integration tests for core paths
+1. Land the Bun + TypeScript runtime so the implementation matches the docs contract.
+2. Extend Bun-owned coverage to helper commands, observability assertions, and latency-budget checks.
+3. Promote reliability budgets from documented standards into executable checks.
 `;
 
 writeFileSync(join(REPO_ROOT, "docs", "QUALITY_SCORE.md"), content);

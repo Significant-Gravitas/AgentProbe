@@ -3,7 +3,7 @@ version: "1.0"
 personas:
   - id: e2e-customer
     name: "E2E Customer"
-    description: "Deterministic persona used by the Bun migration baseline."
+    description: "Deterministic persona used by the Bun baseline."
     demographics:
       role: "customer"
       tech_literacy: medium

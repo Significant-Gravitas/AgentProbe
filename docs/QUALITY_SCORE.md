@@ -4,12 +4,14 @@ Last updated: 2026-04-10
 
 ## Health summary
 
-| Area              | Status | Notes                     |
-|-------------------|--------|---------------------------|
-| CI                | 🟢     | pytest + pyright + ruff   |
-| Test coverage     | 🟢     | Python unit tests + Bun e2e baseline |
-| Doc freshness     | 🟢     | Generated docs up to date |
-| Baseline debt     | 🟢     | No baselined violations   |
+| Area                 | Status | Notes |
+|----------------------|--------|-------|
+| Knowledge base       | 🟢 | Agent-first docs entrypoints present |
+| Product specs        | 🟢 | Canonical behavior and coverage snapshots present |
+| Planning             | 🟢 | Plans and debt tracking are versioned in-repo |
+| Toolchain contract   | 🟢 | Bun-first workflow and TypeScript standards documented |
+| Reliability standards | 🟢 | Logging, metrics, spans, and latency budgets are documented |
+| Generated docs       | 🟢 | Generated inventories available and script-owned |
 
 ## Incidents
 
@@ -17,6 +19,6 @@ _No incidents yet._
 
 ## Next cleanup targets
 
-1. Extend the Bun baseline to the OpenClaw helper commands if they become part of the migration contract
-2. Keep the Bun subprocess baseline green while the TypeScript rewrite replaces the Python implementation
-3. Fill out remaining behavior scenarios in platform.md
+1. Land the Bun + TypeScript runtime so the implementation matches the docs contract.
+2. Extend Bun-owned coverage to helper commands, observability assertions, and latency-budget checks.
+3. Promote reliability budgets from documented standards into executable checks.
