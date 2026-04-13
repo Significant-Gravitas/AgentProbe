@@ -13,6 +13,3 @@ agentprobe-report-*.html
 .mypy_cache/
 .ruff_cache/
 .env
-.coverage
-.claude/settings.local.json
-dashboard/node_modules/
