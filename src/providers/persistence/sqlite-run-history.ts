@@ -215,16 +215,16 @@ function ensureColumn(
   if (tableColumns(database, tableName).has(columnName)) {
     return;
   }
-  database.exec(`alter table ${tableName} add column ${columnName} ${definition}`);
+  database.exec(
+    `alter table ${tableName} add column ${columnName} ${definition}`,
+  );
 }
 
 function migrateDatabase(database: Database, currentVersion: number): void {
   let version = currentVersion;
   if (version < 2) {
     ensureColumn(database, "scenario_runs", "user_id", "text");
-    database
-      .query("update meta set schema_version = ? where id = 1")
-      .run(2);
+    database.query("update meta set schema_version = ? where id = 1").run(2);
     version = 2;
   }
 

@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import type {
   AdapterReply,
   AutogptAuthResult,
@@ -7,6 +9,7 @@ import type {
   JsonValue,
   SessionLifecycleRequest,
   ToolCallRecord,
+  UploadedFile,
 } from "../../shared/types/contracts.ts";
 import {
   AgentProbeConfigError,
@@ -503,6 +506,40 @@ export class HttpEndpointAdapter {
       },
       latencyMs: performance.now() - startedAt,
       usage,
+    };
+  }
+
+  async uploadFile(filePath: string, fileName: string): Promise<UploadedFile> {
+    const connection = this.endpoint.connection;
+    if (!connection || !("baseUrl" in connection)) {
+      throw new AgentProbeConfigError(
+        "File upload requires an HTTP connection with base_url.",
+      );
+    }
+    const baseUrl = connection.baseUrl.replace(/\/$/, "");
+    const authHeaders = await this.resolveAuthHeaders();
+    const fileBytes = await readFile(filePath);
+    const blob = new Blob([fileBytes]);
+    const form = new FormData();
+    form.append("file", blob, fileName);
+    const response = await this.fetchImpl(
+      `${baseUrl}/api/workspace/files/upload`,
+      {
+        method: "POST",
+        headers: authHeaders,
+        body: form,
+      },
+    );
+    if (!response.ok) {
+      throw new AgentProbeRuntimeError(
+        `File upload failed (${response.status}) for ${fileName}.`,
+      );
+    }
+    const body = (await response.json()) as Record<string, unknown>;
+    return {
+      fileId: String(body.file_id ?? body.id ?? ""),
+      name: String(body.name ?? fileName),
+      mimeType: typeof body.mime_type === "string" ? body.mime_type : undefined,
     };
   }
 

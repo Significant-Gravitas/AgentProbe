@@ -396,6 +396,8 @@ scenarios:
           - role: user
             use_exact_message: true
             content: "I'm uploading a messy CSV of leads. Clean it up -- dedupe by email, normalize phone numbers to E.164 format, capitalize names properly, drop any rows with no email at all, and for rows where the company column is empty, flag them but don't drop them. Walk me through what you'd do."
+            attachments:
+              - path: fixtures/messy-leads.csv
           - role: user
             use_exact_message: true
             content: "Wait -- you deduped by name. Do it by email, people have nicknames."
@@ -411,6 +413,8 @@ scenarios:
           - role: user
             use_exact_message: true
             content: "I just uploaded a new messy lead CSV. Clean it up the way we usually do."
+            attachments:
+              - path: fixtures/messy-leads.csv
 
     expectations:
       expected_behavior: |
@@ -1172,6 +1176,8 @@ scenarios:
           - role: user
             use_exact_message: true
             content: "Take the 40 leads from the lead_list.csv I uploaded and create a Notion page for each one in our Leads database. Each page should have: lead name, company, email, and a 'Status: New' field."
+            attachments:
+              - path: fixtures/lead_list.csv
             use_exact_message: true
 
     expectations:
@@ -1561,6 +1567,9 @@ scenarios:
           - role: user
             use_exact_message: true
             content: "Loop in our lawyer on this -- I need them to review the attached supplier agreement before I sign."
+            attachments:
+              - path: fixtures/supplier-agreement.pdf.txt
+                name: supplier-agreement.pdf
             use_exact_message: true
 
     expectations:

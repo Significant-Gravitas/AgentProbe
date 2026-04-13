@@ -1,0 +1,44 @@
+SUPPLIER AGREEMENT
+
+Between: [Supplier Name] ("Supplier")
+And: [Your Company] ("Buyer")
+
+Effective Date: April 1, 2026
+
+1. SCOPE OF SUPPLY
+Supplier agrees to provide [products/services] as described in Exhibit A.
+
+2. PRICING AND PAYMENT
+- Unit price: As specified in Exhibit B
+- Payment terms: Net 30 from date of invoice
+- Currency: USD
+
+3. DELIVERY
+- FOB: Supplier's facility
+- Lead time: 14 business days from PO receipt
+- Shipping: Buyer-arranged freight
+
+4. QUALITY STANDARDS
+Supplier warrants that all products conform to specifications in Exhibit A and applicable industry standards.
+
+5. TERM AND TERMINATION
+- Initial term: 12 months from Effective Date
+- Auto-renewal: 12-month periods unless terminated with 60 days written notice
+- Either party may terminate for cause with 30 days written notice
+
+6. CONFIDENTIALITY
+Both parties agree to maintain confidentiality of proprietary information exchanged under this agreement.
+
+7. LIMITATION OF LIABILITY
+Neither party's aggregate liability shall exceed the total amounts paid under this agreement in the preceding 12 months.
+
+8. GOVERNING LAW
+This agreement is governed by the laws of the State of Delaware.
+
+SIGNATURES:
+
+Supplier: _________________________ Date: _________
+Title: ___________________________
+
+Buyer: ___________________________ Date: _________
+Title: ___________________________

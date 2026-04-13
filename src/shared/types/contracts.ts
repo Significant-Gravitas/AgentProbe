@@ -327,10 +327,16 @@ export type CheckpointAssertion = {
   responseMentions?: string;
 };
 
+export type TurnAttachment = {
+  path: string;
+  name?: string;
+};
+
 export type UserTurn = {
   role: "user";
   content?: string;
   useExactMessage: boolean;
+  attachments: TurnAttachment[];
 };
 
 export type CheckpointTurn = {
@@ -428,6 +434,12 @@ export type ToolCallRecord = {
   args: Record<string, JsonValue>;
   order?: number;
   raw?: Record<string, JsonValue>;
+};
+
+export type UploadedFile = {
+  fileId: string;
+  name: string;
+  mimeType?: string;
 };
 
 export type AdapterReply = {

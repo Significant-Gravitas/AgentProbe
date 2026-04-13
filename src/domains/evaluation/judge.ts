@@ -1,8 +1,8 @@
+import type { OpenAiResponsesClient } from "../../providers/sdk/openai-responses.ts";
 import {
   OpenAiResponsesApiError,
   OpenAiResponsesAuthenticationError,
 } from "../../providers/sdk/openai-responses.ts";
-import type { OpenAiResponsesClient } from "../../providers/sdk/openai-responses.ts";
 import type {
   JsonValue,
   OpenAiResponsesRequest,
@@ -311,7 +311,12 @@ export async function judgeResponse(
 
       if (error instanceof OpenAiResponsesApiError) {
         const statusCode = error.statusCode;
-        if (statusCode && statusCode >= 400 && statusCode < 500 && statusCode !== 429) {
+        if (
+          statusCode &&
+          statusCode >= 400 &&
+          statusCode < 500 &&
+          statusCode !== 429
+        ) {
           throw error;
         }
         if (attempt < MAX_JUDGE_ATTEMPTS) {
@@ -338,9 +343,7 @@ export async function judgeResponse(
     }
   }
 
-  throw (
-    lastError instanceof Error
-      ? lastError
-      : new AgentProbeRuntimeError(String(lastError))
-  );
+  throw lastError instanceof Error
+    ? lastError
+    : new AgentProbeRuntimeError(String(lastError));
 }

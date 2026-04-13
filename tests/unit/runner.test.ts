@@ -47,8 +47,14 @@ describe("runner", () => {
             role: "user",
             content: "Please change booking {{ booking_id }}.",
             useExactMessage: false,
+            attachments: [],
           },
-          { role: "user", content: undefined, useExactMessage: false },
+          {
+            role: "user",
+            content: undefined,
+            useExactMessage: false,
+            attachments: [],
+          },
         ],
       }),
       buildPersona(),
@@ -96,6 +102,7 @@ describe("runner", () => {
             role: "user",
             content: "Where is order 123?",
             useExactMessage: true,
+            attachments: [],
           },
           {
             role: "checkpoint",
@@ -162,6 +169,7 @@ describe("runner", () => {
             role: "user",
             content: "Where is order 123?",
             useExactMessage: true,
+            attachments: [],
           },
         ],
       }),
@@ -210,11 +218,13 @@ describe("runner", () => {
             role: "user",
             content: "Please change booking {{ booking_id }}.",
             useExactMessage: false,
+            attachments: [],
           },
           {
             role: "user",
             content: "Mention that arrival must be before noon.",
             useExactMessage: false,
+            attachments: [],
           },
         ],
       }),
@@ -248,7 +258,12 @@ describe("runner", () => {
       adapter,
       buildScenario({
         turns: [
-          { role: "user", content: "First turn", useExactMessage: false },
+          {
+            role: "user",
+            content: "First turn",
+            useExactMessage: false,
+            attachments: [],
+          },
         ],
       }),
       buildPersona(),
@@ -303,6 +318,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Remember that Sarah should be CC'd.",
                 useExactMessage: false,
+                attachments: [],
               },
             ],
           },
@@ -315,6 +331,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Who should I CC on outgoing client proposals?",
                 useExactMessage: false,
+                attachments: [],
               },
             ],
           },
@@ -355,6 +372,7 @@ describe("runner", () => {
             role: "user",
             content: "Can you help with my refund?",
             useExactMessage: true,
+            attachments: [],
           },
           {
             role: "checkpoint",
@@ -405,6 +423,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Remember Sarah handles proposals.",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -417,6 +436,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Who handles proposals?",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -468,6 +488,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Remember that Sarah handles proposals.",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -480,6 +501,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Who handles proposals?",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -497,7 +519,9 @@ describe("runner", () => {
       "Remember that Sarah handles proposals.",
     ]);
     expect(sendMessages(secondAdapter)).toEqual(["Who handles proposals?"]);
-    expect(result.transcript.filter((turn) => turn.role === "assistant")).toHaveLength(2);
+    expect(
+      result.transcript.filter((turn) => turn.role === "assistant"),
+    ).toHaveLength(2);
   });
 
   test("runScenario warns and degrades when fresh_agent is requested without an adapter factory", async () => {
@@ -531,6 +555,7 @@ describe("runner", () => {
                   role: "user",
                   content: "Remember this for later.",
                   useExactMessage: true,
+                  attachments: [],
                 },
               ],
             },
@@ -543,6 +568,7 @@ describe("runner", () => {
                   role: "user",
                   content: "What did I ask you to remember?",
                   useExactMessage: true,
+                  attachments: [],
                 },
               ],
             },
@@ -590,6 +616,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Remember Sarah for later.",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -602,6 +629,7 @@ describe("runner", () => {
                 role: "user",
                 content: "What did I ask you to remember?",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },

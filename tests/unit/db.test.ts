@@ -251,9 +251,7 @@ describe("sqlite recorder", () => {
     expect(result.exitCode).toBe(0);
     expect(persisted?.runId).toBe(result.runId ?? undefined);
     expect(persisted?.status).toBe("completed");
-    expect(result.results[0]?.userId).toMatch(
-      /^[0-9a-f-]{36}$/i,
-    );
+    expect(result.results[0]?.userId).toMatch(/^[0-9a-f-]{36}$/i);
     expect(persisted?.aggregateCounts).toEqual({
       scenarioTotal: 1,
       scenarioPassedCount: 1,
@@ -468,46 +466,50 @@ describe("sqlite recorder", () => {
 
     const database = new Database(dbPath);
     try {
-      database.query(
-        `insert into runs (
+      database
+        .query(
+          `insert into runs (
           id, status, passed, exit_code, suite_fingerprint, started_at, updated_at,
           completed_at, scenario_total, scenario_passed_count, scenario_failed_count,
           scenario_errored_count
         ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ).run(
-        "run-older",
-        "completed",
-        1,
-        0,
-        "suite-1",
-        "2026-04-10T10:00:00",
-        "2026-04-10T10:05:00",
-        "2026-04-10T10:05:00",
-        0,
-        0,
-        0,
-        0,
-      );
-      database.query(
-        `insert into runs (
+        )
+        .run(
+          "run-older",
+          "completed",
+          1,
+          0,
+          "suite-1",
+          "2026-04-10T10:00:00",
+          "2026-04-10T10:05:00",
+          "2026-04-10T10:05:00",
+          0,
+          0,
+          0,
+          0,
+        );
+      database
+        .query(
+          `insert into runs (
           id, status, passed, exit_code, suite_fingerprint, started_at, updated_at,
           completed_at, scenario_total, scenario_passed_count, scenario_failed_count,
           scenario_errored_count
         ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ).run(
-        "run-newer",
-        "completed",
-        1,
-        0,
-        "suite-1",
-        "2026-04-10T12:00:00",
-        "2026-04-10T12:05:00",
-        "2026-04-10T12:05:00",
-        0,
-        0,
-        0,
-        0,
-      );
+        )
+        .run(
+          "run-newer",
+          "completed",
+          1,
+          0,
+          "suite-1",
+          "2026-04-10T12:00:00",
+          "2026-04-10T12:05:00",
+          "2026-04-10T12:05:00",
+          0,
+          0,
+          0,
+          0,
+        );
     } finally {
       database.close();
     }

@@ -1,0 +1,13 @@
+Name,Email,Phone,Company,Title
+john smith,john@example.com,5551234567,Acme Inc,Manager
+JANE DOE,jane@example.com,(555) 234-5678,Widget Co,Director
+john smith,john@example.com,555.123.4567,Acme Inc,Manager
+Bob Wilson,,+15553456789,,Sales Rep
+alice CHEN,alice@startup.io,555-456-7890,StartUp IO,CEO
+charlie brown,charlie@test.com,5555678901,Test Corp,Engineer
+,missing@email.com,5556789012,NoName LLC,Analyst
+dave jones,dave@bigco.com,(555) 789-0123,,VP Sales
+Eve Martinez,eve@greenbiz.com,555.890.1234,GreenBiz,Founder
+frank lee,frank@example.com,+1-555-901-2345,Example Co,CTO
+alice CHEN,alice@startup.io,555-456-7890,StartUp IO,CEO
+grace kim,,5550123456,Kim Consulting,Partner

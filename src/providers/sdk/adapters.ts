@@ -2,6 +2,7 @@ import type {
   AdapterReply,
   AutogptAuthResult,
   Endpoints,
+  UploadedFile,
 } from "../../shared/types/contracts.ts";
 import {
   AgentProbeConfigError,
@@ -20,6 +21,7 @@ export type EndpointAdapter = {
     renderContext: Record<string, unknown>,
   ) => Promise<AdapterReply>;
   closeScenario: (renderContext: Record<string, unknown>) => Promise<void>;
+  uploadFile?: (filePath: string, fileName: string) => Promise<UploadedFile>;
 };
 
 class CliHarnessEndpointAdapter implements EndpointAdapter {

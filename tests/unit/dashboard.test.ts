@@ -22,150 +22,171 @@ function seedDashboardRun(): { dbUrl: string; runId: string; root: string } {
 
   const database = new Database(dbPath);
   try {
-    database.query(
-      `insert into runs (
+    database
+      .query(
+        `insert into runs (
         id, status, passed, exit_code, suite_fingerprint, started_at, updated_at,
         completed_at, scenario_total, scenario_passed_count, scenario_failed_count,
         scenario_errored_count
       ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      runId,
-      "completed",
-      0,
-      1,
-      "suite-1",
-      "2026-04-10T10:00:00Z",
-      "2026-04-10T10:02:00Z",
-      "2026-04-10T10:02:00Z",
-      2,
-      1,
-      1,
-      0,
-    );
+      )
+      .run(
+        runId,
+        "completed",
+        0,
+        1,
+        "suite-1",
+        "2026-04-10T10:00:00Z",
+        "2026-04-10T10:02:00Z",
+        "2026-04-10T10:02:00Z",
+        2,
+        1,
+        1,
+        0,
+      );
 
-    database.query(
-      `insert into scenario_runs (
+    database
+      .query(
+        `insert into scenario_runs (
         run_id, ordinal, scenario_id, scenario_name, persona_id, rubric_id, user_id,
         status, passed, overall_score, pass_threshold, judge_provider, judge_model,
         judge_temperature, judge_max_tokens, overall_notes, judge_output_json,
         turn_count, assistant_turn_count, tool_call_count, checkpoint_count,
         started_at, updated_at, completed_at
       ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      runId,
-      0,
-      "smoke",
-      "Smoke",
-      "persona-1",
-      "rubric-1",
-      "user-1",
-      "completed",
-      1,
-      0.9,
-      0.7,
-      "openai",
-      "anthropic/claude-opus-4.6",
-      0,
-      500,
-      "Strong memory recall.",
-      JSON.stringify({ failure_mode_detected: null }),
-      2,
-      1,
-      0,
-      0,
-      "2026-04-10T10:00:00Z",
-      "2026-04-10T10:01:00Z",
-      "2026-04-10T10:01:00Z",
-    );
-    database.query(
-      `insert into scenario_runs (
+      )
+      .run(
+        runId,
+        0,
+        "smoke",
+        "Smoke",
+        "persona-1",
+        "rubric-1",
+        "user-1",
+        "completed",
+        1,
+        0.9,
+        0.7,
+        "openai",
+        "anthropic/claude-opus-4.6",
+        0,
+        500,
+        "Strong memory recall.",
+        JSON.stringify({ failure_mode_detected: null }),
+        2,
+        1,
+        0,
+        0,
+        "2026-04-10T10:00:00Z",
+        "2026-04-10T10:01:00Z",
+        "2026-04-10T10:01:00Z",
+      );
+    database
+      .query(
+        `insert into scenario_runs (
         run_id, ordinal, scenario_id, scenario_name, persona_id, rubric_id, user_id,
         status, passed, overall_score, pass_threshold, judge_provider, judge_model,
         judge_temperature, judge_max_tokens, overall_notes, judge_output_json,
         turn_count, assistant_turn_count, tool_call_count, checkpoint_count,
         started_at, updated_at, completed_at
       ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      runId,
-      1,
-      "smoke",
-      "Smoke",
-      "persona-1",
-      "rubric-1",
-      "user-2",
-      "completed",
-      0,
-      0.4,
-      0.7,
-      "openai",
-      "anthropic/claude-opus-4.6",
-      0,
-      500,
-      "Missed the stored fact.",
-      JSON.stringify({ failure_mode_detected: "fabrication" }),
-      2,
-      1,
-      0,
-      0,
-      "2026-04-10T10:01:00Z",
-      "2026-04-10T10:02:00Z",
-      "2026-04-10T10:02:00Z",
-    );
+      )
+      .run(
+        runId,
+        1,
+        "smoke",
+        "Smoke",
+        "persona-1",
+        "rubric-1",
+        "user-2",
+        "completed",
+        0,
+        0.4,
+        0.7,
+        "openai",
+        "anthropic/claude-opus-4.6",
+        0,
+        500,
+        "Missed the stored fact.",
+        JSON.stringify({ failure_mode_detected: "fabrication" }),
+        2,
+        1,
+        0,
+        0,
+        "2026-04-10T10:01:00Z",
+        "2026-04-10T10:02:00Z",
+        "2026-04-10T10:02:00Z",
+      );
 
-    database.query(
-      `insert into turns (
+    database
+      .query(
+        `insert into turns (
         scenario_run_id, turn_index, role, source, content, created_at
       ) values (?, ?, ?, ?, ?, ?)`,
-    ).run(1, 0, "user", "user_exact", "Remember Sarah.", "2026-04-10T10:00:01Z");
-    database.query(
-      `insert into turns (
+      )
+      .run(
+        1,
+        0,
+        "user",
+        "user_exact",
+        "Remember Sarah.",
+        "2026-04-10T10:00:01Z",
+      );
+    database
+      .query(
+        `insert into turns (
         scenario_run_id, turn_index, role, source, content, created_at
       ) values (?, ?, ?, ?, ?, ?)`,
-    ).run(
-      2,
-      0,
-      "system",
-      "session_boundary",
-      "--- Session boundary: session_id: probe reset_policy: fresh_agent time_offset: 24h user_id: user-2 ---",
-      "2026-04-10T10:01:01Z",
-    );
+      )
+      .run(
+        2,
+        0,
+        "system",
+        "session_boundary",
+        "--- Session boundary: session_id: probe reset_policy: fresh_agent time_offset: 24h user_id: user-2 ---",
+        "2026-04-10T10:01:01Z",
+      );
 
-    database.query(
-      `insert into judge_dimension_scores (
+    database
+      .query(
+        `insert into judge_dimension_scores (
         scenario_run_id, dimension_id, dimension_name, weight, scale_type, scale_points,
         raw_score, normalized_score, reasoning, evidence_json, created_at
       ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      1,
-      "task_completion",
-      "Task Completion",
-      1,
-      "likert",
-      5,
-      4.5,
-      0.9,
-      "Remembered the fact.",
-      JSON.stringify(["Named Sarah"]),
-      "2026-04-10T10:01:00Z",
-    );
-    database.query(
-      `insert into judge_dimension_scores (
+      )
+      .run(
+        1,
+        "task_completion",
+        "Task Completion",
+        1,
+        "likert",
+        5,
+        4.5,
+        0.9,
+        "Remembered the fact.",
+        JSON.stringify(["Named Sarah"]),
+        "2026-04-10T10:01:00Z",
+      );
+    database
+      .query(
+        `insert into judge_dimension_scores (
         scenario_run_id, dimension_id, dimension_name, weight, scale_type, scale_points,
         raw_score, normalized_score, reasoning, evidence_json, created_at
       ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      2,
-      "task_completion",
-      "Task Completion",
-      1,
-      "likert",
-      5,
-      2,
-      0.4,
-      "Forgot the fact.",
-      JSON.stringify(["Asked again"]),
-      "2026-04-10T10:02:00Z",
-    );
+      )
+      .run(
+        2,
+        "task_completion",
+        "Task Completion",
+        1,
+        "likert",
+        5,
+        2,
+        0.4,
+        "Forgot the fact.",
+        JSON.stringify(["Asked again"]),
+        "2026-04-10T10:02:00Z",
+      );
   } finally {
     database.close();
   }

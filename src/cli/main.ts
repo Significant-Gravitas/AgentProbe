@@ -155,9 +155,10 @@ function parseIntegerOption(args: string[], name: string): number | undefined {
   return parseIntegerValue(name, value);
 }
 
-function parseParallelOption(
-  args: string[],
-): { enabled: boolean; limit?: number } {
+function parseParallelOption(args: string[]): {
+  enabled: boolean;
+  limit?: number;
+} {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg !== "--parallel" && arg !== "--parrallel") {
@@ -240,7 +241,10 @@ function selectDashboardScenarios(options: {
     if (options.scenarioId && scenario.id !== options.scenarioId) {
       return false;
     }
-    if (requestedTags.size > 0 && !scenario.tags.some((tag) => requestedTags.has(tag))) {
+    if (
+      requestedTags.size > 0 &&
+      !scenario.tags.some((tag) => requestedTags.has(tag))
+    ) {
       return false;
     }
     return true;

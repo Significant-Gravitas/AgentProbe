@@ -66,7 +66,10 @@ async function waitForStderrMatch(
     const read = await Promise.race([
       reader.read(),
       new Promise<never>((_resolve, reject) => {
-        setTimeout(() => reject(new Error("Timed out waiting for stderr output.")), remaining);
+        setTimeout(
+          () => reject(new Error("Timed out waiting for stderr output.")),
+          remaining,
+        );
       }),
     ]);
     if (read.done) {
@@ -749,9 +752,7 @@ describe("bun e2e baseline for the typescript cli", () => {
       .map((entry) => jwtSubject(entry.headers.authorization))
       .filter((value): value is string => typeof value === "string");
     expect(new Set(subjects).size).toBe(2);
-    expect(subjects).toEqual(
-      scenarioRows.map((row) => String(row.user_id)),
-    );
+    expect(subjects).toEqual(scenarioRows.map((row) => String(row.user_id)));
   });
 
   test("dashboard mode serves live state from the Bun dashboard server", async () => {

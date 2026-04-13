@@ -1,3 +1,5 @@
+import { basename, dirname, resolve } from "node:path";
+
 import {
   buildEndpointAdapter,
   type EndpointAdapter,
@@ -21,23 +23,20 @@ import type {
   ScenarioTermination,
   Session,
   ToolCallRecord,
+  UploadedFile,
 } from "../../shared/types/contracts.ts";
 import {
   AgentProbeConfigError,
   AgentProbeRuntimeError,
 } from "../../shared/utils/errors.ts";
-import {
-  logDebug,
-  logInfo,
-  logWarn,
-} from "../../shared/utils/logging.ts";
+import { logDebug, logInfo, logWarn } from "../../shared/utils/logging.ts";
 import { renderTemplate } from "../../shared/utils/template.ts";
 import {
   parseEndpointsYaml,
   parsePersonaYaml,
-  parseTimeOffset,
   parseRubricsYaml,
   parseScenariosInput,
+  parseTimeOffset,
 } from "../validation/load-suite.ts";
 import { judgeResponse } from "./judge.ts";
 import { generatePersonaStep, resolvePersonaModel } from "./simulator.ts";
@@ -179,7 +178,9 @@ function incrementUserTurnCount(
   return next;
 }
 
-function isMaxTurnsExceededError(error: unknown): error is AgentProbeRuntimeError {
+function isMaxTurnsExceededError(
+  error: unknown,
+): error is AgentProbeRuntimeError {
   return (
     error instanceof AgentProbeRuntimeError &&
     /exceeded max_turns=/.test(error.message)
@@ -273,11 +274,11 @@ function evaluateCheckpointTurn(
 
     for (const forbidden of assertion.responseMustNotContain ?? []) {
       if (
-        lastReply.assistantText
-          .toLowerCase()
-          .includes(forbidden.toLowerCase())
+        lastReply.assistantText.toLowerCase().includes(forbidden.toLowerCase())
       ) {
-        failures.push(`Response contains forbidden string: ${JSON.stringify(forbidden)}`);
+        failures.push(
+          `Response contains forbidden string: ${JSON.stringify(forbidden)}`,
+        );
       }
     }
   }
@@ -405,6 +406,7 @@ export async function runScenario(
     dryRun?: boolean;
     adapterFactory?: () => EndpointAdapter;
     userId?: string;
+    scenariosPath?: string;
   },
 ): Promise<ScenarioRunResult> {
   if (options.dryRun) {
@@ -469,14 +471,15 @@ export async function runScenario(
       maxTurns?: number;
       currentUserTurnCount: number;
       setUserTurnCount: (value: number) => void;
+      fileIds?: string[];
     },
   ): Promise<void> => {
     const nextUserTurnCount = incrementUserTurnCount(
       optionsForTurn.currentUserTurnCount,
       {
-      scenarioId: scenario.id,
-      maxTurns: optionsForTurn.maxTurns,
-    },
+        scenarioId: scenario.id,
+        maxTurns: optionsForTurn.maxTurns,
+      },
     );
     optionsForTurn.setUserTurnCount(nextUserTurnCount);
     const userTurn: ConversationTurn = { role: "user", content: userText };
@@ -500,6 +503,10 @@ export async function runScenario(
       lastMessage,
       lastReply,
     });
+    if (optionsForTurn.fileIds && optionsForTurn.fileIds.length > 0) {
+      replyContext.file_ids = optionsForTurn.fileIds;
+      replyContext.fileIds = optionsForTurn.fileIds;
+    }
     const reply = await currentAdapter.sendUserTurn(replyContext);
     lastReply = reply;
 
@@ -548,7 +555,9 @@ export async function runScenario(
           }),
         );
         if (session.reset === "fresh_agent" && options.adapterFactory) {
-          logDebug(`Resetting adapter for fresh_agent session ${session.id ?? sessionIndex + 1}`);
+          logDebug(
+            `Resetting adapter for fresh_agent session ${session.id ?? sessionIndex + 1}`,
+          );
           currentAdapter = options.adapterFactory();
         } else if (session.reset === "fresh_agent" && !options.adapterFactory) {
           logWarn(
@@ -696,6 +705,28 @@ export async function runScenario(
             generatorModel = personaModel;
           }
 
+          let uploadedFileIds: string[] | undefined;
+          if (
+            turn.role === "user" &&
+            turn.attachments.length > 0 &&
+            currentAdapter.uploadFile
+          ) {
+            const scenarioSourcePath = options.scenariosPath ?? "data";
+            const baseDir = dirname(resolve(scenarioSourcePath));
+            const uploaded: UploadedFile[] = [];
+            for (const attachment of turn.attachments) {
+              const resolvedPath = resolve(baseDir, attachment.path);
+              const name = attachment.name ?? basename(resolvedPath);
+              logInfo(`Uploading file: ${name} (${resolvedPath})`);
+              const result = await currentAdapter.uploadFile(
+                resolvedPath,
+                name,
+              );
+              uploaded.push(result);
+            }
+            uploadedFileIds = uploaded.map((f) => f.fileId);
+          }
+
           renderedTurns.push({
             role: "user",
             content: messageText,
@@ -703,9 +734,12 @@ export async function runScenario(
           await submitUserTurn(messageText, {
             source,
             generatorModel,
+            fileIds: uploadedFileIds,
             maxTurns: effectiveMaxTurns,
             currentUserTurnCount:
-              session.maxTurns !== undefined ? sessionUserTurnCount : userTurnCount,
+              session.maxTurns !== undefined
+                ? sessionUserTurnCount
+                : userTurnCount,
             setUserTurnCount: (value) => {
               if (session.maxTurns !== undefined) {
                 sessionUserTurnCount = value;
@@ -927,7 +961,8 @@ export async function runSuite(options: {
     options.progressCallback?.({
       kind: "suite_started",
       runId,
-      scenarioTotal: selectedScenarios.length * Math.max(1, options.repeat ?? 1),
+      scenarioTotal:
+        selectedScenarios.length * Math.max(1, options.repeat ?? 1),
     });
 
     const preparedRuns: PreparedRun[] = [];
@@ -1006,6 +1041,7 @@ export async function runSuite(options: {
           dryRun: options.dryRun,
           adapterFactory: prepared.adapterFactory,
           userId: prepared.userId,
+          scenariosPath: options.scenarios,
         },
       );
     };
