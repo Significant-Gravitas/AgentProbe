@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { scorePct } from "../helpers.ts";
 import type { ScenarioDetail } from "../types.ts";
 import { ConversationView } from "./ConversationView.tsx";
 import { RubricView } from "./RubricView.tsx";
@@ -8,21 +9,24 @@ interface Props {
   onClose: () => void;
 }
 
-function scorePct(val: number | null): number {
-  if (val == null) return 0;
-  return Math.max(0, Math.min(100, Math.round(val * 100)));
-}
-
 export function DetailPanel({ detail, onClose }: Props) {
   const [tab, setTab] = useState<"conversation" | "rubric">("conversation");
 
   const isRunning = detail.status === "running";
   const scoreLabel =
-    detail.overall_score != null ? detail.overall_score.toFixed(2) : isRunning ? "..." : "n/a";
+    detail.overall_score != null
+      ? detail.overall_score.toFixed(2)
+      : isRunning
+        ? "..."
+        : "n/a";
   const thresholdLabel =
     detail.pass_threshold != null ? detail.pass_threshold.toFixed(2) : "n/a";
   const statusLabel = isRunning ? "RUNNING" : detail.passed ? "PASS" : "FAIL";
-  const headerClass = isRunning ? "detail-running" : detail.passed ? "detail-pass" : "detail-fail";
+  const headerClass = isRunning
+    ? "detail-running"
+    : detail.passed
+      ? "detail-pass"
+      : "detail-fail";
   const failureMode =
     typeof detail.judge?.output === "object" && detail.judge?.output != null
       ? (detail.judge.output as Record<string, unknown>).failure_mode_detected
@@ -30,7 +34,15 @@ export function DetailPanel({ detail, onClose }: Props) {
 
   return (
     <>
-      <div className="detail-backdrop open" onClick={onClose} />
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay uses presentation role */}
+      <div
+        className="detail-backdrop open"
+        role="presentation"
+        onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") onClose();
+        }}
+      />
       <div className="detail-overlay open">
         <div className="detail-panel">
           <div className="detail-top">
@@ -42,7 +54,10 @@ export function DetailPanel({ detail, onClose }: Props) {
                 <div className="detail-name">
                   {detail.scenario_name}
                   {isRunning && (
-                    <span className="live-badge" style={{ marginLeft: 12, verticalAlign: "middle" }}>
+                    <span
+                      className="live-badge"
+                      style={{ marginLeft: 12, verticalAlign: "middle" }}
+                    >
                       <span className="live-dot" /> LIVE
                     </span>
                   )}

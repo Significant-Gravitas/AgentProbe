@@ -16,7 +16,9 @@ const STATUS_LABELS: Record<string, string> = {
 
 function Duration({ scenario }: { scenario: ScenarioState }) {
   const [now, setNow] = useState(Date.now());
-  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (scenario.status === "running" && scenario.started_at != null) {
@@ -30,7 +32,7 @@ function Duration({ scenario }: { scenario: ScenarioState }) {
   if (scenario.finished_at != null) {
     return <>{(scenario.finished_at - scenario.started_at).toFixed(1)}s</>;
   }
-  const elapsed = (now / 1000 - scenario.started_at);
+  const elapsed = now / 1000 - scenario.started_at;
   return <>{elapsed > 0 ? `${elapsed.toFixed(0)}s` : "-"}</>;
 }
 
@@ -66,7 +68,9 @@ export function ScenarioTable({ data, onSelect }: Props) {
                 <td className="id-cell">{s.scenario_id}</td>
                 <td>{s.scenario_name ?? ""}</td>
                 <td className="status-badge">
-                  <span>{STATUS_LABELS[s.status] ?? s.status.toUpperCase()}</span>
+                  <span>
+                    {STATUS_LABELS[s.status] ?? s.status.toUpperCase()}
+                  </span>
                 </td>
                 <td className="score-cell">
                   {s.score != null ? s.score.toFixed(2) : "-"}

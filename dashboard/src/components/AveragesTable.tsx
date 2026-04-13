@@ -1,13 +1,10 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
+import { scorePct } from "../helpers.ts";
 import type { AverageScore, DimensionAverage } from "../types.ts";
 
 interface Props {
   averages: AverageScore[];
   onSelectRun: (ordinal: number) => void;
-}
-
-function scorePct(val: number): number {
-  return Math.max(0, Math.min(100, Math.round(val * 100)));
 }
 
 function DimBar({ d }: { d: DimensionAverage }) {
@@ -31,7 +28,10 @@ function DimBar({ d }: { d: DimensionAverage }) {
 function ExpandedDetail({
   avg,
   onSelectRun,
-}: { avg: AverageScore; onSelectRun: (ordinal: number) => void }) {
+}: {
+  avg: AverageScore;
+  onSelectRun: (ordinal: number) => void;
+}) {
   const failureModes = Object.entries(avg.failure_modes);
   const passRate =
     avg.n > 0 ? ((avg.pass_count / avg.n) * 100).toFixed(0) : "0";
@@ -76,7 +76,8 @@ function ExpandedDetail({
               <div className="avg-failure-modes">
                 {failureModes.map(([mode, count]) => (
                   <span key={mode} className="avg-failure-pill">
-                    {mode} <span className="avg-failure-count">&times;{count}</span>
+                    {mode}{" "}
+                    <span className="avg-failure-count">&times;{count}</span>
                   </span>
                 ))}
               </div>
@@ -157,9 +158,8 @@ export function AveragesTable({ averages, onSelectRun }: Props) {
         </thead>
         <tbody>
           {averages.map((a) => (
-            <>
+            <Fragment key={a.base_id}>
               <tr
-                key={a.base_id}
                 className={`${a.avg >= 0.7 ? "avg-pass" : "avg-fail"} clickable-row`}
                 onClick={() =>
                   setExpanded(expanded === a.base_id ? null : a.base_id)
@@ -172,7 +172,8 @@ export function AveragesTable({ averages, onSelectRun }: Props) {
                     style={{
                       marginLeft: 6,
                       display: "inline-block",
-                      transform: expanded === a.base_id ? "rotate(90deg)" : "none",
+                      transform:
+                        expanded === a.base_id ? "rotate(90deg)" : "none",
                       transition: "transform .15s",
                     }}
                   >
@@ -186,13 +187,9 @@ export function AveragesTable({ averages, onSelectRun }: Props) {
                 <td style={{ textAlign: "right" }}>{a.n}</td>
               </tr>
               {expanded === a.base_id && (
-                <ExpandedDetail
-                  key={`${a.base_id}-detail`}
-                  avg={a}
-                  onSelectRun={onSelectRun}
-                />
+                <ExpandedDetail avg={a} onSelectRun={onSelectRun} />
               )}
-            </>
+            </Fragment>
           ))}
         </tbody>
       </table>

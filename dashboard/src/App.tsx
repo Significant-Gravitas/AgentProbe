@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useDashboard } from "./hooks/useDashboard.ts";
-import { StatsBar } from "./components/StatsBar.tsx";
-import { ProgressBar } from "./components/ProgressBar.tsx";
-import { ScenarioTable } from "./components/ScenarioTable.tsx";
 import { AveragesTable } from "./components/AveragesTable.tsx";
 import { DetailPanel } from "./components/DetailPanel.tsx";
+import { ProgressBar } from "./components/ProgressBar.tsx";
+import { ScenarioTable } from "./components/ScenarioTable.tsx";
+import { StatsBar } from "./components/StatsBar.tsx";
+import { useDashboard } from "./hooks/useDashboard.ts";
 
 export function App() {
   const { data, error } = useDashboard();
@@ -30,7 +30,7 @@ export function App() {
   }
 
   const selectedDetail =
-    selectedOrdinal != null ? data.details[selectedOrdinal] ?? null : null;
+    selectedOrdinal != null ? (data.details[selectedOrdinal] ?? null) : null;
 
   return (
     <>
@@ -45,7 +45,10 @@ export function App() {
       <StatsBar data={data} />
       <ProgressBar data={data} />
       <ScenarioTable data={data} onSelect={setSelectedOrdinal} />
-      <AveragesTable averages={data.averages} onSelectRun={setSelectedOrdinal} />
+      <AveragesTable
+        averages={data.averages}
+        onSelectRun={setSelectedOrdinal}
+      />
 
       <div className="footer">
         AgentProbe Dashboard &middot; {data.done}/{data.total} scenarios

@@ -3,7 +3,9 @@
 ## Purpose
 
 Execution plans for multi-step work that spans multiple PRs or sessions.
-Active work lives in `active/`; shipped work is archived to `completed/`.
+These plans are durable coordination artifacts for agents, not temporary notes.
+Active work lives in `active/`; shipped work is archived to `completed/`; debt
+that is known but unscheduled stays in the tracker.
 
 ## File conventions
 
@@ -11,10 +13,13 @@ Active work lives in `active/`; shipped work is archived to `completed/`.
   Validation.
 - Name plans by workstream and date (e.g., `websocket-refactor-2026-04.md`).
 - Move plans to `completed/` when all steps are done and shipped.
+- Record meaningful design decisions in the plan instead of assuming chat
+  context will survive.
 
 ## Files
 
 - [README.md](README.md) — Execution plans index and format guide
+- [tech-debt-tracker.md](tech-debt-tracker.md) — Shared queue of known cleanup work
 
 ## Subdirectories
 
@@ -23,6 +28,7 @@ Active work lives in `active/`; shipped work is archived to `completed/`.
 
 <!-- AUTO-GENERATED FILE LINKS START -->
 - [README.md](README.md)
+- [tech-debt-tracker.md](tech-debt-tracker.md)
 <!-- AUTO-GENERATED FILE LINKS END -->
 
 <!-- AUTO-GENERATED SUBDIR LINKS START -->

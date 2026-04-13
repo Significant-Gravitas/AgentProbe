@@ -1,5 +1,5 @@
+import { formatElapsed, useElapsed } from "../hooks/useElapsed.ts";
 import type { DashboardData } from "../types.ts";
-import { useElapsed, formatElapsed } from "../hooks/useElapsed.ts";
 
 interface Props {
   data: DashboardData;
@@ -9,7 +9,11 @@ function Stat({
   value,
   label,
   color,
-}: { value: string; label: string; color: string }) {
+}: {
+  value: string;
+  label: string;
+  color: string;
+}) {
   return (
     <div className="stat">
       <div className="stat-value" style={{ color }}>

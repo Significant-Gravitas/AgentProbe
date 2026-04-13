@@ -6,7 +6,6 @@ export function useElapsed(serverElapsed: number, allDone: boolean) {
   useEffect(() => {
     if (allDone) return;
     const start = performance.now();
-    const baseElapsed = serverElapsed;
     const id = setInterval(() => {
       setOffset((performance.now() - start) / 1000);
     }, 500);

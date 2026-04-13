@@ -1,4 +1,4 @@
-import type { ScenarioDetail, Turn, ToolCall, Checkpoint } from "../types.ts";
+import type { Checkpoint, ScenarioDetail, ToolCall, Turn } from "../types.ts";
 
 interface Props {
   detail: ScenarioDetail;
@@ -8,12 +8,15 @@ function buildTurnRows(detail: ScenarioDetail): Turn[] {
   const toolsByTurn: Record<number, ToolCall[]> = {};
   for (const tc of detail.tool_calls ?? []) {
     const idx = (tc as unknown as Record<string, number>).turn_index ?? -1;
-    (toolsByTurn[idx] ??= []).push(tc);
+    if (!toolsByTurn[idx]) toolsByTurn[idx] = [];
+    toolsByTurn[idx].push(tc);
   }
   const cpByTurn: Record<number, Checkpoint[]> = {};
   for (const cp of detail.checkpoints ?? []) {
-    const idx = (cp as unknown as Record<string, number>).preceding_turn_index ?? -1;
-    (cpByTurn[idx] ??= []).push(cp);
+    const idx =
+      (cp as unknown as Record<string, number>).preceding_turn_index ?? -1;
+    if (!cpByTurn[idx]) cpByTurn[idx] = [];
+    cpByTurn[idx].push(cp);
   }
   return (detail.turns ?? []).map((t) => ({
     ...t,
@@ -68,9 +71,7 @@ function ToolCallBlock({ tc }: { tc: ToolCall }) {
     <div className="tool-call">
       <div className="tool-name">{tc.name}</div>
       {tc.args != null && (
-        <pre className="tool-args">
-          {JSON.stringify(tc.args, null, 2)}
-        </pre>
+        <pre className="tool-args">{JSON.stringify(tc.args, null, 2)}</pre>
       )}
     </div>
   );
@@ -123,14 +124,14 @@ function MessageTurn({ turn }: { turn: Turn }) {
       {(turn.tool_calls ?? []).length > 0 && (
         <div className="tool-calls">
           <div className="section-label">Tool Calls</div>
-          {turn.tool_calls!.map((tc, i) => (
+          {turn.tool_calls?.map((tc, i) => (
             <ToolCallBlock key={i} tc={tc} />
           ))}
         </div>
       )}
       {(turn.checkpoints ?? []).length > 0 && (
         <div className="checkpoints">
-          {turn.checkpoints!.map((cp, i) => (
+          {turn.checkpoints?.map((cp, i) => (
             <CheckpointBlock key={i} cp={cp} />
           ))}
         </div>

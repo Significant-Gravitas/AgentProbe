@@ -1,12 +1,8 @@
-import type { ScenarioDetail, DimensionScore } from "../types.ts";
+import { scorePct } from "../helpers.ts";
+import type { DimensionScore, ScenarioDetail } from "../types.ts";
 
 interface Props {
   detail: ScenarioDetail;
-}
-
-function scorePct(val: number | null): number {
-  if (val == null) return 0;
-  return Math.max(0, Math.min(100, Math.round(val * 100)));
 }
 
 function DimensionCard({ d }: { d: DimensionScore }) {
@@ -36,7 +32,7 @@ function DimensionCard({ d }: { d: DimensionScore }) {
       {d.reasoning && <div className="dim-reasoning">{d.reasoning}</div>}
       {(d.evidence ?? []).length > 0 && (
         <div className="dim-evidence">
-          {d.evidence!.map((e, i) => (
+          {d.evidence?.map((e, i) => (
             <div key={i} className="evidence-item">
               {e}
             </div>
