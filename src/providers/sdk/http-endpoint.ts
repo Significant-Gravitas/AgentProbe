@@ -464,7 +464,8 @@ export class HttpEndpointAdapter {
           extractTextByJsonPath(event, responseConfig.contentPath),
         )
         .filter(Boolean)
-        .join("\n")
+        .join(" ")
+        .replace(/ {2,}/g, " ")
         .trim();
       rawBody = events;
       usage = events.length > 0 ? extractUsage(events.at(-1)) : {};
