@@ -867,6 +867,7 @@ export async function runScenario(
     rubricId: rubric.id,
     userId: options.userId,
     passed: score.passed,
+    failureKind: score.failureKind,
     overallScore: finalScore,
     transcript: fullTranscript,
     checkpoints,

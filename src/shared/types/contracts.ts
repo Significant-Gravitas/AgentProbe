@@ -461,10 +461,13 @@ export type JudgeDimensionScore = {
   score: number;
 };
 
+export type FailureKind = "agent" | "harness";
+
 export type RubricScore = {
   dimensions: Record<string, JudgeDimensionScore>;
   overallNotes: string;
   passed: boolean;
+  failureKind?: FailureKind;
   failureModeDetected?: string | null;
 };
 
@@ -475,6 +478,7 @@ export type ScenarioRunResult = {
   rubricId: string;
   userId?: string | null;
   passed: boolean;
+  failureKind?: FailureKind;
   overallScore: number;
   transcript: ConversationTurn[];
   checkpoints: CheckpointResult[];
@@ -528,6 +532,7 @@ export type RunSummary = {
     scenarioTotal: number;
     scenarioPassedCount: number;
     scenarioFailedCount: number;
+    scenarioHarnessFailedCount: number;
     scenarioErroredCount: number;
   };
 };
@@ -555,6 +560,7 @@ export type ScenarioRecord = {
   rubricSnapshot?: JsonValue;
   status: string;
   passed?: boolean | null;
+  failureKind?: FailureKind | null;
   overallScore?: number | null;
   passThreshold?: number | null;
   judge: {

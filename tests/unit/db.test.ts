@@ -218,7 +218,7 @@ describe("sqlite recorder", () => {
       }
       expect(
         database.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 2 });
+      ).toEqual({ schema_version: 3 });
     } finally {
       database.close();
     }
@@ -253,6 +253,7 @@ describe("sqlite recorder", () => {
       scenarioTotal: 1,
       scenarioPassedCount: 1,
       scenarioFailedCount: 0,
+      scenarioHarnessFailedCount: 0,
       scenarioErroredCount: 0,
     });
 
@@ -442,6 +443,7 @@ describe("sqlite recorder", () => {
       scenarioTotal: 1,
       scenarioPassedCount: 0,
       scenarioFailedCount: 0,
+      scenarioHarnessFailedCount: 0,
       scenarioErroredCount: 1,
     });
 
@@ -608,7 +610,7 @@ describe("sqlite recorder", () => {
       expect(columns.includes("user_id")).toBe(true);
       expect(
         migrated.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 2 });
+      ).toEqual({ schema_version: 3 });
     } finally {
       migrated.close();
     }

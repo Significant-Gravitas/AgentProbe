@@ -149,13 +149,25 @@ function judgeJsonSchema(rubric: Rubric): Record<string, unknown> {
         type: "boolean",
         description: "Whether the evaluated response passes the rubric.",
       },
+      failure_kind: {
+        type: "string",
+        enum: ["agent", "harness"],
+        description:
+          "When pass is false, classify whether the failure is due to the agent under test ('agent') or a defect in the test harness itself such as missing files or incorrect persona behavior ('harness'). When pass is true, set to 'agent'.",
+      },
       failure_mode_detected: {
         type: ["string", "null"],
         description:
           "Named failure mode detected in the response, or null when none apply.",
       },
     },
-    required: ["dimensions", "overall_notes", "pass", "failure_mode_detected"],
+    required: [
+      "dimensions",
+      "overall_notes",
+      "pass",
+      "failure_kind",
+      "failure_mode_detected",
+    ],
     additionalProperties: false,
   };
 }
@@ -243,6 +255,12 @@ function parseRubricScore(payload: string): RubricScore {
     overallNotes:
       typeof record.overall_notes === "string" ? record.overall_notes : "",
     passed: record.pass === true,
+    failureKind:
+      record.pass === false
+        ? record.failure_kind === "harness"
+          ? "harness"
+          : "agent"
+        : undefined,
     failureModeDetected:
       typeof record.failure_mode_detected === "string"
         ? record.failure_mode_detected

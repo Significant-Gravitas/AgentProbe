@@ -12,7 +12,7 @@ import { logDebug, logInfo, logWarn } from "../../shared/utils/logging.ts";
 export type DashboardScenarioState = {
   scenario_id: string;
   scenario_name: string | null;
-  status: "pending" | "running" | "pass" | "fail" | "error";
+  status: "pending" | "running" | "pass" | "fail" | "harness_fail" | "error";
   score: number | null;
   error: string | null;
   started_at: number | null;
@@ -24,6 +24,7 @@ export type DashboardScenarioDetail = {
   scenario_name: string;
   user_id?: string;
   passed: boolean;
+  failure_kind?: "agent" | "harness";
   overall_score: number | null;
   pass_threshold: number | null;
   status: string;
@@ -77,6 +78,7 @@ export type DashboardStateSnapshot = {
   elapsed: number;
   passed: number;
   failed: number;
+  harness_failed: number;
   errored: number;
   running: number;
   done: number;
@@ -137,7 +139,10 @@ function displayStatus(
     return "running";
   }
   if (record.status === "completed") {
-    return record.passed ? "pass" : "fail";
+    if (record.passed) {
+      return "pass";
+    }
+    return record.failureKind === "harness" ? "harness_fail" : "fail";
   }
   return "error";
 }
@@ -182,6 +187,12 @@ function mapScenarioDetail(
     scenario_name: record.scenarioName,
     user_id: record.userId ?? undefined,
     passed: record.passed === true,
+    failure_kind:
+      record.failureKind === "harness"
+        ? "harness"
+        : record.failureKind === "agent"
+          ? "agent"
+          : undefined,
     overall_score: record.overallScore ?? null,
     pass_threshold: record.passThreshold ?? null,
     status: record.status,
@@ -450,13 +461,16 @@ export class LiveDashboardState {
     const failed = scenarios.filter(
       (scenario) => scenario.status === "fail",
     ).length;
+    const harnessFailedCount = scenarios.filter(
+      (scenario) => scenario.status === "harness_fail",
+    ).length;
     const errored = scenarios.filter(
       (scenario) => scenario.status === "error",
     ).length;
     const running = scenarios.filter(
       (scenario) => scenario.status === "running",
     ).length;
-    const done = passed + failed + errored;
+    const done = passed + failed + harnessFailedCount + errored;
     const allDone =
       this.completedAt !== undefined || (this.total > 0 && done >= this.total);
     const startedAt = this.startedAt ?? nowSeconds();
@@ -470,6 +484,7 @@ export class LiveDashboardState {
       elapsed,
       passed,
       failed,
+      harness_failed: harnessFailedCount,
       errored,
       running,
       done,
