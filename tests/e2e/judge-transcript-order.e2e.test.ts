@@ -6,6 +6,7 @@ import {
   createWorkspace,
   type E2EWorkspace,
   FakeAutogptBackend,
+  type OpenAiScript,
   readOpenAiLog,
   runAgentprobe,
 } from "./support.ts";
@@ -18,7 +19,7 @@ const LOOKUP_TOOL_OUTPUT = {
   days_since_purchase: 12,
 };
 
-function buildJudgeOrderRules() {
+function buildJudgeOrderRules(): OpenAiScript {
   return {
     rules: [
       {
