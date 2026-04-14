@@ -1,31 +1,41 @@
 # Workspace Inventory
 
-Generated: 2026-04-10T11:50:56.624Z
+Generated: 2026-04-13T09:43:44.217Z
 
 ```text
   AGENTS.md
   CLAUDE.md
   README.md
-  agentprobe-report-29bcccb9aca2425b8be34621743fd339.html
-  agentprobe-report-2b71d247aa8b46ceb38dec77e2d7268b.html
+  WORKFLOW.md
   agentprobe-spec-v0.2.md
+  biome.json
   bun.lock
+dashboard/
+  dashboard/index.html
+  dashboard/package.json
+dashboard/src/
+  dashboard/src/App.tsx
+dashboard/src/components/
+  dashboard/src/components/AveragesTable.tsx
+  dashboard/src/components/ConversationView.tsx
+  dashboard/src/components/DetailPanel.tsx
+  dashboard/src/components/ProgressBar.tsx
+  dashboard/src/components/RubricView.tsx
+  dashboard/src/components/ScenarioTable.tsx
+  dashboard/src/components/StatsBar.tsx
+  dashboard/src/helpers.ts
+dashboard/src/hooks/
+  dashboard/src/hooks/useDashboard.ts
+  dashboard/src/hooks/useElapsed.ts
+  dashboard/src/main.tsx
+  dashboard/src/styles.css
+  dashboard/src/types.ts
+  dashboard/src/vite-env.d.ts
+  dashboard/tsconfig.json
+  dashboard/vite.config.ts
 data/
   data/adversarial-scenarios.yaml
   data/autogpt-endpoint.yaml
-data/cluster_scenarios/
-  data/cluster_scenarios/cluster_01_founder_operations.yaml
-  data/cluster_scenarios/cluster_01_founder_operations_simple.yaml
-  data/cluster_scenarios/cluster_02_software_development.yaml
-  data/cluster_scenarios/cluster_03_multi_process_ops.yaml
-  data/cluster_scenarios/cluster_04_data_marketing_ops.yaml
-  data/cluster_scenarios/cluster_05_research_workflow.yaml
-  data/cluster_scenarios/cluster_06_sales_marketing.yaml
-  data/cluster_scenarios/cluster_07_data_analysis.yaml
-  data/cluster_scenarios/cluster_08_task_delegation.yaml
-  data/cluster_scenarios/cluster_09_exploration_learning.yaml
-  data/cluster_scenarios/cluster_10_multi_agent_builder.yaml
-  data/cluster_scenarios/cluster_11_agent_deployment.yaml
   data/multi-session-memory.yaml
   data/openclaw-endpoints.yaml
   data/opencode-endpoints.yaml
@@ -46,6 +56,7 @@ docs/
 docs/design-docs/
   docs/design-docs/INDEX.md
   docs/design-docs/core-beliefs.md
+  docs/design-docs/frontend-react.md
 docs/exec-plans/
   docs/exec-plans/INDEX.md
   docs/exec-plans/README.md
@@ -94,11 +105,11 @@ src/domains/evaluation/
   src/domains/evaluation/run-suite.ts
   src/domains/evaluation/simulator.ts
 src/domains/reporting/
+  src/domains/reporting/dashboard.ts
   src/domains/reporting/render-report.ts
 src/domains/validation/
   src/domains/validation/load-suite.ts
 src/providers/
-src/providers/observability/
 src/providers/persistence/
   src/providers/persistence/sqlite-run-history.ts
 src/providers/sdk/
@@ -109,12 +120,12 @@ src/providers/sdk/
   src/providers/sdk/openclaw.ts
   src/providers/sdk/preset-config.ts
 src/shared/
-src/shared/testing/
 src/shared/types/
   src/shared/types/contracts.ts
 src/shared/utils/
   src/shared/utils/errors.ts
   src/shared/utils/json.ts
+  src/shared/utils/logging.ts
   src/shared/utils/template.ts
 tests/
 tests/e2e/
@@ -125,9 +136,11 @@ tests/e2e/fixtures/suite/
 tests/unit/
   tests/unit/adapters.test.ts
   tests/unit/autogpt-auth.test.ts
+  tests/unit/dashboard.test.ts
   tests/unit/db.test.ts
   tests/unit/endpoint-config.test.ts
   tests/unit/judge.test.ts
+  tests/unit/load-suite.test.ts
   tests/unit/openclaw.test.ts
   tests/unit/report.test.ts
   tests/unit/runner.test.ts
