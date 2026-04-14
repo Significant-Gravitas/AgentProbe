@@ -12,6 +12,44 @@ import {
 } from "../../shared/utils/errors.ts";
 
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
+const DEFAULT_MAX_ATTEMPTS = 4;
+const DEFAULT_RETRY_BASE_MS = 500;
+const DEFAULT_RETRY_MAX_MS = 8000;
+
+function readPositiveInt(raw: string | undefined, fallback: number): number {
+  if (!raw) {
+    return fallback;
+  }
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}
+
+function computeBackoffMs(
+  attempt: number,
+  baseMs: number,
+  maxMs: number,
+): number {
+  const exponential = Math.min(maxMs, baseMs * 2 ** (attempt - 1));
+  const jitter = Math.random() * exponential;
+  return Math.max(0, Math.floor(jitter));
+}
+
+function isRetryableStatus(status: number): boolean {
+  return (
+    status === 408 ||
+    status === 409 ||
+    status === 425 ||
+    status === 429 ||
+    status >= 500
+  );
+}
+
+async function sleep(ms: number): Promise<void> {
+  if (ms <= 0) {
+    return;
+  }
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export class OpenAiResponsesApiError extends AgentProbeRuntimeError {
   constructor(
@@ -75,11 +113,35 @@ function loadFakeRules(path: string | undefined): FakeRule[] {
   return Array.isArray(parsed.rules) ? (parsed.rules as FakeRule[]) : [];
 }
 
+function flattenInputText(request: OpenAiResponsesRequest): string {
+  if (typeof request.input === "string") {
+    return request.input;
+  }
+  return request.input
+    .flatMap((message) => message.content.map((part) => part.text))
+    .join("\n\n");
+}
+
+function serializeInput(request: OpenAiResponsesRequest): unknown {
+  if (typeof request.input === "string") {
+    return request.input;
+  }
+  return request.input.map((message) => ({
+    type: message.type,
+    role: message.role,
+    content: message.content.map((part) => ({
+      type: part.type,
+      text: part.text,
+    })),
+  }));
+}
+
 function matchFakeRule(
   request: OpenAiResponsesRequest,
   rules: FakeRule[],
 ): FakeRule {
   const kind = request.text.format.name;
+  const inputText = flattenInputText(request);
   for (const rule of rules) {
     if ((rule.kind ?? "") !== kind) {
       continue;
@@ -87,7 +149,7 @@ function matchFakeRule(
     const inputContains = Array.isArray(rule.inputContains)
       ? rule.inputContains
       : [];
-    if (inputContains.some((item) => !request.input.includes(String(item)))) {
+    if (inputContains.some((item) => !inputText.includes(String(item)))) {
       continue;
     }
     const instructionsContains = Array.isArray(rule.instructionsContains)
@@ -103,7 +165,7 @@ function matchFakeRule(
     return rule;
   }
   throw new AgentProbeRuntimeError(
-    `No fake OpenAI response matched the request. kind='${kind}' input='${request.input}'`,
+    `No fake OpenAI response matched the request. kind='${kind}' input='${inputText}'`,
   );
 }
 
@@ -113,6 +175,9 @@ export class OpenAiResponsesClient {
   private readonly fakeScriptPath?: string;
   private readonly fakeLogPath?: string;
   private readonly fakeRules: FakeRule[];
+  private readonly maxAttempts: number;
+  private readonly retryBaseMs: number;
+  private readonly retryMaxMs: number;
 
   constructor() {
     this.apiKey = Bun.env.OPEN_ROUTER_API_KEY?.trim();
@@ -120,6 +185,18 @@ export class OpenAiResponsesClient {
     this.fakeScriptPath = Bun.env.AGENTPROBE_E2E_OPENAI_SCRIPT?.trim();
     this.fakeLogPath = Bun.env.AGENTPROBE_E2E_OPENAI_LOG?.trim();
     this.fakeRules = loadFakeRules(this.fakeScriptPath);
+    this.maxAttempts = readPositiveInt(
+      Bun.env.AGENTPROBE_OPENROUTER_MAX_ATTEMPTS,
+      DEFAULT_MAX_ATTEMPTS,
+    );
+    this.retryBaseMs = readPositiveInt(
+      Bun.env.AGENTPROBE_OPENROUTER_RETRY_BASE_MS,
+      DEFAULT_RETRY_BASE_MS,
+    );
+    this.retryMaxMs = readPositiveInt(
+      Bun.env.AGENTPROBE_OPENROUTER_RETRY_MAX_MS,
+      DEFAULT_RETRY_MAX_MS,
+    );
   }
 
   assertConfigured(): void {
@@ -142,7 +219,7 @@ export class OpenAiResponsesClient {
         kind: request.text.format.name,
         matched_rule: rule.name ?? "",
         model: request.model || null,
-        input: request.input,
+        input: flattenInputText(request),
         request: normalizeJson(request),
       });
       const output =
@@ -158,74 +235,130 @@ export class OpenAiResponsesClient {
       );
     }
 
-    let response: Response;
-    try {
-      response = await fetch(`${this.baseUrl}/responses`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
+    const body = JSON.stringify({
+      model: request.model,
+      instructions: request.instructions,
+      input: serializeInput(request),
+      text: {
+        format: {
+          type: request.text.format.type,
+          name: request.text.format.name,
+          description: request.text.format.description,
+          schema: request.text.format.schema,
+          strict: request.text.format.strict,
         },
-        body: JSON.stringify({
-          model: request.model,
-          instructions: request.instructions,
-          input: request.input,
-          text: {
-            format: {
-              type: request.text.format.type,
-              name: request.text.format.name,
-              description: request.text.format.description,
-              schema: request.text.format.schema,
-              strict: request.text.format.strict,
-            },
-          },
-          temperature: request.temperature,
-          max_output_tokens: request.maxOutputTokens,
-        }),
-      });
-    } catch (error) {
-      throw new OpenAiResponsesApiError(
-        `OpenRouter request failed before a response was received: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    }
+      },
+      temperature: request.temperature,
+      max_output_tokens: request.maxOutputTokens,
+      prompt_cache_key: request.promptCacheKey,
+      cache_control: request.cacheControl
+        ? {
+            type: request.cacheControl.type,
+            ttl: request.cacheControl.ttl,
+          }
+        : undefined,
+    });
 
-    if (!response.ok) {
-      const bodyText = await response.text();
-      const message = `OpenRouter request failed (${response.status}): ${bodyText}`;
-      if (response.status === 401 || response.status === 403) {
-        throw new OpenAiResponsesAuthenticationError(
+    let lastError: OpenAiResponsesApiError | undefined;
+    for (let attempt = 1; attempt <= this.maxAttempts; attempt += 1) {
+      let response: Response;
+      try {
+        response = await fetch(`${this.baseUrl}/responses`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body,
+        });
+      } catch (error) {
+        lastError = new OpenAiResponsesApiError(
+          `OpenRouter request failed before a response was received (attempt ${attempt}/${this.maxAttempts}): ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+        if (attempt < this.maxAttempts) {
+          await sleep(
+            computeBackoffMs(attempt, this.retryBaseMs, this.retryMaxMs),
+          );
+          continue;
+        }
+        throw lastError;
+      }
+
+      if (!response.ok) {
+        const bodyText = await response.text();
+        const message = `OpenRouter request failed (${response.status}): ${bodyText}`;
+        if (response.status === 401 || response.status === 403) {
+          throw new OpenAiResponsesAuthenticationError(
+            message,
+            response.status,
+            bodyText,
+          );
+        }
+        const apiError = new OpenAiResponsesApiError(
           message,
           response.status,
           bodyText,
         );
+        if (isRetryableStatus(response.status) && attempt < this.maxAttempts) {
+          lastError = apiError;
+          await sleep(
+            retryAfterMs(response) ??
+              computeBackoffMs(attempt, this.retryBaseMs, this.retryMaxMs),
+          );
+          continue;
+        }
+        throw apiError;
       }
-      throw new OpenAiResponsesApiError(message, response.status, bodyText);
+
+      let payload: Record<string, unknown>;
+      try {
+        payload = (await response.json()) as Record<string, unknown>;
+      } catch (error) {
+        throw new OpenAiResponsesApiError(
+          `OpenRouter response was not valid JSON: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+      const outputText =
+        typeof payload.output_text === "string"
+          ? payload.output_text
+          : extractOutputText(payload);
+      if (!outputText.trim()) {
+        throw new AgentProbeRuntimeError(
+          "OpenAI response contained no text output.",
+        );
+      }
+
+      return { outputText, raw: normalizeJson(payload) };
     }
 
-    let payload: Record<string, unknown>;
-    try {
-      payload = (await response.json()) as Record<string, unknown>;
-    } catch (error) {
-      throw new OpenAiResponsesApiError(
-        `OpenRouter response was not valid JSON: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-    }
-    const outputText =
-      typeof payload.output_text === "string"
-        ? payload.output_text
-        : extractOutputText(payload);
-    if (!outputText.trim()) {
-      throw new AgentProbeRuntimeError(
-        "OpenAI response contained no text output.",
-      );
-    }
-
-    return { outputText, raw: normalizeJson(payload) };
+    throw (
+      lastError ??
+      new OpenAiResponsesApiError(
+        "OpenRouter request exhausted retries without a response.",
+      )
+    );
   }
+}
+
+function retryAfterMs(response: Response): number | undefined {
+  const header = response.headers.get("retry-after");
+  if (!header) {
+    return undefined;
+  }
+  const seconds = Number(header);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.min(60_000, Math.floor(seconds * 1000));
+  }
+  const date = Date.parse(header);
+  if (Number.isFinite(date)) {
+    const delta = date - Date.now();
+    return delta > 0 ? Math.min(60_000, delta) : 0;
+  }
+  return undefined;
 }
 
 function extractOutputText(payload: Record<string, unknown>): string {

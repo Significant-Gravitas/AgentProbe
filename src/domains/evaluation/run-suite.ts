@@ -312,13 +312,13 @@ function formatTranscriptForJudge(
 
   transcript.forEach((turn, index) => {
     const content = (turn.content ?? "").trim();
-    if (!content) {
-      return;
-    }
-    lines.push(`${displayTurnRole(turn.role)}: ${content}`);
     const toolCalls = toolCallsByTurn[index] ?? [];
-    if (toolCalls.length > 0) {
-      lines.push("Tool Calls:");
+    const role = turn.role.trim().toLowerCase();
+
+    if (role === "assistant" && toolCalls.length > 0) {
+      lines.push(
+        "Assistant Tool Calls (executed before the assistant's reply):",
+      );
       for (const toolCall of toolCalls) {
         lines.push(`- ${toolCall.name}: ${JSON.stringify(toolCall.args)}`);
         const output =
@@ -333,6 +333,11 @@ function formatTranscriptForJudge(
         }
       }
     }
+
+    if (!content) {
+      return;
+    }
+    lines.push(`${displayTurnRole(turn.role)}: ${content}`);
   });
 
   return lines.join("\n").trim();
@@ -1046,6 +1051,26 @@ export async function runSuite(options: {
       );
     };
 
+    const erroredScenarioResult = (
+      prepared: PreparedRun,
+      error: Error,
+    ): ScenarioRunResult => ({
+      scenarioId: prepared.displayId,
+      scenarioName: prepared.scenario.name,
+      personaId: prepared.persona.id,
+      rubricId: prepared.rubric.id,
+      userId: prepared.userId,
+      passed: false,
+      overallScore: 0,
+      transcript: [],
+      checkpoints: [],
+      judgeScore: {
+        dimensions: {},
+        overallNotes: `Scenario failed to execute: ${error.message}`,
+        passed: false,
+      },
+    });
+
     let results: ScenarioRunResult[] = [];
     const parallelEnabled =
       options.parallel || options.parallelLimit !== undefined;
@@ -1099,6 +1124,10 @@ export async function runSuite(options: {
           const failure =
             error instanceof Error ? error : new Error(String(error));
           failures.push(failure);
+          orderedResults[prepared.ordinal] = erroredScenarioResult(
+            prepared,
+            failure,
+          );
           options.progressCallback?.({
             kind: "scenario_error",
             runId,
@@ -1116,9 +1145,6 @@ export async function runSuite(options: {
       await Promise.all(
         Array.from({ length: concurrencyLimit }, () => runNextPrepared()),
       );
-      if (failures.length > 0) {
-        throw failures[0];
-      }
       results = orderedResults.filter(
         (item): item is ScenarioRunResult => item !== undefined,
       );
@@ -1148,6 +1174,7 @@ export async function runSuite(options: {
         } catch (error) {
           const failure =
             error instanceof Error ? error : new Error(String(error));
+          results.push(erroredScenarioResult(prepared, failure));
           options.progressCallback?.({
             kind: "scenario_error",
             runId,
@@ -1157,7 +1184,6 @@ export async function runSuite(options: {
             scenarioTotal: prepared.total,
             error: failure,
           });
-          throw failure;
         }
       }
     }

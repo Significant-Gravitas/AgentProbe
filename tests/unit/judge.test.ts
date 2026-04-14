@@ -80,11 +80,35 @@ describe("judge", () => {
     expect(call.text.format.schema.additionalProperties).toBe(false);
     expect(call.temperature).toBe(rubric.judge.temperature);
     expect(call.maxOutputTokens).toBe(rubric.judge.maxTokens);
-    expect(call.input).toBe(
-      "Response to evaluate:\n\nReset your password from settings.",
+    expect(call.instructions).toBe(
+      "You are an expert rubric judge. Evaluate only the provided response using the supplied evaluation context.",
     );
-    expect(call.instructions).toContain("accuracy");
-    expect(call.instructions).toContain('"additionalProperties": false');
+    expect(call.input).toEqual([
+      {
+        type: "message",
+        role: "user",
+        content: [
+          expect.objectContaining({
+            type: "input_text",
+            text: expect.stringContaining("# Rubric: Support Rubric"),
+          }),
+        ],
+      },
+      {
+        type: "message",
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: "Response to evaluate:\n\nReset your password from settings.",
+          },
+        ],
+      },
+    ]);
+    expect(call.promptCacheKey).toMatch(
+      /^agentprobe:judge:support:[0-9a-f]{16}$/,
+    );
+    expect(call.cacheControl).toEqual({ type: "ephemeral" });
   });
 
   test("rejects missing judge config, wrong provider, dimension mismatches, and empty rubrics", async () => {

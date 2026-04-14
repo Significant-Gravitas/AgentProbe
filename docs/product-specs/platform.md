@@ -40,6 +40,14 @@ scenario matches the requested filters
 scores, records the run selection metadata, and skips endpoint traffic and
 judge-model calls
 
+### Judge requests preserve cache-friendly prompt prefixes
+
+**Given** repeated evaluations that share the same rendered rubric context
+**When** AgentProbe sends judge-model requests
+**Then** the CLI keeps stable rubric instructions at the start of the request,
+pushes transcript-specific content to the tail, and enables supported provider
+prompt caching without changing the scoring contract
+
 ### Parallel mode overlaps scenario execution while preserving ordering
 
 **Given** valid endpoint, scenario, persona, and rubric YAML files with more

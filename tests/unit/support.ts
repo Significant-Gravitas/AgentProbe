@@ -307,6 +307,21 @@ export function asResponsesClient(client: FakeResponsesClient) {
   };
 }
 
+export function judgeInputText(
+  request: OpenAiResponsesRequest | undefined,
+): string {
+  if (!request) {
+    return "";
+  }
+  const { input } = request;
+  if (typeof input === "string") {
+    return input;
+  }
+  return input
+    .flatMap((message) => message.content.map((part) => part.text))
+    .join("\n");
+}
+
 export function asEndpoint(endpoint: Endpoints): Endpoints {
   return endpoint;
 }

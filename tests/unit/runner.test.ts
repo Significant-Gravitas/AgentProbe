@@ -22,6 +22,7 @@ import {
   FailingAdapter,
   FakeAdapter,
   FakeResponsesClient,
+  judgeInputText,
   makeTempDir,
   sendMessages,
 } from "./support.ts";
@@ -180,10 +181,10 @@ describe("runner", () => {
       },
     );
 
-    expect(client.calls.at(-1)?.input).toContain(
+    expect(judgeInputText(client.calls.at(-1))).toContain(
       '- lookup_order: {"order_id":"123"}',
     );
-    expect(client.calls.at(-1)?.input).toContain(
+    expect(judgeInputText(client.calls.at(-1))).toContain(
       'Output: {"status":"found","tracking_number":"ZX9"}',
     );
   });
@@ -241,7 +242,7 @@ describe("runner", () => {
       "I need to land before noon.",
       "What options are available?",
     ]);
-    expect(client.calls.at(-1)?.instructions).toContain(
+    expect(judgeInputText(client.calls.at(-1))).toContain(
       "User asked: Please change booking FLT-29481.",
     );
   });
@@ -277,10 +278,12 @@ describe("runner", () => {
     expect(sendMessages(adapter)).toEqual(["First turn"]);
     expect(result.passed).toBe(false);
     expect(result.overallScore).toBeCloseTo(0.4);
-    expect(client.calls.at(-1)?.input).toContain(
+    expect(judgeInputText(client.calls.at(-1))).toContain(
       "Scenario flight-rebooking exceeded max_turns=1.",
     );
-    expect(client.calls.at(-1)?.input).toContain("Assistant: First reply.");
+    expect(judgeInputText(client.calls.at(-1))).toContain(
+      "Assistant: First reply.",
+    );
   });
 
   test("runScenario handles multi-session resets", async () => {
@@ -1257,24 +1260,31 @@ describe("runner", () => {
 
     const events: RunProgressEvent[] = [];
 
-    await expect(
-      runSuite({
-        endpoint: endpointPath,
-        scenarios: scenariosPath,
-        personas: personasPath,
-        rubric: rubricPath,
-        client: asResponsesClient(new FakeResponsesClient([])) as never,
-        adapterFactory: (_endpoint: Endpoints) =>
-          new FailingAdapter("endpoint down"),
-        progressCallback: (event) => {
-          events.push(event);
-        },
-        parallel: true,
-      }),
-    ).rejects.toThrow("endpoint down");
+    const result = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      client: asResponsesClient(new FakeResponsesClient([])) as never,
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FailingAdapter("endpoint down"),
+      progressCallback: (event) => {
+        events.push(event);
+      },
+      parallel: true,
+    });
 
     expect(
       events.filter((event) => event.kind === "scenario_error"),
     ).toHaveLength(2);
+    expect(result.passed).toBe(false);
+    expect(result.exitCode).toBe(1);
+    expect(result.results).toHaveLength(2);
+    expect(result.results.every((item) => item.passed === false)).toBe(true);
+    expect(
+      result.results.every((item) =>
+        item.judgeScore?.overallNotes.includes("endpoint down"),
+      ),
+    ).toBe(true);
   });
 });

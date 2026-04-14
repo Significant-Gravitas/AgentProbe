@@ -8,6 +8,7 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | Evaluation run records ordered results and artifacts | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Scenario filters narrow execution to matching scenarios | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Dry-run mode records intent without contacting external systems | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
+| Judge requests preserve cache-friendly prompt prefixes | `tests/unit/judge.test.ts` | ✅ covered |
 | Parallel mode overlaps scenario execution while preserving ordering | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Multi-session memory scenarios preserve pinned identity and session controls | `tests/unit/runner.test.ts` + `tests/unit/scenario-parsing.test.ts` | ⏳ planned |
 | AutoGPT preset forges auth tokens internally | `tests/unit/autogpt-auth.test.ts` + `tests/unit/adapters.test.ts` | ⏳ expanding |

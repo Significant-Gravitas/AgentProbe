@@ -13,10 +13,7 @@ import {
   SqliteRunRecorder,
 } from "../../src/providers/persistence/sqlite-run-history.ts";
 import type { Endpoints } from "../../src/shared/types/contracts.ts";
-import {
-  AgentProbeConfigError,
-  AgentProbeRuntimeError,
-} from "../../src/shared/utils/errors.ts";
+import { AgentProbeConfigError } from "../../src/shared/utils/errors.ts";
 import {
   adapterReply,
   asResponsesClient,
@@ -422,25 +419,25 @@ describe("sqlite recorder", () => {
     const runtimeRoot = makeTempDir("db-runtime-error");
     const runtimePaths = writeSuiteFiles(runtimeRoot);
     const runtimeRecorder = new SqliteRunRecorder(dbUrlFor(runtimeRoot));
-    await expect(
-      runSuite({
-        ...runtimePaths,
-        client: asResponsesClient(
-          new FakeResponsesClient([buildScore()]),
-        ) as never,
-        recorder: runtimeRecorder,
-        adapterFactory: (_endpoint: Endpoints) =>
-          new FailingAdapter("endpoint down"),
-      }),
-    ).rejects.toThrow(AgentProbeRuntimeError);
+    const runtimeResult = await runSuite({
+      ...runtimePaths,
+      client: asResponsesClient(
+        new FakeResponsesClient([buildScore()]),
+      ) as never,
+      recorder: runtimeRecorder,
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FailingAdapter("endpoint down"),
+    });
+    expect(runtimeResult.passed).toBe(false);
+    expect(runtimeResult.exitCode).toBe(1);
 
     const runtimeRun = listRuns({ dbUrl: dbUrlFor(runtimeRoot) })[0];
     expect(runtimeRun).toBeDefined();
     if (!runtimeRun) {
       throw new Error("Expected a persisted runtime-error run.");
     }
-    expect(runtimeRun.status).toBe("runtime_error");
-    expect(runtimeRun.exitCode).toBe(3);
+    expect(runtimeRun.status).toBe("completed");
+    expect(runtimeRun.exitCode).toBe(1);
     expect(runtimeRun.aggregateCounts).toEqual({
       scenarioTotal: 1,
       scenarioPassedCount: 0,
