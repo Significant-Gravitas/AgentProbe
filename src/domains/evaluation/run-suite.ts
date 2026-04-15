@@ -937,10 +937,17 @@ export async function runSuite(options: {
         .filter(Boolean),
     );
 
+    const requestedIds = new Set(
+      (options.scenarioId ?? "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    );
+
     let selectedScenarios = [...scenarioCollection.scenarios];
-    if (options.scenarioId) {
+    if (requestedIds.size > 0) {
       selectedScenarios = selectedScenarios.filter(
-        (item) => item.id === options.scenarioId,
+        (item) => requestedIds.has(item.id) || requestedIds.has(item.name),
       );
     }
     if (requestedTags.size > 0) {
@@ -949,6 +956,14 @@ export async function runSuite(options: {
       );
     }
     if (selectedScenarios.length === 0) {
+      if (options.scenarioId) {
+        const available = scenarioCollection.scenarios.map(
+          (s) => `${s.id} (${s.name})`,
+        );
+        throw new AgentProbeConfigError(
+          `No scenario matching "${options.scenarioId}" found. Available: ${available.join(", ")}`,
+        );
+      }
       throw new AgentProbeConfigError(
         "No scenarios matched the requested filters.",
       );

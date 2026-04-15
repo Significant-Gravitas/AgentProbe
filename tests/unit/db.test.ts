@@ -414,7 +414,8 @@ describe("sqlite recorder", () => {
     expect(configRun.exitCode).toBe(2);
     expect(configRun.finalError).toEqual({
       type: "AgentProbeConfigError",
-      message: "No scenarios matched the requested filters.",
+      message:
+        'No scenario matching "missing-scenario" found. Available: smoke-scenario (Smoke)',
     });
 
     const runtimeRoot = makeTempDir("db-runtime-error");

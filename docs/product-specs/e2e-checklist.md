@@ -7,6 +7,7 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | YAML validation succeeds for well-formed data | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Evaluation run records ordered results and artifacts | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Scenario filters narrow execution to matching scenarios | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
+| List command shows available scenarios | `tests/e2e/cli.e2e.test.ts` | ⏳ planned |
 | Dry-run mode records intent without contacting external systems | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Judge requests preserve cache-friendly prompt prefixes | `tests/unit/judge.test.ts` | ✅ covered |
 | Parallel mode overlaps scenario execution while preserving ordering | `tests/e2e/cli.e2e.test.ts` | ✅ covered |

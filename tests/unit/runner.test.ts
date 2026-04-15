@@ -658,6 +658,310 @@ describe("runner", () => {
     expect(result.passed).toBe(true);
   });
 
+  test("runSuite filters by scenarioId and reports available ids on mismatch", async () => {
+    const root = makeTempDir("run-suite-scenario-id");
+    mkdirSync(root, { recursive: true });
+    const endpointPath = join(root, "endpoint.yaml");
+    const personasPath = join(root, "personas.yaml");
+    const rubricPath = join(root, "rubric.yaml");
+    const scenariosPath = join(root, "scenarios.yaml");
+
+    writeFileSync(
+      endpointPath,
+      [
+        "transport: http",
+        "connection:",
+        "  base_url: http://example.test",
+        "request:",
+        "  method: POST",
+        '  url: "{{ base_url }}/chat"',
+        "response:",
+        "  format: text",
+        '  content_path: "$"',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      personasPath,
+      [
+        "personas:",
+        "  - id: business-traveler",
+        "    name: Business Traveler",
+        "    demographics:",
+        "      role: business customer",
+        "      tech_literacy: high",
+        "      domain_expertise: intermediate",
+        "      language_style: terse",
+        "    personality:",
+        "      patience: 2",
+        "      assertiveness: 4",
+        "      detail_orientation: 5",
+        "      cooperativeness: 4",
+        "      emotional_intensity: 2",
+        "    behavior:",
+        "      opening_style: Be direct.",
+        "      follow_up_style: Answer follow-up questions directly.",
+        "      escalation_triggers: []",
+        "      topic_drift: none",
+        "      clarification_compliance: high",
+        "    system_prompt: You are a direct business traveler.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      rubricPath,
+      [
+        "judge:",
+        "  provider: openai",
+        "  model: anthropic/claude-opus-4.6",
+        "  temperature: 0.0",
+        "  max_tokens: 500",
+        "rubrics:",
+        "  - id: customer-support",
+        "    name: Customer Support",
+        "    pass_threshold: 0.7",
+        "    meta_prompt: Judge behavior.",
+        "    dimensions:",
+        "      - id: task_completion",
+        "        name: Task Completion",
+        "        weight: 1.0",
+        "        scale:",
+        "          type: likert",
+        "          points: 5",
+        "          labels:",
+        "            1: bad",
+        "            5: good",
+        "        judge_prompt: Check task completion.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      scenariosPath,
+      [
+        "scenarios:",
+        "  - id: scenario-a",
+        "    name: Scenario A",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        "        content: Hello A",
+        "        use_exact_message: true",
+        "    expectations:",
+        "      expected_behavior: Help.",
+        "      expected_outcome: resolved",
+        "  - id: scenario-b",
+        "    name: Scenario B",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        "        content: Hello B",
+        "        use_exact_message: true",
+        "    expectations:",
+        "      expected_behavior: Help.",
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const matchedClient = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+    const matched = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      scenarioId: "scenario-b",
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FakeAdapter([adapterReply("Handled.")]),
+      client: asResponsesClient(matchedClient) as never,
+    });
+
+    expect(matched.exitCode).toBe(0);
+    expect(matched.results.map((item) => item.scenarioId)).toEqual([
+      "scenario-b",
+    ]);
+
+    try {
+      await runSuite({
+        endpoint: endpointPath,
+        scenarios: scenariosPath,
+        personas: personasPath,
+        rubric: rubricPath,
+        scenarioId: "nonexistent",
+        adapterFactory: (_endpoint: Endpoints) =>
+          new FakeAdapter([adapterReply("Handled.")]),
+        client: asResponsesClient(new FakeResponsesClient([])) as never,
+      });
+      expect.unreachable("Should have thrown for unknown scenario id");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toContain("nonexistent");
+      expect(message).toContain("scenario-a");
+      expect(message).toContain("scenario-b");
+    }
+  });
+
+  test("runSuite filters by scenario name when scenarioId matches name but not id", async () => {
+    const root = makeTempDir("run-suite-scenario-name");
+    mkdirSync(root, { recursive: true });
+    const endpointPath = join(root, "endpoint.yaml");
+    const personasPath = join(root, "personas.yaml");
+    const rubricPath = join(root, "rubric.yaml");
+    const scenariosPath = join(root, "scenarios.yaml");
+
+    writeFileSync(
+      endpointPath,
+      [
+        "transport: http",
+        "connection:",
+        "  base_url: http://example.test",
+        "request:",
+        "  method: POST",
+        '  url: "{{ base_url }}/chat"',
+        "response:",
+        "  format: text",
+        '  content_path: "$"',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      personasPath,
+      [
+        "personas:",
+        "  - id: business-traveler",
+        "    name: Business Traveler",
+        "    demographics:",
+        "      role: business customer",
+        "      tech_literacy: high",
+        "      domain_expertise: intermediate",
+        "      language_style: terse",
+        "    personality:",
+        "      patience: 2",
+        "      assertiveness: 4",
+        "      detail_orientation: 5",
+        "      cooperativeness: 4",
+        "      emotional_intensity: 2",
+        "    behavior:",
+        "      opening_style: Be direct.",
+        "      follow_up_style: Answer follow-up questions directly.",
+        "      escalation_triggers: []",
+        "      topic_drift: none",
+        "      clarification_compliance: high",
+        "    system_prompt: You are a direct business traveler.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      rubricPath,
+      [
+        "judge:",
+        "  provider: openai",
+        "  model: anthropic/claude-opus-4.6",
+        "  temperature: 0.0",
+        "  max_tokens: 500",
+        "rubrics:",
+        "  - id: customer-support",
+        "    name: Customer Support",
+        "    pass_threshold: 0.7",
+        "    meta_prompt: Judge behavior.",
+        "    dimensions:",
+        "      - id: task_completion",
+        "        name: Task Completion",
+        "        weight: 1.0",
+        "        scale:",
+        "          type: likert",
+        "          points: 5",
+        "          labels:",
+        "            1: bad",
+        "            5: good",
+        "        judge_prompt: Check task completion.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      scenariosPath,
+      [
+        "scenarios:",
+        "  - id: smoke-a",
+        "    name: Smoke Alpha",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        "        content: Hello A",
+        "        use_exact_message: true",
+        "    expectations:",
+        "      expected_behavior: Help.",
+        "      expected_outcome: resolved",
+        "  - id: smoke-b",
+        "    name: Smoke Beta",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        "        content: Hello B",
+        "        use_exact_message: true",
+        "    expectations:",
+        "      expected_behavior: Help.",
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const nameMatchClient = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+    const result = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      scenarioId: "Smoke Beta",
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FakeAdapter([adapterReply("Handled.")]),
+      client: asResponsesClient(nameMatchClient) as never,
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.results.map((item) => item.scenarioId)).toEqual(["smoke-b"]);
+
+    const multiMatchClient = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore(),
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+    const multiResult = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      scenarioId: "smoke-a,Smoke Beta",
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FakeAdapter([adapterReply("Handled.")]),
+      client: asResponsesClient(multiMatchClient) as never,
+    });
+
+    expect(multiResult.exitCode).toBe(0);
+    expect(multiResult.results.map((item) => item.scenarioId)).toEqual([
+      "smoke-a",
+      "smoke-b",
+    ]);
+  });
+
   test("runSuite filters tags, merges directories, emits progress, and preserves parallel order", async () => {
     const root = makeTempDir("run-suite");
     mkdirSync(root, { recursive: true });

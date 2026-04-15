@@ -237,8 +237,20 @@ function selectDashboardScenarios(options: {
       .map((item) => item.trim())
       .filter(Boolean),
   );
+  const requestedScenarioIds = options.scenarioId
+    ? new Set(
+        options.scenarioId
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      )
+    : undefined;
   const selectedScenarios = scenarioCollection.scenarios.filter((scenario) => {
-    if (options.scenarioId && scenario.id !== options.scenarioId) {
+    if (
+      requestedScenarioIds &&
+      !requestedScenarioIds.has(scenario.id) &&
+      !requestedScenarioIds.has(scenario.name)
+    ) {
       return false;
     }
     if (
@@ -310,6 +322,9 @@ async function handleRun(args: string[]): Promise<number> {
     );
   }
 
+  const scenarioId =
+    parseOption(args, "--scenario") ?? parseOption(args, "--scenario-id");
+
   const client = new OpenAiResponsesClient();
   client.assertConfigured();
   const recorder = new SqliteRunRecorder(
@@ -331,7 +346,7 @@ async function handleRun(args: string[]): Promise<number> {
       dashboard.state.primeScenarios(
         selectDashboardScenarios({
           scenariosPath: scenarios,
-          scenarioId: parseOption(args, "--scenario-id"),
+          scenarioId,
           tags: parseOption(args, "--tags"),
           repeat,
         }),
@@ -345,7 +360,7 @@ async function handleRun(args: string[]): Promise<number> {
       scenarios,
       personas,
       rubric,
-      scenarioId: parseOption(args, "--scenario-id"),
+      scenarioId,
       tags: parseOption(args, "--tags"),
       client,
       recorder,
@@ -363,6 +378,45 @@ async function handleRun(args: string[]): Promise<number> {
   } finally {
     dashboard?.stop();
   }
+}
+
+async function handleList(
+  args: string[],
+  globalDataPath?: string,
+): Promise<number> {
+  const scenariosPath =
+    parseOption(args, "--scenarios") ?? globalDataPath ?? "data";
+  const tags = parseOption(args, "--tags");
+  const scenarioCollection = parseScenariosInput(scenariosPath);
+
+  const requestedTags = new Set(
+    (tags ?? "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
+
+  const selectedScenarios = scenarioCollection.scenarios.filter((scenario) => {
+    if (
+      requestedTags.size > 0 &&
+      !scenario.tags.some((tag) => requestedTags.has(tag))
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  if (selectedScenarios.length === 0) {
+    console.error("No scenarios found.");
+    return 1;
+  }
+
+  for (const scenario of selectedScenarios) {
+    const tagSuffix =
+      scenario.tags.length > 0 ? ` [${scenario.tags.join(", ")}]` : "";
+    console.log(`${scenario.id}: ${scenario.name}${tagSuffix}`);
+  }
+  return 0;
 }
 
 async function handleReport(
@@ -448,6 +502,9 @@ export async function executeCli(argv: string[]): Promise<number> {
   try {
     if (command === "validate") {
       return await handleValidate(rest, globalDataPath);
+    }
+    if (command === "list") {
+      return await handleList(rest, globalDataPath);
     }
     if (command === "run") {
       return await handleRun(rest);
