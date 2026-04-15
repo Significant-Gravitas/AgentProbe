@@ -1074,10 +1074,13 @@ function mergeScenarioDefaults(
         continue;
       }
       if (merged[key] !== undefined && merged[key] !== value) {
-        const existingSource = sources.get(key) ?? "unknown";
-        throw new AgentProbeConfigError(
-          `Conflicting scenario defaults for \`${key}\` between ${existingSource} and ${sourcePath}.`,
-        );
+        // Different files define different defaults — drop the key from
+        // the merged result.  Each file's own defaults were already
+        // applied to its scenarios during parsing, so the per-scenario
+        // values are correct regardless.
+        delete (merged as Record<string, unknown>)[key];
+        sources.delete(key);
+        continue;
       }
       (merged as Record<string, string | number>)[key] = value;
       sources.set(key, sourcePath);
