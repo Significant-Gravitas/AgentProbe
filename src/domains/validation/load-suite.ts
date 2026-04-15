@@ -215,6 +215,9 @@ export function iterYamlFiles(dataPath: string): string[] {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const entryPath = join(directory, entry.name);
       if (entry.isDirectory()) {
+        if (entry.name === "fixtures" || entry.name.startsWith(".")) {
+          continue;
+        }
         walk(entryPath);
         continue;
       }
