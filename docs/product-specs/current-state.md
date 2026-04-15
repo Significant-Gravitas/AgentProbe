@@ -7,6 +7,7 @@ Last validated against `platform.md`: 2026-04-13
 - [x] YAML validation succeeds for well-formed data
 - [x] Evaluation run records ordered results and artifacts
 - [x] Scenario filters narrow execution to matching scenarios
+- [x] List command shows available scenarios
 - [x] Dry-run mode records intent without contacting external systems
 - [x] Judge requests preserve cache-friendly prompt prefixes
 - [x] Parallel mode overlaps scenario execution while preserving ordering

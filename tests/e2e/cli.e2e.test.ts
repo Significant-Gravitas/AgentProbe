@@ -754,6 +754,37 @@ describe("bun e2e baseline for the typescript cli", () => {
     expect(await readOpenAiLog(workspace.openAiLogPath)).toHaveLength(0);
   });
 
+  test("no-match scenario-id returns a configuration error with available ids", async () => {
+    await workspace.writeOpenAiScript({ rules: [] });
+
+    const result = await runAgentprobe(
+      [
+        "run",
+        "--endpoint",
+        workspace.endpointPath,
+        "--scenarios",
+        workspace.scenariosPath,
+        "--personas",
+        workspace.personasPath,
+        "--rubric",
+        workspace.rubricPath,
+        "--scenario-id",
+        "does-not-exist",
+      ],
+      {
+        backendUrl: backend.url,
+        suiteDir: workspace.suiteDir,
+        workspace,
+      },
+    );
+
+    expect(result.exitCode).toBe(2);
+    expect(result.stderr).toContain("does-not-exist");
+    expect(result.stderr).toContain("refund-smoke");
+    expect(result.stderr).toContain("billing-followup");
+    expect(backend.requestLog).toHaveLength(0);
+  });
+
   test("dry-run avoids backend and openai calls while still recording the run", async () => {
     await workspace.writeOpenAiScript({ rules: [] });
 

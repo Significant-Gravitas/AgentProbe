@@ -27,10 +27,20 @@ humans can use to inspect pass/fail outcomes
 
 **Given** valid endpoint, scenario, persona, and rubric YAML files that define
 multiple scenarios and tags
-**When** the user runs an evaluation suite with `--scenario-id` or `--tags`
+**When** the user runs an evaluation suite with `--scenario` (or `--scenario-id`)
+or `--tags`
 **Then** the CLI runs only the matching scenarios, records the selected
 scenario IDs in run history, and fails fast before any endpoint traffic when no
-scenario matches the requested filters
+scenario matches the requested filters. The `--scenario` flag accepts one or
+more comma-separated values that match by scenario ID or scenario name. When no
+match is found, the error message lists all available scenario IDs and names.
+
+### List command shows available scenarios
+
+**Given** a scenario file or directory containing scenario YAML files
+**When** the user runs the `list` command with `--scenarios`
+**Then** the CLI prints each scenario's ID, name, and tags, and returns a
+non-zero exit code when no scenarios match the optional `--tags` filter
 
 ### Dry-run mode records intent without contacting external systems
 
