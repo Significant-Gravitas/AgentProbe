@@ -1,0 +1,13 @@
+ProjectID,ProjectName,Client,BudgetCategory,ExpectedExpensePatterns,ApprovalThreshold
+PRJ-2024-001,Neon-Rebrand,Lumina Tech,Creative Services,Adobe subscriptions; Stock photography; Color proofs,2500.00
+PRJ-2024-002,Spring-Campaign,Veloce Footwear,Marketing,Travel to shoot; Model catering; Equipment rental,5000.00
+PRJ-2024-003,Web-Overhaul,Delta Banking,Development,Software licenses; AWS hosting; API credits,1500.00
+PRJ-2024-004,Social-Strategy,Aura Skincare,Content Creation,Prop styling; Influencer lunches; Ring lights,800.00
+PRJ-2024-005,Documentary-Edit,Green-Earth NGO,Production,Hard drives; Courier services; Sound mixing fees,3000.00
+PRJ-2024-006,Annual-Report,Global Logistics,Print Production,High-end paper stock; Binding; Local courier,1200.00
+PRJ-2024-007,Brand-Activation,Summit Spirits,Events,Event permits; Venue catering; Promotional signage,7500.00
+PRJ-2024-008,UX-Research,Zenith Health,Research,User incentives; Transcription services; Focus group snacks,2000.00
+PRJ-2024-009,Podcast-Launch,Vox Media,Audio Production,Studio time; Music licensing; Microphone hardware,1800.00
+PRJ-2024-010,Holiday-Catalog,Orion Retail,Photography,Set design; Wardrobe; Catering; Travel,4500.00
+PRJ-2024-011,Internal-Ops,Agency-General,Overhead,Office supplies; Software; Team building; Coffee,500.00
+PRJ-2024-012,Pitch-Deck-Gen,New Business,Business Development,Printing; Uber/Lyft to pitches; Client dinners,1000.00

@@ -13,6 +13,7 @@ import type {
 } from "../../shared/types/contracts.ts";
 import {
   AgentProbeConfigError,
+  AgentProbeHarnessError,
   AgentProbeRuntimeError,
 } from "../../shared/utils/errors.ts";
 import {
@@ -519,21 +520,39 @@ export class HttpEndpointAdapter {
     }
     const baseUrl = connection.baseUrl.replace(/\/$/, "");
     const authHeaders = await this.resolveAuthHeaders();
-    const fileBytes = await readFile(filePath);
+    let fileBytes: Buffer;
+    try {
+      fileBytes = await readFile(filePath);
+    } catch (error) {
+      throw new AgentProbeHarnessError(
+        `File upload failed for ${fileName}: cannot read ${filePath} (${error instanceof Error ? error.message : String(error)}).`,
+      );
+    }
     const blob = new Blob([fileBytes]);
     const form = new FormData();
     form.append("file", blob, fileName);
-    const response = await this.fetchImpl(
-      `${baseUrl}/api/workspace/files/upload?overwrite=true`,
-      {
-        method: "POST",
-        headers: authHeaders,
-        body: form,
-      },
-    );
+    let response: Response;
+    try {
+      response = await this.fetchImpl(
+        `${baseUrl}/api/workspace/files/upload?overwrite=true`,
+        {
+          method: "POST",
+          headers: authHeaders,
+          body: form,
+        },
+      );
+    } catch (error) {
+      throw new AgentProbeHarnessError(
+        `File upload failed for ${fileName}: transport error (${error instanceof Error ? error.message : String(error)}).`,
+      );
+    }
     if (!response.ok) {
-      throw new AgentProbeRuntimeError(
-        `File upload failed (${response.status}) for ${fileName}.`,
+      let detail = "";
+      try {
+        detail = (await response.text()).slice(0, 400);
+      } catch {}
+      throw new AgentProbeHarnessError(
+        `File upload rejected for ${fileName}: ${response.status} ${response.statusText}${detail ? ` — ${detail}` : ""}.`,
       );
     }
     const body = (await response.json()) as Record<string, unknown>;

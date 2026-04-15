@@ -1,0 +1,4 @@
+test_id,date_range,price_point,billing_model,total_traffic,conversion_rate,revenue,notes
+PT-001,2023-09-01 to 2023-09-30,149.00,One-time,4100,1.1%,$6705,Lowered price from $199. Higher volume but lower margin and quality of student decreased.
+PT-002,2023-11-15 to 2023-12-15,349.00,One-time,3850,0.6%,$8027,Premium positioning test. Conversion rate dropped significantly; high abandonment at checkout.
+PT-003,2024-02-01 to 2024-02-28,249.00,2-Pay ($135x2),4220,0.95%,$9960,Tested payment plan to reduce friction. Slight lift in conversion but 12% default rate on second payment.

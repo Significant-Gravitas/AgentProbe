@@ -27,6 +27,7 @@ import type {
 } from "../../shared/types/contracts.ts";
 import {
   AgentProbeConfigError,
+  AgentProbeHarnessError,
   AgentProbeRuntimeError,
 } from "../../shared/utils/errors.ts";
 import { logDebug, logInfo, logWarn } from "../../shared/utils/logging.ts";
@@ -436,6 +437,7 @@ export async function runScenario(
   const toolCallsByTurn: Record<number, ToolCallRecord[]> = {};
   const renderedTurns: Array<Record<string, unknown>> = [];
   let termination: ScenarioTermination | undefined;
+  let harnessError: AgentProbeHarnessError | undefined;
   let lastMessage: ConversationTurn | undefined;
   let lastReply: AdapterReply | undefined;
   let sessionState: Record<string, unknown> = {};
@@ -810,6 +812,9 @@ export async function runScenario(
         message: error.message,
         maxTurns,
       };
+    } else if (error instanceof AgentProbeHarnessError) {
+      harnessError = error;
+      logWarn(`Harness failure in ${scenario.id}: ${error.message}`);
     } else {
       if (scenarioRunId !== undefined) {
         options.recorder?.recordScenarioError?.(
@@ -829,6 +834,35 @@ export async function runScenario(
         lastReply,
       }),
     );
+  }
+
+  if (harnessError) {
+    const harnessResult: ScenarioRunResult = {
+      scenarioId: scenario.id,
+      scenarioName: scenario.name,
+      personaId: persona.id,
+      rubricId: rubric.id,
+      userId: options.userId,
+      passed: false,
+      failureKind: "harness",
+      overallScore: 0,
+      transcript: fullTranscript,
+      checkpoints,
+      toolCallsByTurn,
+      judgeScore: {
+        dimensions: {},
+        overallNotes: `Harness failure: ${harnessError.message}`,
+        passed: false,
+        failureKind: "harness",
+      },
+      renderedTurns,
+    };
+    if (scenarioRunId !== undefined) {
+      options.recorder?.recordScenarioFinished?.(scenarioRunId, {
+        result: harnessResult,
+      });
+    }
+    return harnessResult;
   }
 
   const rubricContext = buildRunContext({
@@ -1070,22 +1104,29 @@ export async function runSuite(options: {
     const erroredScenarioResult = (
       prepared: PreparedRun,
       error: Error,
-    ): ScenarioRunResult => ({
-      scenarioId: prepared.displayId,
-      scenarioName: prepared.scenario.name,
-      personaId: prepared.persona.id,
-      rubricId: prepared.rubric.id,
-      userId: prepared.userId,
-      passed: false,
-      overallScore: 0,
-      transcript: [],
-      checkpoints: [],
-      judgeScore: {
-        dimensions: {},
-        overallNotes: `Scenario failed to execute: ${error.message}`,
+    ): ScenarioRunResult => {
+      const isHarness = error instanceof AgentProbeHarnessError;
+      return {
+        scenarioId: prepared.displayId,
+        scenarioName: prepared.scenario.name,
+        personaId: prepared.persona.id,
+        rubricId: prepared.rubric.id,
+        userId: prepared.userId,
         passed: false,
-      },
-    });
+        failureKind: isHarness ? "harness" : undefined,
+        overallScore: 0,
+        transcript: [],
+        checkpoints: [],
+        judgeScore: {
+          dimensions: {},
+          overallNotes: isHarness
+            ? `Harness failure: ${error.message}`
+            : `Scenario failed to execute: ${error.message}`,
+          passed: false,
+          failureKind: isHarness ? "harness" : undefined,
+        },
+      };
+    };
 
     let results: ScenarioRunResult[] = [];
     const parallelEnabled =

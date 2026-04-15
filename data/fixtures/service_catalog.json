@@ -1,0 +1,100 @@
+{
+  "services": [
+    {
+      "id": "SRV-001",
+      "name": "Standard Document Translation",
+      "category": "Core",
+      "description": "General business documents, internal memos, and non-technical correspondence.",
+      "adoption_rate": 0.98,
+      "base_pricing": "0.18 per word"
+    },
+    {
+      "id": "SRV-002",
+      "name": "Legal & Contractual Localization",
+      "category": "Core",
+      "description": "Certified translation of MSAs, NDAs, and employment contracts by legal subject matter experts.",
+      "adoption_rate": 0.85,
+      "base_pricing": "0.28 per word"
+    },
+    {
+      "id": "SRV-003",
+      "name": "Website & CMS Integration",
+      "category": "Digital",
+      "description": "Direct API-based translation workflows for WordPress, Contentful, and Adobe Experience Manager.",
+      "adoption_rate": 0.42,
+      "base_pricing": "1,500.00 setup + 0.22 per word"
+    },
+    {
+      "id": "SRV-004",
+      "name": "Technical Manual Translation",
+      "category": "Core",
+      "description": "High-precision translation for engineering specs, safety manuals, and industrial documentation.",
+      "adoption_rate": 0.76,
+      "base_pricing": "0.24 per word"
+    },
+    {
+      "id": "SRV-005",
+      "name": "Machine Translation Post-Editing (MTPE)",
+      "category": "Efficiency",
+      "description": "AI-driven draft generation followed by human expert review for high-volume, low-risk content.",
+      "adoption_rate": 0.22,
+      "base_pricing": "0.09 per word"
+    },
+    {
+      "id": "SRV-006",
+      "name": "Multilingual E-Discovery",
+      "category": "Legal",
+      "description": "Large-scale document screening and keyword tagging for international litigation and audits.",
+      "adoption_rate": 0.15,
+      "base_pricing": "450.00 per GB"
+    },
+    {
+      "id": "SRV-007",
+      "name": "Software & App Internationalization",
+      "category": "Digital",
+      "description": "UI/UX string extraction, character limit management, and right-to-left layout adjustments.",
+      "adoption_rate": 0.18,
+      "base_pricing": "3,000.00 per project phase"
+    },
+    {
+      "id": "SRV-008",
+      "name": "Real-time Remote Interpreting (VRI)",
+      "category": "Events",
+      "description": "On-demand video or audio interpretation for board meetings and client consultations.",
+      "adoption_rate": 0.12,
+      "base_pricing": "180.00 per hour"
+    },
+    {
+      "id": "SRV-009",
+      "name": "Multilingual SEO & Keyword Research",
+      "category": "Marketing",
+      "description": "Optimization of metadata and search terms for regional search engines (Baidu, Google JP, etc.).",
+      "adoption_rate": 0.28,
+      "base_pricing": "1,200.00 per market/language"
+    },
+    {
+      "id": "SRV-010",
+      "name": "Multimedia Subtitling & Dubbing",
+      "category": "Marketing",
+      "description": "Transcription, time-coded subtitling, and professional voice-over for corporate training and ads.",
+      "adoption_rate": 0.14,
+      "base_pricing": "45.00 per minute of video"
+    },
+    {
+      "id": "SRV-011",
+      "name": "Transcreation & Creative Copywriting",
+      "category": "Marketing",
+      "description": "Re-imagining brand slogans and marketing campaigns to resonate with specific cultural nuances.",
+      "adoption_rate": 0.31,
+      "base_pricing": "250.00 per hour"
+    },
+    {
+      "id": "SRV-012",
+      "name": "24/7 Dedicated Account Desk",
+      "category": "Support",
+      "description": "White-glove service with guaranteed 2-hour turnaround for urgent requests and a dedicated PM.",
+      "adoption_rate": 0.08,
+      "base_pricing": "2,500.00 monthly retainer"
+    }
+  ]
+}

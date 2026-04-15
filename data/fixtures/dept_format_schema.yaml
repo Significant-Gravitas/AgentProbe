@@ -1,0 +1,189 @@
+title: "CS 4501: Network Security (8-week Accelerated)"
+outcomes_mapped:
+  - id: LO-SEC-01
+    description: "Analyze and implement cryptographic protocols for secure communication."
+  - id: LO-SEC-02
+    description: "Evaluate network perimeter defense mechanisms including firewalls and IDS."
+  - id: LO-SEC-03
+    description: "Identify and mitigate common network-layer attacks (MITM, DoS, Spoofing)."
+  - id: LO-SEC-04
+    description: "Demonstrate proficiency in packet analysis and traffic forensics."
+  - id: LO-SEC-05
+    description: "Apply principles of least privilege and zero-trust architecture in network design."
+  - id: LO-SEC-06
+    description: "Assess wireless and mobile network security vulnerabilities."
+  - id: LO-SEC-07
+    description: "Implement secure remote access solutions (VPNs, SSH)."
+  - id: LO-SEC-08
+    description: "Design and verify application-layer security (TLS/HTTPS)."
+  - id: LO-SEC-09
+    description: "Execute structured vulnerability scanning and penetration testing workflows."
+  - id: LO-SEC-10
+    description: "Understand legal and ethical frameworks for network monitoring."
+  - id: LO-SEC-11
+    description: "Configure and secure routing protocols (BGPsec, OSPF Auth)."
+  - id: LO-SEC-12
+    description: "Develop incident response plans for network-based breaches."
+
+week_plan:
+  - week: 1
+    topic: "Foundations & Packet Analysis"
+    outcomes: ["LO-SEC-04", "LO-SEC-10"]
+    justification: "Establishes baseline visibility and ethical constraints before active exploitation modules, aligning with ACM CyberEd Data Security knowledge area."
+  - week: 2
+    topic: "Network Layer Attacks & Defense"
+    outcomes: ["LO-SEC-03", "LO-SEC-05"]
+    justification: "Focuses on L2/L3 vulnerabilities; maps to ACM Component 3: Connection Security."
+  - week: 3
+    topic: "Applied Cryptography & PKI"
+    outcomes: ["LO-SEC-01", "LO-SEC-08"]
+    justification: "Transitions from cleartext to encrypted traffic; addresses IEEE outcomes for Cryptographic primitives in network protocols."
+  - week: 4
+    topic: "Perimeter Defense & Firewalls"
+    outcomes: ["LO-SEC-02", "LO-SEC-09"]
+    justification: "Covers stateful inspection and NIDS; maps to ACM System Security and defensive operations."
+  - week: 5
+    topic: "Transport Layer Security (TLS)"
+    outcomes: ["LO-SEC-01", "LO-SEC-07"]
+    justification: "Deep dive into handshake protocols and secure tunneling; required for IEEE 'Secure Communications' competency."
+  - week: 6
+    topic: "Wireless & IoT Security"
+    outcomes: ["LO-SEC-06", "LO-SEC-03"]
+    justification: "Explores 802.11i and WPA3; addresses emerging threats in mobile environments per ACM recommendations."
+  - week: 7
+    topic: "Enterprise Architecture & Zero Trust"
+    outcomes: ["LO-SEC-05", "LO-SEC-11"]
+    justification: "Synthesis of segmentation and secure routing; aligns with modern industry shift toward ZTA."
+  - week: 8
+    topic: "Incident Response & Forensics"
+    outcomes: ["LO-SEC-12", "LO-SEC-04"]
+    justification: "Capstone week focusing on post-compromise recovery and evidence preservation."
+
+readings_by_week:
+  - week: 1
+    resources: ["RES-001", "RES-042"]
+    cost_per_student: 0.00
+  - week: 2
+    resources: ["RES-112"]
+    cost_per_student: 12.50
+  - week: 3
+    resources: ["RES-088", "RES-009"]
+    cost_per_student: 0.00
+  - week: 4
+    resources: ["RES-201"]
+    cost_per_student: 15.00
+  - week: 5
+    resources: ["RES-015"]
+    cost_per_student: 0.00
+  - week: 6
+    resources: ["RES-310"]
+    cost_per_student: 10.00
+  - week: 7
+    resources: ["RES-055"]
+    cost_per_student: 0.00
+  - week: 8
+    resources: ["RES-480"]
+    cost_per_student: 5.00
+  - total_cost: 42.50
+
+labs:
+  - id: LAB-01
+    title: "Wireshark Traffic Analysis"
+    prerequisites: ["None"]
+    automated_test_cases:
+      - "test_pcap_contains_http_get"
+      - "test_identify_telnet_creds"
+      - "test_filter_icmp_unreachable"
+      - "test_extract_ftp_payload"
+      - "test_calculate_tcp_latency"
+  - id: LAB-02
+    title: "ARP Spoofing & MITM"
+    prerequisites: ["LAB-01"]
+    automated_test_cases:
+      - "test_arp_cache_poisoned"
+      - "test_ip_forwarding_enabled"
+      - "test_packet_interception_verified"
+      - "test_dns_record_spoof"
+      - "test_sslstrip_execution"
+  - id: LAB-03
+    title: "OpenSSL & Certificate Chains"
+    prerequisites: ["None"]
+    automated_test_cases:
+      - "test_rsa_key_generation"
+      - "test_csr_signature_valid"
+      - "test_ca_root_trust_store"
+      - "test_cert_chain_validation"
+      - "test_crl_revocation_check"
+  - id: LAB-04
+    title: "Iptables & Snort Configuration"
+    prerequisites: ["LAB-02"]
+    automated_test_cases:
+      - "test_block_inbound_port_22"
+      - "test_rate_limit_icmp"
+      - "test_snort_alert_on_nmap"
+      - "test_nat_rule_persistence"
+      - "test_log_dropped_packets"
+  - id: LAB-05
+    title: "TLS Handshake Analysis"
+    prerequisites: ["LAB-03"]
+    automated_test_cases:
+      - "test_extract_server_hello"
+      - "test_verify_cipher_suite"
+      - "test_analyze_diffie_hellman"
+      - "test_sni_field_detection"
+      - "test_tls_1_3_downgrade_prevention"
+  - id: LAB-06
+    title: "WPA2-PSK Cracking (Aircrack-ng)"
+    prerequisites: ["LAB-01"]
+    automated_test_cases:
+      - "test_capture_4way_handshake"
+      - "test_monitor_mode_enabled"
+      - "test_deauth_attack_success"
+      - "test_wordlist_hit_verification"
+      - "test_bssid_filtering"
+  - id: LAB-07
+    title: "BGP Prefix Hijacking Simulation"
+    prerequisites: ["None"]
+    automated_test_cases:
+      - "test_bgp_neighbor_established"
+      - "test_as_path_prepending"
+      - "test_detect_rogue_prefix"
+      - "test_rpki_valid_filtering"
+      - "test_route_map_application"
+  - id: LAB-08
+    title: "Network Forensics & Log Correlation"
+    prerequisites: ["LAB-01", "LAB-04"]
+    automated_test_cases:
+      - "test_correlate_syslog_pcap"
+      - "test_reconstruct_exfiltrated_file"
+      - "test_identify_c2_beacon_pattern"
+      - "test_timeline_generation"
+      - "test_hash_integrity_verification"
+
+assessments:
+  - type: "Bi-Weekly Quizzes"
+    weight: 20
+    rubric:
+      - target: "LO-SEC-01, LO-SEC-03, LO-SEC-06, LO-SEC-11"
+        criteria: "Conceptual accuracy in cryptographic theory and protocol mechanics."
+  - type: "Lab Completions"
+    weight: 40
+    rubric:
+      - target: "LO-SEC-02, LO-SEC-04, LO-SEC-07, LO-SEC-09"
+        criteria: "Passing 5/5 automated test cases per lab."
+  - type: "Midterm Project: Secure Network Design"
+    weight: 15
+    rubric:
+      - target: "LO-SEC-05, LO-SEC-08"
+        criteria: "Implementation of Zero Trust principles and TLS load balancing."
+  - type: "Final Exam"
+    weight: 25
+    rubric:
+      - target: "LO-SEC-10, LO-SEC-12, All previous"
+        criteria: "Comprehensive synthesis of defensive strategy and ethical incident response."
+
+grading_weights:
+  quizzes: 20
+  labs: 40
+  midterm_project: 15
+  final_exam: 25

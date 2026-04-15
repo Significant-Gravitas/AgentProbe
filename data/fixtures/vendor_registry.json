@@ -1,0 +1,98 @@
+[
+  {
+    "vendor_id": "V-001",
+    "vendor_name": "BuildRight Lumber Co.",
+    "tax_id": "81-0922314",
+    "remit_address": "452 Industrial Way, Portland, OR 97201",
+    "preferred_terms": "Net 30",
+    "primary_category": "Materials"
+  },
+  {
+    "vendor_id": "V-002",
+    "vendor_name": "Steel Core Reinforcements",
+    "tax_id": "94-2281773",
+    "remit_address": "PO Box 8821, Chicago, IL 60609",
+    "preferred_terms": "Net 15",
+    "primary_category": "Structural"
+  },
+  {
+    "vendor_id": "V-003",
+    "vendor_name": "City Wide Electrical Services",
+    "tax_id": "27-1100492",
+    "remit_address": "1200 Spark Blvd, Austin, TX 78701",
+    "preferred_terms": "Due on Receipt",
+    "primary_category": "Subcontractor"
+  },
+  {
+    "vendor_id": "V-004",
+    "vendor_name": "Peak Plumbing & HVAC",
+    "tax_id": "46-8830129",
+    "remit_address": "901 Water St, Denver, CO 80202",
+    "preferred_terms": "Net 30",
+    "primary_category": "Subcontractor"
+  },
+  {
+    "vendor_id": "V-005",
+    "vendor_name": "Solid Foundation Concrete",
+    "tax_id": "33-0449182",
+    "remit_address": "77 Cement Path, Phoenix, AZ 85001",
+    "preferred_terms": "2% 10 Net 30",
+    "primary_category": "Materials"
+  },
+  {
+    "vendor_id": "V-006",
+    "vendor_name": "Granite & Marble Surfaces Inc.",
+    "tax_id": "52-9901234",
+    "remit_address": "33 Quarry Rd, Barre, VT 05641",
+    "preferred_terms": "Net 45",
+    "primary_category": "Finishes"
+  },
+  {
+    "vendor_id": "V-007",
+    "vendor_name": "Modern Glass & Glazing",
+    "tax_id": "20-1556789",
+    "remit_address": "Suite 400, 888 Crystal Plaza, Seattle, WA 98104",
+    "preferred_terms": "Net 30",
+    "primary_category": "Exterior"
+  },
+  {
+    "vendor_id": "V-008",
+    "vendor_name": "Rent-A-Crane Heavy Equipment",
+    "tax_id": "11-4403321",
+    "remit_address": "Dept 4452, Los Angeles, CA 90001",
+    "preferred_terms": "Net 15",
+    "primary_category": "Equipment Rental"
+  },
+  {
+    "vendor_id": "V-009",
+    "vendor_name": "Green Earth Landscaping",
+    "tax_id": "75-3321109",
+    "remit_address": "12 Gardenia Ln, Orlando, FL 32801",
+    "preferred_terms": "Net 30",
+    "primary_category": "Landscaping"
+  },
+  {
+    "vendor_id": "V-010",
+    "vendor_name": "Safety First PPE & Supplies",
+    "tax_id": "61-0098765",
+    "remit_address": "22 Protection Way, Columbus, OH 43215",
+    "preferred_terms": "Net 30",
+    "primary_category": "Safety"
+  },
+  {
+    "vendor_id": "V-011",
+    "vendor_name": "Drywall & Insulation Masters",
+    "tax_id": "47-5561230",
+    "remit_address": "PO Box 112, Nashville, TN 37201",
+    "preferred_terms": "Net 30",
+    "primary_category": "Subcontractor"
+  },
+  {
+    "vendor_id": "V-012",
+    "vendor_name": "Global Hauling & Waste",
+    "tax_id": "82-4410023",
+    "remit_address": "900 Trash St, Atlanta, GA 30301",
+    "preferred_terms": "Net 15",
+    "primary_category": "Waste Management"
+  }
+]

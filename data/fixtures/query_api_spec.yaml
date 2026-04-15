@@ -1,0 +1,178 @@
+openapi: 3.0.3
+info:
+  title: Agent-Ops Tracing & Cost API
+  description: API for retrieving agent execution traces, step-level logs, and cost aggregation data.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+paths:
+  /runs/{run_id}:
+    get:
+      summary: Get full trace for a specific run
+      operationId: get_run_by_id
+      parameters:
+        - name: run_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Detailed run data including steps and total cost
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunDetail'
+        '404':
+          description: Run not found
+
+  /agents/{agent_id}/runs:
+    get:
+      summary: List runs for a specific agent
+      operationId: list_runs_by_agent
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: A list of runs associated with the agent
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RunSummary'
+
+  /aggregate:
+    get:
+      summary: Get aggregated cost and performance metrics
+      operationId: get_aggregates
+      parameters:
+        - name: start_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end_time
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: agent_id
+          in: query
+          description: Optional filter by agent
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Aggregated metrics over the specified window
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AggregateMetrics'
+
+components:
+  schemas:
+    RunSummary:
+      type: object
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        agent_id:
+          type: string
+        status:
+          type: string
+          enum: [running, completed, failed]
+        start_time:
+          type: string
+          format: date-time
+        total_cost:
+          type: number
+          format: float
+
+    RunDetail:
+      allOf:
+        - $ref: '#/components/schemas/RunSummary'
+        - type: object
+          properties:
+            end_time:
+              type: string
+              format: date-time
+            steps:
+              type: array
+              items:
+                $ref: '#/components/schemas/Step'
+            metadata:
+              type: object
+              additionalProperties: true
+
+    Step:
+      type: object
+      properties:
+        step_id:
+          type: string
+          format: uuid
+        step_name:
+          type: string
+        input:
+          type: object
+        output:
+          type: object
+        cost:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+
+    AggregateMetrics:
+      type: object
+      properties:
+        window_start:
+          type: string
+          format: date-time
+        window_end:
+          type: string
+          format: date-time
+        total_runs:
+          type: integer
+        success_rate:
+          type: number
+          format: float
+          description: Percentage of completed vs failed runs
+        total_cost_usd:
+          type: number
+          format: float
+        avg_cost_per_run:
+          type: number
+          format: float
+        agent_breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              agent_id:
+                type: string
+              run_count:
+                type: integer
+              success_rate:
+                type: number
+              total_cost:
+                type: number

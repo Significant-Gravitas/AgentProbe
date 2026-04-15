@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: summer-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
+    region: oregon
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: summer-db
+          property: connectionString
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://summer-web.onrender.com
+      - key: PAGE_FETCH_TIMEOUT
+        value: "15"
+      - key: RATE_LIMIT_PER_MIN
+        value: "10"
+
+  - type: web
+    name: summer-web
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    region: oregon
+    plan: free
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: summer-api
+          property: host
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false
+    routingRules:
+      - route: /*
+        rewrite: /index.html
+
+databases:
+  - name: summer-db
+    plan: free
+    databaseName: summary_db
+    user: summer_admin
+    postgresMajorVersion: 16

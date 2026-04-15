@@ -1591,4 +1591,55 @@ describe("runner", () => {
       ),
     ).toBe(true);
   });
+
+  test("runScenario records upload rejections as harness failures", async () => {
+    class UploadRejectingAdapter extends FakeAdapter {
+      async uploadFile(_filePath: string, _fileName: string): Promise<never> {
+        const { AgentProbeHarnessError } = await import(
+          "../../src/shared/utils/errors.ts"
+        );
+        throw new AgentProbeHarnessError(
+          "File upload rejected for foo.csv: 413 Payload Too Large.",
+        );
+      }
+    }
+
+    const tempDir = makeTempDir("upload-harness-fail");
+    const fixtureDir = join(tempDir, "fixtures");
+    mkdirSync(fixtureDir, { recursive: true });
+    writeFileSync(join(fixtureDir, "foo.csv"), "id,name\n1,a\n");
+    const scenariosPath = join(tempDir, "scenarios.yaml");
+
+    const adapter = new UploadRejectingAdapter([]);
+    const client = new FakeResponsesClient([]);
+
+    const result = await runScenario(
+      adapter as unknown as Parameters<typeof runScenario>[0],
+      buildScenario({
+        turns: [
+          {
+            role: "user",
+            content: "Process this file.",
+            useExactMessage: true,
+            attachments: [{ path: "fixtures/foo.csv" }],
+          },
+        ],
+      }),
+      buildPersona(),
+      buildRubric(),
+      {
+        client: asResponsesClient(client) as never,
+        scenariosPath,
+      },
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.failureKind).toBe("harness");
+    expect(result.judgeScore?.failureKind).toBe("harness");
+    expect(result.judgeScore?.overallNotes).toContain("Harness failure");
+    expect(result.judgeScore?.overallNotes).toContain("413");
+    expect(result.overallScore).toBe(0);
+    // Judge must NOT have been called.
+    expect(client.calls).toHaveLength(0);
+  });
 });

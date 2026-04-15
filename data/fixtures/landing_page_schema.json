@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.2.0",
+  "page_type": "webinar_registration",
+  "required_fields": [
+    {
+      "field_id": "first_name",
+      "label": "First Name",
+      "type": "string",
+      "validation": "^[a-zA-Z\\s]{2,30}$",
+      "required": true
+    },
+    {
+      "field_id": "last_name",
+      "label": "Last Name",
+      "type": "string",
+      "validation": "^[a-zA-Z\\s]{2,30}$",
+      "required": true
+    },
+    {
+      "field_id": "work_email",
+      "label": "Work Email",
+      "type": "email",
+      "validation": "^[a-zA-Z0-9._%+-]+@(?!gmail\\.com|yahoo\\.com|hotmail\\.com|outlook\\.com)[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+      "required": true,
+      "error_message": "Please use a valid business email address."
+    },
+    {
+      "field_id": "company_name",
+      "label": "Company",
+      "type": "string",
+      "required": true
+    },
+    {
+      "field_id": "job_role",
+      "label": "Job Role",
+      "type": "enum",
+      "options": [
+        "ML Engineer",
+        "Data Scientist",
+        "Product Manager (AI)",
+        "CTO/VP Engineering",
+        "Founder/CEO",
+        "Other"
+      ],
+      "required": true
+    },
+    {
+      "field_id": "ai_maturity",
+      "label": "Current AI Stage",
+      "type": "enum",
+      "options": [
+        "Researching/Prototyping",
+        "In Production (Small Scale)",
+        "In Production (Enterprise Scale)",
+        "Scaling Evaluation Infrastructure"
+      ],
+      "required": true
+    }
+  ],
+  "cta_config": {
+    "primary_cta": {
+      "button_text": "Register for the Webinar",
+      "tracking_id": "webinar_reg_submit",
+      "success_url": "/webinar/thank-you",
+      "measurable_goal": "conversion_rate",
+      "ga_event_category": "Lead Gen",
+      "ga_event_action": "Registration"
+    },
+    "secondary_cta": {
+      "button_text": "Add to Calendar",
+      "tracking_id": "webinar_cal_add",
+      "visible_post_conversion": true,
+      "measurable_goal": "calendar_intent"
+    }
+  },
+  "metadata_requirements": {
+    "og_title": "required",
+    "og_description": "required",
+    "pixel_tracking": true,
+    "utm_params": [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "partner_id"
+    ]
+  },
+  "conversion_tracking": {
+    "pixel_id": "braintrust_webinar_2024_09",
+    "event_name": "CompleteRegistration",
+    "value": 50.00,
+    "currency": "USD"
+  }
+}

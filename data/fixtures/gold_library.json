@@ -1,0 +1,93 @@
+{
+  "deduplicated_count": 34,
+  "removed_duplicates": [
+    "Lamport1978_v1",
+    "Shapiro2011_Preprint",
+    "Ongaro2014_Draft",
+    "DeCandia2007_ACM_Version",
+    "Burrows2006_OSDI_Duplicate",
+    "Vogels2009_CACM_Duplicate"
+  ],
+  "topical_clusters": [
+    {
+      "cluster_id": "C1",
+      "theme": "Strong Consistency and Consensus Algorithms",
+      "representative_citations": ["Lamport1978", "Ongaro2014", "Liskov1988", "Chandra1996", "Howard2020"],
+      "description": "Foundational protocols for reaching agreement in asynchronous systems with crash-stop or Byzantine failure models."
+    },
+    {
+      "cluster_id": "C2",
+      "theme": "Eventual Consistency and Conflict-free Replicated Data Types (CRDTs)",
+      "representative_citations": ["Shapiro2011", "Preguica2018", "Kleppmann2017", "Gomes2020", "Balegas2015"],
+      "description": "Mechanisms for optimistic replication and formal frameworks for ensuring convergence without global synchronization."
+    },
+    {
+      "cluster_id": "C3",
+      "theme": "Gossip Protocols and Epidemic Dissemination",
+      "representative_citations": ["Demers1987", "Vahdat2000", "Kermarrec2007", "Ganesh2003", "Jelasity2005"],
+      "description": "Scalable membership management and information propagation using probabilistic, peer-to-peer communication patterns."
+    },
+    {
+      "cluster_id": "C4",
+      "theme": "Distributed Transactional Models and Isolation",
+      "representative_citations": ["Gray1981", "Corbett2013", "Bailis2013", "Mu2014", "Zhang2018"],
+      "description": "Systems providing ACID properties across partitioned data stores, focusing on the trade-offs between latency and isolation levels."
+    },
+    {
+      "cluster_id": "C5",
+      "theme": "Industrial Large-Scale Distributed Key-Value Stores",
+      "representative_citations": ["DeCandia2007", "Lakshman2010", "Calder2011", "Sivasubramanian2012", "Verma2015"],
+      "description": "Case studies and architectural post-mortems of production systems implementing the aforementioned theoretical concepts."
+    }
+  ],
+  "literature_matrix": [
+    {
+      "citation_key": "Ongaro2014",
+      "title": "In Search of an Understandable Consensus Algorithm",
+      "approach": "Raft consensus protocol (Leader election, Log replication, Safety).",
+      "assumptions": "Non-Byzantine, asynchronous network with eventual delivery.",
+      "limitations": "Performance bottleneck on a single leader; scale-out requires sharding.",
+      "relevance": "Primary comparison point for the thesis's proposed consensus optimization."
+    },
+    {
+      "citation_key": "Shapiro2011",
+      "title": "Conflict-free Replicated Data Types",
+      "approach": "State-based (CvRDT) and Operation-based (CmRDT) mathematical frameworks.",
+      "assumptions": "Monotonic semilattices for state merges; causal delivery for operations.",
+      "limitations": "High memory overhead for tombstone management in many implementations.",
+      "relevance": "Provides the formal basis for the thesis's edge-computing data synchronization."
+    },
+    {
+      "citation_key": "Bailis2013",
+      "title": "Highly Available Transactions: Virtues and Limitations",
+      "approach": "Formalization of 'Highly Available' (HA) transaction levels like Read Committed.",
+      "assumptions": "CAP theorem constraints; preference for Availability over strict Consistency.",
+      "limitations": "Proves that serializability cannot be achieved in HA settings.",
+      "relevance": "Defines the boundary of what my system can guarantee under partition."
+    },
+    {
+      "citation_key": "Kleppmann2017",
+      "title": "A Conflict-Free Replicated JSON Datatype",
+      "approach": "Algorithm for merging nested JSON structures without manual conflict resolution.",
+      "assumptions": "Collaborative editing environment; causal order preservation.",
+      "limitations": "Increased metadata overhead compared to flat CRDTs.",
+      "relevance": "Practical implementation guide for the thesis application layer."
+    },
+    {
+      "citation_key": "Corbett2013",
+      "title": "Spanner: Google’s Globally-Distributed Database",
+      "approach": "TrueTime API using GPS/Atomic clocks for external consistency.",
+      "assumptions": "Access to high-precision hardware clocks with bounded uncertainty.",
+      "limitations": "Hardware dependency makes it difficult to replicate in commodity clouds.",
+      "relevance": "Contrast to the thesis's software-only logical clock approach."
+    },
+    {
+      "citation_key": "Demers1987",
+      "title": "Epidemic Algorithms for Replicated Database Maintenance",
+      "approach": "Anti-entropy and Rumor Mongering for database consistency.",
+      "assumptions": "Fixed set of replicas; periodic pairwise communication.",
+      "limitations": "Slow convergence for large state updates; high bandwidth usage if not tuned.",
+      "relevance": "Foundation for the background synchronization task in the thesis architecture."
+    }
+  ]
+}

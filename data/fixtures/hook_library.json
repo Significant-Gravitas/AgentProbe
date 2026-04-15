@@ -1,0 +1,167 @@
+{
+  "last_updated": "2023-10-27T09:00:00Z",
+  "period": "Last 90 Days",
+  "brand": "Glow",
+  "hooks": [
+    {
+      "id": "H-001",
+      "hook_text": "The 3-step routine that cleared my hormonal acne in 14 days.",
+      "avg_roas": 4.2,
+      "ctr": "2.1%",
+      "angle": "Social Proof / Transformation",
+      "platform_performance": ["Meta", "TikTok"]
+    },
+    {
+      "id": "H-002",
+      "hook_text": "Stop overpaying for luxury skincare. Here is the science-backed alternative.",
+      "avg_roas": 3.8,
+      "ctr": "1.8%",
+      "angle": "Value / Price Comparison",
+      "platform_performance": ["Google", "Meta"]
+    },
+    {
+      "id": "H-003",
+      "hook_text": "Why dermatologists are switching their patients to Glow's Barrier Repair.",
+      "avg_roas": 3.5,
+      "ctr": "1.4%",
+      "angle": "Authority / Trust",
+      "platform_performance": ["LinkedIn", "Google"]
+    },
+    {
+      "id": "H-004",
+      "hook_text": "Your skin isn't sensitive, your barrier is just broken.",
+      "avg_roas": 3.4,
+      "ctr": "2.4%",
+      "angle": "Educational / Problem-Solution",
+      "platform_performance": ["Meta", "Instagram"]
+    },
+    {
+      "id": "H-005",
+      "hook_text": "The 'No-Filter' glow is finally achievable at home.",
+      "avg_roas": 3.1,
+      "ctr": "1.9%",
+      "angle": "Aspiration / Benefit",
+      "platform_performance": ["Meta", "Instagram"]
+    },
+    {
+      "id": "H-006",
+      "hook_text": "92% of users reported brighter skin after just one use.",
+      "avg_roas": 2.9,
+      "ctr": "1.2%",
+      "angle": "Data-Driven / Results",
+      "platform_performance": ["Google", "LinkedIn"]
+    },
+    {
+      "id": "H-007",
+      "hook_text": "POV: You finally found the serum that doesn't pill under makeup.",
+      "avg_roas": 2.8,
+      "ctr": "3.1%",
+      "angle": "Relatability / Use Case",
+      "platform_performance": ["Meta", "TikTok"]
+    },
+    {
+      "id": "H-008",
+      "hook_text": "Free Vitamin C Serum with your first order today only.",
+      "avg_roas": 2.7,
+      "ctr": "2.5%",
+      "angle": "Offer / Scarcity",
+      "platform_performance": ["Meta", "Google"]
+    },
+    {
+      "id": "H-009",
+      "hook_text": "Is your moisturizer actually dehydrating your skin?",
+      "avg_roas": 2.6,
+      "ctr": "1.7%",
+      "angle": "Fear of Missing Out / Curiosity",
+      "platform_performance": ["Google", "Meta"]
+    },
+    {
+      "id": "H-010",
+      "hook_text": "The secret to glass skin isn't a 10-step routine.",
+      "avg_roas": 2.5,
+      "ctr": "1.9%",
+      "angle": "Simplicity / Counter-Intuitive",
+      "platform_performance": ["Meta", "Instagram"]
+    },
+    {
+      "id": "H-011",
+      "hook_text": "Clean ingredients. Clinical results. Zero compromises.",
+      "avg_roas": 2.4,
+      "ctr": "1.1%",
+      "angle": "Brand Ethics / Quality",
+      "platform_performance": ["LinkedIn", "Google"]
+    },
+    {
+      "id": "H-012",
+      "hook_text": "Tired of waking up with puffy eyes? Read this.",
+      "avg_roas": 2.3,
+      "ctr": "2.2%",
+      "angle": "Direct Problem / Call to Action",
+      "platform_performance": ["Meta", "Google"]
+    },
+    {
+      "id": "H-013",
+      "hook_text": "The LinkedIn-famous moisturizer that actually works for 12-hour shifts.",
+      "avg_roas": 2.2,
+      "ctr": "0.9%",
+      "angle": "Professional Lifestyle",
+      "platform_performance": ["LinkedIn"]
+    },
+    {
+      "id": "H-014",
+      "hook_text": "Meet the last cleanser you'll ever buy.",
+      "avg_roas": 2.1,
+      "ctr": "1.5%",
+      "angle": "Bold Claim / Retention",
+      "platform_performance": ["Google", "Meta"]
+    },
+    {
+      "id": "H-015",
+      "hook_text": "Winter is coming. Is your skin barrier ready?",
+      "avg_roas": 2.0,
+      "ctr": "1.8%",
+      "angle": "Seasonal / Urgency",
+      "platform_performance": ["Meta", "Google"]
+    },
+    {
+      "id": "H-016",
+      "hook_text": "What $18M in R&D looks like for your face.",
+      "avg_roas": 1.9,
+      "ctr": "1.3%",
+      "angle": "Authority / Investment",
+      "platform_performance": ["LinkedIn", "Meta"]
+    },
+    {
+      "id": "H-017",
+      "hook_text": "Fragrance-free. Paraben-free. Drama-free.",
+      "avg_roas": 1.8,
+      "ctr": "1.1%",
+      "angle": "Product Specs / Minimalist",
+      "platform_performance": ["Google", "Instagram"]
+    },
+    {
+      "id": "H-018",
+      "hook_text": "The skincare routine for people who hate skincare routines.",
+      "avg_roas": 1.7,
+      "ctr": "2.0%",
+      "angle": "Efficiency / Persona Fit",
+      "platform_performance": ["Meta", "TikTok"]
+    },
+    {
+      "id": "H-019",
+      "hook_text": "Why we sold out 4 times in 6 months.",
+      "avg_roas": 1.6,
+      "ctr": "1.9%",
+      "angle": "Social Proof / Demand",
+      "platform_performance": ["Meta", "Instagram"]
+    },
+    {
+      "id": "H-020",
+      "hook_text": "Better skin or your money back. Period.",
+      "avg_roas": 1.5,
+      "ctr": "1.4%",
+      "angle": "Risk Reversal / Guarantee",
+      "platform_performance": ["Google", "Meta"]
+    }
+  ]
+}

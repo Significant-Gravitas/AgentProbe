@@ -1,0 +1,134 @@
+[
+  {
+    "trace_id": "tr-8821-media-01",
+    "topic": "The rise of vertical farming in urban Singapore",
+    "steps": [
+      {
+        "agent": "ResearchAgent",
+        "status": "success",
+        "output": {
+          "sources": ["https://news.sg/farming-2024", "internal-archive://case-study-09"],
+          "key_facts": ["Sky Greens expansion", "9% local production target"],
+          "outline": ["Intro: Land scarcity", "Tech: Hydroponics", "Future outlook"]
+        },
+        "observability_link": "/mocks/langsmith/tr-8821-media-01/research"
+      },
+      {
+        "agent": "DraftAgent",
+        "status": "success",
+        "input_contract": "research_output_v1",
+        "output": {
+          "word_count": 850,
+          "draft_body": "Singapore's skyline is changing, not with skyscrapers, but with greens...",
+          "tone": "Informative"
+        },
+        "observability_link": "/mocks/langsmith/tr-8821-media-01/draft"
+      },
+      {
+        "agent": "EditorAgent",
+        "status": "success",
+        "input_contract": "draft_output_v1",
+        "revisions": ["Fixed AP style for dates", "Verified 9% stat"],
+        "final_version": "Singapore's skyline is evolving...",
+        "observability_link": "/mocks/langsmith/tr-8821-media-01/editor"
+      },
+      {
+        "agent": "PublisherAgent",
+        "status": "success",
+        "cms_response": {"id": "art-9901", "url": "/mocks/cms/articles/9901", "status": "published"},
+        "observability_link": "/mocks/langsmith/tr-8821-media-01/publish"
+      }
+    ]
+  },
+  {
+    "trace_id": "tr-8822-media-02",
+    "topic": "Impact of AI on freelance graphic designers",
+    "steps": [
+      {
+        "agent": "ResearchAgent",
+        "status": "success",
+        "output": {
+          "sources": ["https://techcrunch.com/ai-design", "internal-archive://survey-results-q3"],
+          "key_facts": ["40% productivity gain", "Copyright concerns"],
+          "outline": ["The Tool Shift", "Legal Grey Zones", "Adapting Skills"]
+        },
+        "observability_link": "/mocks/langsmith/tr-8822-media-02/research"
+      },
+      {
+        "agent": "DraftAgent",
+        "status": "retry",
+        "retry_reason": "Word count below threshold (300/800)",
+        "observability_link": "/mocks/langsmith/tr-8822-media-02/draft-attempt1"
+      },
+      {
+        "agent": "DraftAgent",
+        "status": "success",
+        "input_contract": "research_output_v1",
+        "output": {
+          "word_count": 812,
+          "draft_body": "The canvas is no longer just digital; it's algorithmic...",
+          "tone": "Analytical"
+        },
+        "observability_link": "/mocks/langsmith/tr-8822-media-02/draft-attempt2"
+      },
+      {
+        "agent": "EditorAgent",
+        "status": "success",
+        "revisions": ["Removed redundant adjectives", "Applied house rule on Oxford commas"],
+        "final_version": "The digital canvas is evolving through algorithms...",
+        "observability_link": "/mocks/langsmith/tr-8822-media-02/editor"
+      },
+      {
+        "agent": "PublisherAgent",
+        "status": "success",
+        "cms_response": {"id": "art-9902", "url": "/mocks/cms/articles/9902", "status": "published"},
+        "observability_link": "/mocks/langsmith/tr-8822-media-02/publish"
+      }
+    ]
+  },
+  {
+    "trace_id": "tr-8823-media-03",
+    "topic": "Electric Vehicle infrastructure in rural Appalachia",
+    "steps": [
+      {
+        "agent": "ResearchAgent",
+        "status": "success",
+        "output": {
+          "sources": ["https://energy.gov/ev-rural", "internal-archive://regional-data"],
+          "key_facts": ["Charging deserts", "New federal grants"],
+          "outline": ["Access Gap", "Topography challenges", "Recent initiatives"]
+        },
+        "observability_link": "/mocks/langsmith/tr-8823-media-03/research"
+      },
+      {
+        "agent": "DraftAgent",
+        "status": "success",
+        "output": {
+          "word_count": 920,
+          "draft_body": "While cities buzz with EVs, the hills of Appalachia face a different reality...",
+          "tone": "Narrative"
+        },
+        "observability_link": "/mocks/langsmith/tr-8823-media-03/draft"
+      },
+      {
+        "agent": "EditorAgent",
+        "status": "retry",
+        "retry_reason": "Fact-check failed: Grant amount misquoted ($2M vs $20M)",
+        "observability_link": "/mocks/langsmith/tr-8823-media-03/editor-attempt1"
+      },
+      {
+        "agent": "EditorAgent",
+        "status": "success",
+        "revisions": ["Corrected grant figures", "Tightened intro"],
+        "final_version": "While urban centers transition to electric vehicles...",
+        "observability_link": "/mocks/langsmith/tr-8823-media-03/editor-attempt2"
+      },
+      {
+        "agent": "PublisherAgent",
+        "status": "success",
+        "cms_response": {"id": "art-9903", "url": "/mocks/cms/articles/9903", "status": "published"},
+        "observability_link": "/mocks/langsmith/tr-8823-media-03/publish"
+      }
+    ]
+  }
+]

@@ -1,0 +1,41 @@
+document_types:
+  - id: PASSPORT
+    name: International Passport
+    sla_hours: 4
+    priority: 1
+    description: Individual identity verification via government-issued passport.
+  - id: PROOF_ADDRESS
+    name: Proof of Address
+    sla_hours: 12
+    priority: 3
+    description: Utility bills or bank statements issued within last 3 months.
+  - id: CORP_REG
+    name: Commercial Entity Verification
+    sla_hours: 48
+    priority: 2
+    description: Articles of incorporation and business registry filings for corporate clients.
+  - id: TAX_ID
+    name: Tax Identification Document
+    sla_hours: 24
+    priority: 3
+    description: TIN or SSN verification documents.
+  - id: PEP_SCREENING
+    name: PEP & Sanctions Screening
+    sla_hours: 2
+    priority: 1
+    description: Automated and manual review of Politically Exposed Person databases.
+  - id: UBO_DECLARATION
+    name: Ultimate Beneficial Owner Declaration
+    sla_hours: 72
+    priority: 2
+    description: Complex ownership structure mapping for legal entities.
+  - id: SOURCE_FUNDS
+    name: Source of Funds/Wealth
+    sla_hours: 48
+    priority: 4
+    description: High-value account due diligence documentation.
+  - id: DRIVERS_LICENSE
+    name: Driver's License
+    sla_hours: 6
+    priority: 2
+    description: Secondary government identification for domestic residents.

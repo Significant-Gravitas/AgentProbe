@@ -1,0 +1,41 @@
+client_id,name,city,industry,annual_spend_with_us,services_used,contract_renewal_date,account_manager
+C-1001,Aether Biopharma,NYC,Life Sciences,85000,"Legal, Technical, Marketing",2024-11-15,Sarah Chen
+C-1002,Global Fintech Solutions,London,Finance,120000,"Legal, Financial",2024-12-01,Marcus Thorne
+C-1003,Nakamura Robotics,Tokyo,Manufacturing,95000,"Technical, Patent",2024-10-30,Yuki Tanaka
+C-1004,Alpine Asset Management,Frankfurt,Finance,72000,"Financial, Legal",2024-11-20,Hans Weber
+C-1005,Lion City Logistics,Singapore,Shipping,45000,"Technical, HR",2025-01-15,Priya Nair
+C-1006,Manhattan Creative Group,NYC,Advertising,60000,"Marketing, Creative",2024-11-05,Sarah Chen
+C-1007,London Health Systems,London,Healthcare,110000,"Technical, Medical",2024-12-15,Marcus Thorne
+C-1008,Kyoto Tech Industries,Tokyo,Electronics,88000,"Technical, Patent, Legal",2024-12-22,Yuki Tanaka
+C-1009,Rhein-Main Auto Group,Frankfurt,Automotive,140000,"Technical, Marketing",2024-11-12,Hans Weber
+C-1010,Pacific Rim Hospitality,Singapore,Travel,55000,"Marketing, Localization",2025-02-10,Priya Nair
+C-1011,Empire State Law,NYC,Legal Services,92000,"Legal, Certified",2024-11-28,Sarah Chen
+C-1012,Thames Digital Media,London,Entertainment,68000,"Subtitling, Localization",2024-11-18,Marcus Thorne
+C-1013,Shibuya Gaming Lab,Tokyo,Gaming,135000,"Localization, Voiceover",2024-12-05,Yuki Tanaka
+C-1014,Mainz Pharma,Frankfurt,Life Sciences,105000,"Technical, Medical",2024-12-30,Hans Weber
+C-1015,Singapore FinTech Hub,Singapore,Finance,42000,"Financial, Marketing",2025-01-05,Priya Nair
+C-1016,Gotham Real Estate,NYC,Real Estate,38000,"Marketing, Legal",2024-11-14,Sarah Chen
+C-1017,Westminster Consulting,London,Professional Services,52000,"Legal, HR",2024-12-12,Marcus Thorne
+C-1018,Osaka Heavy Machinery,Tokyo,Manufacturing,115000,"Technical, Training",2024-11-25,Yuki Tanaka
+C-1019,EuroBank Frankfurt,Frankfurt,Finance,160000,"Financial, Legal, Compliance",2024-11-08,Hans Weber
+C-1020,Marina Bay Retailers,Singapore,Retail,29000,"Marketing",2025-03-01,Priya Nair
+C-1021,Hudson River Trading,NYC,Finance,98000,"Financial, Technical",2024-12-02,Sarah Chen
+C-1022,British Aerospace Partners,London,Aerospace,145000,"Technical, Patent",2024-11-19,Marcus Thorne
+C-1023,Ginza Luxury Brands,Tokyo,Retail,77000,"Marketing, E-commerce",2024-12-18,Yuki Tanaka
+C-1024,Black Forest Engineering,Frankfurt,Manufacturing,82000,"Technical, Training",2024-12-14,Hans Weber
+C-1025,Changi Air Cargo,Singapore,Logistics,64000,"Technical, Legal",2025-01-20,Priya Nair
+C-1026,Wall Street Securities,NYC,Finance,125000,"Financial, Legal",2024-11-22,Sarah Chen
+C-1027,Piccadilly Publishing,London,Media,48000,"Localization, Creative",2024-12-08,Marcus Thorne
+C-1028,Tohoku Energy,Tokyo,Energy,91000,"Technical, Legal",2024-12-28,Yuki Tanaka
+C-1029,Frankfurt Stock Exchange,Frankfurt,Finance,112000,"Financial, Compliance",2024-11-30,Hans Weber
+C-1030,Sentosa Island Resorts,Singapore,Travel,73000,"Marketing, Localization",2025-01-12,Priya Nair
+C-1031,Metropolitan Museum,NYC,Education,35000,"Creative, Audio Guide",2024-11-02,Sarah Chen
+C-1032,City of London Corp,London,Government,89000,"Legal, Public Relations",2024-12-20,Marcus Thorne
+C-1033,Minato Medical,Tokyo,Healthcare,102000,"Medical, Technical",2024-11-16,Yuki Tanaka
+C-1034,Hessen Logistics,Frankfurt,Shipping,56000,"Technical, HR",2025-02-15,Hans Weber
+C-1035,Orchard Road Tech,Singapore,Software,94000,"Localization, Technical",2024-12-10,Priya Nair
+C-1036,Brooklyn Brewery,NYC,F&B,22000,"Marketing",2025-04-01,Sarah Chen
+C-1037,Canary Wharf Partners,London,Real Estate,44000,"Legal, Financial",2025-03-15,Marcus Thorne
+C-1038,Sumitomo Chemical,Tokyo,Chemicals,128000,"Technical, Patent, Medical",2024-11-29,Yuki Tanaka
+C-1039,Taunus Ventures,Frankfurt,Venture Capital,39000,"Legal, Financial",2025-01-25,Hans Weber
+C-1040,Temasek Holdings,Singapore,Finance,185000,"Financial, Legal, Compliance",2024-11-03,Priya Nair

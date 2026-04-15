@@ -1,0 +1,212 @@
+[
+  {
+    "dm_id": "dm_001",
+    "text": "Hey! Do you have the High-Alpine Parka in stock in Navy?",
+    "expected_action": "auto-reply",
+    "expected_reply": "Hi! Yes, the High-Alpine Parka is currently in stock in Navy. You can find it here: https://fjordapparel.com/products/high-alpine-parka-navy",
+    "reasoning": "Product availability question."
+  },
+  {
+    "dm_id": "dm_002",
+    "text": "My order #88219 arrived damaged. The zipper is completely broken.",
+    "expected_action": "escalate",
+    "expected_reply": "I'm so sorry to hear about the damaged zipper! I've escalated this to our support team, and a human agent will reach out to you here shortly to arrange a replacement.",
+    "reasoning": "Product complaint/damage."
+  },
+  {
+    "dm_id": "dm_003",
+    "text": "I'm 6'2\" and 210lbs, should I get an L or XL in the base layers?",
+    "expected_action": "auto-reply",
+    "expected_reply": "Great question! For your height and weight, we usually recommend an XL for a comfortable fit in our Merino Base Layers. Check out our detailed size guide here: https://fjordapparel.com/pages/size-chart",
+    "reasoning": "Sizing question."
+  },
+  {
+    "dm_id": "dm_004",
+    "text": "Just wanted to say I love my new boots! Took them up Mt. Rainier this weekend.",
+    "expected_action": "auto-reply",
+    "expected_reply": "That's incredible! Mt. Rainier is no joke. We're so glad the boots kept you moving. Tag us in your photos—we'd love to see them in action!",
+    "reasoning": "General brand engagement."
+  },
+  {
+    "dm_id": "dm_005",
+    "text": "I need to change the shipping address for my order #99201. It's for a $650 bulk order for my guide team.",
+    "expected_action": "escalate",
+    "expected_reply": "I've flagged this for our priority support team since it involves a large order update. Someone will assist you with that address change within the hour.",
+    "reasoning": "Order > $500 and shipping modification."
+  },
+  {
+    "dm_id": "dm_006",
+    "text": "Is the Trail-Runner shell waterproof or just water-resistant?",
+    "expected_action": "auto-reply",
+    "expected_reply": "The Trail-Runner shell is fully waterproof with a 20k/20k rating! It's designed for heavy downpours. Details here: https://fjordapparel.com/products/trail-runner-shell",
+    "reasoning": "Product specification question."
+  },
+  {
+    "dm_id": "dm_007",
+    "text": "I've been waiting 3 weeks for my package and no one is responding to my emails.",
+    "expected_action": "escalate",
+    "expected_reply": "I sincerely apologize for the delay and the communication gap. I am escalating this to our customer success manager immediately to track down your package.",
+    "reasoning": "Customer complaint/unresolved issue."
+  },
+  {
+    "dm_id": "dm_008",
+    "text": "What's the difference between the 'Arctic' and 'Glacier' insulation levels?",
+    "expected_action": "auto-reply",
+    "expected_reply": "The 'Arctic' line is built for sub-zero static activities, while 'Glacier' is optimized for high-output movement in cold weather. You can compare our insulation tech here: https://fjordapparel.com/pages/insulation-guide",
+    "reasoning": "Common product comparison."
+  },
+  {
+    "dm_id": "dm_009",
+    "text": "Do you offer pro-deals for search and rescue volunteers?",
+    "expected_action": "auto-reply",
+    "expected_reply": "We certainly do! Thank you for what you do. You can apply for our Pro Program here: https://fjordapparel.com/pages/pro-application",
+    "reasoning": "Standard policy question."
+  },
+  {
+    "dm_id": "dm_010",
+    "text": "I want to buy 10 pairs of the Summit Socks for a gift, do you have a discount code?",
+    "expected_action": "auto-reply",
+    "expected_reply": "That's a lot of cozy feet! You can use code SUMMIT10 for 10% off orders of 5 items or more. Shop socks here: https://fjordapparel.com/collections/socks",
+    "reasoning": "Discount/Common product question."
+  },
+  {
+    "dm_id": "dm_011",
+    "text": "The color of the jacket I received looks nothing like the photo on the website. I'm very disappointed.",
+    "expected_action": "escalate",
+    "expected_reply": "I'm sorry the color wasn't what you expected. I've sent this to our team to help you with a return or exchange for a color you'll love.",
+    "reasoning": "Product complaint."
+  },
+  {
+    "dm_id": "dm_012",
+    "text": "When are you restocking the 4-Season Tent?",
+    "expected_action": "auto-reply",
+    "expected_reply": "We're expecting a restock of the 4-Season Tent in mid-October! You can sign up for notifications on the product page here: https://fjordapparel.com/products/4-season-tent",
+    "reasoning": "Restock inquiry."
+  },
+  {
+    "dm_id": "dm_013",
+    "text": "Can I return a gift if I don't have the receipt?",
+    "expected_action": "auto-reply",
+    "expected_reply": "We can usually help with gift exchanges for store credit! Check out our gift return portal here: https://fjordapparel.com/pages/returns",
+    "reasoning": "Policy question."
+  },
+  {
+    "dm_id": "dm_014",
+    "text": "Is the wool ethically sourced?",
+    "expected_action": "auto-reply",
+    "expected_reply": "Sustainability is at our core. 100% of our wool is RWS (Responsible Wool Standard) certified. Read about our sourcing here: https://fjordapparel.com/pages/sustainability",
+    "reasoning": "Brand values/Product info."
+  },
+  {
+    "dm_id": "dm_015",
+    "text": "I ordered the Expedition Kit ($599) and it says delivered but it's not here.",
+    "expected_action": "escalate",
+    "expected_reply": "I'm sorry to hear your high-value order is missing. I've escalated this to our shipping specialists to open a claim with the carrier and get this resolved for you.",
+    "reasoning": "Order > $500 and missing package."
+  },
+  {
+    "dm_id": "dm_016",
+    "text": "Do the pants have a gusseted crotch for climbing?",
+    "expected_action": "auto-reply",
+    "expected_reply": "Yes! Our Alpine Tech Pants feature a full gusset and articulated knees for maximum mobility. Check them out: https://fjordapparel.com/products/alpine-tech-pants",
+    "reasoning": "Product feature inquiry."
+  },
+  {
+    "dm_id": "dm_017",
+    "text": "Your website is crashing every time I try to checkout.",
+    "expected_action": "escalate",
+    "expected_reply": "Oh no! I'm sorry for the technical trouble. I'm alerting our tech team and a support agent will message you to help process your order manually.",
+    "reasoning": "Technical issue/Complaint."
+  },
+  {
+    "dm_id": "dm_018",
+    "text": "What are your holiday shipping deadlines for the East Coast?",
+    "expected_action": "auto-reply",
+    "expected_reply": "To get your gear by 12/24, please order by 12/16 for Standard shipping or 12/20 for Express. Full details here: https://fjordapparel.com/pages/shipping",
+    "reasoning": "General shipping info."
+  },
+  {
+    "dm_id": "dm_019",
+    "text": "Do you ship to Norway?",
+    "expected_action": "auto-reply",
+    "expected_reply": "Yes, we ship to Norway! International shipping rates and times are calculated at checkout. More info: https://fjordapparel.com/pages/international",
+    "reasoning": "Shipping inquiry."
+  },
+  {
+    "dm_id": "dm_020",
+    "text": "I'm an influencer and want to collab. Who do I talk to?",
+    "expected_action": "auto-reply",
+    "expected_reply": "We love connecting with the community! Please fill out our creator form here and our marketing team will take a look: https://fjordapparel.com/pages/collabs",
+    "reasoning": "Partnership inquiry."
+  },
+  {
+    "dm_id": "dm_021",
+    "text": "The XL fits like a Medium. This is ridiculous.",
+    "expected_action": "escalate",
+    "expected_reply": "I'm sorry the sizing was so far off! That doesn't sound right. I'm escalating this to our quality team to see if there's a labeling error and to help you with a return.",
+    "reasoning": "Sizing complaint."
+  },
+  {
+    "dm_id": "dm_022",
+    "text": "How do I wash the Down Sleeping Bag?",
+    "expected_action": "auto-reply",
+    "expected_reply": "Proper care is key! We recommend a front-loading washer with down-specific detergent and tumble drying on low with tennis balls. Guide: https://fjordapparel.com/pages/care-instructions",
+    "reasoning": "Product care inquiry."
+  },
+  {
+    "dm_id": "dm_023",
+    "text": "I'm placing a $1,200 order for my wedding party. Can I get a bulk discount?",
+    "expected_action": "escalate",
+    "expected_reply": "How exciting! For an order of that size, I've looped in our VIP coordinator to provide you with custom pricing and support.",
+    "reasoning": "Order > $500 / Bulk inquiry."
+  },
+  {
+    "dm_id": "dm_024",
+    "text": "Are the zippers YKK?",
+    "expected_action": "auto-reply",
+    "expected_reply": "Yes, we use YKK Vislon or AquaGuard zippers on all our technical outerwear for maximum durability. Specs here: https://fjordapparel.com/pages/materials",
+    "reasoning": "Product spec inquiry."
+  },
+  {
+    "dm_id": "dm_025",
+    "text": "I hate the new logo. The old one was way better.",
+    "expected_action": "auto-reply",
+    "expected_reply": "Thanks for sharing your feedback! We're always evolving, but we appreciate hearing from our long-time fans. I'll pass your thoughts along to our design team.",
+    "reasoning": "General feedback (not an escalation-worthy complaint)."
+  },
+  {
+    "dm_id": "dm_026",
+    "text": "Is the Daypack big enough for a 16\" laptop?",
+    "expected_action": "auto-reply",
+    "expected_reply": "Yes! The Daypack features a padded sleeve that fits most 16\" laptops comfortably. Check dimensions: https://fjordapparel.com/products/daypack",
+    "reasoning": "Product fit inquiry."
+  },
+  {
+    "dm_id": "dm_027",
+    "text": "My package was stolen from my porch. What can you do?",
+    "expected_action": "escalate",
+    "expected_reply": "I'm so sorry to hear that happened. I've escalated this to our support team to help you file a claim and see how we can help you get your gear.",
+    "reasoning": "Shipping issue/Complaint."
+  },
+  {
+    "dm_id": "dm_028",
+    "text": "Do you have a physical store in Denver?",
+    "expected_action": "auto-reply",
+    "expected_reply": "We don't have a standalone Fjord store in Denver yet, but you can find us at REI and other local outfitters! Store locator: https://fjordapparel.com/pages/stockists",
+    "reasoning": "Location inquiry."
+  },
+  {
+    "dm_id": "dm_029",
+    "text": "I need to return this jacket but I lost the bag it came in.",
+    "expected_action": "auto-reply",
+    "expected_reply": "No worries! You can return items in any secure packaging as long as the tags are still attached. Start your return here: https://fjordapparel.com/pages/returns",
+    "reasoning": "Return inquiry."
+  },
+  {
+    "dm_id": "dm_030",
+    "text": "The seams on my leggings are unravelling after just one hike.",
+    "expected_action": "escalate",
+    "expected_reply": "That certainly shouldn't happen with our gear. I'm escalating this to our quality control team so we can replace those for you immediately.",
+    "reasoning": "Product quality complaint."
+  }
+]

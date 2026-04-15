@@ -13,6 +13,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/last_month_analytics.json
+          - path: fixtures/pending_tickets.csv
+          - path: fixtures/top_posts.json
         content: |-
           Act as my operations assistant: draft next week's content calendar (5 LinkedIn posts, 3 blog outlines, 2 newsletter drafts) in my brand voice based on last month's top-performing posts, then draft 10 replies to pending customer support tickets in the inbox CSV I'll provide.
 
@@ -41,6 +45,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/calendar.json
+          - path: fixtures/hubspot_activity.json
         content: |-
           Produce a Monday morning briefing: summarize last week's CRM activity, flag the top 5 stalled deals with a suggested next action, draft follow-up emails to each lead, and queue them as drafts in Gmail.
 
@@ -67,6 +74,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/signed_contract.pdf
+          - path: fixtures/team_roster.json
         content: |-
           Onboard a new client end-to-end from a signed contract PDF: extract key terms, create a kickoff deck, generate a project plan in Notion, draft the welcome email with meeting slots from my calendar, and create a Slack channel with the right members.
 
@@ -136,6 +146,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/hubspot_pipeline_snapshot.json
+          - path: fixtures/stripe_mrr_last_2mo.json
         content: |-
           Prepare the board update: pull MRR, churn, and pipeline metrics from Stripe and HubSpot, compare to last month, draft the commentary for each KPI, and render a branded PDF using our template.
 
@@ -163,6 +176,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/discovery_call_transcript.txt
+          - path: fixtures/jtbd_template.json
         content: |-
           Turn this 60-minute customer discovery call recording into: a highlight reel transcript, a structured list of jobs-to-be-done, a product feedback Linear ticket, and a follow-up email to the customer with the commitments I made.
 
@@ -190,6 +206,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/brand_guide.pdf
         content: |-
           Draft three variants of a marketing landing page for our new pricing tier, generate hero imagery prompts, write three paid-ad headlines and body copy variations, and schedule the ads in Meta Ads Manager.
 
@@ -217,6 +235,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/contacts_vip.json
+          - path: fixtures/inbox_50.json
         content: |-
           Handle my inbox for the next hour: triage 50 unread emails into categories (customer, vendor, sales, noise), draft responses to the top 10 that need a reply, and produce a short summary of what I can safely ignore.
 
@@ -242,6 +263,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/loomstep_brand.md
         content: |-
           I'm launching a webinar in three weeks. Given our speaker bio, topic abstract, target ICP, brand guide, and top-3 prior webinar landing pages as style exemplars (all attached), produce three artifacts: (1) landing page copy conforming to our page schema (headline ≤70 chars, subhead, 3 benefit bullets, speaker card, CTA), (2) a 4-email invite sequence with defined spacing, subject line ≤50 chars, and each email tagged to a funnel stage, (3) a LinkedIn event draft with required fields and a 1,300-char description. Each artifact must cite which input it grounds on; tone match scored against the exemplars by a voice-matcher.
 
@@ -280,6 +303,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/ad_spend_3mo.csv
+          - path: fixtures/cohort_behavior.csv
+          - path: fixtures/funnel_conversion.csv
         content: |-
           Investigate why last month's CAC rose 22%: pull spend data per channel, conversion rates at each funnel step, and customer cohort behavior, then write a three-page memo with the root cause and three recommended actions.
 
@@ -307,6 +334,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/prior_quarter_metrics.json
         content: |-
           Prepare the quarterly objectives review: pull the draft OKRs from Notion, cross-reference against last quarter's actual metrics from our analytics stack, identify which OKRs are at risk based on run-rate, generate a one-page prep doc, and open a Slack thread in #leadership to kick off the team review meeting.
 
@@ -334,6 +363,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/chart_of_accounts.csv
+          - path: fixtures/gold_invoices_extracted.csv
+          - path: fixtures/vendor_registry.json
         content: |-
           Ingest the folder of 500 vendor invoices (mixed PDF and scanned images), extract vendor, line items, dates, totals, and tax into a normalized CSV, flag any rows with low-confidence extractions for human review.
 
@@ -391,6 +424,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/ats_existing.json
+          - path: fixtures/job_description.md
         content: |-
           Process the attached batch of 200 resumes: parse each into structured fields (name, years of experience, tech stack, most recent role, location), de-duplicate against our ATS, and output a shortlist ranked by fit to the JD I provide.
 
@@ -417,6 +453,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/change-log.csv
+          - path: fixtures/snapshots/2026-04-13_prices.json
         content: |-
           Every night at 2am, crawl the competitor pricing pages we track, diff against yesterday's snapshot, and produce a change-log CSV plus an email with only the non-trivial changes summarized in plain English.
 
@@ -444,6 +483,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/gold_contracts_labeled.json
+          - path: fixtures/mandatory_clause_checklist.json
         content: |-
           Take this folder of 1,200 scanned legal contracts, extract parties, effective date, renewal terms, and governing law into a structured database, and flag any contract missing a mandatory clause from our checklist.
 
@@ -470,6 +512,13 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/bank_statement_bofa_2026-03.csv
+          - path: fixtures/bank_statement_chase_2026-03.csv
+          - path: fixtures/bank_statement_mercury_2026-03.csv
+          - path: fixtures/erp_ledger_2026-03.csv
+          - path: fixtures/gold_unreconciled.csv
+          - path: fixtures/unreconciled.csv
         content: |-
           Automate the monthly treasury reconciliation: pull bank statements from three accounts, match transactions against our ERP ledger, surface unreconciled items in a spreadsheet with suggested matches ranked by confidence.
 
@@ -498,6 +547,12 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/canonical.csv
+          - path: fixtures/change_log.csv
+          - path: fixtures/crm_export.csv
+          - path: fixtures/domain_to_industry_mapping.json
+          - path: fixtures/gold_canonical.csv
         content: |-
           Clean this messy 80k-row CRM export: standardize company names, merge duplicates, infer missing industry codes from domain, validate email deliverability, and output a canonical version plus a change log.
 
@@ -524,6 +579,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/incoming_emails_100.json
+          - path: fixtures/policy.yaml
+          - path: fixtures/team_routing.json
         content: |-
           Build a document intake agent for our support team: when a customer emails in an attached form, extract the requested fields, validate them against our policy rules, and either auto-approve or route to the right team with context.
 
@@ -583,6 +642,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/direct_reports.json
+          - path: fixtures/yesterday_data.json
         content: |-
           Take over my daily 'status update' ritual: pull updates from Linear, GitHub, Jira, and our Slack project channels, write a crisp daily standup summary for each direct report, and post it to #leadership by 9am.
 
@@ -614,6 +676,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/prior_classifications.json
+          - path: fixtures/project_codes.csv
         content: |-
           Automate expense report processing: pick up receipt photos from a shared drive, extract vendor/amount/category, match to the right project code using memory of prior submissions, submit to Expensify, and email the employee if anything needs correction.
 
@@ -641,6 +706,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/contracts_tracker.csv
         content: |-
           Every time a new contract lands in DocuSign as 'signed', file a copy to the right client folder in SharePoint, extract key dates into our contracts tracker, and schedule renewal reminders 90 days out.
 
@@ -668,6 +735,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/po_database.json
+          - path: fixtures/quickbooks_due_invoices.json
         content: |-
           Handle our weekly vendor payment batch: pull invoices due in the next 7 days from QuickBooks, verify each against the PO, flag discrepancies, generate the ACH file, and prepare a summary for the controller to approve.
 
@@ -695,6 +765,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/attendee_roster.json
         content: |-
           Kill my meeting-notes drudgery: for every calendar meeting I attend, grab the transcript, extract action items per attendee, create the corresponding tasks in Asana, and send a follow-up email summarizing decisions.
 
@@ -721,6 +793,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/release_notes_template.md
         content: |-
           Automate the repetitive parts of our QA release checklist: run the smoke tests, verify the version on staging, check the changelog is updated, generate release notes from merged PRs, and post them to #releases.
 
@@ -752,6 +826,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/clients.json
         content: |-
           Offload monthly client reporting: for each of 15 clients, pull their campaign numbers from Google Ads and GA4, drop them into the client-branded template, add a short plain-English commentary on wins and issues, and email the PDF.
 
@@ -779,6 +855,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/gold_review_labels.json
+          - path: fixtures/reviews_android.json
+          - path: fixtures/reviews_ios.json
         content: |-
           Every morning, go through yesterday's app-store reviews across iOS and Android, classify by theme (bug, feature request, UX complaint, praise), push bugs to Linear, and surface the top three themes to the product team.
 
@@ -813,6 +893,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/render.yaml
         content: |-
           Build a working MVP: a React + FastAPI app where a user pastes a URL and gets back a structured summary of the page, with auth via Google, Postgres for persistence, and a Render deployment. Produce the repo and a live URL.
 
@@ -836,6 +918,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/figma_tokens.json
         content: |-
           Take my figma file and implement a responsive Next.js frontend with server-side rendering, Tailwind, and the component structure that matches the design tokens in the Figma. Commit to a new branch and open a PR.
 
@@ -859,6 +943,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/stripe_skus.json
         content: |-
           Add a Stripe subscription checkout to my existing Rails app: wire up the webhook handler, plan/subscription models, customer portal redirect, and a feature-flag gate around the premium routes. Include tests.
 
@@ -882,6 +968,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/internal_api.openapi.yaml
         content: |-
           Scaffold a Python CLI that wraps our internal REST API into ergonomic commands with auto-generated docs, shell completion, and publish it to an internal PyPI. Target three flagship endpoints first.
 
@@ -952,6 +1040,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/widget_inventory.json
         content: |-
           Port our legacy jQuery dashboard to React: preserve all current widgets, improve load time by at least 30%, add dark mode, and write an ADR explaining the state management choice.
 
@@ -976,6 +1066,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/schema.sql
         content: |-
           Build an internal admin panel in Next.js: list/search/edit across three Postgres tables, role-based access via our auth provider, audit log of every mutation, Playwright e2e tests for the three happy paths, and deploy to staging with a passing CI.
 
@@ -999,6 +1091,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/test_prospects.json
         content: |-
           I run an AI consultancy. Build a reusable 'client discovery agent' template that interviews a prospect via a chat UI, extracts their pain points, maps them to three of our service offerings, and emits a tailored proposal draft.
 
@@ -1038,6 +1132,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/property_inventory.json
         content: |-
           For my hotel-group operations business: design an agent that ingests rooming lists emailed by group organizers, validates against our availability, drafts the reply with confirmations or conflicts, and updates our PMS.
 
@@ -1064,6 +1160,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/gold_outcomes.json
+          - path: fixtures/scripted_queries.json
         content: |-
           Build an internal 'AI ops concierge' for my 40-person agency: Slack bot that can answer operational questions, trigger process runbooks (onboard client, close project), and escalate cleanly when it's unsure.
 
@@ -1097,6 +1196,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/test_onboardings.json
         content: |-
           I'm a B2B healthcare SaaS founder. Implement an agent that handles repetitive bits of practitioner onboarding — customizing training per role, scheduling, comms, and chasing missing items — with audit logs suitable for compliance.
 
@@ -1130,6 +1231,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/sample_leads.json
+          - path: fixtures/territories.json
         content: |-
           For my real-estate advisory: build an agent that handles speed-to-lead within 2 minutes, qualifies the lead with five questions, books a time on my calendar, and hands off to me with a short prep brief.
 
@@ -1164,6 +1268,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/brand_voice.md
+          - path: fixtures/brief_template.md
+          - path: fixtures/test_client_briefs.json
         content: |-
           My creative agency needs an agent that sits between our PMs and creative team: parse a client brief, check against our style/brand rules, generate the creative brief document in our template, and open the project in our PM tool.
 
@@ -1191,6 +1299,12 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/funding_events_7d.json
+          - path: fixtures/icp_list.csv
+          - path: fixtures/job_postings_7d.json
+          - path: fixtures/scoring_rubric.yaml
+          - path: fixtures/tech_stack_changes_7d.json
         content: |-
           Run one pass of our growth ops workflow. Given our ICP list (500 companies attached), our trigger-event definitions, and seeded signal fixtures (funding announcements, job postings, tech-stack changes for the past 7 days), scan the fixtures, score each company using our scoring rubric, and deliver the prioritized top-50 outreach list with per-company rationale citing the triggering event. Include the scheduler config that promotes this pass to weekly execution.
 
@@ -1219,6 +1333,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/expiring_contracts_60d.json
+          - path: fixtures/pricing_tiers.yaml
+          - path: fixtures/usage_data.csv
         content: |-
           Build a contract-renewal agent for my law firm: 60 days before each contract expires, pull the client's usage data, draft a tailored renewal proposal with three pricing options, schedule a renewal call with the partner's calendar, and open a renewal matter in our document management system.
 
@@ -1251,6 +1369,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/candidate_accounts.csv
+          - path: fixtures/signal_corpus.json
         content: |-
           Automate the top of our sales funnel: identify 200 new target accounts matching our ICP this week, enrich each contact, draft personalized first-touch emails referencing a recent signal, and queue them in Outreach for rep approval.
 
@@ -1282,6 +1403,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/call_summaries.json
+          - path: fixtures/linkedin_updates.json
         content: |-
           For each stalled deal in HubSpot (>14 days no activity), write a context-aware re-engagement message based on the last call summary and the prospect's LinkedIn updates, schedule it, and log the activity.
 
@@ -1308,6 +1432,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/brand_guide.pdf
+          - path: fixtures/hook_library.json
         content: |-
           Run a weekly marketing ops sweep: audit all active campaigns in Google/Meta/LinkedIn for underperforming creative, pause anything below 0.7x ROAS, draft three new variants using our best-performing hooks, and send me a recommendation summary.
 
@@ -1339,6 +1466,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/funnel_stage_map.yaml
+          - path: fixtures/pmm_deck.pdf
+          - path: fixtures/seo_keywords.csv
+          - path: fixtures/style_exemplars.json
         content: |-
           Turn the 40-page product marketing deck into a 90-day content engine: 30 LinkedIn posts, 12 blog outlines, 4 webinar concepts, each with a clear CTA and mapped to a funnel stage.
 
@@ -1365,6 +1497,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/ae_territories.json
+          - path: fixtures/gold_labels.json
+          - path: fixtures/new_leads.json
+          - path: fixtures/scoring_rubric.yaml
         content: |-
           Build a lead-scoring workflow: enrich every new inbound lead, compute a fit+intent score using our defined rubric, route high-intent leads to the right AE with a prep brief in Slack, and demote low-quality ones to nurture.
 
@@ -1394,6 +1531,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/affiliate_db.json
+          - path: fixtures/performance_tips_library.md
+          - path: fixtures/weekly_report_template.html
         content: |-
           Own our affiliate marketing loop: pull the weekly affiliate report, generate personalized performance emails for each of 60 affiliates with a specific tip, and schedule a check-in with anyone whose volume dropped >25%.
 
@@ -1420,6 +1561,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/ae_roster.json
+          - path: fixtures/calendar_availabilities.json
+          - path: fixtures/demo_requests_this_week.json
+          - path: fixtures/icp_definition.yaml
         content: |-
           Own the full BDR workflow for this week's inbound demo requests: enrich each request, qualify against our ICP, auto-book a discovery call on the right AE's calendar using territory rules, and produce a daily pipeline snapshot posted to #sales-leadership each evening.
 
@@ -1447,6 +1593,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/attendance_by_event.csv
+          - path: fixtures/candidate_cities.json
+          - path: fixtures/marketing_channel_spend.csv
+          - path: fixtures/pnl_24mo.csv
         content: |-
           I run a local events business across 2 cities. Given 24 months of our P&L, attendance, and marketing-channel data (attached), plus a demographic/competitor fixture for 10 candidate US cities, score each candidate city using our defined rubric (market size 30%, competitive density 25%, demographic fit 25%, projected unit economics 20%), pick the top 3 expansion targets, justify each pick with the computed scores and the numbers driving them, and produce a 12-month rollout plan with monthly milestones and a budget tied to our actual cash-on-hand. Grade on rubric application, arithmetic correctness, and plan schema.
 
@@ -1476,6 +1627,13 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/cac_ltv_cohorts.csv
+          - path: fixtures/google_ads_12mo.csv
+          - path: fixtures/growth_playbook.yaml
+          - path: fixtures/meta_ads_12mo.csv
+          - path: fixtures/retention_by_product.csv
+          - path: fixtures/shopify_12mo.csv
         content: |-
           Audit our D2C brand ($40k MRR) given attached data: 12 months of Shopify orders, Meta + Google ad-spend with UTM mapping, CAC and LTV per acquisition cohort, and retention curves per product line. Using a scoring framework (expected 90-day revenue lift × confidence ÷ effort), compute the score for each of 10 candidate growth levers from our playbook (attached), select the top 3, and produce a week-by-week execution plan for each with the single leading metric to monitor weekly. Grade on computation correctness, rubric application, and plan schema match.
 
@@ -1507,6 +1665,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/channel_cac.csv
+          - path: fixtures/current_offer.md
+          - path: fixtures/funnel_6mo.csv
+          - path: fixtures/pricing_tests_history.csv
         content: |-
           My solopreneur business is at $8k/month. Given my funnel data, offer, pricing, and channel-level CAC/conversion (attached, 6 months), identify the single bottleneck stage from the numbers, and propose two alternative pricing/packaging models. For each alternative, project monthly revenue at current traffic using a stated arithmetic model, quantify the incremental effort, and identify the two leading indicators (with specific thresholds) that would confirm or refute the model within 30 days. Grade on diagnosis correctness vs seeded bottleneck, arithmetic, and indicator specificity.
 
@@ -1535,6 +1698,8 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/current_business_summary.md
         content: |-
           Help me launch a new vertical adjacent to my existing consulting business: research demand, competition, pricing norms, a minimum viable offer, and the first 10 ideal prospects to approach.
 
@@ -1561,6 +1726,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/customer_surveys.json
+          - path: fixtures/local_media_rates.csv
+          - path: fixtures/reviews_google_yelp.json
+          - path: fixtures/sales_by_daypart.csv
         content: |-
           I'm rebranding my small café. Given 500 customer reviews scraped from Google/Yelp, 200 survey responses, and our sales-by-daypart data (all attached), extract the top three customer-valued attributes with supporting quotes and quantified frequency, draft the new positioning statement grounded in those attributes, generate 10 candidate names scored against a rubric (trademark availability check, .com availability, phonetic distinctiveness, fit to positioning), and produce a launch campaign with predicted reach math against a $3,000 budget. Grade on attribute extraction vs gold, rubric application on names, and arithmetic on campaign reach.
 
@@ -1590,6 +1760,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/clients.csv
+          - path: fixtures/service_catalog.json
+          - path: fixtures/upsell_playbook.md
         content: |-
           My translation business has 300 clients across 5 cities. Identify the 30 highest-value upsell targets and write a tailored outreach and expansion offer for each, including pricing guidance.
 
@@ -1617,6 +1791,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/foot_traffic_by_location.csv
+          - path: fixtures/hours.csv
+          - path: fixtures/pos_18mo.csv
+          - path: fixtures/staffing.csv
         content: |-
           I run a local coffee-shop chain with 4 locations. Analyze 18 months of POS data, identify the single underperforming location and the root cause (menu mix, hours, foot traffic, staffing), and produce a specific action plan with a projected revenue lift and the metrics to monitor.
 
@@ -1645,6 +1824,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/customer_dim.csv
+          - path: fixtures/transactions_24mo.csv
         content: |-
           Analyze our 24 months of transactional data: identify three actionable customer segments, their LTV, and the single biggest driver of churn in each. Deliver a notebook with the analysis and a two-page executive summary.
 
@@ -1672,6 +1854,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/annotation_events.json
+          - path: fixtures/metrics_this_week.csv
+          - path: fixtures/prior_4_weeks.csv
         content: |-
           Build a recurring Friday 4pm report that summarizes the week's key product metrics (DAU, retention D7/D30, feature adoption), auto-annotates anomalies, and posts it to #exec-reports with charts and a short commentary.
 
@@ -1699,6 +1885,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/bank_statements.csv
+          - path: fixtures/expense_ledger_18mo.csv
+          - path: fixtures/irs_categories.yaml
+          - path: fixtures/suspicious_flags.yaml
         content: |-
           Run a tax-filing-ready analysis on our 18-month expense ledger: categorize per IRS rules, flag anything suspicious, reconcile against bank statements, and produce the filing pack for our CPA.
 
@@ -1726,6 +1917,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/carrier_contracts.yaml
+          - path: fixtures/routes.json
+          - path: fixtures/shipments_2yr.csv
         content: |-
           Given this logistics dataset (shipments, carriers, routes), find the optimization opportunities worth >$100k annually, quantify each, and write the memo I'd hand to ops leadership with implementation steps.
 
@@ -1753,6 +1948,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/document_types.yaml
+          - path: fixtures/kyc_queue_90d.csv
+          - path: fixtures/team_roster.json
         content: |-
           Take our KYC operations data, compute queue times and failure rates by team and document type, identify the two biggest bottlenecks, and propose a prioritized remediation plan with expected impact.
 
@@ -1780,6 +1979,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/gold_anomaly_labels.json
+          - path: fixtures/severity_thresholds.yaml
+          - path: fixtures/signature_catalog.yaml
         content: |-
           Given the past 24 hours of our cybersecurity log feed (2M events, fixture attached) and our signature catalog + severity thresholds, cluster anomalies by signature, identify events above threshold, auto-draft an incident ticket for each (pre-filled with affected host, kill-chain stage, MITRE ATT&CK tag, and last-hour context), and render the 24-hour summary dashboard snapshot as a single HTML artifact. Grade on clustering accuracy vs gold labels, ticket-field correctness, and dashboard schema.
 
@@ -1807,6 +2010,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/budget_2026.yaml
+          - path: fixtures/prior_months.json
+          - path: fixtures/quickbooks_monthly.json
         content: |-
           Build this month's board financial pack: pull P&L, cash flow, and burn from QuickBooks, compute variance vs budget, identify the three line items driving overage with commentary, chart the runway projection under three scenarios, and export the final pack as a branded PDF.
 
@@ -1835,6 +2042,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/niche_definition.md
+          - path: fixtures/seed_keywords.csv
         content: |-
           Design and execute a month-long organic content push: do keyword research in our niche, produce 12 SEO-optimized blog posts, 8 LinkedIn carousel posts, and 4 newsletter issues, with an interlinking plan that rolls up to our pillar page.
 
@@ -1866,6 +2076,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/candidate_companies.csv
+          - path: fixtures/style_exemplars.json
         content: |-
           Research a target industry vertical, build a list of 500 qualified companies with the right buyer persona, enrich with recent signals (hiring, funding, product launches), and produce three outreach sequences tailored to the top three sub-segments.
 
@@ -1894,6 +2107,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/linear_voice.md
+          - path: fixtures/linkedin_top5.json
+          - path: fixtures/podcast_outlines_top2.json
+          - path: fixtures/video_scripts_top3.json
         content: |-
           Given our best-performing blog post (3,000 words attached), our brand voice guide, and 5 top-performing posts from each channel as style exemplars (attached), produce: 10 Twitter threads (each 5–9 posts, ≤280 chars per post), 5 LinkedIn posts (1,200–2,000 chars, single CTA), 3 short-video scripts (45–60 sec, hook-body-CTA structure), 1 podcast outline (30 min, 5 labeled segments), and 1 webinar landing headline + 3 bullets + CTA. Each output must include an 'argument preservation' mapping (source-blog section → new-format expression). Grade on structural conformance, source-grounding coverage, and tone match against exemplars by voice-matcher.
 
@@ -1930,6 +2148,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/landing_page_schema.json
+          - path: fixtures/partner_corpus.json
+          - path: fixtures/scoring_rubric.yaml
         content: |-
           Given our webinar topic, target ICP, speaker bio (attached), and a corpus of 2,000 podcasts/newsletters with audience metadata (attached), deliver: (1) a landing page with schema-checked fields and a measurable CTA; (2) a 5-email invite sequence with defined spacing and subject/preheader/body structure per email; (3) a filtered shortlist of the 50 best-matched partners using a scored rubric (audience overlap, size fit, recent cross-promo activity); (4) personalized pitch emails to each shortlisted partner, each citing one specific recent episode/issue from that partner. Grade on schema, rubric application, and citation grounding.
 
@@ -1956,6 +2178,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/journalist_list.csv
+          - path: fixtures/survey_responses_100.json
         content: |-
           Produce a gated research report. Given 100 completed survey responses (attached structured data), synthesize the top three findings each backed by explicit statistical claims (n, mean/proportion, confidence interval) computed from the data, produce the branded PDF with charts per our template spec, write an 800-word launch blog post that cites each finding by number, and draft 5 personalized press pitches to journalists from the attached list of 50 — each pitch referencing one finding and one recent article the journalist wrote.
 
@@ -1983,6 +2208,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/candidate_partners.csv
+          - path: fixtures/gold_attribution_test_cases.json
+          - path: fixtures/product_details.md
         content: |-
           Stand up our B2B affiliate program. Given our product details, revenue-share rules, and a list of 30 candidate partners with audience metadata and current tech stack (attached): (1) build the affiliate landing page with required fields + schema.org markup + a gated application flow; (2) produce a 12-slide pitch deck matching our brand-template sections; (3) write 30 personalized recruit emails each referencing the partner's audience fit and one public signal; (4) implement the tracking/attribution spec as a UTM + cookie policy + Stripe metadata schema handling cross-device, refunds, and clawbacks. Grade on schema match, personalization grounding, and attribution-spec correctness against gold test cases.
 
@@ -2011,6 +2240,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/candidate_pool.csv
+          - path: fixtures/closed_won_20.csv
+          - path: fixtures/icp_definition.yaml
         content: |-
           Build our Q2 ABM target list: given our ICP definition and 20 closed-won deals as positive examples, surface 300 new companies ranked by fit score, enrich each with buyer signals (tech stack, funding, hiring), and segment into three tiers with a recommended outreach cadence per tier.
 
@@ -2039,6 +2272,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/candidate_stacks.json
+          - path: fixtures/resume.pdf
         content: |-
           Given my resume/GitHub/Stack Overflow profile (attached) and a fixture of candidate stacks with job-market demand and complement-to-my-skills scores (attached), recommend ONE stack with evidence from the data (market demand %, complementarity score, ramp curve). Produce a day-by-day 14-day curriculum where each day ships a measurable artifact (commits, passing tests, deployed endpoint). Include a build-along project spec with a provided test suite the finished project must pass. Grade on data-grounded stack choice, artifact-per-day structure, and test suite runnability.
 
@@ -2066,6 +2302,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/arxiv_links.txt
+          - path: fixtures/gold_library.json
         content: |-
           I'm an MSc student with a messy literature review. Take my 40 saved papers, deduplicate, cluster by theme, generate a structured literature matrix, and draft the introduction section grounded in the sources.
 
@@ -2092,6 +2331,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/pocket_export.csv
+          - path: fixtures/projects.yaml
+          - path: fixtures/readwise_export.json
+          - path: fixtures/source_authority.json
         content: |-
           Build a knowledge dashboard over my read-later queue (200 Pocket + Readwise items attached with full text). Given descriptions of my three current projects (attached), cluster items by topic and rank each for each project using a defined rubric: topical relevance (cosine sim to project description), recency weight, and source-authority score. Surface the top 5 items per project with the matched keywords and the computed scores, and produce a 300-word grounded digest per project citing the items it summarizes.
 
@@ -2119,6 +2363,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/interviewers.json
+          - path: fixtures/my_resume.md
         content: |-
           I'm prepping for interviews at three companies. Research each — product, recent news, interviewer backgrounds — produce a tailored prep pack with likely questions, and a 90-second 'why me' pitch personalized for each.
 
@@ -2160,6 +2407,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/idea_statement.md
+          - path: fixtures/search_fixture.json
+          - path: fixtures/spec_schema.json
+          - path: fixtures/user_voice.json
         content: |-
           Given my side-project idea statement and constraints (attached), scan the competitive landscape via a provided search fixture (15+ existing products with feature matrices), extract the most-cited unmet need from 200 attached Reddit/G2/HN comments (with frequency counts), propose the thinnest MVP that addresses it, produce a one-page spec conforming to schema (problem, user, scope, explicit out-of-scope, success metric), and a one-week build plan with daily deliverables and a defined 'ship-ready' test list. Grade on evidence grounding, schema conformance, and test-list specificity.
 
@@ -2186,6 +2438,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/handout_template.docx
+          - path: fixtures/prior_syllabus.md
+          - path: fixtures/sources.json
         content: |-
           I'm a food science researcher prepping a lecture. Gather 10 authoritative sources on the topic (I'll give you), summarize each, draft the 45-minute lecture with discussion prompts, and create a student handout.
 
@@ -2212,6 +2468,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/past_awardees.json
+          - path: fixtures/submission_schema.yaml
         content: |-
           I'm applying to three research grants. For each: research the program's funding history (past awardees, themes, typical grant size), pull relevant publications from my Zotero library, draft a tailored 500-word specific-aims section, and compile the full submission checklist with deadlines.
 
@@ -2255,6 +2514,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/gold_labels.json
+          - path: fixtures/product_catalog.json
+          - path: fixtures/triage_rules.yaml
         content: |-
           Build me a custom agent that handles our Instagram community: reply to DMs in brand voice, triage escalations to a human, auto-respond to common product questions with links, and summarize sentiment weekly.
 
@@ -2283,6 +2546,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/planted_defects.json
+          - path: fixtures/product_db.json
         content: |-
           I need a QA agent for my e-commerce site: every 6 hours, crawl the top 20 product pages, check for broken images, 404s, price/stock mismatches against the database, and open a Linear ticket with screenshots when issues are found.
 
@@ -2310,6 +2576,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/reference_library.json
+          - path: fixtures/scene_specs.json
+          - path: fixtures/selection_rubric.yaml
         content: |-
           Build a sound-generation orchestration agent for a game studio. Given a scene description and a library of 50 categorized reference tracks (attached metadata: mood, BPM, key, tags), the agent must: (1) parse scene metadata into a structured spec; (2) select the 3 best-matching reference tracks using our scored rubric and cite each match; (3) invoke our audio-generation API with the correct parameters per candidate; (4) export each to the assets bucket using the naming convention; (5) attach all three to the Jira ticket with a comparison summary. Grade on parsing correctness, rubric application, tool-call schema, and naming convention — not on audio quality.
 
@@ -2339,6 +2609,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/brand_voice.md
+          - path: fixtures/friction_events.yaml
+          - path: fixtures/gold_labels.json
+          - path: fixtures/nudge_templates.json
         content: |-
           Build the customer-experience agent. Given our defined list of 12 friction events, 500 simulated trial-user session traces (fixtures attached with gold-labeled friction events), a 40-template nudge library, our brand voice guide, and a template-selection rubric: (1) detect friction events in each trace at precision/recall ≥ 0.9 vs gold; (2) select the correct contextual nudge template via the rubric; (3) personalize each nudge with the user's actual trace context; (4) emit the send call + logging event in the correct schema. Grade on detection metrics, template-selection accuracy, personalization grounding, and tool-call schema.
 
@@ -2368,6 +2643,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/approved_rewordings.yaml
+          - path: fixtures/gold_labels.json
+          - path: fixtures/regulatory_checklist.yaml
         content: |-
           Create a content-audit agent for a compliance-heavy industry: scan our public website weekly against our regulatory checklist, flag non-compliant claims, and suggest approved rewordings for each.
 
@@ -2395,6 +2674,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/escalation_rules.yaml
+          - path: fixtures/quote_requests.json
         content: |-
           Build a custom lead-response agent for our insurance brokerage: when a quote request form arrives, parse it, pull rate tables from our three carriers' APIs, generate the comparison quote, draft the personalized email response, and log the quote to our CRM — with explicit rules for which cases must be escalated to a human broker.
 
@@ -2449,6 +2731,12 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/calendar_next_week.ics
+          - path: fixtures/gold_conflicts.json
+          - path: fixtures/pending_invites.json
+          - path: fixtures/priorities.md
+          - path: fixtures/travel.json
         content: |-
           Sort out my calendar for next week: resolve the four double-bookings, propose blocks for the two deep-work priorities I'll name, reply to the three pending invites, and hold travel buffer for my Thursday trip.
 
@@ -2477,6 +2765,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/agenda_template.md
+          - path: fixtures/team_roster.json
         content: |-
           Plan and book a 3-day team offsite for 8 people in a $5k budget: shortlist three venues, compare, book the winner, arrange travel, create the agenda, and send the logistics email to the team.
 
@@ -2505,6 +2796,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/gold_labels.json
+          - path: fixtures/inbox_400.json
+          - path: fixtures/top_20_contacts.csv
         content: |-
           My inbox has 400 unread and I'm drowning. Archive anything older than 14 days that's not from our top-20 contacts list, categorize the rest into action buckets, and draft responses to the 12 most urgent.
 
@@ -2538,6 +2833,11 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/employee_details.json
+          - path: fixtures/mentor_pool.json
+          - path: fixtures/onboarding_template.md
+          - path: fixtures/tool_list.yaml
         content: |-
           Research and book the full stack for my new hire's first day: order laptop, create accounts across our 15 tools, draft the Day 1 agenda, set up mentor intro meetings, and send the welcome email sequence.
 
@@ -2565,6 +2865,12 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/board_materials_prior.pdf
+          - path: fixtures/macro_context.md
+          - path: fixtures/pipeline.json
+          - path: fixtures/q1_financials.csv
+          - path: fixtures/tough_questions_seed.txt
         content: |-
           I need to prep for a difficult board conversation next Tuesday. Pull the relevant financial context, draft three scenarios with downside/upside, prepare the one-pager, and rehearse three tough questions with me.
 
@@ -2593,6 +2899,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/ingestion_spec_examples.md
+          - path: fixtures/target_schemas.yaml
         content: |-
           Build and deploy an agent that writes Python data-pipeline code on request: given a natural-language description and a target schema, it writes the DAG, unit tests, and opens a PR against our Airflow repo.
 
@@ -2648,6 +2957,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/editor_brief_template.md
+          - path: fixtures/style_guide.md
         content: |-
           Design a multi-agent system for a media company: a research agent, a draft agent, an editor agent, and a publisher agent, with clear handoff contracts and retry/observability for each step.
 
@@ -2676,6 +2988,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/query_api_spec.yaml
+          - path: fixtures/sdk_spec.md
+          - path: fixtures/storage_schema.sql
         content: |-
           Build the trace-logging and cost-tracking component of our agent-ops platform (this task covers that one component, not the full platform). Deliverables: an SDK that wraps an agent run and emits structured trace events, a storage layer with defined schema, a query API with three endpoints (by-run, by-agent, time-range aggregates), and a dashboard that renders cost-per-run and success-rate-per-agent over a configurable window. Ship with 30 seeded historical runs and a test suite that validates SDK emission, storage idempotency, and dashboard render correctness.
 
@@ -2703,6 +3019,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/attack_taxonomy.yaml
+          - path: fixtures/planted_failures.yaml
         content: |-
           Build a production-grade QA agent for our own agent deployments: it attacks a target agent with adversarial inputs, logs failure modes, and produces a weekly reliability report.
 
@@ -2788,6 +3107,9 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/dataset.zip
+          - path: fixtures/reference_scores.json
         content: |-
           Reproduce the analysis from this published paper on the attached dataset, identify any methodological weaknesses, and write a two-page critique suitable for a graduate seminar.
 
@@ -2815,6 +3137,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/approved_catalog.json
+          - path: fixtures/dept_format_schema.yaml
+          - path: fixtures/dept_learning_outcomes.yaml
         content: |-
           Build an 8-week undergrad network-security syllabus. Given our department's required learning outcomes (attached), the published ACM/IEEE curriculum recommendations (attached), and our reading-list budget of $50/student: (1) map each of the 8 weeks to 2+ required learning outcomes with cited justification; (2) select readings only from the approved catalog (attached JSON, 500 resources) with total cost/student ≤ budget; (3) design 8 lab assignments, each with stated prerequisites and 5+ automated test cases; (4) define graded assessments with a rubric explicitly targeting each learning outcome. Grade on outcome-coverage matrix, budget compliance, lab-test count, and departmental schema conformance.
 
@@ -2844,6 +3170,10 @@ scenarios:
     rubric: operations-automation
     turns:
       - role: user
+        attachments:
+          - path: fixtures/irb_template.docx
+          - path: fixtures/recruitment_channel_options.yaml
+          - path: fixtures/research_questions.md
         content: |-
           Help with my masters thesis data collection: design a survey instrument, identify three recruitment channels for my target population, handle the IRB-friendly consent wording, and set up a secure data-capture pipeline.
 

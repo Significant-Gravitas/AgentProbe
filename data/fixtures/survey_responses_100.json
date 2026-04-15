@@ -1,0 +1,329 @@
+[
+  {
+    "respondent_id": 1,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "PyTorch", "LangChain", "PostgreSQL"],
+    "challenges": ["Latency", "Model hallucination", "Data privacy"],
+    "tools_used": ["OpenAI", "Anthropic", "Weights & Biases", "Pinecone"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 2,
+    "role": "CTO",
+    "company_size": "11-50",
+    "stack": ["TypeScript", "Next.js", "Vercel AI SDK"],
+    "challenges": ["Cost management", "Scaling production traffic"],
+    "tools_used": ["Anthropic", "Supabase", "LangSmith"],
+    "budget_range": "$5,000 - $10,000"
+  },
+  {
+    "respondent_id": 3,
+    "role": "Machine Learning Engineer",
+    "company_size": "1001-5000",
+    "stack": ["Python", "TensorFlow", "Kubernetes"],
+    "challenges": ["Evaluation metrics", "Data privacy", "Model hallucination"],
+    "tools_used": ["Hugging Face", "BentoML", "Arize Phoenix"],
+    "budget_range": "$100,000+"
+  },
+  {
+    "respondent_id": 4,
+    "role": "AI Engineer",
+    "company_size": "1-10",
+    "stack": ["Python", "FastAPI", "LlamaIndex"],
+    "challenges": ["Latency", "Prompt engineering"],
+    "tools_used": ["Anthropic", "Cohere", "ChromaDB"],
+    "budget_range": "$1,000 - $5,000"
+  },
+  {
+    "respondent_id": 5,
+    "role": "Product Manager",
+    "company_size": "201-500",
+    "stack": ["No-code", "Bubble", "Python"],
+    "challenges": ["Cost management", "Latency"],
+    "tools_used": ["OpenAI", "Zapier", "Flowise"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 6,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "Mojo", "JAX"],
+    "challenges": ["Model hallucination", "Evaluation metrics"],
+    "tools_used": ["Anthropic", "Weights & Biases", "LangSmith"],
+    "budget_range": "$50,000 - $100,000"
+  },
+  {
+    "respondent_id": 7,
+    "role": "Software Engineer",
+    "company_size": "5001+",
+    "stack": ["Java", "Python", "Spring Boot"],
+    "challenges": ["Data privacy", "Governance"],
+    "tools_used": ["Azure AI", "OpenAI", "Databricks"],
+    "budget_range": "$100,000+"
+  },
+  {
+    "respondent_id": 8,
+    "role": "AI Engineer",
+    "company_size": "11-50",
+    "stack": ["Python", "TypeScript", "LangGraph"],
+    "challenges": ["Latency", "Model hallucination", "Cost management"],
+    "tools_used": ["Anthropic", "OpenAI", "Pinecone", "Helicone"],
+    "budget_range": "$5,000 - $10,000"
+  },
+  {
+    "respondent_id": 9,
+    "role": "Data Scientist",
+    "company_size": "201-500",
+    "stack": ["R", "Python", "SQL"],
+    "challenges": ["Data privacy", "Evaluation metrics"],
+    "tools_used": ["Hugging Face", "Sagemaker"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 10,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "FastAPI", "React"],
+    "challenges": ["Model hallucination", "Latency", "Prompt engineering"],
+    "tools_used": ["Anthropic", "LangSmith", "Weaviate"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 11,
+    "role": "AI Engineer",
+    "company_size": "11-50",
+    "stack": ["Python", "LangChain"],
+    "challenges": ["Latency", "Model hallucination"],
+    "tools_used": ["Anthropic", "OpenAI"],
+    "budget_range": "$5,000 - $10,000"
+  },
+  {
+    "respondent_id": 12,
+    "role": "Head of AI",
+    "company_size": "501-1000",
+    "stack": ["Python", "PyTorch", "Rust"],
+    "challenges": ["Cost management", "Evaluation metrics", "Talent acquisition"],
+    "tools_used": ["Anthropic", "Anyscale", "Weights & Biases"],
+    "budget_range": "$100,000+"
+  },
+  {
+    "respondent_id": 13,
+    "role": "AI Engineer",
+    "company_size": "1-10",
+    "stack": ["TypeScript", "Vercel"],
+    "challenges": ["Model hallucination", "Prompt engineering"],
+    "tools_used": ["OpenAI", "LangSmith"],
+    "budget_range": "$1,000 - $5,000"
+  },
+  {
+    "respondent_id": 14,
+    "role": "Software Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "Django"],
+    "challenges": ["Latency", "Data privacy"],
+    "tools_used": ["Anthropic", "Pinecone"],
+    "budget_range": "$5,000 - $10,000"
+  },
+  {
+    "respondent_id": 15,
+    "role": "AI Engineer",
+    "company_size": "11-50",
+    "stack": ["Python", "LangChain", "Streamlit"],
+    "challenges": ["Model hallucination", "Latency"],
+    "tools_used": ["Anthropic", "OpenAI", "Voyage AI"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 16,
+    "role": "MLOps Engineer",
+    "company_size": "201-500",
+    "stack": ["Python", "Docker", "Kubernetes"],
+    "challenges": ["Scaling production traffic", "Evaluation metrics"],
+    "tools_used": ["Triton", "Hugging Face", "Weights & Biases"],
+    "budget_range": "$50,000 - $100,000"
+  },
+  {
+    "respondent_id": 17,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "FastAPI", "LlamaIndex"],
+    "challenges": ["Model hallucination", "Latency", "Data privacy"],
+    "tools_used": ["Anthropic", "Qdrant", "LangSmith"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 18,
+    "role": "CTO",
+    "company_size": "1-10",
+    "stack": ["TypeScript", "Next.js", "Python"],
+    "challenges": ["Cost management", "Model hallucination"],
+    "tools_used": ["OpenAI", "Anthropic", "Supabase"],
+    "budget_range": "$1,000 - $5,000"
+  },
+  {
+    "respondent_id": 19,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "LangGraph", "React"],
+    "challenges": ["Latency", "Evaluation metrics"],
+    "tools_used": ["Anthropic", "LangSmith", "Pinecone"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 20,
+    "role": "Software Engineer",
+    "company_size": "1001-5000",
+    "stack": ["Java", "Python"],
+    "challenges": ["Data privacy", "Governance", "Model hallucination"],
+    "tools_used": ["Azure AI", "Anthropic"],
+    "budget_range": "$50,000 - $100,000"
+  },
+  {
+    "respondent_id": 21,
+    "role": "AI Engineer",
+    "company_size": "11-50",
+    "stack": ["Python", "FastAPI"],
+    "challenges": ["Latency", "Model hallucination"],
+    "tools_used": ["Anthropic", "OpenAI", "LangSmith"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 22,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "LangChain"],
+    "challenges": ["Model hallucination", "Latency"],
+    "tools_used": ["Anthropic", "Pinecone"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 23,
+    "role": "Founder",
+    "company_size": "1-10",
+    "stack": ["TypeScript", "Python"],
+    "challenges": ["Cost management", "Latency"],
+    "tools_used": ["Anthropic", "Groq"],
+    "budget_range": "$1,000 - $5,000"
+  },
+  {
+    "respondent_id": 24,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "FastAPI", "LlamaIndex"],
+    "challenges": ["Model hallucination", "Evaluation metrics", "Data privacy"],
+    "tools_used": ["Anthropic", "LangSmith", "Weights & Biases"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 25,
+    "role": "ML Engineer",
+    "company_size": "201-500",
+    "stack": ["Python", "PyTorch"],
+    "challenges": ["Latency", "Scaling production traffic"],
+    "tools_used": ["Anthropic", "OpenAI", "Anyscale"],
+    "budget_range": "$50,000 - $100,000"
+  },
+  {
+    "respondent_id": 26,
+    "role": "AI Engineer",
+    "company_size": "11-50",
+    "stack": ["Python", "LangGraph"],
+    "challenges": ["Model hallucination", "Latency"],
+    "tools_used": ["Anthropic", "LangSmith"],
+    "budget_range": "$5,000 - $10,000"
+  },
+  {
+    "respondent_id": 27,
+    "role": "Software Engineer",
+    "company_size": "5001+",
+    "stack": ["C#", "Python"],
+    "challenges": ["Data privacy", "Model hallucination"],
+    "tools_used": ["Azure AI", "OpenAI"],
+    "budget_range": "$100,000+"
+  },
+  {
+    "respondent_id": 28,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "FastAPI"],
+    "challenges": ["Latency", "Model hallucination", "Evaluation metrics"],
+    "tools_used": ["Anthropic", "Pinecone", "LangSmith"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 29,
+    "role": "AI Engineer",
+    "company_size": "11-50",
+    "stack": ["Python", "LangChain"],
+    "challenges": ["Model hallucination", "Latency"],
+    "tools_used": ["Anthropic", "OpenAI"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 30,
+    "role": "CTO",
+    "company_size": "1-10",
+    "stack": ["TypeScript", "Next.js"],
+    "challenges": ["Cost management", "Latency"],
+    "tools_used": ["Anthropic", "Supabase"],
+    "budget_range": "$1,000 - $5,000"
+  },
+  {
+    "respondent_id": 31,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "LlamaIndex"],
+    "challenges": ["Model hallucination", "Latency"],
+    "tools_used": ["Anthropic", "Weaviate"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 32,
+    "role": "AI Engineer",
+    "company_size": "11-50",
+    "stack": ["Python", "FastAPI"],
+    "challenges": ["Latency", "Model hallucination"],
+    "tools_used": ["Anthropic", "LangSmith"],
+    "budget_range": "$5,000 - $10,000"
+  },
+  {
+    "respondent_id": 33,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "LangChain"],
+    "challenges": ["Model hallucination", "Evaluation metrics", "Latency"],
+    "tools_used": ["Anthropic", "Pinecone", "Weights & Biases"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 34,
+    "role": "ML Engineer",
+    "company_size": "501-1000",
+    "stack": ["Python", "PyTorch"],
+    "challenges": ["Data privacy", "Latency"],
+    "tools_used": ["Anthropic", "Hugging Face"],
+    "budget_range": "$50,000 - $100,000"
+  },
+  {
+    "respondent_id": 35,
+    "role": "AI Engineer",
+    "company_size": "11-50",
+    "stack": ["Python", "FastAPI", "LangGraph"],
+    "challenges": ["Model hallucination", "Latency"],
+    "tools_used": ["Anthropic", "LangSmith"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 36,
+    "role": "AI Engineer",
+    "company_size": "51-200",
+    "stack": ["Python", "LlamaIndex"],
+    "challenges": ["Latency", "Model hallucination"],
+    "tools_used": ["Anthropic", "Qdrant"],
+    "budget_range": "$10,000 - $50,000"
+  },
+  {
+    "respondent_id": 37,
+    "role": "Software Engineer",
+    "company_size": "1001-5

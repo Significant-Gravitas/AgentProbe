@@ -1,0 +1,31 @@
+{
+  "template_version": "1.0.2",
+  "schema_name": "Jobs-to-be-Done (JTBD) Framework",
+  "required_fields": [
+    {
+      "id": "situation",
+      "description": "The specific context or circumstances the user is in when the need arises.",
+      "example": "When we are preparing for a seasonal sale and need to segment our high-value customers..."
+    },
+    {
+      "id": "motivation",
+      "description": "The underlying driver, pain point, or desire that pushes the user to seek a solution.",
+      "example": "I want to automate the export of live purchase data to our email marketing tool..."
+    },
+    {
+      "id": "expected_outcome",
+      "description": "The measurable success criteria or functional benefit the user hopes to achieve.",
+      "example": "So that we can send personalized offers in real-time without manual CSV uploads."
+    },
+    {
+      "id": "current_workaround",
+      "description": "How the user currently solves the problem or manages the pain point today.",
+      "example": "Currently, a junior analyst manually exports a report from the SQL database every Monday morning."
+    }
+  ],
+  "validation_rules": {
+    "allow_multiple_entries": true,
+    "format_requirement": "List of JSON objects",
+    "required_keys": ["situation", "motivation", "expected_outcome", "current_workaround"]
+  }
+}

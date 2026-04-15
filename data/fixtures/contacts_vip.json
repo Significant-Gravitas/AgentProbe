@@ -1,0 +1,194 @@
+{
+  "vip_contacts": [
+    {
+      "id": "vip-001",
+      "name": "Sarah Jenkins",
+      "role": "Co-Founder & CTO",
+      "company": "CurrentSaaS",
+      "email": "sarah@currentsaas.io",
+      "category": "Internal",
+      "notes": "Direct partner. High urgency."
+    },
+    {
+      "id": "vip-002",
+      "name": "Marcus Thorne",
+      "role": "Lead Investor",
+      "company": "Apex Ventures",
+      "email": "m.thorne@apexvc.com",
+      "category": "Investor",
+      "notes": "Board member. Focuses on Burn Rate and MRR."
+    },
+    {
+      "id": "vip-003",
+      "name": "Elena Rodriguez",
+      "role": "General Counsel",
+      "company": "Rodriguez & Associates",
+      "email": "elena@rodlaw.legal",
+      "category": "Legal",
+      "notes": "Handles all IP and employment contracts."
+    },
+    {
+      "id": "vip-004",
+      "name": "David Chen",
+      "role": "VP of Engineering",
+      "company": "Global Logistics Corp",
+      "email": "d.chen@globallogistics.com",
+      "category": "Customer",
+      "arr": 125000,
+      "notes": "Top Tier Customer. Renewal in Q3."
+    },
+    {
+      "id": "vip-005",
+      "name": "Jessica Wu",
+      "role": "Head of Operations",
+      "company": "Fintech Flow",
+      "email": "jwu@fintechflow.io",
+      "category": "Customer",
+      "arr": 98000,
+      "notes": "Beta tester for new API features."
+    },
+    {
+      "id": "vip-006",
+      "name": "Tom Aris",
+      "role": "Partner",
+      "company": "Seedling Capital",
+      "email": "tom@seedling.cap",
+      "category": "Investor",
+      "notes": "Series A lead."
+    },
+    {
+      "id": "vip-007",
+      "name": "Linda Sterling",
+      "role": "CTO",
+      "company": "Sterling Retail Group",
+      "email": "lsterling@sterling.com",
+      "category": "Customer",
+      "arr": 85000,
+      "notes": "High-volume user. Sensitive to latency issues."
+    },
+    {
+      "id": "vip-008",
+      "name": "Michael O'Reilly",
+      "role": "Director of IT",
+      "company": "Beacon Health",
+      "email": "oreilly@beacon.org",
+      "category": "Customer",
+      "arr": 72000,
+      "notes": "Requires HIPAA compliance documentation."
+    },
+    {
+      "id": "vip-009",
+      "name": "Samantha Reed",
+      "role": "CEO",
+      "company": "Reed Media",
+      "email": "sam@reedmedia.com",
+      "category": "Customer",
+      "arr": 68000,
+      "notes": "Expanding to 500 seats next month."
+    },
+    {
+      "id": "vip-010",
+      "name": "Kevin Park",
+      "role": "Principal",
+      "company": "Horizon Equity",
+      "email": "kevin@horizonequity.com",
+      "category": "Investor",
+      "notes": "Participated in Bridge round."
+    },
+    {
+      "id": "vip-011",
+      "name": "Anita Desai",
+      "role": "VP Infrastructure",
+      "company": "CloudScale Systems",
+      "email": "adesai@cloudscale.net",
+      "category": "Customer",
+      "arr": 65000,
+      "notes": "Referral source for 3 other leads."
+    },
+    {
+      "id": "vip-012",
+      "name": "Robert Vance",
+      "role": "Procurement Lead",
+      "company": "Vance Enterprises",
+      "email": "rvance@vance-ent.com",
+      "category": "Customer",
+      "arr": 62000,
+      "notes": "Strict SLA requirements."
+    },
+    {
+      "id": "vip-013",
+      "name": "Chloe Simmons",
+      "role": "Founder",
+      "company": "Simmons Data",
+      "email": "chloe@simmonsdata.io",
+      "category": "Customer",
+      "arr": 58000,
+      "notes": "Strategic partnership prospect."
+    },
+    {
+      "id": "vip-014",
+      "name": "Gary Oldman",
+      "role": "Head of Product",
+      "company": "NeoBank",
+      "email": "gary.o@neobank.com",
+      "category": "Customer",
+      "arr": 55000,
+      "notes": "Power user. Provides detailed feedback."
+    },
+    {
+      "id": "vip-015",
+      "name": "Sonia Gupta",
+      "role": "Director of Technology",
+      "company": "EduTech Solutions",
+      "email": "sgupta@edutech.edu",
+      "category": "Customer",
+      "arr": 52000,
+      "notes": "Academic license holder."
+    },
+    {
+      "id": "vip-016",
+      "name": "Derek Zool",
+      "role": "CFO",
+      "company": "CurrentSaaS",
+      "email": "derek@currentsaas.io",
+      "category": "Internal",
+      "notes": "Handles payroll and runway modeling."
+    },
+    {
+      "id": "vip-017",
+      "name": "Patricia Highsmith",
+      "role": "Managing Director",
+      "company": "Green Light Ventures",
+      "email": "phighsmith@glv.io",
+      "category": "Investor",
+      "notes": "Early angel investor."
+    },
+    {
+      "id": "vip-018",
+      "name": "Brian Kates",
+      "role": "Account Manager",
+      "company": "AWS Enterprise",
+      "email": "bkates@amazon.com",
+      "category": "Vendor",
+      "notes": "Primary infrastructure contact. Crucial for credits."
+    },
+    {
+      "id": "vip-019",
+      "name": "Alice Wonderland",
+      "role": "Head of People",
+      "company": "CurrentSaaS",
+      "email": "alice@currentsaas.io",
+      "category": "Internal",
+      "notes": "Recruiting and culture."
+    },
+    {
+      "id": "vip-020",
+      "name": "Mark Zuckerberg",
+      "role": "Founder",
+      "company": "Meta",
+      "email": "zuck@fb.com",
+      "category": "Sales",
+      "notes": "Whale prospect. Do not ignore."
+    }
+  ]
+}

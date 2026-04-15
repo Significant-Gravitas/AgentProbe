@@ -1,0 +1,160 @@
+{
+  "total_defects": 20,
+  "defects": [
+    {
+      "id": "DEF-001",
+      "type": "broken_image",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/the-monolith-dining-table",
+      "element_selector": "img.main-hero-image",
+      "observed_behavior": "403 Forbidden on image asset load",
+      "expected_url": "https://cdn.sundial.example/assets/tables/monolith_hero_01.jpg"
+    },
+    {
+      "id": "DEF-002",
+      "type": "broken_image",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/scandic-oak-bedframe",
+      "element_selector": ".gallery-thumb-3",
+      "observed_behavior": "500 Internal Server Error on asset request",
+      "expected_url": "https://cdn.sundial.example/assets/beds/scandic_oak_side.jpg"
+    },
+    {
+      "id": "DEF-003",
+      "type": "broken_image",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/velvet-accent-chair-emerald",
+      "element_selector": "img[alt='Emerald Velvet Texture Detail']",
+      "observed_behavior": "Resource not found (404) for image source",
+      "expected_url": "https://cdn.sundial.example/assets/chairs/velvet_emerald_detail.jpg"
+    },
+    {
+      "id": "DEF-004",
+      "type": "broken_image",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/minimalist-desk-lamp",
+      "element_selector": ".product-lifestyle-image",
+      "observed_behavior": "Empty src attribute on render",
+      "expected_url": "https://cdn.sundial.example/assets/lighting/minimalist_lamp_lifestyle.jpg"
+    },
+    {
+      "id": "DEF-005",
+      "type": "404_not_found",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/modular-sofa-cloud-grey",
+      "observed_behavior": "Page returns 404 status code instead of product details",
+      "context": "Top selling SKU, routing table error"
+    },
+    {
+      "id": "DEF-006",
+      "type": "404_not_found",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/brass-pendant-light-set",
+      "observed_behavior": "Redirect loop leading to 404",
+      "context": "Category mapping failure"
+    },
+    {
+      "id": "DEF-007",
+      "type": "404_not_found",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/outdoor-teak-bench",
+      "observed_behavior": "Soft 404 (200 OK but 'Product Not Found' text displayed)",
+      "context": "Database query timeout during page load"
+    },
+    {
+      "id": "DEF-008",
+      "type": "price_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/mid-century-credenza",
+      "db_price": 1299.00,
+      "ui_price": 899.00,
+      "discrepancy": "-$400.00 (Unintended discount applied in UI)"
+    },
+    {
+      "id": "DEF-009",
+      "type": "price_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/islands-coffee-table",
+      "db_price": 450.00,
+      "ui_price": 4500.00,
+      "discrepancy": "+$4050.00 (Decimal point placement error)"
+    },
+    {
+      "id": "DEF-010",
+      "type": "price_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/linen-blackout-curtains",
+      "db_price": 85.00,
+      "ui_price": 0.00,
+      "discrepancy": "Product showing as free ($0.00) on PDP"
+    },
+    {
+      "id": "DEF-011",
+      "type": "price_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/ergonomic-office-chair",
+      "db_price": 549.99,
+      "ui_price": 599.99,
+      "discrepancy": "Stale price cached in frontend"
+    },
+    {
+      "id": "DEF-012",
+      "type": "price_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/wool-area-rug-8x10",
+      "db_price": 720.00,
+      "ui_price": 72.00,
+      "discrepancy": "Missing trailing zero in currency formatter"
+    },
+    {
+      "id": "DEF-013",
+      "type": "price_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/floating-bookshelf-walnut",
+      "db_price": 120.00,
+      "ui_price": 145.00,
+      "discrepancy": "Shipping fee incorrectly bundled into base price display"
+    },
+    {
+      "id": "DEF-014",
+      "type": "stock_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/modernist-floor-lamp",
+      "db_stock": 0,
+      "ui_status": "In Stock",
+      "discrepancy": "Overselling risk: DB shows out of stock"
+    },
+    {
+      "id": "DEF-015",
+      "type": "stock_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/ceramic-vase-trio",
+      "db_stock": 42,
+      "ui_status": "Out of Stock",
+      "discrepancy": "Lost sales: DB shows inventory but UI shows OOS"
+    },
+    {
+      "id": "DEF-016",
+      "type": "stock_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/bamboo-bath-mat",
+      "db_stock": 5,
+      "ui_status": "Only 1 left!",
+      "discrepancy": "Low stock warning logic mismatch"
+    },
+    {
+      "id": "DEF-017",
+      "type": "stock_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/leather-ottoman-tan",
+      "db_stock": 100,
+      "ui_status": "Pre-order",
+      "discrepancy": "Incorrect status: Product is ready to ship"
+    },
+    {
+      "id": "DEF-018",
+      "type": "stock_mismatch",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/marble-side-table",
+      "db_stock": 0,
+      "ui_status": "Limited Quantities Available",
+      "discrepancy": "UI showing false availability"
+    },
+    {
+      "id": "DEF-019",
+      "type": "missing_alt_text",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/woven-wall-hanging",
+      "element_selector": "img.primary-view",
+      "observed_behavior": "alt attribute is present but empty (alt=\"\")"
+    },
+    {
+      "id": "DEF-020",
+      "type": "missing_alt_text",
+      "pdp_url": "https://sundial-test.qa-sandbox.example/products/concrete-planter-set",
+      "element_selector": "img.thumbnail-1",
+      "observed_behavior": "alt attribute is entirely missing from the DOM"
+    }
+  ]
+}

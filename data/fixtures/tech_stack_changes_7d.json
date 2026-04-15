@@ -1,0 +1,227 @@
+[
+  {
+    "domain": "acme-solutions.io",
+    "company_name": "Acme Solutions",
+    "detected_at": "2023-10-24T09:15:00Z",
+    "changes": [
+      {
+        "technology": "HubSpot Marketing Hub",
+        "category": "Marketing Automation",
+        "action": "added",
+        "confidence": 0.98
+      },
+      {
+        "technology": "Marketo",
+        "category": "Marketing Automation",
+        "action": "removed",
+        "confidence": 0.92
+      }
+    ]
+  },
+  {
+    "domain": "quant-fintech.com",
+    "company_name": "Quant Fintech",
+    "detected_at": "2023-10-25T14:20:00Z",
+    "changes": [
+      {
+        "technology": "Segment",
+        "category": "Customer Data Platform",
+        "action": "added",
+        "confidence": 0.99
+      },
+      {
+        "technology": "Amplitude",
+        "category": "Analytics",
+        "action": "added",
+        "confidence": 0.95
+      }
+    ]
+  },
+  {
+    "domain": "blue-horizon-logistics.net",
+    "company_name": "Blue Horizon Logistics",
+    "detected_at": "2023-10-22T11:05:00Z",
+    "changes": [
+      {
+        "technology": "Salesforce B2B Commerce",
+        "category": "Ecommerce",
+        "action": "added",
+        "confidence": 0.97
+      }
+    ]
+  },
+  {
+    "domain": "vertex-ai-labs.com",
+    "company_name": "Vertex AI Labs",
+    "detected_at": "2023-10-26T08:45:00Z",
+    "changes": [
+      {
+        "technology": "Intercom",
+        "category": "Customer Service",
+        "action": "added",
+        "confidence": 0.94
+      },
+      {
+        "technology": "Zendesk",
+        "category": "Customer Service",
+        "action": "removed",
+        "confidence": 0.89
+      }
+    ]
+  },
+  {
+    "domain": "cloud-sync-systems.co",
+    "company_name": "Cloud Sync Systems",
+    "detected_at": "2023-10-23T16:30:00Z",
+    "changes": [
+      {
+        "technology": "6sense",
+        "category": "Account Based Marketing",
+        "action": "added",
+        "confidence": 0.91
+      }
+    ]
+  },
+  {
+    "domain": "global-reach-media.com",
+    "company_name": "Global Reach Media",
+    "detected_at": "2023-10-27T10:10:00Z",
+    "changes": [
+      {
+        "technology": "NetSuite",
+        "category": "ERP",
+        "action": "added",
+        "confidence": 0.96
+      }
+    ]
+  },
+  {
+    "domain": "iron-clad-security.io",
+    "company_name": "Iron Clad Security",
+    "detected_at": "2023-10-24T13:55:00Z",
+    "changes": [
+      {
+        "technology": "Drift",
+        "category": "Conversational Marketing",
+        "action": "added",
+        "confidence": 0.93
+      }
+    ]
+  },
+  {
+    "domain": "nexus-biotech.com",
+    "company_name": "Nexus Biotech",
+    "detected_at": "2023-10-25T17:40:00Z",
+    "changes": [
+      {
+        "technology": "Gong",
+        "category": "Revenue Intelligence",
+        "action": "added",
+        "confidence": 0.90
+      },
+      {
+        "technology": "Outreach",
+        "category": "Sales Engagement",
+        "action": "added",
+        "confidence": 0.94
+      }
+    ]
+  },
+  {
+    "domain": "summit-retail-group.com",
+    "company_name": "Summit Retail Group",
+    "detected_at": "2023-10-21T09:00:00Z",
+    "changes": [
+      {
+        "technology": "Shopify Plus",
+        "category": "Ecommerce",
+        "action": "added",
+        "confidence": 0.99
+      },
+      {
+        "technology": "Magento",
+        "category": "Ecommerce",
+        "action": "removed",
+        "confidence": 0.95
+      }
+    ]
+  },
+  {
+    "domain": "data-flow-analytics.io",
+    "company_name": "Data Flow Analytics",
+    "detected_at": "2023-10-26T12:20:00Z",
+    "changes": [
+      {
+        "technology": "Mixpanel",
+        "category": "Analytics",
+        "action": "added",
+        "confidence": 0.92
+      }
+    ]
+  },
+  {
+    "domain": "vector-dynamics.org",
+    "company_name": "Vector Dynamics",
+    "detected_at": "2023-10-22T15:15:00Z",
+    "changes": [
+      {
+        "technology": "Snowflake",
+        "category": "Data Warehouse",
+        "action": "added",
+        "confidence": 0.97
+      }
+    ]
+  },
+  {
+    "domain": "prime-stack-software.com",
+    "company_name": "Prime Stack Software",
+    "detected_at": "2023-10-24T10:45:00Z",
+    "changes": [
+      {
+        "technology": "Apollo.io",
+        "category": "Sales Intelligence",
+        "action": "added",
+        "confidence": 0.88
+      }
+    ]
+  },
+  {
+    "domain": "shield-cyber.net",
+    "company_name": "Shield Cyber",
+    "detected_at": "2023-10-27T16:05:00Z",
+    "changes": [
+      {
+        "technology": "Pendo",
+        "category": "Product Experience",
+        "action": "added",
+        "confidence": 0.94
+      }
+    ]
+  },
+  {
+    "domain": "orbit-pay.io",
+    "company_name": "Orbit Pay",
+    "detected_at": "2023-10-23T08:30:00Z",
+    "changes": [
+      {
+        "technology": "FullStory",
+        "category": "Session Replay",
+        "action": "added",
+        "confidence": 0.91
+      }
+    ]
+  },
+  {
+    "domain": "green-grid-energy.com",
+    "company_name": "Green Grid Energy",
+    "detected_at": "2023-10-25T11:50:00Z",
+    "changes": [
+      {
+        "technology": "Microsoft Dynamics 365",
+        "category": "CRM",
+        "action": "added",
+        "confidence": 0.96
+      }
+    ]
+  }
+]

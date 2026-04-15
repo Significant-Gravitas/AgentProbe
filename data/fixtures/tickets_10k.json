@@ -1,0 +1,182 @@
+[
+  {
+    "ticket_id": "TKT-00001",
+    "timestamp": "2023-10-01T08:12:05Z",
+    "customer_id": "CUST-9921",
+    "issue": "I am trying to sync my Outlook calendar with Cascade CRM but I keep getting a '403 Forbidden' error after I authorize the app.",
+    "resolution": "User had not enabled 'External API Access' in their Microsoft 365 admin center. Instructed user to toggle the permission. Verified sync success after change.",
+    "tags": ["integration", "outlook", "authentication", "permissions"],
+    "priority": "high"
+  },
+  {
+    "ticket_id": "TKT-00002",
+    "timestamp": "2023-10-01T08:15:30Z",
+    "customer_id": "CUST-4410",
+    "issue": "How do I export my lead list to a CSV file? I only see the option for PDF.",
+    "resolution": "Navigated user to the 'Leads' tab, clicked the 'Bulk Actions' dropdown, and selected 'Export as CSV'. Explained that the PDF option they saw was for individual lead summaries.",
+    "tags": ["export", "leads", "ui-navigation"],
+    "priority": "low"
+  },
+  {
+    "ticket_id": "TKT-00003",
+    "timestamp": "2023-10-01T09:02:11Z",
+    "customer_id": "CUST-1022",
+    "issue": "Our team's dashboard is showing 'Data Load Error' for the last 2 hours. Is there a service outage?",
+    "resolution": "Investigated regional shard US-EAST-1. Found a temporary latency spike. Service was restored automatically. Advised user to clear browser cache and retry.",
+    "tags": ["outage", "dashboard", "error-message"],
+    "priority": "urgent"
+  },
+  {
+    "ticket_id": "TKT-00004",
+    "timestamp": "2023-10-01T09:45:00Z",
+    "customer_id": "CUST-8832",
+    "issue": "Can I set up an automated email to go out 3 days after a lead is moved to the 'Qualified' stage?",
+    "resolution": "Guided user to 'Workflows' -> 'Create New'. Trigger: Stage Change (Qualified). Action: Delay (3 days). Sub-action: Send Email Template. Provided documentation link for Workflow triggers.",
+    "tags": ["automation", "workflows", "email"],
+    "priority": "medium"
+  },
+  {
+    "ticket_id": "TKT-00005",
+    "timestamp": "2023-10-01T10:20:15Z",
+    "customer_id": "CUST-3319",
+    "issue": "I accidentally deleted a contact named 'Robert Miller'. Can this be recovered?",
+    "resolution": "Used the 'Trash' recovery tool within the Settings > Data Management menu. Restored contact 'Robert Miller' (ID: 55921). Reminded user that items in Trash are purged after 30 days.",
+    "tags": ["data-recovery", "contacts", "trash"],
+    "priority": "medium"
+  },
+  {
+    "ticket_id": "TKT-00006",
+    "timestamp": "2023-10-01T11:05:44Z",
+    "customer_id": "CUST-2201",
+    "issue": "The mobile app is crashing whenever I try to upload a photo to a deal note.",
+    "resolution": "Identified version mismatch on iOS. User was on v2.1.2. Instructed upgrade to v2.2.0. Verified that the multipart/form-data fix in the latest version resolved the crash.",
+    "tags": ["mobile", "crash", "ios", "attachments"],
+    "priority": "high"
+  },
+  {
+    "ticket_id": "TKT-00007",
+    "timestamp": "2023-10-01T11:30:12Z",
+    "customer_id": "CUST-7761",
+    "issue": "I need to change my billing address from 123 Maple St to 456 Oak Ave.",
+    "resolution": "Updated billing record in Stripe and synced back to CRM account settings. Confirmed change with user via email.",
+    "tags": ["billing", "account-management"],
+    "priority": "low"
+  },
+  {
+    "ticket_id": "TKT-00008",
+    "timestamp": "2023-10-01T12:40:00Z",
+    "customer_id": "CUST-5542",
+    "issue": "Is there a limit on how many custom fields I can add to a Deal?",
+    "resolution": "Informed user that the Professional plan allows up to 100 custom fields per object. They currently have 12. Advised on best practices for naming conventions.",
+    "tags": ["custom-fields", "limits", "account-plans"],
+    "priority": "low"
+  },
+  {
+    "ticket_id": "TKT-00009",
+    "timestamp": "2023-10-01T13:12:19Z",
+    "customer_id": "CUST-1190",
+    "issue": "I'm trying to use the API to fetch all tasks, but I'm only getting 20 results back even though we have hundreds.",
+    "resolution": "Explained pagination logic. The /tasks endpoint defaults to 20 per page. Instructed user to use the ?page= and ?per_page= parameters or check the 'next_page_url' in the JSON response.",
+    "tags": ["api", "pagination", "developer-support"],
+    "priority": "medium"
+  },
+  {
+    "ticket_id": "TKT-00010",
+    "timestamp": "2023-10-01T14:05:05Z",
+    "customer_id": "CUST-6623",
+    "issue": "One of my team members cannot see the 'Revenue' report. They have the 'Sales Rep' role.",
+    "resolution": "The 'Sales Rep' role does not have 'View Financials' permission by default. Created a custom role 'Senior Sales' with the required permission and assigned it to the user.",
+    "tags": ["permissions", "roles", "reporting"],
+    "priority": "medium"
+  },
+  {
+    "ticket_id": "TKT-00011",
+    "timestamp": "2023-10-01T15:00:22Z",
+    "customer_id": "CUST-4455",
+    "issue": "Slack notifications for new deals aren't working since this morning.",
+    "resolution": "Checked Slack OAuth token status. Token was revoked. Re-authenticated the Slack integration in the Integrations panel. Sent test notification to confirm fix.",
+    "tags": ["integration", "slack", "notifications"],
+    "priority": "high"
+  },
+  {
+    "ticket_id": "TKT-00012",
+    "timestamp": "2023-10-01T15:45:30Z",
+    "customer_id": "CUST-9012",
+    "issue": "Can I merge two duplicate contact records?",
+    "resolution": "Yes, selected both contacts in the Contact list view and clicked 'Merge'. Selected the master record to retain data. Merged successfully.",
+    "tags": ["data-management", "deduplication", "contacts"],
+    "priority": "low"
+  },
+  {
+    "ticket_id": "TKT-00013",
+    "timestamp": "2023-10-01T16:20:11Z",
+    "customer_id": "CUST-2341",
+    "issue": "The 'Last Activity' date on my leads isn't updating when I send an email through Gmail (synced).",
+    "resolution": "Found that the user had 'Track Activities' disabled in the Gmail Integration settings. Enabled the setting. Retroactive sync started for last 24 hours.",
+    "tags": ["integration", "gmail", "activity-tracking"],
+    "priority": "medium"
+  },
+  {
+    "ticket_id": "TKT-00014",
+    "timestamp": "2023-10-01T17:10:05Z",
+    "customer_id": "CUST-1122",
+    "issue": "I need to import 5,000 leads from an Excel file. What is the limit?",
+    "resolution": "Import limit is 50,000 rows per CSV upload. 5,000 is well within limits. Provided the standard CSV template for mapping headers.",
+    "tags": ["import", "leads", "bulk-upload"],
+    "priority": "low"
+  },
+  {
+    "ticket_id": "TKT-00015",
+    "timestamp": "2023-10-01T18:00:00Z",
+    "customer_id": "CUST-8877",
+    "issue": "My password reset link isn't arriving in my inbox.",
+    "resolution": "Verified email status in SendGrid logs. Email was dropped due to a previous 'Unsubscribe' from marketing emails. Cleared the suppression list for this user and resent the link.",
+    "tags": ["authentication", "email", "troubleshooting"],
+    "priority": "high"
+  },
+  {
+    "ticket_id": "TKT-00016",
+    "timestamp": "2023-10-02T08:30:15Z",
+    "customer_id": "CUST-4491",
+    "issue": "Is there a way to see which users have logged in over the last 7 days?",
+    "resolution": "Directed user to Settings > Security > Audit Logs. Filtered by 'Login' event and date range. Exported the list for the user.",
+    "tags": ["security", "audit-logs", "admin"],
+    "priority": "low"
+  },
+  {
+    "ticket_id": "TKT-00017",
+    "timestamp": "2023-10-02T09:15:22Z",
+    "customer_id": "CUST-5510",
+    "issue": "I'm getting a 'Validation Error: Invalid Currency' when creating a deal via Zapier.",
+    "resolution": "The Zapier payload was sending 'USD' but the CRM account was set to 'GBP'. Updated the Zap to use the correct currency code matching the account settings.",
+    "tags": ["integration", "zapier", "error-handling"],
+    "priority": "medium"
+  },
+  {
+    "ticket_id": "TKT-00018",
+    "timestamp": "2023-10-02T10:05:40Z",
+    "customer_id": "CUST-3322",
+    "issue": "How do I delete a custom pipeline stage that has active deals in it?",
+    "resolution": "Explained that deals must be moved to another stage first. Assisted user in bulk-moving 15 deals from 'Old Stage' to 'Discovery'. Deleted the 'Old Stage' successfully.",
+    "tags": ["pipelines", "deals", "ui-navigation"],
+    "priority": "low"
+  },
+  {
+    "ticket_id": "TKT-00019",
+    "timestamp": "2023-10-02T11:20:11Z",
+    "customer_id": "CUST-9900",
+    "issue": "The API documentation for /contacts/search seems to be missing the 'sort' parameter details.",
+    "resolution": "Confirmed documentation gap. Updated the Swagger docs to include 'sort_by' and 'sort_order' parameters. Provided example: ?sort_by=created_at&sort_order=desc.",
+    "tags": ["api", "documentation", "developer-support"],
+    "priority": "medium"
+  },
+  {
+    "ticket_id": "TKT-00020",
+    "timestamp": "2023-10-02T12:45:55Z",
+    "customer_id": "CUST-4431",
+    "issue": "Our company logo isn't appearing on the invoices we send through Cascade.",
+    "resolution": "Checked 'Brand Settings'. The uploaded file was a .TIFF which is not supported for web rendering in invoices. Converted logo to .PNG and re-uploaded. Verified on test invoice.",
+    "tags": ["billing", "branding", "invoices"],
+    "priority": "medium"
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "rw_001",
+    "title": "The Evolution of Usage-Based Pricing in SaaS",
+    "url": "https://www.battery.com/blog/usage-based-pricing-evolution/",
+    "author": "Battery Ventures",
+    "highlighted_at": "2023-10-15T14:20:00Z",
+    "text": "The transition from seat-based to usage-based models requires a fundamental shift in how companies measure customer success and recognize revenue.",
+    "full_text": "In the early days of SaaS, the per-seat license was king. However, as infrastructure costs plummeted and API-first companies like Twilio and Stripe emerged, usage-based pricing (UBP) became the gold standard. Transitioning to UBP isn't just a pricing change; it's an operational overhaul. Engineering must build metering systems that are accurate to the cent, while Sales must move from upfront quotas to consumption-based forecasting. The most successful rollouts use a 'hybrid' approach initially, offering a base tier with overage charges to ensure predictable revenue while capturing the upside of heavy users."
+  },
+  {
+    "id": "rw_002",
+    "title": "LLMs in Customer Support: Beyond the Hype",
+    "url": "https://intercom.com/blog/llm-customer-support-reality/",
+    "author": "Des Traynor",
+    "highlighted_at": "2023-11-02T09:12:00Z",
+    "text": "An AI copilot is only as good as the knowledge base it can access. RAG (Retrieval-Augmented Generation) is the bridge between generic models and specific company context.",
+    "full_text": "The promise of AI in support is often framed as full automation, but the real value is in the 'Copilot' model. By surfacing relevant documentation and drafting responses for human agents, LLMs reduce average handle time (AHT) by 40%. The technical challenge lies in the RAG pipeline. If your knowledge base is outdated, the AI will confidently hallucinate incorrect answers. Therefore, the first step in building a support copilot is not choosing a model, but auditing and cleaning your support docs to ensure the vector database contains high-signal information."
+  },
+  {
+    "id": "rw_003",
+    "title": "The Psychology of User Onboarding",
+    "url": "https://growth.design/case-studies/onboarding-ux/",
+    "author": "Growth.Design",
+    "highlighted_at": "2023-11-10T11:45:00Z",
+    "text": "Cognitive load during the first five minutes of a product experience is the primary driver of churn.",
+    "full_text": "When redesigning onboarding, teams often make the mistake of adding more tooltips. This increases 'interaction cost' and cognitive load. Instead, focus on 'progressive disclosure'—only showing features when they are relevant to the user's current task. The 'Aha! Moment' must be reached within the first session. For complex B2B tools, this might mean skipping the full setup and using sample data to show what the dashboard looks like when fully populated. Reducing friction isn't just about fewer clicks; it's about reducing the mental energy required to understand the value proposition."
+  },
+  {
+    "id": "rw_004",
+    "title": "Usage-Based Pricing: Metrics that Matter",
+    "url": "https://www.openviewpartners.com/blog/usage-based-pricing-metrics/",
+    "author": "Kyle Poyar",
+    "highlighted_at": "2023-09-28T16:30:00Z",
+    "text": "Net Revenue Retention (NRR) is significantly higher for companies with usage-based components because they grow naturally with the customer.",
+    "full_text": "Data from OpenView shows that UBP companies see 120%+ NRR compared to 110% for flat-fee peers. When implementing UBP, you must identify your 'Value Metric'—the unit of consumption that most closely aligns with the value the customer perceives. For a cloud storage company, it's GBs; for a support tool, it might be resolved tickets. If you charge for something the customer views as a cost (like 'users' in a tool meant for collaboration), you create a 'tax' that disincentivizes adoption. The rollout should include a 'grace period' where customers see what their bill would be under the new model without actually paying it yet."
+  },
+  {
+    "id": "rw_005",
+    "title": "Fine-Tuning vs RAG for Support Agents",
+    "url": "https://towardsdatascience.com/rag-vs-finetuning-for-support-bots/",
+    "author": "AI Research Lab",
+    "highlighted_at": "2023-11-15T08:00:00Z",
+    "text": "Fine-tuning is for style and format; RAG is for facts and knowledge.",
+    "full_text": "When building an AI copilot for customer support, founders often ask if they should fine-tune a model on their support tickets. The answer is usually no. Fine-tuning is expensive and the model's knowledge becomes frozen in time. Retrieval-Augmented Generation (RAG) allows the agent to query a live database of articles. Use fine-tuning only if you need the agent to adopt a very specific brand voice or follow a complex output format (like specific JSON schemas) that few-shot prompting can't handle. For the actual 'knowledge' part of the copilot, stick to a robust vector search over your existing documentation."
+  },
+  {
+    "id": "rw_006",
+    "title": "Onboarding Redesign: The 'Empty State' Problem",
+    "url": "https://uxplanet.org/solving-the-empty-state-problem/",
+    "author": "Jane Doe",
+    "highlighted_at": "2023-10-20T13:10:00Z",
+    "text": "An empty dashboard is a failure of onboarding. Use placeholder data or 'get started' checklists to drive momentum.",
+    "full_text": "The most critical moment in the onboarding redesign is the first time a user lands on the home screen. If they see 'No data available,' they feel a sense of work ahead of them rather than value received. Effective onboarding uses 'active states' even for new users. This can be achieved through interactive tutorials where the user actually creates their first project during the walkthrough, or by populating the screen with 'dummy' data that demonstrates the product's power. The goal is to move the user from 'What is this?' to 'I can see how this helps me' in under 60 seconds."
+  },
+  {
+    "id": "rw_007",
+    "title": "The Hidden Complexity of Metered Billing",
+    "url": "https://stripe.com/blog/metered-billing-complexity/",
+    "author": "Stripe Engineering",
+    "highlighted_at": "2023-11-20T10:00:00Z",
+    "text": "Idempotency in usage reporting is the difference between accurate billing and a PR disaster.",
+    "full_text": "When rolling out usage-based pricing, your billing system must be able to handle duplicate events without double-charging. This requires an idempotency key for every usage event sent from your application to the billing engine. Furthermore, you need to consider 'clock drift'—events that happen at 11:59 PM on the last day of the month but aren't processed until 12:01 AM. A robust implementation includes a lookback window for late-arriving events and a clear reconciliation UI so support agents can explain specific charges to confused customers. Don't underestimate the 'billing support' load during the first three months of a UBP rollout."
+  },
+  {
+    "id": "rw_008",
+    "title": "Human-in-the-loop: The Future of AI Workflows",
+    "url": "https://hbr.org/2023/09/ai-human-in-the-loop-workflows/",
+    "author": "HBR",
+    "highlighted_at": "2023-09-15T15:45:00Z",
+    "text": "AI should augment, not replace. The 'Copilot' approach maintains accountability while increasing throughput.",
+    "full_text": "In customer service, the fear of AI-driven 'hallucinations' keeps many executives from deploying fully autonomous bots. The solution is the 'Human-in-the-loop' (HITL) framework. In this setup, the AI generates a suggested response, cites its sources from the company wiki, and presents it to a human agent. The agent can then approve, edit, or reject the response. This not only ensures 100% accuracy but also creates a feedback loop where the AI learns from the human's edits. Over time, the 'confidence score' required for the AI to send a message without human intervention can be lowered as the system improves."
+  },
+  {
+    "id": "rw_009",
+    "title": "Friction as a Tool in Onboarding",
+    "url": "https://reforge.com/blog/onboarding-friction/",
+    "author": "Reforge",
+    "highlighted_at": "2023-11-25T09:30:00Z",
+    "text": "Not all friction is bad. 'Good friction' can qualify leads and set expectations.",
+    "full_text": "The common wisdom in onboarding redesign is to remove every possible click. However, companies like Airtable and Canva actually introduce friction by asking users about their role and goals upfront. This 'segmentation' allows the product to customize the subsequent onboarding flow. If a user says they are a 'Project Manager,' the onboarding should highlight Gantt charts, not gallery views. By adding two or three strategic questions at the start, you can significantly increase the long-term retention of the user because the product feels 'built for them' immediately after the sign-up process."
+  },
+  {
+    "id": "rw_010",
+    "title": "Predictable Revenue in a Usage-Based World",
+    "url": "https://a16z.com/2023/08/usage-based-pricing-models/",
+    "author": "Andreessen Horowitz",
+    "highlighted_at": "2023-08-20T14:00:00Z",
+    "text": "Investors value predictability. To maintain valuation, UBP companies must master the art of 'commitments'.",
+    "full_text": "The biggest risk of a usage-based pricing rollout is the volatility of monthly revenue. To mitigate this, many SaaS companies moving to UBP use 'Minimum Monthly Commitments.' Customers agree to pay a floor (e.g., $500/month) which covers a certain amount of usage, and then pay overages for anything beyond that. This provides the 'predictability' of a subscription with the 'scalability' of usage-based models. During the rollout, it is vital to analyze historical usage data to set these floors at a level that feels fair to customers while protecting the company's bottom line."
+  }
+]

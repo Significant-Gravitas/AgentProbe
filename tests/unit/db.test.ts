@@ -458,6 +458,80 @@ describe("sqlite recorder", () => {
     });
   });
 
+  test("upload rejections count as harness failures in persisted aggregate counts", async () => {
+    const { AgentProbeHarnessError } = await import(
+      "../../src/shared/utils/errors.ts"
+    );
+    class UploadRejectingAdapter extends FakeAdapter {
+      constructor() {
+        super([adapterReply("never reached")]);
+      }
+      async uploadFile(_filePath: string, _fileName: string): Promise<never> {
+        throw new AgentProbeHarnessError(
+          "File upload rejected for foo.csv: 413 Payload Too Large.",
+        );
+      }
+    }
+
+    const root = makeTempDir("db-harness-fail");
+    const paths = writeSuiteFiles(root);
+    mkdirSync(join(root, "fixtures"), { recursive: true });
+    writeFileSync(join(root, "fixtures", "foo.csv"), "id,name\n1,a\n");
+    writeFileSync(
+      paths.scenarios,
+      [
+        "defaults:",
+        "  max_turns: 1",
+        "scenarios:",
+        "  - id: upload-scenario",
+        "    name: Upload",
+        "    tags: [upload]",
+        "    priority: high",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    context:",
+        "      injected_data:",
+        "        booking_id: FLT-29481",
+        "    turns:",
+        "      - role: user",
+        "        attachments:",
+        "          - path: fixtures/foo.csv",
+        "        use_exact_message: true",
+        "        content: Process attached file.",
+        "    expectations:",
+        "      expected_behavior: Help the user quickly.",
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const recorder = new SqliteRunRecorder(dbUrlFor(root));
+    const result = await runSuite({
+      ...paths,
+      client: asResponsesClient(
+        new FakeResponsesClient([buildScore()]),
+      ) as never,
+      recorder,
+      adapterFactory: (_endpoint: Endpoints) => new UploadRejectingAdapter(),
+    });
+
+    expect(result.passed).toBe(false);
+    expect(result.exitCode).toBe(1);
+    expect(result.results[0]?.failureKind).toBe("harness");
+
+    const persisted = getRun(result.runId ?? "", { dbUrl: dbUrlFor(root) });
+    expect(persisted?.aggregateCounts).toEqual({
+      scenarioTotal: 1,
+      scenarioPassedCount: 0,
+      scenarioFailedCount: 1,
+      scenarioHarnessFailedCount: 1,
+      scenarioErroredCount: 0,
+    });
+    expect(persisted?.scenarios[0]?.failureKind).toBe("harness");
+    expect(persisted?.scenarios[0]?.status).toBe("completed");
+  });
+
   test("normalizes naive timestamps when resolving latestRunForSuite cutoffs", () => {
     const root = makeTempDir("db-cutoff");
     const dbUrl = dbUrlFor(root);

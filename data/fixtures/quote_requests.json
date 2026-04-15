@@ -1,0 +1,388 @@
+[
+  {
+    "request_id": "REQ-001",
+    "timestamp": "2023-10-27T09:12:00Z",
+    "applicant": {
+      "name": "James Miller",
+      "age": 45,
+      "email": "j.miller@example.com",
+      "phone": "555-0101"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 35000,
+      "last_claim_date": "2019-05-12",
+      "estimated_annual_premium": 1200
+    }
+  },
+  {
+    "request_id": "REQ-002",
+    "timestamp": "2023-10-27T09:45:00Z",
+    "applicant": {
+      "name": "Sarah Jenkins",
+      "age": 19,
+      "email": "sjenks99@example.com",
+      "phone": "555-0102"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 18000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 2400
+    }
+  },
+  {
+    "request_id": "REQ-003",
+    "timestamp": "2023-10-27T10:15:00Z",
+    "applicant": {
+      "name": "Robert Vanderhaus",
+      "age": 52,
+      "email": "rv@vanderhaus-estates.com",
+      "phone": "555-0103"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 3200000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 18000
+    }
+  },
+  {
+    "request_id": "REQ-004",
+    "timestamp": "2023-10-27T11:05:00Z",
+    "applicant": {
+      "name": "Linda Chen",
+      "age": 34,
+      "email": "lchen_89@example.com",
+      "phone": "555-0104"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 450000,
+      "last_claim_date": "2022-11-20",
+      "estimated_annual_premium": 1100
+    }
+  },
+  {
+    "request_id": "REQ-005",
+    "timestamp": "2023-10-27T11:30:00Z",
+    "applicant": {
+      "name": "Arthur Pringle",
+      "age": 78,
+      "email": "artie.p@example.com",
+      "phone": "555-0105"
+    },
+    "product_line": "umbrella",
+    "details": {
+      "coverage_limit": 2000000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 600
+    }
+  },
+  {
+    "request_id": "REQ-006",
+    "timestamp": "2023-10-27T12:00:00Z",
+    "applicant": {
+      "name": "David Smith",
+      "age": 29,
+      "email": "dsmith@example.com",
+      "phone": "555-0106"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 22000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 950
+    }
+  },
+  {
+    "request_id": "REQ-007",
+    "timestamp": "2023-10-27T12:45:00Z",
+    "applicant": {
+      "name": "Maria Garcia",
+      "age": 41,
+      "email": "m.garcia@example.com",
+      "phone": "555-0107"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 850000,
+      "last_claim_date": "2023-04-10",
+      "estimated_annual_premium": 2100
+    }
+  },
+  {
+    "request_id": "REQ-008",
+    "timestamp": "2023-10-27T13:20:00Z",
+    "applicant": {
+      "name": "Kevin O'Malley",
+      "age": 55,
+      "email": "komalley@example.com",
+      "phone": "555-0108"
+    },
+    "product_line": "life",
+    "details": {
+      "benefit_amount": 1000000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 1400
+    }
+  },
+  {
+    "request_id": "REQ-009",
+    "timestamp": "2023-10-27T14:10:00Z",
+    "applicant": {
+      "name": "Susan Wright",
+      "age": 62,
+      "email": "swright@example.com",
+      "phone": "555-0109"
+    },
+    "product_line": "umbrella",
+    "details": {
+      "coverage_limit": 5000000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 1200
+    }
+  },
+  {
+    "request_id": "REQ-010",
+    "timestamp": "2023-10-27T15:00:00Z",
+    "applicant": {
+      "name": "Brian Thompson",
+      "age": 25,
+      "email": "brian.t@example.com",
+      "phone": "555-0110"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 65000,
+      "last_claim_date": "2023-08-15",
+      "estimated_annual_premium": 3200
+    }
+  },
+  {
+    "request_id": "REQ-011",
+    "timestamp": "2023-10-28T08:15:00Z",
+    "applicant": {
+      "name": "Emily Watson",
+      "age": 31,
+      "email": "emily.w@example.com",
+      "phone": "555-0111"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 1200000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 2800
+    }
+  },
+  {
+    "request_id": "REQ-012",
+    "timestamp": "2023-10-28T09:00:00Z",
+    "applicant": {
+      "name": "George Lucas",
+      "age": 72,
+      "email": "glucas@example.com",
+      "phone": "555-0112"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 45000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 1800
+    }
+  },
+  {
+    "request_id": "REQ-013",
+    "timestamp": "2023-10-28T09:40:00Z",
+    "applicant": {
+      "name": "Patricia Moore",
+      "age": 48,
+      "email": "pmoore@example.com",
+      "phone": "555-0113"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 2100000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 4500
+    }
+  },
+  {
+    "request_id": "REQ-014",
+    "timestamp": "2023-10-28T10:20:00Z",
+    "applicant": {
+      "name": "Samuel Jackson",
+      "age": 20,
+      "email": "sam.j@example.com",
+      "phone": "555-0114"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 12000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 3100
+    }
+  },
+  {
+    "request_id": "REQ-015",
+    "timestamp": "2023-10-28T11:10:00Z",
+    "applicant": {
+      "name": "Nancy Drew",
+      "age": 39,
+      "email": "ndrew@example.com",
+      "phone": "555-0115"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 550000,
+      "last_claim_date": "2021-03-14",
+      "estimated_annual_premium": 1400
+    }
+  },
+  {
+    "request_id": "REQ-016",
+    "timestamp": "2023-10-28T12:00:00Z",
+    "applicant": {
+      "name": "Steven King",
+      "age": 58,
+      "email": "sking@example.com",
+      "phone": "555-0116"
+    },
+    "product_line": "life",
+    "details": {
+      "benefit_amount": 500000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 2200
+    }
+  },
+  {
+    "request_id": "REQ-017",
+    "timestamp": "2023-10-28T13:30:00Z",
+    "applicant": {
+      "name": "Alice Cooper",
+      "age": 65,
+      "email": "acoop@example.com",
+      "phone": "555-0117"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 85000,
+      "last_claim_date": "2023-01-05",
+      "estimated_annual_premium": 4100
+    }
+  },
+  {
+    "request_id": "REQ-018",
+    "timestamp": "2023-10-28T14:15:00Z",
+    "applicant": {
+      "name": "Mark Hamill",
+      "age": 42,
+      "email": "mhamill@example.com",
+      "phone": "555-0118"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 900000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 2300
+    }
+  },
+  {
+    "request_id": "REQ-019",
+    "timestamp": "2023-10-28T15:05:00Z",
+    "applicant": {
+      "name": "Diana Ross",
+      "age": 27,
+      "email": "dross@example.com",
+      "phone": "555-0119"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 29000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 1100
+    }
+  },
+  {
+    "request_id": "REQ-020",
+    "timestamp": "2023-10-28T16:00:00Z",
+    "applicant": {
+      "name": "Oscar Wilde",
+      "age": 50,
+      "email": "owilde@example.com",
+      "phone": "555-0120"
+    },
+    "product_line": "umbrella",
+    "details": {
+      "coverage_limit": 10000000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 16000
+    }
+  },
+  {
+    "request_id": "REQ-021",
+    "timestamp": "2023-10-29T09:10:00Z",
+    "applicant": {
+      "name": "Tina Turner",
+      "age": 71,
+      "email": "tturner@example.com",
+      "phone": "555-0121"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 1500000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 3200
+    }
+  },
+  {
+    "request_id": "REQ-022",
+    "timestamp": "2023-10-29T10:00:00Z",
+    "applicant": {
+      "name": "Freddie Mercury",
+      "age": 36,
+      "email": "fmercury@example.com",
+      "phone": "555-0122"
+    },
+    "product_line": "auto",
+    "details": {
+      "vehicle_value": 120000,
+      "last_claim_date": "2022-06-12",
+      "estimated_annual_premium": 5500
+    }
+  },
+  {
+    "request_id": "REQ-023",
+    "timestamp": "2023-10-29T11:15:00Z",
+    "applicant": {
+      "name": "Elton John",
+      "age": 68,
+      "email": "ejohn@example.com",
+      "phone": "555-0123"
+    },
+    "product_line": "home",
+    "details": {
+      "property_value": 4500000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 22000
+    }
+  },
+  {
+    "request_id": "REQ-024",
+    "timestamp": "2023-10-29T12:30:00Z",
+    "applicant": {
+      "name": "David Bowie",
+      "age": 54,
+      "email": "dbowie@example.com",
+      "phone": "555-0124"
+    },
+    "product_line": "life",
+    "details": {
+      "benefit_amount": 2500000,
+      "last_claim_date": null,
+      "estimated_annual_premium": 4800
+    }
+  },
+  {
+    "request_id": "REQ-025",
+    "timestamp": "202

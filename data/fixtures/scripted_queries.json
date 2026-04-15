@@ -1,0 +1,302 @@
+[
+  {
+    "id": "q1",
+    "query": "How do I onboard a new creative client?",
+    "category": "runbook_answerable",
+    "target_runbook": "client_onboarding.md"
+  },
+  {
+    "id": "q2",
+    "query": "What is the process for closing out a recruitment project?",
+    "category": "runbook_answerable",
+    "target_runbook": "project_offboarding.md"
+  },
+  {
+    "id": "q3",
+    "query": "I need to kick off a new workplace strategy project. What are the steps?",
+    "category": "runbook_answerable",
+    "target_runbook": "project_kickoff.md"
+  },
+  {
+    "id": "q4",
+    "query": "What do I need to do when an employee leaves Paragon?",
+    "category": "runbook_answerable",
+    "target_runbook": "employee_offboarding.md"
+  },
+  {
+    "id": "q5",
+    "query": "How do we handle internal performance reviews?",
+    "category": "runbook_answerable",
+    "target_runbook": "performance_review_process.md"
+  },
+  {
+    "id": "q6",
+    "query": "What is the policy for booking travel for client meetings?",
+    "category": "runbook_answerable",
+    "target_runbook": "travel_and_expense_policy.md"
+  },
+  {
+    "id": "q7",
+    "query": "How do I request a new seat for Greenhouse?",
+    "category": "runbook_answerable",
+    "target_runbook": "it_access_request.md"
+  },
+  {
+    "id": "q8",
+    "query": "What is the standard procedure for invoicing a client in Harvest?",
+    "category": "runbook_answerable",
+    "target_runbook": "billing_and_invoicing.md"
+  },
+  {
+    "id": "q9",
+    "query": "Can you show me the checklist for setting up a new Slack channel for a client?",
+    "category": "runbook_answerable",
+    "target_runbook": "client_onboarding.md"
+  },
+  {
+    "id": "q10",
+    "query": "Who needs to approve a project budget over $50k?",
+    "category": "runbook_answerable",
+    "target_runbook": "project_kickoff.md"
+  },
+  {
+    "id": "q11",
+    "query": "How do we handle candidate referrals for the recruitment team?",
+    "category": "runbook_answerable",
+    "target_runbook": "recruitment_referral_policy.md"
+  },
+  {
+    "id": "q12",
+    "query": "What documents go into the Notion project folder at the start?",
+    "category": "runbook_answerable",
+    "target_runbook": "project_kickoff.md"
+  },
+  {
+    "id": "q13",
+    "query": "What is the deadline for submitting Harvest timecards?",
+    "category": "runbook_answerable",
+    "target_runbook": "billing_and_invoicing.md"
+  },
+  {
+    "id": "q14",
+    "query": "How do I archive a project once it's finished?",
+    "category": "runbook_answerable",
+    "target_runbook": "project_offboarding.md"
+  },
+  {
+    "id": "q15",
+    "query": "What are the steps for a 30-60-90 day review for new hires?",
+    "category": "runbook_answerable",
+    "target_runbook": "performance_review_process.md"
+  },
+  {
+    "id": "q16",
+    "query": "How do I update the status of a lead in HubSpot?",
+    "category": "runbook_answerable",
+    "target_runbook": "client_onboarding.md"
+  },
+  {
+    "id": "q17",
+    "query": "What is the reimbursement limit for team lunches?",
+    "category": "runbook_answerable",
+    "target_runbook": "travel_and_expense_policy.md"
+  },
+  {
+    "id": "q18",
+    "query": "How do I request a laptop upgrade?",
+    "category": "runbook_answerable",
+    "target_runbook": "it_access_request.md"
+  },
+  {
+    "id": "q19",
+    "query": "Where do I find the MSA template for new recruitment clients?",
+    "category": "runbook_answerable",
+    "target_runbook": "client_onboarding.md"
+  },
+  {
+    "id": "q20",
+    "query": "What is the protocol for emergency client escalations?",
+    "category": "runbook_answerable",
+    "target_runbook": "client_onboarding.md"
+  },
+  {
+    "id": "q21",
+    "query": "How do I set up a Harvest project for a fixed-fee engagement?",
+    "category": "runbook_answerable",
+    "target_runbook": "billing_and_invoicing.md"
+  },
+  {
+    "id": "q22",
+    "query": "What is the process for offboarding a freelancer?",
+    "category": "runbook_answerable",
+    "target_runbook": "employee_offboarding.md"
+  },
+  {
+    "id": "q23",
+    "query": "Who is responsible for the final QA on recruitment placements?",
+    "category": "runbook_answerable",
+    "target_runbook": "project_offboarding.md"
+  },
+  {
+    "id": "q24",
+    "query": "How do I add a new user to the Notion workspace?",
+    "category": "runbook_answerable",
+    "target_runbook": "it_access_request.md"
+  },
+  {
+    "id": "q25",
+    "query": "What is our policy on remote work equipment stipends?",
+    "category": "runbook_answerable",
+    "target_runbook": "travel_and_expense_policy.md"
+  },
+  {
+    "id": "q26",
+    "query": "How do I trigger the 'Client Onboarding' runbook for a new win?",
+    "category": "runbook_answerable",
+    "target_runbook": "client_onboarding.md"
+  },
+  {
+    "id": "q27",
+    "query": "Where do I log the post-mortem notes for a project?",
+    "category": "runbook_answerable",
+    "target_runbook": "project_offboarding.md"
+  },
+  {
+    "id": "q28",
+    "query": "What is the first thing I should do when a candidate accepts an offer?",
+    "category": "runbook_answerable",
+    "target_runbook": "recruitment_referral_policy.md"
+  },
+  {
+    "id": "q29",
+    "query": "How do I submit a request for a new software tool?",
+    "category": "runbook_answerable",
+    "target_runbook": "it_access_request.md"
+  },
+  {
+    "id": "q30",
+    "query": "What are the requirements for a project to be considered 'Ready for Kickoff'?",
+    "category": "runbook_answerable",
+    "target_runbook": "project_kickoff.md"
+  },
+  {
+    "id": "q31",
+    "query": "What is the current status of the 'Acme Corp' deal in HubSpot?",
+    "category": "tool_lookup",
+    "tool": "HubSpot"
+  },
+  {
+    "id": "q32",
+    "query": "How many hours has the team logged to the 'Nike Branding' project this week?",
+    "category": "tool_lookup",
+    "tool": "Harvest"
+  },
+  {
+    "id": "q33",
+    "query": "Who is the primary contact for the 'Globex' account?",
+    "category": "tool_lookup",
+    "tool": "HubSpot"
+  },
+  {
+    "id": "q34",
+    "query": "List the candidates currently in the 'Interview' stage for the Senior Designer role.",
+    "category": "tool_lookup",
+    "tool": "Greenhouse"
+  },
+  {
+    "id": "q35",
+    "query": "What is the remaining budget on the 'Stark Industries' workplace project?",
+    "category": "tool_lookup",
+    "tool": "Harvest"
+  },
+  {
+    "id": "q36",
+    "query": "Find the Notion page for the 'Q3 Marketing Strategy'.",
+    "category": "tool_lookup",
+    "tool": "Notion"
+  },
+  {
+    "id": "q37",
+    "query": "Show me the last three notes on the 'Wayne Enterprises' HubSpot record.",
+    "category": "tool_lookup",
+    "tool": "HubSpot"
+  },
+  {
+    "id": "q38",
+    "query": "What is the average time-to-hire for the Recruitment team this month?",
+    "category": "tool_lookup",
+    "tool": "Greenhouse"
+  },
+  {
+    "id": "q39",
+    "query": "Is there a signed contract on file for 'Hooli' in HubSpot?",
+    "category": "tool_lookup",
+    "tool": "HubSpot"
+  },
+  {
+    "id": "q40",
+    "query": "Check Harvest: has everyone on the Creative team submitted their timesheets?",
+    "category": "tool_lookup",
+    "tool": "Harvest"
+  },
+  {
+    "id": "q41",
+    "query": "I'm having a conflict with my manager, who should I talk to?",
+    "category": "escalate",
+    "reason": "Sensitive HR issue"
+  },
+  {
+    "id": "q42",
+    "query": "I need to fire a client immediately because they are being abusive. What's the process?",
+    "category": "escalate",
+    "reason": "Critical client relation/legal risk"
+  },
+  {
+    "id": "q43",
+    "query": "Can I get an exception to the travel policy for a first-class flight?",
+    "category": "escalate",
+    "reason": "Policy exception request"
+  },
+  {
+    "id": "q44",
+    "query": "The office is flooding, what do I do?",
+    "category": "escalate",
+    "reason": "Physical emergency"
+  },
+  {
+    "id": "q45",
+    "query": "I think I found a security breach in our HubSpot account.",
+    "category": "escalate",
+    "reason": "Security incident"
+  },
+  {
+    "id": "q46",
+    "query": "I want to discuss a raise outside of the normal performance review cycle.",
+    "category": "escalate",
+    "reason": "Compensation negotiation"
+  },
+  {
+    "id": "q47",
+    "query": "A client is threatening to sue us over the last deliverable.",
+    "category": "escalate",
+    "reason": "Legal threat"
+  },
+  {
+    "id": "q48",
+    "query": "I need to report harassment I witnessed in the Slack #general channel.",
+    "category": "escalate",
+    "reason": "Code of conduct violation"
+  },
+  {
+    "id": "q49",
+    "query": "The CEO asked me to bypass the onboarding process for this one VIP client, is that okay?",
+    "category": "escalate",
+    "reason": "Executive override/Compliance"
+  },
+  {
+    "id": "q50",
+    "query": "I'm feeling completely burnt out and need to take immediate leave.",
+    "category": "escalate",
+    "reason": "Mental health/Urgent leave"
+  }
+]

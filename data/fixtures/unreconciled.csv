@@ -1,0 +1,24 @@
+bank_ref,bank_amount,date,suggested_ledger_entry_id,match_confidence_0_1,reason
+CHASE-301-492,-1240.50,2026-03-05,ERP-2026-081,0.92,Exact amount match; date variance 1 day; vendor name partial match (AWS vs Amazon Web Services)
+MERC-9921-X,4500.00,2026-03-02,ERP-2026-012,0.88,Amount match; date variance 3 days; counterparty 'Stripe' matches 'Stripe Payouts'
+BOFA-TR-881,-215.00,2026-03-10,ERP-2026-144,0.75,Amount match; date match; vendor mismatch (OfficeDepot vs Stationary Supply Co)
+CHASE-301-512,-55.20,2026-03-12,ERP-2026-156,0.95,Exact amount and date match; vendor 'Starbucks' matches 'Travel/Meals'
+MERC-9944-A,-8900.00,2026-03-14,ERP-2026-189,0.60,Amount match; date variance 5 days; possible duplicate entry in ERP
+BOFA-TR-902,-12.00,2026-03-15,,0.00,No ledger entry found for this amount or date range
+CHASE-301-550,-340.12,2026-03-18,ERP-2026-201,0.82,Amount match; vendor 'FedEx' matches 'Shipping/Logistics'; date variance 2 days
+MERC-9980-B,12500.00,2026-03-20,ERP-2026-215,0.98,Exact amount and date match; counterparty 'Shopify' matches 'Daily Sales Deposit'
+BOFA-TR-915,-1500.00,2026-03-21,ERP-2026-222,0.45,Amount match; date match; ledger entry marked as 'Rent' but bank desc is 'Maintenance'
+CHASE-301-588,-22.50,2026-03-22,,0.00,Bank fee; no corresponding manual entry in ERP ledger
+MERC-9991-C,-412.00,2026-03-23,ERP-2026-240,0.85,Amount match; date variance 1 day; counterparty 'Slack' matches 'Software Subscription'
+BOFA-TR-940,-67.88,2026-03-24,ERP-2026-255,0.70,Amount match; date match; vendor 'Shell' vs ledger 'Fuel Expense'
+CHASE-301-602,-11000.00,2026-03-25,ERP-2026-268,0.91,Amount match; date variance 1 day; description 'Payroll' matches 'Salaries'
+MERC-1002-D,-55.00,2026-03-26,,0.00,Wire transfer fee; no ledger entry
+BOFA-TR-955,-430.25,2026-03-27,ERP-2026-280,0.88,Amount match; date match; vendor 'Adobe' matches 'Creative Cloud'
+CHASE-301-615,-145.00,2026-03-28,ERP-2026-292,0.65,Amount match; date variance 4 days; vendor 'USPS' matches 'Postage'
+MERC-1015-E,-2200.00,2026-03-29,ERP-2026-305,0.78,Amount match; date match; counterparty 'Gusto' matches 'Benefits Admin'
+BOFA-TR-980,-18.40,2026-03-30,,0.00,Small miscellaneous charge; no ledger record
+CHASE-301-630,-3200.00,2026-03-31,ERP-2026-312,0.94,Amount match; date match; vendor 'Iron Mountain' matches 'Storage'
+MERC-1022-F,125.50,2026-03-31,ERP-2026-320,0.55,Amount match; date match; ledger indicates 'Refund' but bank says 'Misc Credit'
+BOFA-TR-999,-5000.00,2026-03-31,ERP-2026-340,0.90,Amount match; date match; vendor 'Amex' matches 'CC Payment'
+CHASE-301-645,-9.99,2026-03-31,ERP-2026-350,0.99,Exact amount and date match; 'Spotify' matches 'Office Music'
+MERC-1030-G,-1250.00,2026-03-31,ERP-2026-360,0.82,Amount match; date match; memo 'Consulting' matches 'Legal Fees'

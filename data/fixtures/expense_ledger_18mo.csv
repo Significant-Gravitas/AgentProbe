@@ -1,0 +1,58 @@
+date,payee,amount,memo,payment_method,gl_code
+2023-01-05,Office Depot,145.22,Printer ink and paper,Amex-8892,6100-Office
+2023-01-12,Home Depot,2450.00,Lumber for Smith Project,Amex-8892,5000-COGS
+2023-01-15,Starbucks,14.50,Client meeting - Sarah,Amex-8892,6200-Meals
+2023-01-20,Verizon Wireless,185.00,Monthly business lines,ACH-9910,6300-Utilities
+2023-02-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-02-05,Adobe Systems,52.99,Creative Cloud Subscription,Amex-8892,6500-Software
+2023-02-12,Home Depot,850.00,Supplies,Amex-8892,5000-COGS
+2023-02-12,Home Depot,850.00,Supplies,Amex-8892,5000-COGS
+2023-02-28,Cash Withdrawal,500.00,Petty cash for site,Cash,6900-Misc
+2023-03-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-03-10,Delta Airlines,450.20,Flight to Design Expo,Amex-8892,6600-Travel
+2023-03-15,Hyatt Regency,890.45,Hotel for Design Expo,Amex-8892,6600-Travel
+2023-03-18,The Steakhouse,499.00,Dinner with potential lead,Amex-8892,6200-Meals
+2023-04-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-04-12,Lumber Liquidators,3200.00,Hardwood flooring - Miller,Amex-8892,5000-COGS
+2023-04-20,Verizon Wireless,185.00,Monthly business lines,ACH-9910,6300-Utilities
+2023-05-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-05-15,Apple Store,2499.00,MacBook Pro for Designer,Amex-8892,1500-FixedAssets
+2023-06-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-06-15,Google Workspace,120.00,Email hosting,Amex-8892,6500-Software
+2023-06-20,Verizon Wireless,185.00,Monthly business lines,ACH-9910,6300-Utilities
+2023-07-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-07-10,Sherwin Williams,430.20,Paint supplies,Amex-8892,5000-COGS
+2023-07-28,Cash Withdrawal,500.00,Contractor tip,Cash,6900-Misc
+2023-08-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-08-15,Amazon,89.99,Office chair mat,Amex-8892,6100-Office
+2023-08-20,Verizon Wireless,185.00,Monthly business lines,ACH-9910,6300-Utilities
+2023-09-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-09-12,Home Depot,2100.00,Decking materials,Amex-8892,5000-COGS
+2023-10-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-10-15,Geico Business,1200.00,Annual Liability Premium,ACH-9910,6700-Insurance
+2023-10-20,Verizon Wireless,185.00,Monthly business lines,ACH-9910,6300-Utilities
+2023-11-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-11-15,Whole Foods,320.50,Holiday party groceries,Amex-8892,6200-Meals
+2023-12-01,Downtown Realty,4200.00,Monthly Office Rent,ACH-9910,6400-Rent
+2023-12-10,The Wine Shop,250.00,Client gifts,Amex-8892,6900-Misc
+2023-12-20,Verizon Wireless,185.00,Monthly business lines,ACH-9910,6300-Utilities
+2024-01-01,Downtown Realty,4400.00,Monthly Office Rent (Reflects increase),ACH-9910,6400-Rent
+2024-01-05,Office Depot,92.10,Toner,Amex-8892,6100-Office
+2024-01-20,Verizon Wireless,192.00,Monthly business lines,ACH-9910,6300-Utilities
+2024-02-01,Downtown Realty,4400.00,Monthly Office Rent,ACH-9910,6400-Rent
+2024-02-12,Home Depot,1200.00,Drywall supplies,Amex-8892,5000-COGS
+2024-02-12,Home Depot,1200.00,Drywall supplies,Amex-8892,5000-COGS
+2024-03-01,Downtown Realty,4400.00,Monthly Office Rent,ACH-9910,6400-Rent
+2024-03-05,Adobe Systems,59.99,Creative Cloud Subscription,Amex-8892,6500-Software
+2024-03-20,Verizon Wireless,192.00,Monthly business lines,ACH-9910,6300-Utilities
+2024-04-01,Downtown Realty,4400.00,Monthly Office Rent,ACH-9910,6400-Rent
+2024-04-10,Shell Oil,85.00,Gas for company truck,Amex-8892,6800-Auto
+2024-04-15,Construction Supplies Inc,5000.00,Invoice 4492 - Steel beans,ACH-9910,5000-COGS
+2024-04-15,Construction Supplies Inc,5000.00,Invoice 4493 - Steel beans,ACH-9910,5000-COGS
+2024-05-01,Downtown Realty,4400.00,Monthly Office Rent,ACH-9910,6400-Rent
+2024-05-15,Starbucks,8.50,Coffee,Amex-8892,6200-Meals
+2024-05-20,Verizon Wireless,192.00,Monthly business lines,ACH-9910,6300-Utilities
+2024-06-01,Downtown Realty,4400.00,Monthly Office Rent,ACH-9910,6400-Rent
+2024-06-10,Cash Withdrawal,1000.00,Owner Draw / Site Cash,Cash,6900-Misc
+2024-06-15,Amazon,1240.00,New workstation monitor,Amex-8892,1500-FixedAssets
+2024-06-25,Blue Shield,950.00,Health Insurance,ACH-9910,6700-Insurance

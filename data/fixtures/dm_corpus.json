@@ -1,0 +1,142 @@
+[
+  {
+    "thread_id": "ig_th_001",
+    "timestamp": "2023-10-12T09:15:22Z",
+    "messages": [
+      {
+        "sender": "user_9921",
+        "text": "Hey! Do you guys have the Arctic Parka in Sage Green back in stock soon?"
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "Hi there! 👋 We're expecting a restock of the Arctic Parka in Sage Green by the first week of November. You can sign up for notifications on the product page here: https://fjordapparel.com/products/arctic-parka-sage"
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_002",
+    "timestamp": "2023-10-12T10:05:10Z",
+    "messages": [
+      {
+        "sender": "user_4432",
+        "text": "My order #88291 arrived but the zipper is stuck. Can I get a refund?"
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "I'm so sorry to hear about the zipper issue! 🌲 I've escalated this to our support team right away. Someone will reach out via email within the hour to handle your refund or replacement."
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_003",
+    "timestamp": "2023-10-12T11:45:01Z",
+    "messages": [
+      {
+        "sender": "user_1102",
+        "text": "I'm 5'11\" and 180lbs, should I go Medium or Large for the Base Layer top?"
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "Great question! For your height and weight, we usually recommend a Large for a comfortable fit, or a Medium if you prefer it very snug against the skin. Check out our size guide for specific measurements: https://fjordapparel.com/pages/size-chart"
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_004",
+    "timestamp": "2023-10-13T14:20:55Z",
+    "messages": [
+      {
+        "sender": "user_7761",
+        "text": "Just wanted to say I wore the Summit Shell on my hike up Rainier and it kept me bone dry. Best gear I've owned."
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "That is what we love to hear! 🏔️ Massive congrats on the Rainier summit. Thanks for taking us along for the adventure!"
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_005",
+    "timestamp": "2023-10-13T16:02:12Z",
+    "messages": [
+      {
+        "sender": "user_3301",
+        "text": "I need to change my shipping address for order #99021. It's urgent!!"
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "I'll get a human to help with this immediately! I've flagged your order #99021 to our shipping team to catch it before it leaves the warehouse."
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_006",
+    "timestamp": "2023-10-14T08:30:00Z",
+    "messages": [
+      {
+        "sender": "user_5521",
+        "text": "Do you offer international shipping to Norway?"
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "We sure do! 🌍 We ship to Norway and most of Europe. Shipping rates are calculated at checkout. You can find more details here: https://fjordapparel.com/pages/shipping"
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_007",
+    "timestamp": "2023-10-14T12:15:44Z",
+    "messages": [
+      {
+        "sender": "user_0982",
+        "text": "Is the Merino wool ethically sourced?"
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "Absolutely. All our Merino wool is ZQ-certified, ensuring the highest standards of animal welfare, environmental sustainability, and social responsibility. 🐑 Learn more about our materials here: https://fjordapparel.com/pages/sustainability"
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_008",
+    "timestamp": "2023-10-15T09:00:10Z",
+    "messages": [
+      {
+        "sender": "user_2121",
+        "text": "I want to place a bulk order for my mountain rescue team. It's about $1,200 worth of gear. Do you offer discounts?"
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "First off, thank you for the incredible work you do. 🏔️ I'm escalating your request to our Pro Sales manager who handles group orders and high-value inquiries. They will be in touch shortly!"
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_009",
+    "timestamp": "2023-10-15T10:45:22Z",
+    "messages": [
+      {
+        "sender": "user_8871",
+        "text": "Are the Daypack straps adjustable for shorter torsos?"
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "Yes, they are! The Daypack features fully adjustable shoulder and sternum straps to fit a wide range of body types. Here's a quick video showing the fit: https://fjordapparel.com/products/daypack#video"
+      }
+    ]
+  },
+  {
+    "thread_id": "ig_th_010",
+    "timestamp": "2023-10-15T22:11:05Z",
+    "messages": [
+      {
+        "sender": "user_6654",
+        "text": "The color in the photo looks more blue than the one I received. It looks teal in person."
+      },
+      {
+        "sender": "fjord_apparel",
+        "text": "I'm sorry the color wasn't what you expected! Lighting can sometimes be tricky. I've sent this to our support team so they can help you with a free return or exchange for a color you'll love. 🌲"
+      }
+    ]
+  }
+]

@@ -1,0 +1,35 @@
+row_id,field,before,after,reason
+102,company_name,Acme Corp.  ,Acme Corp,Whitespace normalization
+102,industry,NULL,Software,Inferred from domain (acme.io)
+405,company_name,globex solutions,Globex Solutions,Casing standardization
+405,industry,IT Services,Information Technology,Industry taxonomy alignment
+892,company_name,Stark Industries Inc.,Stark Industries,Legal suffix removal
+1103,email,j.doe@apple,j.doe@apple.com,Domain suffix correction
+1542,country,US,United States,ISO name standardization
+2091,company_name,Hooli (HQ),Hooli,Parenthetical removal
+2091,industry,NULL,Internet Services,Inferred from domain (hooli.com)
+3104,domain,WWW.MICROSOFT.COM,microsoft.com,Domain casing and protocol strip
+4521,phone,1-555-0199,5550199,Numeric formatting
+5672,company_name,Initech,Initech,Duplicate merged (ID: 15432)
+5672,industry,NULL,Business Services,Inferred from domain (initech.net)
+7821,email,sales@null,NULL,Invalid email format removal
+12043,company_name,Wayne Enterprises  LLC,Wayne Enterprises,Whitespace and suffix cleanup
+12043,industry,Defense,Aerospace & Defense,Industry taxonomy alignment
+15432,id,15432,5672,Duplicate record merged into primary ID
+18902,company_name,Cyberdyne Systems,Cyberdyne Systems,Duplicate merged (ID: 19001)
+19001,id,19001,18902,Duplicate record merged into primary ID
+22405,industry,null,Financial Services,Inferred from domain (bank-of-america.com)
+25671,country,U.K.,United Kingdom,ISO name standardization
+31002,company_name,Soylent Corp,Soylent Corp,Duplicate merged (ID: 31005)
+31005,id,31005,31002,Duplicate record merged into primary ID
+35621,industry,Health,Healthcare,Industry taxonomy alignment
+42109,email,admin@@google.com,admin@google.com,Character syntax correction
+48920,company_name,Umbrella Co.,Umbrella Corp,Brand consistency normalization
+55210,industry,NULL,Software,Inferred from domain (github.com)
+61234,phone,+1 (555) 902-1010,15559021010,E.164 formatting
+65432,company_name,Vandelay Ind.,Vandelay Industries,Suffix expansion
+72019,industry,Retail/Ecomm,E-commerce,Industry taxonomy alignment
+78921,domain,http://tesla.com,tesla.com,Protocol strip
+80421,country,DE,Germany,ISO name standardization
+80422,company_name,Massive Dynamic ,Massive Dynamic,Whitespace normalization
+80422,industry,NULL,Science & Technology,Inferred from domain (massivedynamic.com)

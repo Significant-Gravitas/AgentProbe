@@ -1,0 +1,180 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 7 0 R >> >> /MediaBox [0 0 612 792] /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2825 >>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+15 TL
+(resume.pdf) Tj
+T*
+() Tj
+T*
+(ALEXANDER J. VANCE) Tj
+T*
+(Senior Backend Engineer / Technical Lead) Tj
+T*
+(San Francisco, CA | alex.vance.dev@email.com | github.com/avance-builds) Tj
+T*
+() Tj
+T*
+(SUMMARY) Tj
+T*
+(Senior Backend Engineer with 9 years of experience architecting high-throughput) Tj
+T*
+(distributed systems. Expert in Python-based microservices, relational database) Tj
+T*
+(optimization, and cloud infrastructure. Proven track record of scaling platforms from) Tj
+T*
+(MVP to 500k+ MAU. Currently seeking to deepen systems programming expertise during a) Tj
+T*
+(focused technical sabbatical.) Tj
+T*
+() Tj
+T*
+(TECHNICAL SKILLS) Tj
+T*
+(Languages: Python \(Expert\), Go \(Proficient\), SQL, TypeScript \(Prior experience\), Bash) Tj
+T*
+(Frameworks: FastAPI, Django, Flask, SQLAlchemy, Celery, Pydantic) Tj
+T*
+(Infrastructure: AWS \(EC2, RDS, Lambda, S3, EKS\), Docker, Kubernetes, Terraform, Redis) Tj
+T*
+(Databases: PostgreSQL \(Deep internals knowledge\), MongoDB, DynamoDB) Tj
+T*
+(Tools: Git, CI/CD \(GitHub Actions, Jenkins\), Datadog, Prometheus, Pytest) Tj
+T*
+() Tj
+T*
+(PROFESSIONAL EXPERIENCE) Tj
+T*
+() Tj
+T*
+(Lead Backend Engineer | FinFlow Systems | 2020  Present) Tj
+T*
+(*   Architected a real-time transaction processing engine using FastAPI and PostgreSQL,) Tj
+T*
+(handling 4,000+ requests per second with sub-50ms latency.) Tj
+T*
+(*   Migrated a monolithic Django application to a microservices architecture, reducing) Tj
+T*
+(deployment times by 65% and improving system uptime to 99.99%.) Tj
+T*
+(*   Optimized complex SQL queries and indexing strategies, reducing RDS CPU utilization) Tj
+T*
+(by 40% during peak loads.) Tj
+T*
+(*   Mentored a team of 6 engineers, establishing rigorous code review standards and) Tj
+T*
+(automated testing benchmarks \(achieved 92% coverage\).) Tj
+T*
+() Tj
+T*
+(Senior Software Engineer | DataPulse Analytics | 2017  2020) Tj
+T*
+(*   Developed scalable data ingestion pipelines using Python and Go to process 2TB of) Tj
+T*
+(daily telemetry data.) Tj
+T*
+(*   Implemented a custom caching layer using Redis that reduced database read heavy-load) Tj
+T*
+(by 55%.) Tj
+T*
+(*   Designed and maintained RESTful APIs consumed by enterprise-level dashboard) Tj
+T*
+(applications.) Tj
+T*
+(*   Led the transition from manual AWS provisioning to Infrastructure as Code) Tj
+T*
+(\(Terraform\), resulting in reproducible staging environments.) Tj
+T*
+() Tj
+T*
+(Software Engineer | CloudScale Solutions | 2015  2017) Tj
+T*
+(*   Built and maintained backend services for a multi-tenant SaaS platform using Django) Tj
+T*
+(and Postgres.) Tj
+T*
+(*   Integrated third-party payment gateways \(Stripe, Plaid\) and managed complex) Tj
+T*
+(subscription state machines.) Tj
+T*
+(*   Developed a suite of internal CLI tools in Go to automate log rotation and service) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 7 0 R >> >> /MediaBox [0 0 612 792] /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 723 >>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+15 TL
+(health monitoring.) Tj
+T*
+() Tj
+T*
+(EDUCATION) Tj
+T*
+(Bachelor of Science in Computer Science) Tj
+T*
+(University of Washington, Seattle) Tj
+T*
+() Tj
+T*
+(PROJECTS & CONTRIBUTIONS) Tj
+T*
+(*   FastAPI-Contrib-Lib: Open-source maintainer for a set of utility classes for) Tj
+T*
+(Pydantic v2 validation.) Tj
+T*
+(*   Gopher-Queue: A lightweight, persistent task queue written in Go for educational) Tj
+T*
+(purposes.) Tj
+T*
+(*   Postgres-Check-Health: A Python CLI tool for identifying N+1 queries and missing) Tj
+T*
+(indexes in Django projects.) Tj
+T*
+() Tj
+T*
+(CERTIFICATIONS) Tj
+T*
+(*   AWS Certified Solutions Architect  Professional) Tj
+T*
+(*   Certified Kubernetes Administrator \(CKA\)) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000253 00000 n 
+0000003130 00000 n 
+0000003256 00000 n 
+0000004030 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+4100
+%%EOF

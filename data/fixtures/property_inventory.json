@@ -1,0 +1,114 @@
+{
+  "properties": [
+    {
+      "property_id": "LDN-CENTRAL-01",
+      "property_name": "The Vobot Grand London",
+      "timezone": "Europe/London",
+      "total_rooms": 180,
+      "room_types": [
+        {
+          "code": "STND",
+          "name": "Standard Double",
+          "total_inventory": 100,
+          "max_occupancy": 2,
+          "base_rate": 185.00
+        },
+        {
+          "code": "EXEC",
+          "name": "Executive King",
+          "total_inventory": 50,
+          "max_occupancy": 2,
+          "base_rate": 245.00
+        },
+        {
+          "code": "FAMY",
+          "name": "Family Suite",
+          "total_inventory": 30,
+          "max_occupancy": 4,
+          "base_rate": 350.00
+        }
+      ],
+      "booking_rules": {
+        "min_group_size": 5,
+        "max_group_size": 60,
+        "lead_time_days": 7,
+        "cancellation_policy": "48h_standard",
+        "requires_guest_names": true,
+        "overbooking_threshold": 0.05
+      }
+    },
+    {
+      "property_id": "MAN-QUAY-02",
+      "property_name": "Vobot Quayside Manchester",
+      "timezone": "Europe/London",
+      "total_rooms": 120,
+      "room_types": [
+        {
+          "code": "COZY",
+          "name": "Cozy Studio",
+          "total_inventory": 80,
+          "max_occupancy": 1,
+          "base_rate": 95.00
+        },
+        {
+          "code": "TWIN",
+          "name": "Standard Twin",
+          "total_inventory": 40,
+          "max_occupancy": 2,
+          "base_rate": 120.00
+        }
+      ],
+      "booking_rules": {
+        "min_group_size": 10,
+        "max_group_size": 100,
+        "lead_time_days": 3,
+        "cancellation_policy": "non_refundable_groups",
+        "requires_guest_names": true,
+        "overbooking_threshold": 0.02
+      }
+    },
+    {
+      "property_id": "EDI-CASTLE-03",
+      "property_name": "Vobot Castle View Edinburgh",
+      "timezone": "Europe/London",
+      "total_rooms": 100,
+      "room_types": [
+        {
+          "code": "DLX-K",
+          "name": "Deluxe King",
+          "total_inventory": 60,
+          "max_occupancy": 2,
+          "base_rate": 210.00
+        },
+        {
+          "code": "DLX-T",
+          "name": "Deluxe Twin",
+          "total_inventory": 30,
+          "max_occupancy": 2,
+          "base_rate": 210.00
+        },
+        {
+          "code": "PENT",
+          "name": "Penthouse",
+          "total_inventory": 10,
+          "max_occupancy": 2,
+          "base_rate": 550.00
+        }
+      ],
+      "booking_rules": {
+        "min_group_size": 3,
+        "max_group_size": 40,
+        "lead_time_days": 14,
+        "cancellation_policy": "flexible_group_terms",
+        "requires_guest_names": true,
+        "overbooking_threshold": 0.00
+      }
+    }
+  ],
+  "global_validation_logic": {
+    "allow_unnamed_placeholders": false,
+    "auto_upgrade_on_conflict": true,
+    "max_upgrade_tier_jump": 1,
+    "mandatory_fields": ["first_name", "last_name", "check_in", "check_out", "room_type"]
+  }
+}

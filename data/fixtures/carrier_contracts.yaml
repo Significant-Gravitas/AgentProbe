@@ -1,0 +1,113 @@
+carriers:
+  - name: "Apex Logistics"
+    id: "APX-001"
+    service_type: "TL/LTL"
+    sla:
+      on_time_threshold: 0.98
+      damage_claim_limit: 0.005
+    rate_card:
+      base_mileage_rate: 2.15
+      fuel_surcharge_percent: 0.18
+      accessorials:
+        lift_gate: 75.00
+        residential_delivery: 110.00
+    lanes:
+      - lane_id: "L-102"
+        origin: "60601"
+        dest: "94105"
+        contracted_rate: 1850.00
+  - name: "Standard Freight Systems"
+    id: "SFS-005"
+    service_type: "LTL"
+    sla:
+      on_time_threshold: 0.94
+      damage_claim_limit: 0.012
+    rate_card:
+      weight_brackets:
+        - { min: 0, max: 500, rate_per_cwt: 42.50 }
+        - { min: 501, max: 2000, rate_per_cwt: 38.00 }
+        - { min: 2001, max: 5000, rate_per_cwt: 32.15 }
+    lanes:
+      - lane_id: "L-102"
+        origin: "60601"
+        dest: "94105"
+        contracted_rate: 2100.00
+  - name: "Blue Streak Parcel"
+    id: "BSP-009"
+    service_type: "Parcel"
+    sla:
+      on_time_threshold: 0.99
+      damage_claim_limit: 0.002
+    rate_card:
+      zone_pricing:
+        zone_2: 12.45
+        zone_3: 14.80
+        zone_4: 18.20
+        zone_5: 22.10
+        zone_6: 28.50
+        zone_7: 34.15
+        zone_8: 41.90
+  - name: "Northeast Express"
+    id: "NEX-012"
+    service_type: "Regional LTL"
+    sla:
+      on_time_threshold: 0.96
+      damage_claim_limit: 0.008
+    rate_card:
+      flat_rate_intra_region: 85.00
+      long_haul_multiplier: 1.45
+    notes: "Primary carrier for NY/PA/NJ/MA clusters"
+  - name: "Velocity Haulers"
+    id: "VEL-044"
+    service_type: "TL"
+    sla:
+      on_time_threshold: 0.92
+      damage_claim_limit: 0.015
+    rate_card:
+      base_mileage_rate: 1.95
+      stop_off_charge: 150.00
+    lanes:
+      - lane_id: "L-102"
+        origin: "60601"
+        dest: "94105"
+        contracted_rate: 1725.00
+  - name: "Continental Ground"
+    id: "CG-088"
+    service_type: "Parcel/Hybrid"
+    sla:
+      on_time_threshold: 0.97
+      damage_claim_limit: 0.004
+    rate_card:
+      weight_break_optimization:
+        incentive_threshold_lbs: 150
+        discount_above_threshold: 0.12
+      zone_skipping_eligible: true
+      hub_injection_credit: 2.50
+  - name: "Midwest Direct"
+    id: "MWD-021"
+    service_type: "LTL"
+    sla:
+      on_time_threshold: 0.95
+      damage_claim_limit: 0.009
+    rate_card:
+      base_mileage_rate: 2.05
+      minimum_charge: 125.00
+    lanes:
+      - lane_id: "L-102"
+        origin: "60601"
+        dest: "94105"
+        contracted_rate: 1950.00
+  - name: "Rapid Link"
+    id: "RL-077"
+    service_type: "Expedited"
+    sla:
+      on_time_threshold: 0.995
+      damage_claim_limit: 0.001
+    rate_card:
+      premium_multiplier: 1.75
+      guaranteed_delivery_surcharge: 250.00
+    lanes:
+      - lane_id: "L-102"
+        origin: "60601"
+        dest: "94105"
+        contracted_rate: 3200.00

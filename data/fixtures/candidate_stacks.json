@@ -1,0 +1,62 @@
+{
+  "market_analysis_year": 2024,
+  "source": "Stack Overflow Developer Survey / Industry Aggregate",
+  "candidate_stacks": [
+    {
+      "id": 1,
+      "stack_name": "Rust + Axum",
+      "market_demand_pct": 12.6,
+      "complementarity_score": 0.88,
+      "ramp_up_curve": "Steep",
+      "estimated_hours_to_proficiency": 80,
+      "reasoning": "High demand for systems safety and performance. Complements Python/Go background by introducing ownership models and zero-cost abstractions while leveraging existing backend logic patterns.",
+      "primary_use_case": "High-performance microservices, memory-safe systems"
+    },
+    {
+      "id": 2,
+      "stack_name": "Elixir + Phoenix",
+      "market_demand_pct": 2.1,
+      "complementarity_score": 0.94,
+      "ramp_up_curve": "Moderate",
+      "estimated_hours_to_proficiency": 50,
+      "reasoning": "Strongest architectural complement to Python's concurrency limitations. Introduces the Actor model and BEAM VM. High niche demand in real-time messaging and fintech.",
+      "primary_use_case": "Real-time distributed systems, high-concurrency web apps"
+    },
+    {
+      "id": 3,
+      "stack_name": "TypeScript + Next.js",
+      "market_demand_pct": 34.2,
+      "complementarity_score": 0.45,
+      "ramp_up_curve": "Low",
+      "estimated_hours_to_proficiency": 30,
+      "reasoning": "Highest market demand. However, low complementarity score because it shifts focus from backend systems to full-stack/frontend, which may not maximize sabbatical value for a dedicated backend engineer.",
+      "primary_use_case": "Full-stack web development, SEO-heavy SaaS"
+    },
+    {
+      "id": 4,
+      "stack_name": "Go + gRPC",
+      "market_demand_pct": 21.0,
+      "complementarity_score": 0.15,
+      "ramp_up_curve": "Very Low",
+      "estimated_hours_to_proficiency": 15,
+      "reasoning": "High demand, but the user already has 20% Go representation in their GitHub profile and 9 years experience. Minimal new skill acquisition value for a sabbatical.",
+      "primary_use_case": "Cloud-native infrastructure, internal API services"
+    },
+    {
+      "id": 5,
+      "stack_name": "Svelte + SvelteKit",
+      "market_demand_pct": 3.8,
+      "complementarity_score": 0.30,
+      "ramp_up_curve": "Low",
+      "estimated_hours_to_proficiency": 25,
+      "reasoning": "Modern reactive paradigm. Low complementarity for a backend specialist, but useful if the goal is to pivot toward rapid prototyping or lightweight UI.",
+      "primary_use_case": "Highly interactive, low-bundle-size web interfaces"
+    }
+  ],
+  "metadata": {
+    "scoring_logic": {
+      "complementarity_score": "Inverse correlation to existing skills; higher score means the stack fills a significant technical gap or provides a new paradigm (e.g., functional programming, memory management).",
+      "ramp_up_curve": "Qualitative assessment based on language complexity and ecosystem conventions relative to Python/Django."
+    }
+  }
+}
