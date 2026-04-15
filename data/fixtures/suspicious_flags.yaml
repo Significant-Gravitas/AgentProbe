@@ -1,0 +1,51 @@
+detection_patterns:
+  split_transactions:
+    description: "Multiple transactions to the same vendor within a 48-hour window that sum to just under the $2,500 capitalization threshold or $5,000 internal approval limit."
+    threshold_amount: 2500.00
+    time_window_hours: 48
+    action: "Flag for manual review of invoices to check if single asset was unbundled."
+
+  round_number_cash:
+    description: "Manual journal entries or cash withdrawals ending in .00 or .50 exceeding $100."
+    min_amount: 100.00
+    pattern: "^\\d+\\.(00|50)$"
+    risk_level: "High"
+    irs_context: "High audit risk for undocumented miscellaneous expenses."
+
+  duplicate_vendors:
+    description: "Payments to vendors with similar names but different GL codes or bank accounts."
+    logic: "Levenshtein distance < 3 for vendor names with different tax IDs."
+    common_targets:
+      - "Home Depot"
+      - "Amazon"
+      - "Wayfair"
+    action: "Check for double-billing or personal reimbursement overlap."
+
+  out_of_policy_meals:
+    description: "Meal expenses that likely violate the 'ordinary and necessary' or 'lavish/extravagant' IRS rules."
+    criteria:
+      - weekend_transactions: "Transactions on Saturdays/Sundays without associated project travel logs."
+      - high_per_person: "Meal amounts exceeding $150 per person."
+      - restricted_keywords: ["Spa", "Golf", "Casino", "Resort", "Theater", "Liquor Store"]
+    gl_codes_impacted: [6050, 6060]
+
+  non_business_hours:
+    description: "Transactions occurring between 11:00 PM and 5:00 AM local time."
+    risk: "Potential personal use of company card for entertainment or non-business utilities."
+
+  vendor_mismatch:
+    description: "Payee name does not align with the assigned General Ledger (GL) code."
+    examples:
+      - payee: "Chevron"
+        gl_code: "6200" # Office Supplies (Mismatch)
+      - payee: "Starbucks"
+        gl_code: "7000" # Professional Services (Mismatch)
+
+  unusual_frequency:
+    description: "Vendors appearing more than 4 times in a single month that are not recurring utilities or rent."
+    exclusion_list: ["Verizon", "ConEd", "AWS", "Landlord Inc"]
+
+reporting_requirements:
+  flag_threshold: "Medium"
+  summary_format: "Excel - Flagged Items Tab"
+  audit_trail: "Required for all 100% manual adjustments"

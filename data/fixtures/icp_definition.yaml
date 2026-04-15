@@ -1,0 +1,49 @@
+ideal_customer_profile:
+  version: 2.1
+  last_updated: 2024-03-15
+  target_segments:
+    - B2B SaaS
+    - Fintech Infrastructure
+    - Enterprise AI Platforms
+  firmographics:
+    employee_count:
+      min: 100
+      max: 1000
+    revenue_range: "$20M - $250M ARR"
+    location_focus:
+      - North America
+      - Western Europe
+    funding_stage:
+      - Series B
+      - Series C
+      - Series D
+      - IPO / Public
+  technographics:
+    cloud_infrastructure:
+      - AWS
+      - Snowflake
+      - Google Cloud (BigQuery)
+    data_stack_requirements:
+      - dbt
+      - Fivetran
+      - Airflow
+      - Looker
+      - Tableau
+    crm_integration:
+      - Salesforce
+      - HubSpot
+  organizational_signals:
+    data_team_maturity:
+      min_headcount: 5
+      required_roles:
+        - Data Engineer
+        - Analytics Engineer
+        - Head of Data
+    hiring_triggers:
+      - Increasing headcount in Data Science/Engineering (>15% YoY)
+      - Recent appointment of CTO or VP of Data
+  negative_signals:
+    - Legacy on-premise infrastructure
+    - Service-based agencies
+    - Pure B2C e-commerce without subscription model
+    - Headcount shrinkage > 10% in last 6 months

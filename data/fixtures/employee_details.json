@@ -1,0 +1,31 @@
+{
+  "employee_id": "HX-2024-042",
+  "name": "Eva Ortiz",
+  "role": "Senior Data Engineer",
+  "department": "Data Platform",
+  "start_date": "2024-11-04",
+  "manager": {
+    "name": "Marcus Thorne",
+    "title": "Director of Engineering",
+    "email": "m.thorne@hexproof.io"
+  },
+  "home_city": "Austin, TX",
+  "email_address": "e.ortiz@hexproof.io",
+  "laptop_spec_requirements": {
+    "model": "MacBook Pro 14-inch",
+    "processor": "M3 Max (14-core CPU, 30-core GPU)",
+    "memory": "64GB Unified Memory",
+    "storage": "1TB SSD",
+    "keyboard_layout": "US English",
+    "color": "Space Black",
+    "accessories": [
+      "Magic Mouse",
+      "USB-C to Ethernet Adapter",
+      "Laptop Stand"
+    ],
+    "shipping_priority": "Overnight"
+  },
+  "security_clearance": "Standard + Production Data Access",
+  "onboarding_buddy_assigned": false,
+  "equipment_budget_code": "DP-2024-EQUIP"
+}

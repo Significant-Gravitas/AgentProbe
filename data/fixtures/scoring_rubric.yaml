@@ -1,0 +1,119 @@
+version: 1.2
+rubric_name: Pilgrim Fintech Lead Scoring Model
+last_updated: 2023-10-27
+
+scoring_logic:
+  calculation_method: weighted_sum
+  max_raw_score: 100
+  weights:
+    fit: 0.40
+    intent: 0.40
+    urgency: 0.20
+
+dimensions:
+  fit:
+    description: "Firmographic alignment with Pilgrim's ICP"
+    factors:
+      company_size:
+        weight: 0.35
+        criteria:
+          "500+ employees": 100
+          "101-500 employees": 80
+          "51-100 employees": 60
+          "11-50 employees": 30
+          "1-10 employees": 10
+      industry:
+        weight: 0.35
+        criteria:
+          "Fintech": 100
+          "Banking/Financial Services": 95
+          "E-commerce": 80
+          "SaaS": 70
+          "Professional Services": 40
+          "Retail": 20
+      annual_revenue:
+        weight: 0.20
+        criteria:
+          "$100M+": 100
+          "$50M-$100M": 85
+          "$10M-$50M": 70
+          "$1M-$10M": 40
+          "<$1M": 10
+      geography:
+        weight: 0.10
+        criteria:
+          "USA/Canada": 100
+          "UK/EU": 80
+          "LATAM": 50
+          "APAC": 40
+
+  intent:
+    description: "Digital body language and engagement depth"
+    factors:
+      source:
+        weight: 0.40
+        criteria:
+          "Demo Request": 100
+          "Free Trial Sign-up": 80
+          "Pricing Page Visit": 70
+          "Whitepaper Download": 40
+          "Webinar Registration": 30
+      page_views_last_7_days:
+        weight: 0.30
+        criteria:
+          "10+": 100
+          "5-9": 70
+          "2-4": 40
+          "1": 10
+      g2_intent_signal:
+        weight: 0.30
+        criteria:
+          "High Competition Research": 100
+          "Category Research": 60
+          "No Signal": 0
+
+  urgency:
+    description: "Timeline and authority indicators"
+    factors:
+      job_title_seniority:
+        weight: 0.50
+        criteria:
+          "C-Level/VP": 100
+          "Director": 80
+          "Manager": 60
+          "Individual Contributor": 20
+      implementation_timeline:
+        weight: 0.50
+        criteria:
+          "Immediate / < 1 month": 100
+          "1-3 months": 75
+          "3-6 months": 40
+          "6+ months": 10
+          "Unknown": 0
+
+thresholds:
+  high_intent:
+    min_score: 75
+    action: "ROUTE_TO_AE"
+    slack_notification: true
+    crm_status: "MQL - Priority"
+  medium_intent:
+    min_score: 45
+    max_score: 74
+    action: "SALES_DEVELOPMENT_REACHOUT"
+    slack_notification: false
+    crm_status: "MQL"
+  low_quality:
+    min_score: 0
+    max_score: 44
+    action: "NURTURE_SEQUENCE"
+    slack_notification: false
+    crm_status: "Disqualified - Nurture"
+
+slack_brief_template:
+  fields:
+    - "Lead Name"
+    - "Company"
+    - "Score (Fit/Intent/Urgency)"
+    - "Top Signal: [Highest scoring intent factor]"
+    - "Suggested Opening: [Based on Industry + Source]"

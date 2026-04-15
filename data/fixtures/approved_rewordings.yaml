@@ -1,0 +1,49 @@
+rewordings_library:
+  - violation_type: "guaranteed_coverage_misleading"
+    description: "Implies coverage for all procedures or pre-existing conditions without referencing policy limitations."
+    approved_alternatives:
+      - "Coverage is subject to policy terms, conditions, and exclusions. Please refer to your Summary of Benefits and Coverage (SBC)."
+      - "Eligible services are covered based on medical necessity and plan-specific guidelines."
+      - "Most pre-existing conditions are covered under ACA-compliant plans; however, specific benefit limits may apply."
+
+  - violation_type: "missing_state_disclaimer"
+    description: "Marketing material targeting specific regions without the required state-specific DOI disclosure."
+    approved_alternatives:
+      - "In California: This policy is underwritten by Meridian Health of California, Inc. (File No. 8823-CA)."
+      - "In Texas: Plans are offered by Meridian Health Insurance Co. of Texas. Policy form #TX-MH-2024."
+      - "This plan may not be available in all states. Check availability in your zip code."
+
+  - violation_type: "absolute_cost_claims"
+    description: "Using words like 'Free', 'No Cost', or 'Zero Dollars' without qualifying 'for covered preventative services'."
+    approved_alternatives:
+      - "$0 copay for qualifying preventative care services from in-network providers."
+      - "Available at no additional cost to members when using preferred diagnostic facilities."
+      - "Low-cost monthly premiums starting at [Insert Approved Rate Card Value] for eligible applicants."
+
+  - violation_type: "hipaa_marketing_violation"
+    description: "Using patient testimonials or data in a way that implies unauthorized use of PHI for marketing."
+    approved_alternatives:
+      - "Member experiences may vary. All testimonials are shared with express written consent."
+      - "Based on a composite of member feedback. Names have been changed to protect privacy."
+      - "Meridian Health does not share your personal health information with third-party marketers without your explicit authorization."
+
+  - violation_type: "unsupported_provider_network_claims"
+    description: "Claiming 'all doctors' or 'your doctor' is in-network without a search tool link or disclaimer."
+    approved_alternatives:
+      - "Access to an expansive network of providers. Always verify your doctor's status using our Find a Provider tool before your visit."
+      - "Participating providers are independent contractors and are not agents of Meridian Health."
+      - "Our network includes over 15,000 local specialists; check current directory for availability."
+
+  - violation_type: "aca_compliance_omission"
+    description: "Failure to mention 'Minimum Essential Coverage' (MEC) or '10 Essential Health Benefits'."
+    approved_alternatives:
+      - "This plan meets the Minimum Essential Coverage (MEC) requirements under the Affordable Care Act."
+      - "All Meridian Health Individual and Family plans include the 10 Essential Health Benefits mandated by federal law."
+      - "Comprehensive coverage including emergency services, maternity care, and mental health support."
+
+  - violation_type: "misleading_urgency"
+    description: "Using high-pressure 'Enroll Now or Lose Coverage' language outside of Open Enrollment periods."
+    approved_alternatives:
+      - "The Open Enrollment Period begins November 1. Check if you qualify for a Special Enrollment Period (SEP) today."
+      - "Review your options early to ensure a smooth transition for the upcoming plan year."
+      - "Life changes like marriage or a new baby may qualify you to enroll now."

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "post_7721",
+    "date": "2023-10-12",
+    "body": "We audited 50 mid-market manufacturing lines last month. The biggest margin killer wasn't labor costs or raw material spikes. It was 'ghost inventory'—parts marked as 'in-stock' that physically weren't there, causing 4.2 hours of average weekly downtime. You don't need more staff; you need a better map of your warehouse. Stop guessing, start measuring.",
+    "engagement": {
+      "likes": 842,
+      "comments": 126,
+      "shares": 45,
+      "ctr": "4.8%"
+    },
+    "topic": "Operational Efficiency"
+  },
+  {
+    "id": "post_8904",
+    "date": "2023-10-19",
+    "body": "Most supply chain software is built for the boardroom, not the floor. If your shift leads spend 20 minutes every morning just logging into a dashboard to see what's delayed, your software is failing you. We built Harbor to be 'glanceable.' Five seconds to see the bottleneck, ten seconds to re-route. Tech should save time, not demand it.",
+    "engagement": {
+      "likes": 615,
+      "comments": 89,
+      "shares": 22,
+      "ctr": "3.2%"
+    },
+    "topic": "Product Philosophy"
+  },
+  {
+    "id": "post_9112",
+    "date": "2023-10-26",
+    "body": "The 'Just-in-Time' era isn't dead, it's just getting smarter. The old way: keep 20% safety stock and pray. The Harbor way: use real-time transit data to keep 5% safety stock and know exactly when to trigger the next order. One of our clients just freed up $240k in working capital by trusting the data over their gut. Math beats intuition every time.",
+    "engagement": {
+      "likes": 1104,
+      "comments": 215,
+      "shares": 98,
+      "ctr": "6.1%"
+    },
+    "topic": "ROI/Case Study"
+  }
+]

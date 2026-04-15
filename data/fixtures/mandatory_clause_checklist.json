@@ -1,0 +1,53 @@
+{
+  "MSA": [
+    "Limitation of Liability",
+    "Indemnification",
+    "Termination for Convenience",
+    "Governing Law",
+    "Notices",
+    "Assignment",
+    "Confidentiality",
+    "Intellectual Property Rights",
+    "Force Majeure",
+    "Insurance Requirements",
+    "Audit Rights",
+    "Severability",
+    "Entire Agreement",
+    "Warranty Disclaimer",
+    "Dispute Resolution"
+  ],
+  "DPA": [
+    "Data Processing Purpose",
+    "Security Measures",
+    "Sub-processor Obligations",
+    "Data Subject Rights",
+    "Breach Notification Timeline",
+    "Data Transfers (Standard Contractual Clauses)",
+    "Audit and Inspection",
+    "Return or Deletion of Data",
+    "Confidentiality of Personnel",
+    "Assistance with DPIAs",
+    "Liability for Sub-processors",
+    "Term and Termination",
+    "Scope of Processing",
+    "Record Keeping",
+    "Conflict of Terms"
+  ],
+  "BAA": [
+    "Permitted Uses and Disclosures",
+    "Safeguards for PHI",
+    "Reporting of Unauthorized Use",
+    "Subcontractor Compliance",
+    "Access to PHI",
+    "Amendment of PHI",
+    "Accounting of Disclosures",
+    "HHS Access to Books/Records",
+    "Termination for Material Breach",
+    "Return/Destruction of PHI on Termination",
+    "Security Rule Compliance",
+    "Business Associate Obligations",
+    "Covered Entity Obligations",
+    "No Third-Party Beneficiaries",
+    "Survival of Obligations"
+  ]
+}

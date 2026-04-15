@@ -1,0 +1,87 @@
+organization_id,company_name,hq_location,employee_count,engineering_count,last_funding_round,last_funding_date,tech_stack_microservices,industry,domain
+ORG-0001,VelocePay,San Francisco, CA,450,180,Series C,2023-11-12,true,FinTech,velocepay.io
+ORG-0002,CloudScale AI,Berlin, DE,120,65,Series B,2024-02-15,true,Infrastructure,cloudscale.ai
+ORG-0003,HealthSync,Boston, MA,310,110,Series D,2023-08-20,true,HealthTech,healthsync.com
+ORG-0004,DataGrip Systems,Austin, TX,85,42,Series B,2024-05-01,true,Data Analytics,datagrip.io
+ORG-0005,LogiFlow,London, UK,280,135,Series C,2023-12-05,true,Logistics,logiflow.co
+ORG-0006,SecureNet,San Jose, CA,550,220,Series E,2023-06-10,true,Cybersecurity,securenet.com
+ORG-0007,EcoGrid,Denver, CO,145,55,Series B,2024-01-22,true,Energy,ecogrid.com
+ORG-0008,StreamLine,New York, NY,420,190,Series C,2023-09-30,true,Media,streamline.tv
+ORG-0009,DevPulse,Paris, FR,95,48,Series B,2024-04-12,true,DevTools,devpulse.io
+ORG-0010,FinVantage,Chicago, IL,380,140,Series D,2023-10-18,true,FinTech,finvantage.com
+ORG-0011,AutoDrive AI,Seattle, WA,210,125,Series C,2023-11-28,true,Automotive,autodrive.ai
+ORG-0012,BioGraph,Munich, DE,160,70,Series B,2024-03-05,true,Biotech,biograph.de
+ORG-0013,RetailBot,Atlanta, GA,290,95,Series C,2023-07-14,true,E-commerce,retailbot.com
+ORG-0014,QuantEdge,London, UK,110,60,Series B,2024-02-20,true,FinTech,quantedge.co.uk
+ORG-0015,SkyNode,San Francisco, CA,480,210,Series D,2023-05-25,true,Aerospace,skynode.com
+ORG-0016,TalentSphere,New York, NY,230,85,Series C,2023-12-15,true,HRTech,talentsphere.io
+ORG-0017,CoreLogic SaaS,Dublin, IE,190,90,Series B,2024-01-10,true,SaaS,corelogic.ie
+ORG-0018,NexusPay,Singapore, SG,340,150,Series C,2023-08-04,false,FinTech,nexuspay.com
+ORG-0019,GreenWave,Portland, OR,75,30,Series A,2024-05-10,true,Sustainablity,greenwave.io
+ORG-0020,RoboOps,Salt Lake City, UT,215,115,Series B,2023-11-02,true,Robotics,roboops.com
+ORG-0021,MetaLayer,Toronto, CA,185,95,Series B,2024-03-18,true,Blockchain,metalayer.ca
+ORG-0022,Insuria,Zurich, CH,440,165,Series D,2023-09-12,true,InsurTech,insuria.ch
+ORG-0023,QuickCart,Dallas, TX,520,180,Series E,2022-12-01,true,Retail,quickcart.com
+ORG-0024,SignalFlow,San Mateo, CA,130,75,Series B,2024-02-28,true,DevOps,signalflow.io
+ORG-0025,BrightMind,Stockholm, SE,260,105,Series C,2023-10-25,true,EdTech,brightmind.se
+ORG-0026,DeepTrace,Pittsburgh, PA,90,55,Series B,2024-04-05,true,Security,deeptrace.ai
+ORG-0027,OmniChannel,Los Angeles, CA,370,145,Series C,2023-11-15,true,Marketing,omnichannel.com
+ORG-0028,VertexLabs,Austin, TX,155,80,Series B,2024-01-30,true,Web3,vertexlabs.io
+ORG-0029,PureWater,Amsterdam, NL,125,45,Series B,2023-06-20,false,CleanTech,purewater.nl
+ORG-0030,CloudNexus,San Francisco, CA,510,240,Series D,2023-08-15,true,Cloud,cloudnexus.io
+ORG-0031,SwiftShip,Memphis, TN,300,110,Series C,2023-12-20,true,Logistics,swiftship.com
+ORG-0032,AgriTech AI,Des Moines, IA,115,50,Series B,2024-03-22,true,AgTech,agritech.ai
+ORG-0033,CyberVault,Washington, DC,460,195,Series D,2023-07-08,true,GovTech,cybervault.com
+ORG-0034,HyperLoop IT,Bristol, UK,80,40,Series A,2024-05-15,true,Transportation,hyperloop.it
+ORG-0035,GenomicsPro,San Diego, CA,340,160,Series C,2023-11-05,true,LifeSciences,genomicspro.com
+ORG-0036,PayPoint,Madrid, ES,275,120,Series C,2023-09-22,true,FinTech,paypoint.es
+ORG-0037,SecureStack,Tel Aviv, IL,195,110,Series B,2024-02-10,true,Cybersecurity,securestack.io
+ORG-0038,SmartWare,Phoenix, AZ,420,150,Series D,2023-10-01,true,IoT,smartware.com
+ORG-0039,DraftFlow,New York, NY,140,75,Series B,2024-04-18,true,LegalTech,draftflow.io
+ORG-0040,BlueSky Cloud,Vancouver, CA,310,130,Series C,2023-12-10,true,SaaS,bluesky.ca
+ORG-0041,TitanGraph,Boulder, CO,105,65,Series B,2024-01-15,true,Database,titangraph.io
+ORG-0042,PeakPerformance,Denver, CO,225,95,Series B,2023-11-19,true,HRTech,peakperf.com
+ORG-0043,SolarisData,Barcelona, ES,180,85,Series B,2024-03-30,true,Energy,solaris.io
+ORG-0044,VeloxSystems,Cambridge, MA,390,175,Series D,2023-08-28,true,Robotics,velox.com
+ORG-0045,MarketMind,London, UK,450,160,Series C,2023-06-15,true,AdTech,marketmind.co
+ORG-0046,CodeStream,San Francisco, CA,135,70,Series B,2024-02-05,true,DevTools,codestream.io
+ORG-0047,HealthGrid,Nashville, TN,295,115,Series C,2023-12-02,true,HealthTech,healthgrid.com
+ORG-0048,ZettaStorage,Salt Lake City, UT,170,90,Series B,2024-04-25,true,Storage,zetta.io
+ORG-0049,UrbanFlow,Copenhagen, DK,145,60,Series B,2024-01-05,true,SmartCity,urbanflow.dk
+ORG-0050,FinCore,New York, NY,480,205,Series D,2023-10-12,true,FinTech,fincore.com
+ORG-0051,AppArmor,Austin, TX,210,105,Series B,2023-11-25,true,Security,apparmor.io
+ORG-0052,AeroData,Toulouse, FR,330,145,Series C,2023-07-20,true,Aerospace,aerodata.fr
+ORG-0053,ChainLinker,San Francisco, CA,95,52,Series B,2024-03-12,true,Web3,chainlinker.io
+ORG-0054,LogicGate,Chicago, IL,410,155,Series D,2023-09-05,true,GRC,logicgate.com
+ORG-0055,FrontierAI,Seattle, WA,125,65,Series B,2024-05-05,true,AI/ML,frontier.ai
+ORG-0056,MedConnect,Boston, MA,360,135,Series C,2023-12-18,true,HealthTech,medconnect.com
+ORG-0057,VividVideo,Los Angeles, CA,280,120,Series C,2023-08-30,true,Entertainment,vivid.io
+ORG-0058,SafePass,Stockholm, SE,150,75,Series B,2024-02-22,true,Identity,safepass.se
+ORG-0059,GridLock,London, UK,430,185,Series D,2023-11-01,true,Cybersecurity,gridlock.co.uk
+ORG-0060,BioWave,San Diego, CA,110,45,Series B,2024-04-10,true,Biotech,biowave.com
+ORG-0061,ScaleOps,San Mateo, CA,240,130,Series B,2023-10-15,true,Infra,scaleops.io
+ORG-0062,NetGuard,Helsinki, FI,190,95,Series B,2024-01-20,true,Security,netguard.fi
+ORG-0063,PrimeRetail,New York, NY,550,190,Series E,2023-06-25,true,Retail,primeretail.com
+ORG-0064,DataSphere,Denver, CO,165,85,Series B,2024-03-08,true,Data,datasphere.io
+ORG-0065,SwiftPay,Dublin, IE,320,140,Series C,2023-09-18,true,FinTech,swiftpay.ie
+ORG-0066,NeoBank,Berlin, DE,490,215,Series D,2023-12-08,true,FinTech,neobank.de
+ORG-0067,CloudHarbor,Seattle, WA,140,75,Series B,2024-05-12,true,Cloud,cloudharbor.io
+ORG-0068,EduStream,Austin, TX,270,110,Series C,2023-07-28,true,EdTech,edustream.com
+ORG-0069,AutoPath,Detroit, MI,205,95,Series B,2024-02-14,true,Automotive,autopath.ai
+ORG-0070,TrustLayer,San Francisco, CA,390,165,Series D,2023-10-22,true,Security,trustlayer.io
+ORG-0071,FlexLogistics,Hamburg, DE,155,70,Series B,2024-04-02,true,Logistics,flexlog.de
+ORG-0072,Quantify,London, UK,300,135,Series C,2023-11-10,true,Analytics,quantify.ai
+ORG-0073,LifeLog,Boston, MA,120,55,Series B,2024-01-30,true,Health,lifelog.com
+ORG-0074,CyberShield,Washington, DC,470,210,Series D,2023-08-05,true,Security,cybershield.gov
+ORG-0075,MarketFlow,New York, NY,250,105,Series C,2023-12-28,true,Marketing,marketflow.io
+ORG-0076,DevOpsly,San Jose, CA,185,100,Series B,2024-03-15,true,DevTools,devopsly.com
+ORG-0077,GreenTech,Oslo, NO,135,60,Series B,2024-05-20,true,CleanTech,greentech.no
+ORG-0078,FinStream,Chicago, IL,410,160,Series D,2023-09-15,true,FinTech,finstream.com
+ORG-0079,SecureRoute,Paris, FR,220,110,Series B,2023-11-08,true,Security,secureroute.fr
+ORG-0080,DataPulse,San Francisco, CA,530,225,Series E,2023-07-01,true,Data,datapulse.io
+ORG-0081,SmartCity IT,Vienna, AT,145,70,Series B,2024-02-25,true,SmartCity,smartcity.at
+ORG-0082,LogiCore,Atlanta, GA,315,125,Series C,2023-10-30,true,Logistics,logicore.com
+ORG-0083,BioTech AI,Cambridge, UK,175,90,Series B,2024-04-15,true,Biotech,biotechai.co.uk
+ORG-0084,CloudForge,Salt Lake City, UT,380,155,Series D,2023-08-22,true,Cloud,cloudforge.io
+ORG-0085,RetailPulse,New York, NY,260,115,Series C,2023-12-05,true,Retail,retailpulse.io
+ORG-0086,

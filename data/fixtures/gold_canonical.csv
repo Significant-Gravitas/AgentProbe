@@ -1,0 +1,38 @@
+id,company_name,domain,industry,country,phone,email,created_at
+1,Acme Corp,acme.com,Software,USA,+1-555-0101,contact@acme.com,2023-01-15 08:30:00
+2,Globex Corporation,globex.co,Manufacturing,USA,+1-555-0202,info@globex.co,2023-01-16 09:15:00
+3,Soylent Corp,soylent.com,Consumer Goods,USA,+1-555-0303,sales@soylent.com,2023-01-17 10:00:00
+4,Initech,initech.com,Software,USA,+1-555-0404,support@initech.com,2023-01-18 11:45:00
+5,Umbrella Corp,umbrella.com,Biotechnology,UK,+44-20-7946-0123,admin@umbrella.com,2023-01-19 13:20:00
+7,Hooli,hooli.xyz,Technology,USA,+1-555-0707,hq@hooli.xyz,2023-01-21 15:10:00
+8,Stark Industries,starkindustries.com,Aerospace,USA,+1-555-0808,tony@starkindustries.com,2023-01-22 16:45:00
+9,Wayne Enterprises,wayneent.com,Conglomerate,USA,+1-555-0909,bruce@wayneent.com,2023-01-23 09:00:00
+11,Cyberdyne Systems,cyberdyne.io,Robotics,USA,+1-555-1111,skynet@cyberdyne.io,2023-01-25 11:30:00
+12,Virtucon,virtucon.net,Infrastructure,Germany,+49-30-123456,dr.evil@virtucon.net,2023-01-26 14:20:00
+13,Massive Dynamic,massivedynamic.com,Science & Technology,USA,+1-555-1313,nina@massivedynamic.com,2023-01-27 15:50:00
+15,Oscorp,oscorp.biz,Chemicals,USA,+1-555-1515,norman@oscorp.biz,2023-01-29 17:15:00
+16,Gekko & Co,gekkoco.com,Finance,USA,+1-555-1616,bud@gekkoco.com,2023-01-30 08:45:00
+17,Aperture Science,aperture.org,Research,USA,+1-555-1717,cave@aperture.org,2023-01-31 10:10:00
+18,Black Mesa,blackmesa.org,Research,USA,+1-555-1818,freeman@blackmesa.org,2023-02-01 11:25:00
+19,Tyrell Corp,tyrell.com,Robotics,USA,+1-555-1919,eldon@tyrell.com,2023-02-02 12:40:00
+20,Weyland-Yutani,weyland.com,Aerospace,USA,+1-555-2020,carter@weyland.com,2023-02-03 14:05:00
+21,Dunder Mifflin,dundermifflin.com,Paper & Supplies,USA,+1-555-2121,michael@dundermifflin.com,2023-02-04 15:30:00
+22,Vandelay Industries,vandelay.com,Import-Export,USA,+1-555-2222,art@vandelay.com,2023-02-05 16:55:00
+23,Bluth Company,bluthco.com,Real Estate,USA,+1-555-2323,gob@bluthco.com,2023-02-06 09:20:00
+24,Sterling Cooper,sterlingcooper.com,Advertising,USA,+1-555-2424,don@sterlingcooper.com,2023-02-07 10:45:00
+25,Pied Piper,piedpiper.com,Software,USA,+1-555-2525,richard@piedpiper.com,2023-02-08 11:55:00
+26,MomCorp,momcorp.com,Manufacturing,USA,+1-555-2626,mom@momcorp.com,2023-02-09 13:10:00
+27,E-Corp,ecorp.com,Finance,USA,+1-555-2727,tyrell@ecorp.com,2023-02-10 14:35:00
+28,Gringotts,gringotts.co.uk,Finance,UK,+44-20-7946-0999,griphook@gringotts.co.uk,2023-02-11 15:50:00
+29,Wonka Industries,wonka.com,Food & Beverage,USA,+1-555-2929,willy@wonka.com,2023-02-12 17:05:00
+30,LexCorp,lexcorp.com,Technology,USA,+1-555-3030,lex@lexcorp.com,2023-02-13 08:15:00
+31,Prestige Worldwide,prestige.com,Entertainment,USA,+1-555-3131,dale@prestige.com,2023-02-14 09:40:00
+32,Los Pollos Hermanos,lph.com,Food & Beverage,USA,+1-555-3232,gus@lph.com,2023-02-15 11:05:00
+33,Saban Capital,saban.com,Finance,USA,+1-555-3333,info@saban.com,2023-02-16 12:30:00
+34,Kohl's Corp,kohls.com,Retail,USA,+1-555-3434,support@kohls.com,2023-02-17 13:55:00
+35,Central Perk,centralperk.com,Food & Beverage,USA,+1-555-3535,gunther@centralperk.com,2023-02-18 15:20:00
+36,Paper Street Soap Co,paperstreet.com,Consumer Goods,USA,+1-555-3636,tyler@paperstreet.com,2023-02-19 16:45:00
+37,Duff Beer,duffbeer.com,Food & Beverage,USA,+1-555-3737,barney@duffbeer.com,2023-02-20 09:10:00
+38,Veridian Dynamics,veridian.com,Technology,USA,+1-555-3838,ted@veridian.com,2023-02-21 10:35:00
+39,Strickland Propane,strickland.com,Energy,USA,+1-555-3939,hank@strickland.com,2023-02-22 12:00:00
+40,Oceanic Airlines,oceanic.com,Aviation,Australia,+61-2-9123-4567,jack@oceanic.com,2023-02-23 13:25:00

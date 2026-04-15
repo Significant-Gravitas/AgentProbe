@@ -1,0 +1,64 @@
+{
+  "direct_reports": [
+    {
+      "id": "dr_001",
+      "name": "Sarah Chen",
+      "team": "Platform",
+      "role": "Staff Engineer",
+      "focus_area": "Internal API infrastructure and Kubernetes cluster migration",
+      "github_username": "schen-hex",
+      "linear_id": "sarah_chen",
+      "slack_handle": "@sarahc"
+    },
+    {
+      "id": "dr_002",
+      "name": "Marcus Thorne",
+      "team": "SRE",
+      "role": "Senior Site Reliability Engineer",
+      "focus_area": "Zero-trust networking and SOC2 compliance automation",
+      "github_username": "mthorne_ops",
+      "linear_id": "marcus_t",
+      "slack_handle": "@marcus"
+    },
+    {
+      "id": "dr_003",
+      "name": "Elena Rodriguez",
+      "team": "Product-Eng",
+      "role": "Lead Software Engineer",
+      "focus_area": "Customer-facing threat intelligence dashboard and React frontend",
+      "github_username": "erod-dev",
+      "linear_id": "elena_r",
+      "slack_handle": "@elena"
+    },
+    {
+      "id": "dr_004",
+      "name": "David Park",
+      "team": "Product-Eng",
+      "role": "Senior Backend Engineer",
+      "focus_area": "Data ingestion pipelines and real-time alerting engine",
+      "github_username": "dpark-hexproof",
+      "linear_id": "david_p",
+      "slack_handle": "@dpark"
+    },
+    {
+      "id": "dr_005",
+      "name": "Priya Sharma",
+      "team": "Platform",
+      "role": "Security Engineer",
+      "focus_area": "Automated vulnerability scanning and CI/CD security gates",
+      "github_username": "psharma-sec",
+      "linear_id": "priya_s",
+      "slack_handle": "@priya"
+    },
+    {
+      "id": "dr_006",
+      "name": "Jordan Smith",
+      "team": "SRE",
+      "role": "DevOps Engineer",
+      "focus_area": "On-call rotation tooling and incident response orchestration",
+      "github_username": "jsmith-hex",
+      "linear_id": "jordan_s",
+      "slack_handle": "@jsmith"
+    }
+  ]
+}

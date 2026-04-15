@@ -1,0 +1,15 @@
+projects:
+  - id: proj_001
+    name: AI Copilot for Customer Support
+    description: >
+      We are developing an LLM-powered assistant designed to augment our Tier 1 and Tier 2 support agents. The goal is to reduce Mean Time to Resolution (MTTR) by 40% while maintaining high CSAT scores. The copilot must integrate with our existing Zendesk ticketing system and internal knowledge base. Key technical challenges include RAG (Retrieval-Augmented Generation) optimization to prevent hallucinations, handling multi-turn conversations, and implementing a human-in-the-loop (HITL) mechanism for drafting responses. I am specifically looking for research on prompt engineering for support workflows, benchmarks for customer service LLMs, and UX patterns for agent-facing AI tools. We need to evaluate whether to use fine-tuned small models for latency or larger frontier models for complex reasoning. The dashboard should highlight articles discussing "agentic workflows," "semantic search accuracy," and "automated ticket categorization."
+
+  - id: proj_002
+    name: Onboarding Experience Redesign
+    description: >
+      Our current user onboarding flow has a 65% drop-off rate between account creation and the "Aha! moment" (defined as completing the first integration). This project aims to overhaul the first-run experience using a modular, persona-based approach. We are moving away from generic product tours toward "learning by doing" and contextual tooltips. I need to understand the latest trends in product-led growth (PLG), specifically how companies like Notion or Slack handle complex feature discovery. Research should focus on reducing cognitive load, the psychology of progress bars, and "time-to-value" metrics. The dashboard needs to surface case studies on friction reduction, empty state optimization, and the impact of personalized onboarding checklists on long-term retention. Keywords: "activation energy," "user friction," "behavioral nudges," and "onboarding funnels."
+
+  - id: proj_003
+    name: Usage-Based Pricing Rollout
+    description: >
+      We are transitioning from a flat-rate SaaS subscription model to a hybrid usage-based pricing (UBP) structure. This shift is critical for aligning our revenue with the infrastructure costs associated with our AI features. The project involves defining the primary value metric (e.g., tokens processed, seats, or API calls), building the metering infrastructure, and designing a transparent billing dashboard for customers. I am researching "land and expand" strategies, pricing psychology, and how to communicate price increases without causing churn. The goal is to find the "Goldilocks zone" of predictability for CFOs and flexibility for developers. I need data on how UBP impacts Net Revenue Retention (NRR) and valuation multiples. Priority items include competitive analysis of Snowflake or Twilio's billing models and technical papers on real-time event metering at scale.

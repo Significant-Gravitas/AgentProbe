@@ -1,0 +1,133 @@
+{
+  "company": "CloudScale Systems Inc.",
+  "reporting_currency": "USD",
+  "fiscal_year_start": "2026-01-01",
+  "data_points": [
+    {
+      "month": "2025-08",
+      "revenue": {
+        "subscription_arr": 850000,
+        "professional_services": 45000,
+        "total_revenue": 895000
+      },
+      "cogs": {
+        "hosting_infrastructure": 112000,
+        "customer_support": 88000,
+        "total_cogs": 200000
+      },
+      "operating_expenses": {
+        "sales_marketing": 310000,
+        "research_development": 425000,
+        "general_administrative": 145000,
+        "total_opex": 880000
+      },
+      "net_burn": -185000,
+      "ending_cash": 4820000
+    },
+    {
+      "month": "2025-09",
+      "revenue": {
+        "subscription_arr": 872000,
+        "professional_services": 38000,
+        "total_revenue": 910000
+      },
+      "cogs": {
+        "hosting_infrastructure": 115000,
+        "customer_support": 90000,
+        "total_cogs": 205000
+      },
+      "operating_expenses": {
+        "sales_marketing": 325000,
+        "research_development": 430000,
+        "general_administrative": 148000,
+        "total_opex": 903000
+      },
+      "net_burn": -198000,
+      "ending_cash": 4622000
+    },
+    {
+      "month": "2025-10",
+      "revenue": {
+        "subscription_arr": 905000,
+        "professional_services": 52000,
+        "total_revenue": 957000
+      },
+      "cogs": {
+        "hosting_infrastructure": 118000,
+        "customer_support": 92000,
+        "total_cogs": 210000
+      },
+      "operating_expenses": {
+        "sales_marketing": 340000,
+        "research_development": 445000,
+        "general_administrative": 152000,
+        "total_opex": 937000
+      },
+      "net_burn": -190000,
+      "ending_cash": 4432000
+    },
+    {
+      "month": "2025-11",
+      "revenue": {
+        "subscription_arr": 940000,
+        "professional_services": 41000,
+        "total_revenue": 981000
+      },
+      "cogs": {
+        "hosting_infrastructure": 122000,
+        "customer_support": 94000,
+        "total_cogs": 216000
+      },
+      "operating_expenses": {
+        "sales_marketing": 355000,
+        "research_development": 460000,
+        "general_administrative": 155000,
+        "total_opex": 970000
+      },
+      "net_burn": -205000,
+      "ending_cash": 4227000
+    },
+    {
+      "month": "2025-12",
+      "revenue": {
+        "subscription_arr": 985000,
+        "professional_services": 65000,
+        "total_revenue": 1050000
+      },
+      "cogs": {
+        "hosting_infrastructure": 128000,
+        "customer_support": 98000,
+        "total_cogs": 226000
+      },
+      "operating_expenses": {
+        "sales_marketing": 380000,
+        "research_development": 485000,
+        "general_administrative": 160000,
+        "total_opex": 1025000
+      },
+      "net_burn": -201000,
+      "ending_cash": 4026000
+    },
+    {
+      "month": "2026-01",
+      "revenue": {
+        "subscription_arr": 1020000,
+        "professional_services": 48000,
+        "total_revenue": 1068000
+      },
+      "cogs": {
+        "hosting_infrastructure": 135000,
+        "customer_support": 102000,
+        "total_cogs": 237000
+      },
+      "operating_expenses": {
+        "sales_marketing": 415000,
+        "research_development": 510000,
+        "general_administrative": 175000,
+        "total_opex": 1100000
+      },
+      "net_burn": -269000,
+      "ending_cash": 3757000
+    }
+  ]
+}

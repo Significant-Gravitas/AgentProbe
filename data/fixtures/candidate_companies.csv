@@ -1,0 +1,52 @@
+id,company_name,website,total_locations,revenue_est_usd,headquarters_city,headquarters_state,ownership_model,founded_year,current_tech_stack,on_classpass_corporate
+1,Iron Pulse Fitness,ironpulse.com,12,8500000,Austin,TX,Corporate,2015,Mindbody,false
+2,Evergreen Yoga Collective,evergreenyoga.io,18,12200000,Portland,OR,Boutique,2018,Mariana Tek,false
+3,Summit Peak Performance,summitpeak.fit,42,28000000,Denver,CO,Franchise,2012,ClubReady,false
+4,Neon Cycle Labs,neoncycle.com,15,9000000,New York,NY,Boutique,2019,Glofox,true
+5,Blue Ridge Athletics,blueridgefit.com,22,15500000,Asheville,NC,Corporate,2014,Mindbody,false
+6,Velocity Training Hub,velocityhub.fit,11,7200000,Atlanta,GA,Corporate,2017,Zen Planner,false
+7,Primal Strength Systems,primalstrength.com,35,24000000,Columbus,OH,Franchise,2010,ABC Fitness,false
+8,Zenith Pilates Studio,zenithpilates.co,28,14000000,Santa Monica,CA,Boutique,2016,Mariana Tek,false
+9,Titan Gyms North America,titangyms.com,48,45000000,Chicago,IL,Franchise,2008,ClubReady,false
+10,Aura Wellness Centers,aurawellness.com,14,6800000,Miami,FL,Corporate,2020,Mindbody,false
+11,Burn & Build Fitness,burnbuild.fit,19,11000000,Phoenix,AZ,Franchise,2015,ABC Fitness,false
+12,Core Rhythm Dance Fit,corerhythm.com,10,5200000,Nashville,TN,Boutique,2021,Glofox,false
+13,Strive Health Clubs,strivehealth.com,31,21000000,Seattle,WA,Corporate,2013,Mindbody,false
+14,Iron Grit Boxing,irongrit.com,24,13500000,Philadelphia,PA,Franchise,2016,ClubReady,false
+15,Lumina Yoga & Spa,luminayoga.com,16,9800000,San Diego,CA,Boutique,2017,Mariana Tek,true
+16,Peak Physique Labs,peakphysique.io,13,7900000,Salt Lake City,UT,Corporate,2018,Zen Planner,false
+17,Urban Athlete Network,urbanathlete.com,45,38000000,Brooklyn,NY,Franchise,2011,ABC Fitness,false
+18,Flow State Studios,flowstate.fit,11,6100000,Austin,TX,Boutique,2019,Mindbody,false
+19,Apex Combat Sports,apexcombat.com,20,14200000,Las Vegas,NV,Corporate,2014,ClubReady,false
+20,Vitality Life Fitness,vitalitylife.com,38,29000000,Charlotte,NC,Franchise,2009,ABC Fitness,false
+21,Pulse HIIT Centers,pulsehiit.com,17,10500000,Dallas,TX,Corporate,2016,Glofox,false
+22,Nomad Yoga Works,nomadyoga.io,12,7400000,Boulder,CO,Boutique,2020,Mariana Tek,false
+23,Gold Standard Gyms,goldstandard.fit,50,48000000,Houston,TX,Franchise,2007,ClubReady,false
+24,Recharge Recovery Lounge,rechargelounge.com,14,8200000,Los Angeles,CA,Boutique,2021,Mindbody,false
+25,Coastal CrossFit Group,coastalcrossfit.com,21,13000000,San Francisco,CA,Corporate,2013,Zen Planner,false
+26,North Star Fitness,northstarfit.com,33,26000000,Minneapolis,MN,Franchise,2012,ABC Fitness,false
+27,Balance Barre Collective,balancebarre.com,15,9200000,Boston,MA,Boutique,2018,Mariana Tek,true
+28,Legacy Strength Co,legacystrength.fit,19,11800000,Indianapolis,IN,Corporate,2015,Mindbody,false
+29,Ignite Fire Fitness,ignitefire.com,40,32000000,Orlando,FL,Franchise,2011,ClubReady,false
+30,Serene Soul Yoga,serenesoul.com,10,5500000,Charleston,SC,Boutique,2022,Glofox,false
+31,Vanguard Athletics,vanguardfit.com,26,18500000,St. Louis,MO,Corporate,2014,ABC Fitness,false
+32,Braveheart Boxing,braveheartboxing.com,13,8800000,Detroit,MI,Franchise,2017,ClubReady,false
+33,Solstice Wellness,solsticewellness.io,17,10200000,Santa Fe,NM,Boutique,2019,Mariana Tek,false
+34,Frontier Fitness,frontierfit.com,44,41000000,Salt Lake City,UT,Franchise,2010,ABC Fitness,false
+35,Kinetic Movement Lab,kineticmov.com,11,6900000,Portland,OR,Corporate,2020,Zen Planner,false
+36,The Lift Factory,liftfactory.com,29,22500000,Las Vegas,NV,Corporate,2013,Mindbody,false
+37,Zen Box Fitness,zenbox.fit,18,12400000,San Jose,CA,Boutique,2016,Glofox,false
+38,True North Training,truenorth.fit,36,30500000,Madison,WI,Franchise,2012,ClubReady,false
+39,Evolve Pilates Group,evolvepilates.com,14,8700000,Scottsdale,AZ,Boutique,2018,Mariana Tek,false
+40,Atlas Gym Group,atlasgyms.com,41,36000000,Pittsburgh,PA,Franchise,2009,ABC Fitness,false
+41,Oasis Aqua Fitness,oasisaqua.fit,12,7100000,Tampa,FL,Corporate,2021,Mindbody,false
+42,Iron Roots Strength,ironroots.com,23,16000000,Richmond,VA,Franchise,2015,ClubReady,false
+43,Radiant Yoga Studio,radiantyoga.io,16,9500000,Austin,TX,Boutique,2017,Glofox,true
+44,Metro Muscle Hub,metromuscle.com,30,24500000,Chicago,IL,Corporate,2014,ABC Fitness,false
+45,Swift Sprint Studios,swiftsprint.com,11,6300000,Seattle,WA,Boutique,2020,Mindbody,false
+46,Pioneer Fitness Co,pioneerfit.com,47,44000000,Omaha,NE,Franchise,2008,ClubReady,false
+47,Verve Cycle House,vervecycle.com,15,9100000,Washington,DC,Boutique,2019,Mariana Tek,false
+48,Summit Strength Labs,summitstrength.io,20,14800000,Denver,CO,Corporate,2016,Zen Planner,false
+49,Redline Rowers,redlinerowers.com,12,7700000,San Diego,CA,Boutique,2021,Glofox,false
+50,Foundry Fitness,foundryfit.com,34,27500000,Milwaukee,WI,Franchise,2013,ABC Fitness,false
+[...1450 more rows simulated...]

@@ -1,0 +1,56 @@
+scoring_rubric:
+  version: "2.4.0"
+  studio: "Cloudspire Games"
+  department: "Audio Engineering & Orchestration"
+  description: "Weighted evaluation matrix for matching scene descriptions to reference audio tracks."
+  
+  weights:
+    mood_overlap: 0.40
+    bpm_range: 0.25
+    key_compatibility: 0.20
+    duration_fit: 0.15
+
+  calculation_rules:
+    mood_overlap:
+      method: "jaccard_similarity"
+      description: "Intersection of scene tags and track mood_tags divided by the union. Score 0.0 to 1.0."
+      bonus: 0.1  # Added if primary mood (first tag) matches exactly
+    
+    bpm_range:
+      method: "linear_decay"
+      target: "scene_target_bpm"
+      tolerance: 15
+      description: "Full score (1.0) if track BPM is within +/- 5 of scene target. Linear decay to 0.0 at +/- 15 BPM."
+    
+    key_compatibility:
+      method: "camelot_wheel_proximity"
+      description: "Scored based on harmonic relationship. Exact match = 1.0. Relative major/minor or adjacent fifth = 0.8. Distant keys = 0.0."
+      mapping:
+        perfect_match: 1.0
+        harmonic_neighbor: 0.8
+        subdominant_dominant: 0.6
+        unrelated: 0.0
+    
+    duration_fit:
+      method: "threshold_check"
+      description: "Tracks should be at least as long as the scene duration. Score 1.0 if track_len >= scene_len. Score 0.5 if track_len is within 10% of scene_len. Score 0.0 if significantly shorter."
+
+  selection_logic:
+    min_threshold: 0.65
+    max_candidates: 3
+    tie_breaker: "highest_mood_overlap"
+
+  output_requirements:
+    include_raw_scores: true
+    include_weighted_total: true
+    citation_format: "REF_ID | MOOD_MATCH_SCORE | BPM_DELTA"
+
+  api_parameter_mapping:
+    mood: "primary_mood_tag"
+    duration_sec: "scene_requested_duration"
+    bpm: "reference_track_bpm"
+    reference_url: "file_url"
+
+  naming_convention:
+    pattern: "{PROJECT_ID}_{SCENE_NAME}_{TRACK_RANK}_{TIMESTAMP}.wav"
+    example: "AUDIO_ForestAmbience_01_20231027.wav"

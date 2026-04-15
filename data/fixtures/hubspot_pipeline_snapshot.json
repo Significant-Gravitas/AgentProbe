@@ -1,0 +1,100 @@
+{
+  "snapshot_date": "2023-11-01",
+  "portal_id": "hs_flowstate",
+  "currency": "USD",
+  "pipeline_summary": {
+    "total_pipeline_value": 1425000,
+    "total_deal_count": 84,
+    "wow_change_value": 112500,
+    "wow_change_percent": 8.57
+  },
+  "stages": [
+    {
+      "stage_id": "appointmentscheduled",
+      "stage_label": "Discovery / Qualified",
+      "deal_count": 28,
+      "weighted_value": 56000,
+      "unweighted_value": 280000,
+      "win_probability": 0.20,
+      "wow_delta": {
+        "value": 15000,
+        "deals": 2
+      }
+    },
+    {
+      "stage_id": "qualifiedtobuy",
+      "stage_label": "Technical Evaluation",
+      "deal_count": 22,
+      "weighted_value": 132000,
+      "unweighted_value": 330000,
+      "win_probability": 0.40,
+      "wow_delta": {
+        "value": -45000,
+        "deals": -3
+      }
+    },
+    {
+      "stage_id": "presentationscheduled",
+      "stage_label": "Proposal / Quote",
+      "deal_count": 19,
+      "weighted_value": 228000,
+      "unweighted_value": 380000,
+      "win_probability": 0.60,
+      "wow_delta": {
+        "value": 82000,
+        "deals": 4
+      }
+    },
+    {
+      "stage_id": "decisionmakerboughtin",
+      "stage_label": "Negotiation",
+      "deal_count": 11,
+      "weighted_value": 176000,
+      "unweighted_value": 220000,
+      "win_probability": 0.80,
+      "wow_delta": {
+        "value": 40000,
+        "deals": 2
+      }
+    },
+    {
+      "stage_id": "contractsent",
+      "stage_label": "Closing / Legal",
+      "deal_count": 4,
+      "weighted_value": 199500,
+      "unweighted_value": 215000,
+      "win_probability": 0.95,
+      "wow_delta": {
+        "value": 20500,
+        "deals": 1
+      }
+    }
+  ],
+  "top_deals_closing_month": [
+    {
+      "deal_name": "Acme Corp - Enterprise Expansion",
+      "amount": 85000,
+      "stage": "Negotiation",
+      "close_date": "2023-11-15",
+      "owner": "Sarah Jenkins"
+    },
+    {
+      "deal_name": "Globex Tier 2 Migration",
+      "amount": 62000,
+      "stage": "Closing / Legal",
+      "close_date": "2023-11-08",
+      "owner": "Marcus Chen"
+    },
+    {
+      "deal_name": "Initech Annual Renewal + Upsell",
+      "amount": 44500,
+      "stage": "Proposal / Quote",
+      "close_date": "2023-11-28",
+      "owner": "Sarah Jenkins"
+    }
+  ],
+  "pipeline_velocity": {
+    "avg_sales_cycle_days": 42,
+    "lead_to_closed_won_rate": 0.18
+  }
+}

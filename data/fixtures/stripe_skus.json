@@ -1,0 +1,69 @@
+{
+  "plans": [
+    {
+      "id": "price_pro_monthly",
+      "name": "Pro Monthly",
+      "sku": "SKU-PRO-M",
+      "amount": 4900,
+      "currency": "usd",
+      "interval": "month",
+      "features": ["unlimited_projects", "priority_support"],
+      "stripe_product_id": "prod_pro_tier"
+    },
+    {
+      "id": "price_pro_annual",
+      "name": "Pro Annual",
+      "sku": "SKU-PRO-A",
+      "amount": 49000,
+      "currency": "usd",
+      "interval": "year",
+      "features": ["unlimited_projects", "priority_support"],
+      "stripe_product_id": "prod_pro_tier"
+    },
+    {
+      "id": "price_team_monthly",
+      "name": "Team Monthly",
+      "sku": "SKU-TEAM-M",
+      "amount": 14900,
+      "currency": "usd",
+      "interval": "month",
+      "features": ["shared_workspaces", "team_analytics", "sso_lite"],
+      "stripe_product_id": "prod_team_tier"
+    },
+    {
+      "id": "price_team_annual",
+      "name": "Team Annual",
+      "sku": "SKU-TEAM-A",
+      "amount": 149000,
+      "currency": "usd",
+      "interval": "year",
+      "features": ["shared_workspaces", "team_analytics", "sso_lite"],
+      "stripe_product_id": "prod_team_tier"
+    },
+    {
+      "id": "price_enterprise_monthly",
+      "name": "Enterprise Monthly",
+      "sku": "SKU-ENT-M",
+      "amount": 49900,
+      "currency": "usd",
+      "interval": "month",
+      "features": ["dedicated_account_manager", "scim_provisioning", "audit_logs", "24_7_phone_support"],
+      "stripe_product_id": "prod_enterprise_tier"
+    },
+    {
+      "id": "price_enterprise_annual",
+      "name": "Enterprise Annual",
+      "sku": "SKU-ENT-A",
+      "amount": 499000,
+      "currency": "usd",
+      "interval": "year",
+      "features": ["dedicated_account_manager", "scim_provisioning", "audit_logs", "24_7_phone_support"],
+      "stripe_product_id": "prod_enterprise_tier"
+    }
+  ],
+  "metadata": {
+    "api_version": "2023-10-16",
+    "environment": "test",
+    "webhook_secret_mock": "whsec_test_secret_12345"
+  }
+}

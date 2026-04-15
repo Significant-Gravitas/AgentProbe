@@ -1,0 +1,214 @@
+{
+  "market_landscape": [
+    {
+      "product_name": "Habitica",
+      "category": "Gamified Productivity",
+      "target_audience": "Individual Gamers",
+      "pricing_model": "Freemium",
+      "features": {
+        "multi_user_support": "Party system (shared quests)",
+        "shared_habit_tracking": "Partial (shared boss damage, not shared counters)",
+        "accountability_mechanisms": "Health loss for group",
+        "chat_integration": "In-app guild chat",
+        "mobile_native": true,
+        "sync_speed": "Real-time"
+      }
+    },
+    {
+      "product_name": "Streaks",
+      "category": "Minimalist Habit Tracker",
+      "target_audience": "iOS Power Users",
+      "pricing_model": "Paid Upfront",
+      "features": {
+        "multi_user_support": "iCloud Family Sharing only",
+        "shared_habit_tracking": "None",
+        "accountability_mechanisms": "Local notifications",
+        "chat_integration": "None",
+        "mobile_native": true,
+        "sync_speed": "iCloud dependent"
+      }
+    },
+    {
+      "product_name": "Coach.me",
+      "category": "Coaching/Community",
+      "target_audience": "Self-improvers",
+      "pricing_model": "Free + Paid Coaching",
+      "features": {
+        "multi_user_support": "Community groups",
+        "shared_habit_tracking": "Leaderboards only",
+        "accountability_mechanisms": "Human coaches (paid)",
+        "chat_integration": "Public Q&A",
+        "mobile_native": true,
+        "sync_speed": "Asynchronous"
+      }
+    },
+    {
+      "product_name": "Productive",
+      "category": "General Habit Tracker",
+      "target_audience": "Mass Market",
+      "pricing_model": "Subscription",
+      "features": {
+        "multi_user_support": "None",
+        "shared_habit_tracking": "None",
+        "accountability_mechanisms": "Personal streaks",
+        "chat_integration": "None",
+        "mobile_native": true,
+        "sync_speed": "N/A"
+      }
+    },
+    {
+      "product_name": "Couple",
+      "category": "Relationship Management",
+      "target_audience": "Romantic Couples",
+      "pricing_model": "Free",
+      "features": {
+        "multi_user_support": "1-to-1 pairing",
+        "shared_habit_tracking": "Shared Lists (To-do, not habit)",
+        "accountability_mechanisms": "Nudges",
+        "chat_integration": "Private messaging",
+        "mobile_native": true,
+        "sync_speed": "Real-time"
+      }
+    },
+    {
+      "product_name": "HabitShare",
+      "category": "Social Habit Tracker",
+      "target_audience": "Friends",
+      "pricing_model": "Free",
+      "features": {
+        "multi_user_support": "Friend lists",
+        "shared_habit_tracking": "View-only access to friend habits",
+        "accountability_mechanisms": "Comments on streaks",
+        "chat_integration": "Basic messaging",
+        "mobile_native": true,
+        "sync_speed": "Asynchronous"
+      }
+    },
+    {
+      "product_name": "Way of Life",
+      "category": "Data-driven Habit Tracker",
+      "target_audience": "Analysts",
+      "pricing_model": "Freemium",
+      "features": {
+        "multi_user_support": "None",
+        "shared_habit_tracking": "None",
+        "accountability_mechanisms": "Trend charts",
+        "chat_integration": "None",
+        "mobile_native": true,
+        "sync_speed": "N/A"
+      }
+    },
+    {
+      "product_name": "Loop",
+      "category": "Open Source Habit Tracker",
+      "target_audience": "Privacy-conscious",
+      "pricing_model": "Free/Open Source",
+      "features": {
+        "multi_user_support": "None",
+        "shared_habit_tracking": "None",
+        "accountability_mechanisms": "Widgets",
+        "chat_integration": "None",
+        "mobile_native": true (Android),
+        "sync_speed": "Local only"
+      }
+    },
+    {
+      "product_name": "Tally",
+      "category": "Simple Counter",
+      "target_audience": "Minimalists",
+      "pricing_model": "Freemium",
+      "features": {
+        "multi_user_support": "None",
+        "shared_habit_tracking": "None",
+        "accountability_mechanisms": "Visual progress bars",
+        "chat_integration": "None",
+        "mobile_native": true,
+        "sync_speed": "N/A"
+      }
+    },
+    {
+      "product_name": "StickK",
+      "category": "Commitment Contract",
+      "target_audience": "Goal-oriented",
+      "pricing_model": "Free (Financial stakes)",
+      "features": {
+        "multi_user_support": "Referees/Supporters",
+        "shared_habit_tracking": "Individual goals with oversight",
+        "accountability_mechanisms": "Financial penalties",
+        "chat_integration": "Email updates",
+        "mobile_native": true,
+        "sync_speed": "Manual verification"
+      }
+    },
+    {
+      "product_name": "Cozi",
+      "category": "Family Organizer",
+      "target_audience": "Families",
+      "pricing_model": "Freemium",
+      "features": {
+        "multi_user_support": "Shared family account",
+        "shared_habit_tracking": "Shared chore lists",
+        "accountability_mechanisms": "Shared calendar alerts",
+        "chat_integration": "None",
+        "mobile_native": true,
+        "sync_speed": "Cloud sync"
+      }
+    },
+    {
+      "product_name": "Done",
+      "category": "Simple Habit Tracker",
+      "target_audience": "General users",
+      "pricing_model": "Subscription",
+      "features": {
+        "multi_user_support": "None",
+        "shared_habit_tracking": "None",
+        "accountability_mechanisms": "Streaks",
+        "chat_integration": "None",
+        "mobile_native": true,
+        "sync_speed": "N/A"
+      }
+    },
+    {
+      "product_name": "HabitBull",
+      "category": "Feature-Rich Tracker",
+      "target_audience": "Power Users",
+      "pricing_model": "Freemium",
+      "features": {
+        "multi_user_support": "Forums/Discussion",
+        "shared_habit_tracking": "None",
+        "accountability_mechanisms": "Detailed stats",
+        "chat_integration": "Community forums",
+        "mobile_native": true,
+        "sync_speed": "Cloud sync"
+      }
+    },
+    {
+      "product_name": "Between",
+      "category": "Couple Private Space",
+      "target_audience": "Couples",
+      "pricing_model": "Freemium",
+      "features": {
+        "multi_user_support": "1-to-1 pairing",
+        "shared_habit_tracking": "None (Shared calendar only)",
+        "accountability_mechanisms": "Shared anniversaries",
+        "chat_integration": "Rich private chat",
+        "mobile_native": true,
+        "sync_speed": "Real-time"
+      }
+    },
+    {
+      "product_name": "Routinery",
+      "category": "Routine Builder",
+      "target_audience": "ADHD / Structure seekers",
+      "pricing_model": "Subscription",
+      "features": {
+        "multi_user_support": "None",
+        "shared_habit_tracking": "None",
+        "accountability_mechanisms": "Timer-based sequences",
+        "chat_integration": "None",
+        "mobile_native": true,
+        "sync_speed": "N/A"
+      }
+    }
+  ]
+}

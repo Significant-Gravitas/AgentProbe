@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: Internal Operations API
+  description: Core internal API for managing enterprise customers, order processing, and analytical reporting.
+  version: 2.1.0
+servers:
+  - url: https://api.internal.enterprise.com/v2
+    description: Production internal network
+paths:
+  /customers:
+    get:
+      summary: List Customers
+      operationId: list_customers
+      tags:
+        - Customers
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: region
+          in: query
+          schema:
+            type: string
+            enum: [NORTH_AMERICA, EMEA, APAC, LATAM]
+      responses:
+        '200':
+          description: A list of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+    post:
+      summary: Create Customer
+      operationId: create_customer
+      tags:
+        - Customers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerInput'
+      responses:
+        '201':
+          description: Customer created
+  /orders:
+    get:
+      summary: List Orders
+      operationId: list_orders
+      tags:
+        - Orders
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, SHIPPED, DELIVERED, CANCELLED]
+        - name: customer_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of orders matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+    post:
+      summary: Place Order
+      operationId: place_order
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '202':
+          description: Order accepted for processing
+  /reports:
+    get:
+      summary: Generate System Report
+      operationId: get_report
+      tags:
+        - Reports
+      parameters:
+        - name: report_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [SALES_SUMMARY, INVENTORY_HEALTH, SYSTEM_LATENCY]
+        - name: format
+          in: query
+          schema:
+            type: string
+            default: json
+            enum: [json, csv, pdf]
+      responses:
+        '200':
+          description: Generated report data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        region:
+          type: string
+    CustomerInput:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        region:
+          type: string
+    Order:
+      type: object
+      properties:
+        order_id:
+          type: string
+        customer_id:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    OrderInput:
+      type: object
+      required: [customer_id, amount]
+      properties:
+        customer_id:
+          type: string
+        amount:
+          type: number
+        items:
+          type: array
+          items:
+            type: string
+    Report:
+      type: object
+      properties:
+        report_id:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        data_points:
+          type: integer
+        summary:
+          type: string

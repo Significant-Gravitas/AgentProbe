@@ -1,0 +1,321 @@
+signatures:
+  - id: SIG-001
+    name: Brute Force Login Attempt
+    description: Multiple failed login attempts for a single user from a single IP.
+    mitre_attack_id: T1110.001
+    kill_chain_stage: Delivery
+    severity: MEDIUM
+    pattern: 'event_type == "auth" && status == "failure" && count > 10'
+  - id: SIG-002
+    name: SQL Injection - Union Based
+    description: Detected UNION SELECT statement in API query parameters.
+    mitre_attack_id: T1190
+    kill_chain_stage: Exploitation
+    severity: CRITICAL
+    pattern: 'payload contains "UNION SELECT" || payload contains "information_schema"'
+  - id: SIG-003
+    name: SSH Key Addition
+    description: Unauthorized addition of a public key to authorized_keys.
+    mitre_attack_id: T1098.004
+    kill_chain_stage: Persistence
+    severity: HIGH
+    pattern: 'file_path == "/root/.ssh/authorized_keys" && action == "modify"'
+  - id: SIG-004
+    name: Reverse Shell Connection
+    description: Outbound connection to known malicious C2 IP on port 4444.
+    mitre_attack_id: T1059.004
+    kill_chain_stage: Command and Control
+    severity: CRITICAL
+    pattern: 'dest_port == 4444 && direction == "outbound"'
+  - id: SIG-005
+    name: Excessive API Data Exfiltration
+    description: Single API key requesting > 5000 records in 1 minute.
+    mitre_attack_id: T1020
+    kill_chain_stage: Exfiltration
+    severity: HIGH
+    pattern: 'api_call == "GET /v1/customers" && response_size_sum > 50MB'
+  - id: SIG-006
+    name: Credential Dumping - LSASS
+    description: Access to LSASS process memory detected.
+    mitre_attack_id: T1003.001
+    kill_chain_stage: Credential Access
+    severity: CRITICAL
+    pattern: 'target_process == "lsass.exe" && access_mask == "0x1410"'
+  - id: SIG-007
+    name: Lateral Movement via SMB
+    description: Unusual SMB traffic between internal workstations.
+    mitre_attack_id: T1021.002
+    kill_chain_stage: Lateral Movement
+    severity: MEDIUM
+    pattern: 'protocol == "SMB" && src_zone == "internal" && dest_zone == "internal"'
+  - id: SIG-008
+    name: Log Clearing - Event Viewer
+    description: System logs were cleared by an administrative user.
+    mitre_attack_id: T1070.001
+    kill_chain_stage: Defense Evasion
+    severity: HIGH
+    pattern: 'event_id == 1102 || event_id == 104'
+  - id: SIG-009
+    name: Cryptomining Activity
+    description: Connection to known Stratum protocol mining pools.
+    mitre_attack_id: T1496
+    kill_chain_stage: Impact
+    severity: LOW
+    pattern: 'dest_host contains "pool.supportxmr.com" || dest_port == 3333'
+  - id: SIG-010
+    name: Web Shell Execution
+    description: Unusual process spawned by web server user (www-data/nginx).
+    mitre_attack_id: T1505.003
+    kill_chain_stage: Persistence
+    severity: CRITICAL
+    pattern: 'parent_proc == "nginx" && (proc == "whoami" || proc == "nc")'
+  - id: SIG-011
+    name: DNS Tunneling Detection
+    description: High volume of TXT records or long subdomains.
+    mitre_attack_id: T1132.001
+    kill_chain_stage: Command and Control
+    severity: MEDIUM
+    pattern: 'dns_query_length > 128 && query_type == "TXT"'
+  - id: SIG-012
+    name: Port Scanning - Internal
+    description: Single host scanning more than 50 ports on a target.
+    mitre_attack_id: T1046
+    kill_chain_stage: Reconnaissance
+    severity: LOW
+    pattern: 'unique_ports > 50 && time_window == "5m"'
+  - id: SIG-013
+    name: PowerShell Encoded Command
+    description: Execution of PowerShell with -EncodedCommand flag.
+    mitre_attack_id: T1059.001
+    kill_chain_stage: Execution
+    severity: HIGH
+    pattern: 'command_line contains "-enc" || command_line contains "-EncodedCommand"'
+  - id: SIG-014
+    name: Scheduled Task Creation
+    description: New persistence mechanism via Windows Task Scheduler.
+    mitre_attack_id: T1053.005
+    kill_chain_stage: Persistence
+    severity: MEDIUM
+    pattern: 'proc == "schtasks.exe" && action == "/create"'
+  - id: SIG-015
+    name: Multi-Factor Authentication Bypass
+    description: Successful login after multiple MFA push denials.
+    mitre_attack_id: T1556.006
+    kill_chain_stage: Credential Access
+    severity: HIGH
+    pattern: 'mfa_denied_count > 3 && auth_status == "success"'
+  - id: SIG-016
+    name: Cross-Site Scripting (XSS)
+    description: Script tags detected in HTTP POST request parameters.
+    mitre_attack_id: T1189
+    kill_chain_stage: Delivery
+    severity: MEDIUM
+    pattern: 'payload contains "<script>" || payload contains "alert("'
+  - id: SIG-017
+    name: Privilege Escalation - Sudo
+    description: Successful sudo to root following failed attempts.
+    mitre_attack_id: T1548.003
+    kill_chain_stage: Privilege Escalation
+    severity: HIGH
+    pattern: 'sudo_fail_count > 0 && sudo_user == "root"'
+  - id: SIG-018
+    name: Ransomware File Rename
+    description: Rapid renaming of files to .encrypted or .locked extensions.
+    mitre_attack_id: T1486
+    kill_chain_stage: Impact
+    severity: CRITICAL
+    pattern: 'file_ext_change_count > 100 && new_ext == ".encrypted"'
+  - id: SIG-019
+    name: Cloud Instance Metadata Access
+    description: Attempt to access IMDS from a non-standard process.
+    mitre_attack_id: T1552.005
+    kill_chain_stage: Credential Access
+    severity: HIGH
+    pattern: 'dest_ip == "169.254.169.254" && user_agent != "aws-cli"'
+  - id: SIG-020
+    name: Kerberoasting
+    description: Excessive TGS requests for service accounts.
+    mitre_attack_id: T1558.003
+    kill_chain_stage: Credential Access
+    severity: HIGH
+    pattern: 'event_id == 4769 && ticket_options == "0x40810000"'
+  - id: SIG-021
+    name: Remote File Copy (SCP/FTP)
+    description: Large data transfer to external IP via SCP.
+    mitre_attack_id: T1105
+    kill_chain_stage: Exfiltration
+    severity: MEDIUM
+    pattern: 'proc == "scp" && bytes_sent > 500MB'
+  - id: SIG-022
+    name: Process Injection
+    description: CreateRemoteThread detected across processes.
+    mitre_attack_id: T1055
+    kill_chain_stage: Defense Evasion
+    severity: CRITICAL
+    pattern: 'api_call == "CreateRemoteThread" && src_proc != dest_proc'
+  - id: SIG-023
+    name: Account Discovery
+    description: Use of net user or get-aduser to map accounts.
+    mitre_attack_id: T1087.002
+    kill_chain_stage: Reconnaissance
+    severity: LOW
+    pattern: 'command_line contains "net user /domain"'
+  - id: SIG-024
+    name: Timestomping
+    description: Modification of file creation timestamps.
+    mitre_attack_id: T1070.006
+    kill_chain_stage: Defense Evasion
+    severity: MEDIUM
+    pattern: 'api_call == "SetFileInformationByHandle" && timestamp_delta < 0'
+  - id: SIG-025
+    name: Local File Inclusion (LFI)
+    description: Traversal patterns in URL paths.
+    mitre_attack_id: T1210
+    kill_chain_stage: Exploitation
+    severity: HIGH
+    pattern: 'url contains "../" || url contains "/etc/passwd"'
+  - id: SIG-026
+    name: Abnormal User Agent
+    description: Request from known attack tools (sqlmap, nmap, nikto).
+    mitre_attack_id: T1592
+    kill_chain_stage: Reconnaissance
+    severity: LOW
+    pattern: 'user_agent contains "sqlmap" || user_agent contains "Nikto"'
+  - id: SIG-027
+    name: AWS S3 Bucket Enumeration
+    description: Multiple ListBuckets calls from an unauthenticated IP.
+    mitre_attack_id: T1537
+    kill_chain_stage: Reconnaissance
+    severity: MEDIUM
+    pattern: 'api_name == "ListBuckets" && error == "AccessDenied"'
+  - id: SIG-028
+    name: BITS Job Persistence
+    description: Creation of a long-running BITS transfer job.
+    mitre_attack_id: T1197
+    kill_chain_stage: Persistence
+    severity: MEDIUM
+    pattern: 'proc == "bitsadmin.exe" && action == "/create"'
+  - id: SIG-029
+    name: RDP Tunneling over SSH
+    description: Encapsulated RDP traffic detected on SSH port.
+    mitre_attack_id: T1572
+    kill_chain_stage: Command and Control
+    severity: HIGH
+    pattern: 'protocol == "SSH" && payload_entropy > 7.5 && port == 22'
+  - id: SIG-030
+    name: Masquerading - System Proc
+    description: Process named svchost.exe running from C:\Temp.
+    mitre_attack_id: T1036.005
+    kill_chain_stage: Defense Evasion
+    severity: CRITICAL
+    pattern: 'proc_name == "svchost.exe" && proc_path != "C:\\Windows\\System32"'
+  - id: SIG-031
+    name: Insecure API Gateway Access
+    description: Direct access to backend microservices bypassing gateway.
+    mitre_attack_id: T1595
+    kill_chain_stage: Reconnaissance
+    severity: MEDIUM
+    pattern: 'dest_host == "internal-api-srv" && src_zone == "dmz"'
+  - id: SIG-032
+    name: WMI Event Subscription
+    description: Persistence via WMI Event Filter/Consumer.
+    mitre_attack_id: T1546.003
+    kill_chain_stage: Persistence
+    severity: HIGH
+    pattern: 'wmi_class == "__EventFilter" && action == "created"'
+  - id: SIG-033
+    name: Suspicious Certutil Download
+    description: Using certutil to download files from external URLs.
+    mitre_attack_id: T1105
+    kill_chain_stage: Delivery
+    severity: HIGH
+    pattern: 'command_line contains "certutil" && command_line contains "-urlcache"'
+  - id: SIG-034
+    name: Email Forwarding Rule
+    description: New auto-forwarding rule to external domain.
+    mitre_attack_id: T1114.003
+    kill_chain_stage: Exfiltration
+    severity: MEDIUM
+    pattern: 'rule_action == "ForwardTo" && recipient_domain != "company.com"'
+  - id: SIG-035
+    name: Registry Run Key Modify
+    description: Modification of HKLM\Software\Microsoft\Windows\CurrentVersion\Run.
+    mitre_attack_id: T1547.001
+    kill_chain_stage: Persistence
+    severity: HIGH
+    pattern: 'registry_path contains "\\CurrentVersion\\Run"'
+  - id: SIG-036
+    name: Excessive ICMP Traffic
+    description: Ping sweep or ICMP tunneling behavior.
+    mitre_attack_id: T1071.004
+    kill_chain_stage: Command and Control
+    severity: LOW
+    pattern: 'protocol == "ICMP" && packet_rate > 100/s'
+  - id: SIG-037
+    name: Password Spraying
+    description: One password tried against many accounts.
+    mitre_attack_id: T1110.003
+    kill_chain_stage: Credential Access
+    severity: HIGH
+    pattern: 'unique_users > 50 && auth_failure_count > 50 && src_ip == same'
+  - id: SIG-038
+    name: Domain Controller Sync (DCSync)
+    description: Directory replication request from non-DC.
+    mitre_attack_id: T1003.006
+    kill_chain_stage: Credential Access
+    severity: CRITICAL
+    pattern: 'api_call == "GetNCCheanges" && src_host != "DC01"'
+  - id: SIG-039
+    name: Hidden File/Directory
+    description: Creation of files with leading dots on Linux.
+    mitre_attack_id: T1564.001
+    kill_chain_stage: Defense Evasion
+    severity: LOW
+    pattern: 'action == "file_create" && file_name matches "^\\."'
+  - id: SIG-040
+    name: Process Hollowing
+    description: Process created in suspended state then modified.
+    mitre_attack_id: T1055.012
+    kill_chain_stage: Defense Evasion
+    severity: CRITICAL
+    pattern: 'creation_flags == "0x00000004" && memory_write == true'
+  - id: SIG-041
+    name: Data Compressed for Exfiltration
+    description: Use of 7zip or rar on sensitive directories.
+    mitre_attack_id: T1560.001
+    kill_chain_stage: Exfiltration
+    severity: MEDIUM
+    pattern: 'proc == "7z.exe" && command_line contains "\\CustomerData\\"'
+  - id: SIG-042
+    name: System Information Discovery
+    description: Execution of systeminfo or hostname.
+    mitre_attack_id: T1082
+    kill_chain_stage: Reconnaissance
+    severity: LOW
+    pattern: 'proc == "systeminfo.exe" || proc == "hostname"'
+  - id: SIG-043
+    name: Unsigned Driver Load
+    description: Loading of a kernel driver without valid signature.
+    mitre_attack_id: T1068
+    kill_chain_stage: Privilege Escalation
+    severity: HIGH
+    pattern: 'event_type == "driver_load" && signature_status == "unsigned"'
+  - id: SIG-044
+    name: Port Proxying - Netsh
+    description: Setting up port forwarding via netsh.
+    mitre_attack_id: T1090
+    kill_chain_stage: Command and Control
+    severity: MEDIUM
+    pattern: 'command_line contains "netsh interface portproxy"'
+  - id: SIG-045
+    name: Exploitation of Known CVE
+    description: Pattern matching Log4Shell or similar RCE.
+    mitre_attack_id: T1210
+    kill_chain_stage: Exploitation
+    severity: CRITICAL
+    pattern: 'payload contains "${jndi:ldap://"'
+  - id: SIG-046
+    name: Abnormal Admin Logon Time
+    description: Domain Admin login between 02:00 and 04:00 local.
+    mitre_attack_id: T1078.002
+    kill_chain_stage: Lateral Movement

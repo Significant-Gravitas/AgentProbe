@@ -1,0 +1,61 @@
+{
+  "company": "Brightfold Studio",
+  "total_employees": 20,
+  "departments": [
+    {
+      "name": "Account Management",
+      "members": [
+        {
+          "id": "emp-001",
+          "name": "Priya Sharma",
+          "short_name": "Priya S.",
+          "role": "Account Lead",
+          "email": "priya@brightfold.studio",
+          "slack_id": "U882HS92",
+          "notion_user_id": "ps-9921",
+          "focus_area": "Strategic Partnerships & Enterprise Clients",
+          "availability": "Mon-Fri, 9am-6pm EST"
+        }
+      ]
+    },
+    {
+      "name": "Creative & Design",
+      "members": [
+        {
+          "id": "emp-004",
+          "name": "Rafael Ortiz",
+          "short_name": "Rafa O.",
+          "role": "Design Lead",
+          "email": "rafa@brightfold.studio",
+          "slack_id": "U119KL33",
+          "notion_user_id": "ro-4412",
+          "focus_area": "Visual Identity & Product UI",
+          "availability": "Mon-Fri, 10am-7pm EST"
+        }
+      ]
+    },
+    {
+      "name": "Operations & Project Management",
+      "members": [
+        {
+          "id": "emp-009",
+          "name": "Tomas Kovacs",
+          "short_name": "Tomas K.",
+          "role": "Project Manager",
+          "email": "tomas@brightfold.studio",
+          "slack_id": "U442PP01",
+          "notion_user_id": "tk-0029",
+          "focus_area": "Resource Allocation & Delivery Timelines",
+          "availability": "Mon-Fri, 8am-5pm EST"
+        }
+      ]
+    }
+  ],
+  "default_onboarding_team": [
+    "Priya Sharma",
+    "Rafael Ortiz",
+    "Tomas Kovacs"
+  ],
+  "slack_workspace_id": "T024BE91L",
+  "notion_workspace_id": "brightfold"
+}

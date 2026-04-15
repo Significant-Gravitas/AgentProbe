@@ -1,0 +1,81 @@
+version: 2.1.0
+last_updated: 2023-10-27
+industry: Health Insurance (Payer)
+compliance_frameworks:
+  - HIPAA-HITECH
+  - Affordable Care Act (ACA) Section 1557
+  - CMS Medicare Marketing Guidelines (MMG)
+  - State Department of Insurance (DOI) Standards
+
+rulesets:
+  hipaa_privacy_marketing:
+    id: R-101
+    description: "Strict prohibition on using Protected Health Information (PHI) for marketing outreach without explicit authorization."
+    triggers:
+      - "any mention of specific patient medical history in testimonials without valid HIPAA authorization ID"
+      - "promises of 'personalized medical outcomes' based on historical data"
+      - "implied access to external medical records for lead generation"
+    severity: CRITICAL
+
+  aca_nondiscrimination:
+    id: R-202
+    description: "Compliance with Section 1557 regarding accessibility and language services."
+    required_elements:
+      - "Link to Taglines for Top 15 Non-English Languages"
+      - "Notice of Nondiscrimination Statement"
+      - "Accessibility link in footer"
+    prohibited_language:
+      - "exclusionary language regarding pre-existing conditions"
+      - "limitations based on gender identity or sexual orientation"
+    severity: HIGH
+
+  state_disclaimer_requirements:
+    id: R-303
+    jurisdictions:
+      CA: "Must include: 'This is a solicitation for insurance. A licensed agent may contact you.'"
+      FL: "Must include: 'The benefit information provided is a brief summary, not a complete description of benefits.'"
+      NY: "Must include: 'Policy form numbers [X] apply. Subject to state variations.'"
+    triggers:
+      - "missing state-specific disclosure on plan comparison pages"
+      - "outdated footer copyright or licensing numbers"
+    severity: HIGH
+
+  benefit_accuracy_claims:
+    id: R-404
+    description: "Prevention of misleading financial or coverage claims."
+    prohibited_phrases:
+      - "Free coverage" (Must use 'No-cost' or '$0 premium' if qualified)
+      - "Unlimited benefits"
+      - "Full coverage for everything"
+      - "Endorsed by the government"
+      - "The best plan in [State]"
+    mandatory_clarifications:
+      - "Copays and deductibles may apply"
+      - "Network restrictions apply"
+    severity: MEDIUM
+
+  medicare_marketing_guidelines:
+    id: R-505
+    applicability: "Pages targeting 65+ demographic or Medicare Advantage products"
+    triggers:
+      - "Missing CMS material ID (e.g., SMID: [ID_NUMBER])"
+      - "Using the word 'Senior' in a way that implies government affiliation"
+      - "Failure to list the 24-hour nurse line availability if mentioned"
+    severity: CRITICAL
+
+  network_transparency:
+    id: R-606
+    description: "Accuracy of provider network status."
+    triggers:
+      - "Claims that 'All doctors are in-network'"
+      - "Missing 'Search our Provider Directory' link near plan descriptions"
+    severity: MEDIUM
+
+audit_parameters:
+  weekly_scan_depth: 3
+  ignored_selectors:
+    - "#internal-dev-banner"
+    - "nav.utility-nav"
+  reporting_threshold:
+    min_confidence: 0.85
+    flag_false_positives: true

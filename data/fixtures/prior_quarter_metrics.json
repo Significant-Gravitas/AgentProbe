@@ -1,0 +1,58 @@
+{
+  "fiscal_year": 2024,
+  "quarter": "Q1",
+  "reporting_period": {
+    "start": "2024-01-01",
+    "end": "2024-03-31"
+  },
+  "metrics": [
+    {
+      "metric_name": "Annual Recurring Revenue (ARR)",
+      "target": 8800000.00,
+      "actual": 8400000.00,
+      "currency": "USD",
+      "variance_percent": -4.55,
+      "status": "missed"
+    },
+    {
+      "metric_name": "Paid Logos",
+      "target": 160,
+      "actual": 142,
+      "unit": "count",
+      "variance_percent": -11.25,
+      "status": "missed"
+    },
+    {
+      "metric_name": "Net Promoter Score (NPS)",
+      "target": 55,
+      "actual": 52,
+      "unit": "score",
+      "variance_percent": -5.45,
+      "status": "missed"
+    },
+    {
+      "metric_name": "Monthly Burn Rate",
+      "target": 380000.00,
+      "actual": 410000.00,
+      "currency": "USD",
+      "variance_percent": 7.89,
+      "status": "over_budget"
+    }
+  ],
+  "departmental_breakdown": {
+    "sales": {
+      "new_bookings_q1": 620000.00,
+      "churn_rate_q1": 2.1
+    },
+    "product": {
+      "feature_adoption_rate": 44,
+      "uptime_percentage": 99.92
+    },
+    "finance": {
+      "cash_on_hand": 4200000.00,
+      "runway_months": 10.2
+    }
+  },
+  "data_source": "Metabase-Warehouse-Production",
+  "generated_at": "2024-04-02T09:15:22Z"
+}

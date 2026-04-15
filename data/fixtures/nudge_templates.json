@@ -1,0 +1,284 @@
+{
+  "templates": [
+    {
+      "id": "T01",
+      "event_type": "FAILED_IMPORT",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "Hi {{first_name}}, I noticed the CSV import for {{account_name}} hit a snag on row {{error_row}}. Our enterprise team is here to help—would you like me to flag this for your account manager, or should I send over our formatting guide for {{source_platform}}?",
+      "tone": "proactive_supportive"
+    },
+    {
+      "id": "T02",
+      "event_type": "FAILED_IMPORT",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Hey {{first_name}}, looks like that file import didn't quite go through. It's usually just a header mismatch. Want to try our auto-mapper, or can I show you a quick template that works every time?",
+      "tone": "helpful_direct"
+    },
+    {
+      "id": "T03",
+      "event_type": "STUCK_ON_ONBOARDING_STEP",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "Hi {{first_name}}, setting up {{module_name}} can be complex for larger teams. I've prepared a custom checklist based on your current progress. Would you like to review it, or should we jump on a quick 5-minute call to clear the hurdle?",
+      "tone": "high_touch"
+    },
+    {
+      "id": "T04",
+      "event_type": "STUCK_ON_ONBOARDING_STEP",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Almost there, {{first_name}}! You're just one step away from finishing the {{module_name}} setup. Most users find that clicking '{{button_hint}}' does the trick. Need a hand?",
+      "tone": "encouraging"
+    },
+    {
+      "id": "T05",
+      "event_type": "INVITE_BOUNCE",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "It looks like the invitation to {{invitee_email}} bounced. This often happens with strict enterprise firewalls. Would you like me to generate a manual join link you can send via Slack or Teams instead?",
+      "tone": "solution_oriented"
+    },
+    {
+      "id": "T06",
+      "event_type": "INVITE_BOUNCE",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Whoops! The invite to {{invitee_email}} didn't go through. Double-check the spelling, or just copy this direct link to send it to them personally: {{manual_link}}.",
+      "tone": "casual_helpful"
+    },
+    {
+      "id": "T07",
+      "event_type": "DASHBOARD_EMPTY_STATE",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "Welcome to Cascade, {{first_name}}. To get the most out of your trial, we recommend connecting your CRM data first. I can walk you through the {{integration_name}} sync right now.",
+      "tone": "professional"
+    },
+    {
+      "id": "T08",
+      "event_type": "DASHBOARD_EMPTY_STATE",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Ready to see some magic? Once you add your first 5 leads, this dashboard will start showing you revenue insights. Want to add them manually or sync your Google Contacts?",
+      "tone": "energetic"
+    },
+    {
+      "id": "T09",
+      "event_type": "INTEGRATION_AUTH_ERROR",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "The connection to {{integration_name}} failed due to a permissions error. This usually requires Admin-level access in {{integration_name}}. Would you like the specific documentation to share with your IT team?",
+      "tone": "technical_precise"
+    },
+    {
+      "id": "T10",
+      "event_type": "INTEGRATION_AUTH_ERROR",
+      "user_segment": "SMB_OWNER",
+      "template_text": "It looks like {{integration_name}} isn't letting us in. Usually, re-entering your credentials fixes this. Want to try again, or should I look into why the login failed?",
+      "tone": "simple_support"
+    },
+    {
+      "id": "T11",
+      "event_type": "REPORT_EXPORT_FAILED",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "I noticed your export of '{{report_name}}' failed. For large datasets, we recommend the 'Email when ready' option. Shall I trigger that for you now?",
+      "tone": "efficient"
+    },
+    {
+      "id": "T12",
+      "event_type": "REPORT_EXPORT_FAILED",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Sorry about that! Your report didn't download. I've saved a copy to your 'Recent Files' folder in Cascade so you can try again, or I can email it to {{user_email}}.",
+      "tone": "helpful"
+    },
+    {
+      "id": "T13",
+      "event_type": "SEARCH_ZERO_RESULTS",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "No results for '{{search_query}}'. If you're looking for records across sub-accounts, make sure the 'Global Search' toggle is active. Want me to enable that for you?",
+      "tone": "expert"
+    },
+    {
+      "id": "T14",
+      "event_type": "SEARCH_ZERO_RESULTS",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Couldn't find anything for '{{search_query}}'. Maybe try a broader term? If you're sure it's there, I can help you check if it was archived by mistake.",
+      "tone": "friendly_guide"
+    },
+    {
+      "id": "T15",
+      "event_type": "API_LIMIT_REACHED",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "Your workspace has reached its API rate limit for the hour. This might affect your {{integration_name}} sync. Would you like to discuss increasing these limits for your trial period?",
+      "tone": "business_focused"
+    },
+    {
+      "id": "T16",
+      "event_type": "API_LIMIT_REACHED",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Slow down there! You've hit our temporary API limit. Things will reset in about {{time_remaining}}. In the meantime, you can still manage your leads manually.",
+      "tone": "informative"
+    },
+    {
+      "id": "T17",
+      "event_type": "BILLING_PAGE_ABANDON",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "I saw you were looking at our {{plan_name}} options. If you need a custom MSA or security review before proceeding, I can connect you with our legal desk immediately.",
+      "tone": "facilitator"
+    },
+    {
+      "id": "T18",
+      "event_type": "BILLING_PAGE_ABANDON",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Still deciding on a plan? If you're not sure which features you need for {{company_name}}, I can recommend the best fit based on your usage so far.",
+      "tone": "consultative"
+    },
+    {
+      "id": "T19",
+      "event_type": "USER_INACTIVITY_72H",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "Hi {{first_name}}, we haven't seen your team in Cascade for a few days. Is there anything blocking the {{project_name}} rollout that I can assist with?",
+      "tone": "low_pressure"
+    },
+    {
+      "id": "T20",
+      "event_type": "USER_INACTIVITY_72H",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Missing you in Cascade, {{first_name}}! You were so close to finishing your first workflow. Want to jump back in and see how it's performing?",
+      "tone": "warm"
+    },
+    {
+      "id": "T21",
+      "event_type": "PERMISSION_DENIED",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "It looks like you tried to access {{resource_name}} without the required permissions. Since you're an Admin, you can grant yourself access in the Security Settings, or I can do it for you now.",
+      "tone": "empowering"
+    },
+    {
+      "id": "T22",
+      "event_type": "PERMISSION_DENIED",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Oops, that area is restricted. You might need to adjust your role settings to view {{resource_name}}. Need a link to your profile settings?",
+      "tone": "clarifying"
+    },
+    {
+      "id": "T23",
+      "event_type": "BULK_ACTION_ERROR",
+      "user_segment": "ENT_ADMIN",
+      "template_text": "The bulk update for {{record_count}} records failed to complete. It seems {{failure_reason}} caused the interruption. I've isolated the failed records into a new view for you to review.",
+      "tone": "analytical"
+    },
+    {
+      "id": "T24",
+      "event_type": "BULK_ACTION_ERROR",
+      "user_segment": "SMB_OWNER",
+      "template_text": "Something went wrong with that big update. Only {{success_count}} out of {{total_count}} records were changed. Want me to try the rest again for you?",
+      "tone": "helpful"
+    },
+    {
+      "id": "T25",
+      "event_type": "FAILED_IMPORT",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "Need help getting your data into Cascade? I noticed your import failed. I can take a look at your file, or you can try our 'Easy-Uploader' tool.",
+      "tone": "welcoming"
+    },
+    {
+      "id": "T26",
+      "event_type": "STUCK_ON_ONBOARDING_STEP",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "Don't get stuck! Most people finish this step in under a minute. Here is a 30-second video showing exactly how to set up your {{feature_name}}.",
+      "tone": "educational"
+    },
+    {
+      "id": "T27",
+      "event_type": "INVITE_BOUNCE",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "Looks like that invite didn't reach {{invitee_email}}. Check for typos, or try inviting them using a different email address.",
+      "tone": "brief"
+    },
+    {
+      "id": "T28",
+      "event_type": "DASHBOARD_EMPTY_STATE",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "Welcome! Let's get some data in here so you can see what Cascade can do. Would you like to start with a sample dataset to explore the features?",
+      "tone": "inviting"
+    },
+    {
+      "id": "T29",
+      "event_type": "INTEGRATION_AUTH_ERROR",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "Connection failed! Don't worry, this is usually just a setting in {{integration_name}}. Here is a quick guide on how to fix it.",
+      "tone": "reassuring"
+    },
+    {
+      "id": "T30",
+      "event_type": "REPORT_EXPORT_FAILED",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "Your export hit a snag. This sometimes happens on trial accounts with very large files. Try selecting a smaller date range, or let me send it to your email.",
+      "tone": "problem_solver"
+    },
+    {
+      "id": "T31",
+      "event_type": "SEARCH_ZERO_RESULTS",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "No luck with that search? Try using just the last name or the company domain. I'm here if you need help finding a specific lead!",
+      "tone": "supportive"
+    },
+    {
+      "id": "T32",
+      "event_type": "API_LIMIT_REACHED",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "You're moving fast! You've reached the trial API limit. It resets soon, but if you're testing a large integration, let me know and we can adjust it.",
+      "tone": "accommodating"
+    },
+    {
+      "id": "T33",
+      "event_type": "BILLING_PAGE_ABANDON",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "Saw you checking out the plans! Do you have any questions about which features are included in the {{plan_name}}? I'd love to help you choose.",
+      "tone": "curious"
+    },
+    {
+      "id": "T34",
+      "event_type": "USER_INACTIVITY_72H",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "Is there anything I can do to help you get started again? Your trial for {{company_name}} is still active, and I'd hate for you to miss out on the {{feature_name}} features.",
+      "tone": "gentle_reminder"
+    },
+    {
+      "id": "T35",
+      "event_type": "PERMISSION_DENIED",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "You've stumbled into a restricted area! On the trial, some administrative settings are locked. Want to see a demo of our Enterprise security features?",
+      "tone": "educational"
+    },
+    {
+      "id": "T36",
+      "event_type": "BULK_ACTION_ERROR",
+      "user_segment": "FREE_TRIAL",
+      "template_text": "That bulk action didn't quite finish. It's likely due to a formatting issue in your selection. Want to try again with a smaller batch?",
+      "tone": "suggestive"
+    },
+    {
+      "id": "T37",
+      "event_type": "FAILED_IMPORT",
+      "user_segment": "PARTNER",
+      "template_text": "Hi {{first_name}}, the client import for {{client_name}} failed. As a partner, you can use our 'Debug Console' to see exactly which field caused the rejection. Want the link?",
+      "tone": "technical"
+    },
+    {
+      "id": "T38",
+      "event_type": "STUCK_ON_ONBOARDING_STEP",
+      "user_segment": "PARTNER",
+      "template_text": "Helping a client through onboarding? I noticed a delay at the {{step_name}} stage. Here is the partner-specific guide for white-labeling this step.",
+      "tone": "professional_peer"
+    },
+    {
+      "id": "T39",
+      "event_type": "INTEGRATION_AUTH_ERROR",
+      "user_segment": "PARTNER",
+      "template_text": "The OAuth handshake for {{client_name}} failed. Please ensure the client has granted 'Offline Access' in their {{integration_name}} settings.",
+      "tone": "direct_technical"
+    },
+    {
+      "id": "T40",
+      "event_type": "BILLING_PAGE_ABANDON",
+      "user_segment": "PARTNER",
+      "template_text": "Ready to move this client to a paid plan? Remember, as a partner, you get a 20% commission on the {{plan_name}} for the first year. Need the referral link?",
+      "tone": "incentivizing"
+    }
+  ]
+}

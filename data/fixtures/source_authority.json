@@ -1,0 +1,64 @@
+{
+  "authority_tiers": {
+    "tier_1": {
+      "score": 1.0,
+      "description": "Primary industry research, top-tier VC thought leadership, and technical documentation.",
+      "domains": [
+        "hbr.org",
+        "stratechery.com",
+        "sequoiacap.com",
+        "a16z.com",
+        "lennybeitch.com",
+        "reforge.com",
+        "nngroup.com",
+        "arxiv.org",
+        "openai.com/blog",
+        "anthropic.com/news"
+      ]
+    },
+    "tier_2": {
+      "score": 0.8,
+      "description": "Reputable tech journalism, established product management blogs, and engineering case studies.",
+      "domains": [
+        "techcrunch.com",
+        "theverge.com",
+        "productcoalition.com",
+        "mindtheproduct.com",
+        "intercom.com/blog",
+        "stripe.com/newsroom",
+        "substack.com",
+        "medium.com/towards-data-science",
+        "wired.com"
+      ]
+    },
+    "tier_3": {
+      "score": 0.5,
+      "description": "General interest publications, community forums, and personal blogs.",
+      "domains": [
+        "news.ycombinator.com",
+        "reddit.com",
+        "twitter.com",
+        "x.com",
+        "medium.com",
+        "dev.to",
+        "indiehackers.com"
+      ]
+    },
+    "default": {
+      "score": 0.3,
+      "description": "Uncategorized or niche domains."
+    }
+  },
+  "manual_overrides": {
+    "patterns": [
+      {
+        "regex": ".*\\.edu",
+        "score": 0.9
+      },
+      {
+        "regex": ".*\\.gov",
+        "score": 0.9
+      }
+    ]
+  }
+}

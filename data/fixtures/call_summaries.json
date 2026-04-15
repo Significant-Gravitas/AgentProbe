@@ -1,0 +1,144 @@
+{
+  "summaries": [
+    {
+      "deal_id": "HS-9821",
+      "prospect_name": "Sarah Chen",
+      "company": "Vertex Logistics",
+      "last_call_date": "2023-10-12",
+      "duration": "24:15",
+      "key_points": [
+        "Interested in real-time latency monitoring for fleet tracking.",
+        "Mentioned current tool (Tableau) is too slow for operational decisions.",
+        "Concerned about API integration complexity with legacy ERP."
+      ],
+      "next_steps": "Send technical documentation on API hooks and pricing for Pro tier.",
+      "sentiment": "Positive but cautious"
+    },
+    {
+      "deal_id": "HS-4432",
+      "prospect_name": "Marcus Thorne",
+      "company": "CloudScale AI",
+      "last_call_date": "2023-10-10",
+      "duration": "18:40",
+      "key_points": [
+        "Focus on cost attribution across AWS multi-region deployments.",
+        "Struggling with 'black box' billing in their proprietary platform.",
+        "Budget is approved for Q4, but needs to prove ROI to the CFO."
+      ],
+      "next_steps": "Provide a case study on AWS cost reduction via Foundry.",
+      "sentiment": "High intent"
+    },
+    {
+      "deal_id": "HS-7712",
+      "prospect_name": "Elena Rodriguez",
+      "company": "Nova Health",
+      "last_call_date": "2023-10-11",
+      "duration": "32:05",
+      "key_points": [
+        "Primary pain point is HIPAA-compliant data visualization.",
+        "Expressed frustration with manual reporting cycles taking 3 days.",
+        "Inquired about the 'Foundry Shield' security add-on."
+      ],
+      "next_steps": "Schedule a deep-dive with the Security Compliance lead.",
+      "sentiment": "Urgent"
+    },
+    {
+      "deal_id": "HS-1109",
+      "prospect_name": "David Wu",
+      "company": "FinStream",
+      "last_call_date": "2023-10-09",
+      "duration": "15:20",
+      "key_points": [
+        "Needs automated anomaly detection for fraud prevention.",
+        "Currently using a custom Python script that requires constant maintenance.",
+        "Asked if Foundry supports Snowflake native integration."
+      ],
+      "next_steps": "Confirm Snowflake connector capabilities and performance benchmarks.",
+      "sentiment": "Neutral"
+    },
+    {
+      "deal_id": "HS-2298",
+      "prospect_name": "Jessica Miller",
+      "company": "GreenGrid Energy",
+      "last_call_date": "2023-10-05",
+      "duration": "28:50",
+      "key_points": [
+        "Looking to monitor smart meter data ingestion at scale.",
+        "Expressed personal interest in the 'Sustainability Dashboard' feature.",
+        "Stalled due to internal reorganization of the Data Engineering team."
+      ],
+      "next_steps": "Follow up after the team reorg is finalized (estimated 2 weeks).",
+      "sentiment": "Distracted"
+    },
+    {
+      "deal_id": "HS-6654",
+      "prospect_name": "Amir Khan",
+      "company": "SwiftPay",
+      "last_call_date": "2023-10-08",
+      "duration": "21:10",
+      "key_points": [
+        "Evaluating Foundry vs. Looker for executive-level reporting.",
+        "Pointed out that 'drill-down' capabilities are the most important factor.",
+        "Mentioned they are hiring 4 new analysts who would be primary users."
+      ],
+      "next_steps": "Send a screen recording of the advanced drill-down workflow.",
+      "sentiment": "Competitive"
+    },
+    {
+      "deal_id": "HS-3321",
+      "prospect_name": "Linda Park",
+      "company": "Beacon Retail",
+      "last_call_date": "2023-10-13",
+      "duration": "12:45",
+      "key_points": [
+        "Interested in customer lifetime value (CLV) predictive modeling.",
+        "Currently lacks a unified view of omnichannel sales data.",
+        "Budget is tight; looking for a pilot program or phased rollout."
+      ],
+      "next_steps": "Draft a pilot proposal focusing on the Shopify-Foundry connector.",
+      "sentiment": "Interested but budget-constrained"
+    },
+    {
+      "deal_id": "HS-8801",
+      "prospect_name": "Tom Henderson",
+      "company": "Ironclad Cyber",
+      "last_call_date": "2023-10-04",
+      "duration": "45:00",
+      "key_points": [
+        "Technical deep dive on data encryption at rest and in transit.",
+        "Highly impressed by the speed of the SQL workbench.",
+        "Decision-maker is the CTO, who was missing from this call."
+      ],
+      "next_steps": "Coordinate a 15-minute executive demo for the CTO.",
+      "sentiment": "Very Positive"
+    },
+    {
+      "deal_id": "HS-5543",
+      "prospect_name": "Sonia Gupta",
+      "company": "BioGenix",
+      "last_call_date": "2023-10-02",
+      "duration": "19:30",
+      "key_points": [
+        "Needs to automate lab result aggregation across three global sites.",
+        "Mentioned that data silos are causing delays in R&D timelines.",
+        "Discussed the need for SSO (Okta) integration."
+      ],
+      "next_steps": "Provide documentation on multi-region data residency controls.",
+      "sentiment": "Frustrated with current state"
+    },
+    {
+      "deal_id": "HS-0092",
+      "prospect_name": "Robert Vance",
+      "company": "Vance Refrigeration",
+      "last_call_date": "2023-10-06",
+      "duration": "14:10",
+      "key_points": [
+        "Interested in IoT sensor data analysis for predictive maintenance.",
+        "Concerned about the learning curve for non-technical staff.",
+        "Noted that 'out-of-the-box' templates are a major selling point."
+      ],
+      "next_steps": "Share a list of pre-built IoT templates available in Foundry.",
+      "sentiment": "Pragmatic"
+    }
+  ]
+}

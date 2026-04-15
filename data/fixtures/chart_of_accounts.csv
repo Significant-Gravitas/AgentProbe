@@ -1,0 +1,35 @@
+account_code,account_name,category,department
+1000,Cash - Operating,Asset,Finance
+1200,Accounts Receivable,Asset,Finance
+1500,Prepaid Insurance,Asset,Finance
+2000,Accounts Payable,Liability,Finance
+2100,Accrued Liabilities,Liability,Finance
+2200,Sales Tax Payable,Liability,Finance
+4000,Project Revenue,Revenue,Operations
+5010,Direct Labor - Carpentry,COGS,Operations
+5020,Direct Labor - Electrical,COGS,Operations
+5030,Direct Labor - Plumbing,COGS,Operations
+5040,Direct Labor - HVAC,COGS,Operations
+5100,Subcontractor Fees,COGS,Operations
+5200,Raw Materials - Lumber,COGS,Operations
+5210,Raw Materials - Concrete,COGS,Operations
+5220,Raw Materials - Steel,COGS,Operations
+5230,Raw Materials - Finishing,COGS,Operations
+5300,Equipment Rental - Heavy,COGS,Operations
+5310,Equipment Rental - Small Tools,COGS,Operations
+5400,Permits and Licensing,COGS,Compliance
+5500,Site Security Services,COGS,Operations
+5600,Waste Management & Disposal,COGS,Operations
+6000,Office Rent,Expense,Administrative
+6050,Utilities - Office,Expense,Administrative
+6100,Office Supplies,Expense,Administrative
+6200,Marketing & Business Development,Expense,Marketing
+6300,Professional Fees - Legal,Expense,Administrative
+6310,Professional Fees - Accounting,Expense,Finance
+6400,Insurance - General Liability,Expense,Administrative
+6410,Insurance - Workers Comp,Expense,Administrative
+6500,Travel & Lodging,Expense,Operations
+6600,Vehicle Maintenance & Fuel,Expense,Operations
+6700,Software Subscriptions & IT,Expense,IT
+7000,Interest Expense,Expense,Finance
+8000,Miscellaneous Expense,Expense,Administrative

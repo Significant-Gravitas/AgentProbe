@@ -1,0 +1,185 @@
+fiscal_year: 2026
+currency: USD
+company: CloudScale SaaS Solutions
+budget_version: 2026_Board_Approved_V2
+
+monthly_budget:
+  january:
+    revenue:
+      subscription_arr: 1250000
+      professional_services: 45000
+    expenses:
+      payroll_and_benefits: 840000
+      sales_and_marketing: 185000
+      cloud_infrastructure: 92000
+      office_and_admin: 35000
+      legal_and_professional: 12000
+      software_subscriptions: 28000
+    other:
+      interest_income: 1500
+      taxes: 5000
+
+  february:
+    revenue:
+      subscription_arr: 1320000
+      professional_services: 40000
+    expenses:
+      payroll_and_benefits: 845000
+      sales_and_marketing: 195000
+      cloud_infrastructure: 95000
+      office_and_admin: 35000
+      legal_and_professional: 12000
+      software_subscriptions: 28500
+    other:
+      interest_income: 1500
+      taxes: 5000
+
+  march:
+    revenue:
+      subscription_arr: 1410000
+      professional_services: 55000
+    expenses:
+      payroll_and_benefits: 860000
+      sales_and_marketing: 210000
+      cloud_infrastructure: 105000
+      office_and_admin: 38000
+      legal_and_professional: 25000
+      software_subscriptions: 30000
+    other:
+      interest_income: 1600
+      taxes: 5000
+
+  april:
+    revenue:
+      subscription_arr: 1500000
+      professional_services: 50000
+    expenses:
+      payroll_and_benefits: 890000
+      sales_and_marketing: 225000
+      cloud_infrastructure: 108000
+      office_and_admin: 38000
+      legal_and_professional: 12000
+      software_subscriptions: 30000
+    other:
+      interest_income: 1600
+      taxes: 5000
+
+  may:
+    revenue:
+      subscription_arr: 1600000
+      professional_services: 60000
+    expenses:
+      payroll_and_benefits: 910000
+      sales_and_marketing: 240000
+      cloud_infrastructure: 115000
+      office_and_admin: 40000
+      legal_and_professional: 12000
+      software_subscriptions: 32000
+    other:
+      interest_income: 1700
+      taxes: 5000
+
+  june:
+    revenue:
+      subscription_arr: 1720000
+      professional_services: 65000
+    expenses:
+      payroll_and_benefits: 935000
+      sales_and_marketing: 260000
+      cloud_infrastructure: 125000
+      office_and_admin: 42000
+      legal_and_professional: 30000
+      software_subscriptions: 35000
+    other:
+      interest_income: 1700
+      taxes: 5000
+
+  july:
+    revenue:
+      subscription_arr: 1850000
+      professional_services: 60000
+    expenses:
+      payroll_and_benefits: 960000
+      sales_and_marketing: 280000
+      cloud_infrastructure: 135000
+      office_and_admin: 42000
+      legal_and_professional: 15000
+      software_subscriptions: 35000
+    other:
+      interest_income: 1800
+      taxes: 5000
+
+  august:
+    revenue:
+      subscription_arr: 1980000
+      professional_services: 60000
+    expenses:
+      payroll_and_benefits: 980000
+      sales_and_marketing: 290000
+      cloud_infrastructure: 145000
+      office_and_admin: 42000
+      legal_and_professional: 15000
+      software_subscriptions: 38000
+    other:
+      interest_income: 1800
+      taxes: 5000
+
+  september:
+    revenue:
+      subscription_arr: 2120000
+      professional_services: 70000
+    expenses:
+      payroll_and_benefits: 1020000
+      sales_and_marketing: 310000
+      cloud_infrastructure: 155000
+      office_and_admin: 45000
+      legal_and_professional: 35000
+      software_subscriptions: 40000
+    other:
+      interest_income: 1900
+      taxes: 5000
+
+  october:
+    revenue:
+      subscription_arr: 2280000
+      professional_services: 75000
+    expenses:
+      payroll_and_benefits: 1050000
+      sales_and_marketing: 335000
+      cloud_infrastructure: 165000
+      office_and_admin: 45000
+      legal_and_professional: 15000
+      software_subscriptions: 40000
+    other:
+      interest_income: 2000
+      taxes: 5000
+
+  november:
+    revenue:
+      subscription_arr: 2450000
+      professional_services: 80000
+    expenses:
+      payroll_and_benefits: 1080000
+      sales_and_marketing: 360000
+      cloud_infrastructure: 180000
+      office_and_admin: 45000
+      legal_and_professional: 15000
+      software_subscriptions: 42000
+    other:
+      interest_income: 2100
+      taxes: 5000
+
+  december:
+    revenue:
+      subscription_arr: 2650000
+      professional_services: 90000
+    expenses:
+      payroll_and_benefits: 1120000
+      sales_and_marketing: 400000
+      cloud_infrastructure: 200000
+      office_and_admin: 50000
+      legal_and_professional: 50000
+      software_subscriptions: 45000
+    other:
+      interest_income: 2200
+      taxes: 10000

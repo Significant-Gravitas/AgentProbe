@@ -1,0 +1,21 @@
+company_id,company_name,industry,employee_count,annual_revenue_usd,headquarters_region,tech_stack,data_team_size,primary_cloud,crm,data_warehouse,bi_tool,deal_cycle_days,contract_value_arr
+C-8821,Lumina Analytics,B2B SaaS,450,65000000,US-East,"Snowflake, dbt, Fivetran, Looker",12,AWS,Salesforce,Snowflake,Looker,85,125000
+C-1092,VantagePoint,FinTech SaaS,820,120000000,US-West,"BigQuery, Airflow, dbt, Tableau",24,GCP,Salesforce,BigQuery,Tableau,110,210000
+C-4432,CloudStream,B2B SaaS,180,22000000,EU-West,"Redshift, Stitch, Metabase",5,AWS,HubSpot,Redshift,Metabase,45,45000
+C-5501,NexusLogix,B2B SaaS,310,48000000,US-East,"Snowflake, dbt, FiveTran, Mode",8,AWS,Salesforce,Snowflake,Mode,72,88000
+C-9002,Quantify.ai,MarTech,150,18000000,US-West,"BigQuery, dbt, Looker",6,GCP,HubSpot,BigQuery,Looker,55,52000
+C-3319,DataFlow Systems,B2B SaaS,950,210000000,US-Central,"Snowflake, Airflow, dbt, PowerBI",35,Azure,Salesforce,Snowflake,PowerBI,145,315000
+C-2118,SecureNet,Cybersecurity,290,42000000,US-East,"Redshift, dbt, Looker",9,AWS,Salesforce,Redshift,Looker,88,95000
+C-7741,TalentLoop,HR Tech,520,75000000,EU-West,"Snowflake, Fivetran, dbt, Tableau",14,AWS,Salesforce,Snowflake,Tableau,92,142000
+C-6632,PropelHQ,B2B SaaS,120,15000000,US-West,"BigQuery, Stitch, Metabase",4,GCP,HubSpot,BigQuery,Metabase,40,38000
+C-1120,Zentry,B2B SaaS,380,55000000,US-East,"Snowflake, dbt, FiveTran, Looker",10,AWS,Salesforce,Snowflake,Looker,78,110000
+C-8844,MarketMind,MarTech,210,30000000,US-Central,"Redshift, Airflow, Tableau",7,AWS,Salesforce,Redshift,Tableau,65,72000
+C-5590,Streamline Ops,B2B SaaS,640,92000000,US-West,"BigQuery, dbt, Looker",18,GCP,Salesforce,BigQuery,Looker,105,185000
+C-3321,FinScale,FinTech SaaS,410,68000000,US-East,"Snowflake, dbt, Fivetran, PowerBI",11,Azure,Salesforce,Snowflake,PowerBI,82,135000
+C-9901,CoreLogic SaaS,B2B SaaS,195,28000000,EU-West,"Redshift, dbt, Metabase",6,AWS,HubSpot,Redshift,Metabase,52,58000
+C-4477,PeakInsights,B2B SaaS,750,115000000,US-West,"Snowflake, Airflow, dbt, Looker",22,AWS,Salesforce,Snowflake,Looker,120,240000
+C-2210,VelocityData,MarTech,340,50000000,US-Central,"BigQuery, Fivetran, Tableau",9,GCP,Salesforce,BigQuery,Tableau,75,98000
+C-8812,AlphaSaaS,B2B SaaS,260,38000000,US-East,"Snowflake, dbt, Mode",7,AWS,HubSpot,Snowflake,Mode,68,82000
+C-1005,BlueFrame,B2B SaaS,890,140000000,US-West,"BigQuery, dbt, Airflow, Tableau",30,GCP,Salesforce,BigQuery,Tableau,135,280000
+C-5541,GridScale,B2B SaaS,140,20000000,EU-West,"Redshift, Stitch, Looker",5,AWS,HubSpot,Redshift,Looker,48,46000
+C-3367,OmniCore,FinTech SaaS,580,85000000,US-East,"Snowflake, Fivetran, dbt, Looker",16,AWS,Salesforce,Snowflake,Looker,98,165000

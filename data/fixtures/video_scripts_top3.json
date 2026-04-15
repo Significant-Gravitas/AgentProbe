@@ -1,0 +1,41 @@
+[
+  {
+    "id": "vid-001",
+    "title": "Why Backlogs are Where Ideas Go to Die",
+    "duration_seconds": 52,
+    "hook": "[Visual: Close up on camera, neutral background] Most product teams are drowning in a 500-item backlog. But here’s the truth: if you haven't touched an issue in two weeks, you’re never going to.",
+    "body": "At Linear, we don't believe in the 'infinite scroll' of tasks. We use Cycles. A cycle isn't a sprint—it’s a heartbeat. It’s about momentum, not just capacity. When you shift the focus from 'everything we could do' to 'the only things that matter right now,' the overhead disappears. You stop managing work and start shipping it. We build for the builders, which means removing the friction of endless grooming sessions.",
+    "cta": "Build momentum. Start using Cycles at linear.app.",
+    "argument_preservation": {
+      "source_section": "The Problem with Backlogs",
+      "adaptation": "Framed as 'where ideas go to die' to emphasize the emotional and functional weight of stale tasks."
+    },
+    "tone_notes": "Minimalist, punchy, direct eye contact, no background music."
+  },
+  {
+    "id": "vid-002",
+    "title": "The Art of the Sharp Scope",
+    "duration_seconds": 48,
+    "hook": "[Visual: Screen recording of the Linear interface, smooth transitions] Velocity isn't about typing faster. It's about deciding what you aren't going to build.",
+    "body": "The Linear Method is built on sharp scoping. We don't do vague requirements. We define the 'what' and the 'why' with precision before a single line of code is written. This isn't about bureaucracy; it's about respect for the engineer's time. When the scope is sharp, the execution is seamless. No mid-cycle pivots, no scope creep, just high-quality shipping.",
+    "cta": "Read the full Linear Method at linear.app/method.",
+    "argument_preservation": {
+      "source_section": "Sharp Scoping",
+      "adaptation": "Translated into 'respect for the engineer's time' to align with the engineer-respectful persona."
+    },
+    "tone_notes": "Product-focused, technical, high-utility, calm delivery."
+  },
+  {
+    "id": "vid-003",
+    "title": "Shipping as a Habit",
+    "duration_seconds": 58,
+    "hook": "[Visual: Fast cuts of high-quality UI elements] Most companies ship features. Great companies ship a standard of excellence.",
+    "body": "Shipping isn't a one-time event; it’s a muscle. The way we work at Linear is designed to make shipping feel inevitable. By using automated workflows and focused cycles, we reduce the cognitive load on the team. You don't have to think about the process because the process is built into the tool. It’s opinionated software for teams who have an opinion on quality. Stop fighting your tools and start shipping your best work.",
+    "cta": "Join the teams shipping on Linear.",
+    "argument_preservation": {
+      "source_section": "Cycles and Momentum",
+      "adaptation": "Uses the 'muscle' metaphor to illustrate the repetitive, strengthening nature of the shipping habit described in the blog."
+    },
+    "tone_notes": "Confident, aspirational but grounded, fast-paced editing."
+  }
+]

@@ -1,0 +1,80 @@
+{
+  "conflicts": [
+    {
+      "conflict_id": "C001",
+      "date": "2023-10-23",
+      "day": "Monday",
+      "event_a": {
+        "summary": "Weekly Executive Sync",
+        "time": "10:00 - 11:30",
+        "organizer": "Maya Chen",
+        "status": "Confirmed"
+      },
+      "event_b": {
+        "summary": "Urgent: Series B Pitch Deck Review",
+        "time": "11:00 - 12:00",
+        "organizer": "Jordan Smith (CFO)",
+        "status": "Confirmed"
+      },
+      "overlap_duration": "30 minutes",
+      "priority_note": "Executive sync is internal; Pitch deck is time-sensitive for upcoming board meeting."
+    },
+    {
+      "conflict_id": "C002",
+      "date": "2023-10-24",
+      "day": "Tuesday",
+      "event_a": {
+        "summary": "Product Roadmap Walkthrough",
+        "time": "14:00 - 15:30",
+        "organizer": "Engineering Team",
+        "status": "Confirmed"
+      },
+      "event_b": {
+        "summary": "Candidate Interview: VP of Sales (Final Round)",
+        "time": "15:00 - 16:00",
+        "organizer": "HR / Recruiting",
+        "status": "Confirmed"
+      },
+      "overlap_duration": "30 minutes",
+      "priority_note": "VP interview is high priority and hard to reschedule; Roadmap can be shifted."
+    },
+    {
+      "conflict_id": "C003",
+      "date": "2023-10-25",
+      "day": "Wednesday",
+      "event_a": {
+        "summary": "1:1 with David (Head of Design)",
+        "time": "09:30 - 10:15",
+        "organizer": "Maya Chen",
+        "status": "Confirmed"
+      },
+      "event_b": {
+        "summary": "Customer Advisory Board - Q4 Kickoff",
+        "time": "09:00 - 10:30",
+        "organizer": "Partnerships Team",
+        "status": "Confirmed"
+      },
+      "overlap_duration": "45 minutes",
+      "priority_note": "Client-facing CAB meeting should take precedence over internal 1:1."
+    },
+    {
+      "conflict_id": "C004",
+      "date": "2023-10-27",
+      "day": "Friday",
+      "event_a": {
+        "summary": "All-Hands Prep",
+        "time": "13:00 - 14:00",
+        "organizer": "Communications",
+        "status": "Confirmed"
+      },
+      "event_b": {
+        "summary": "Investor Update Call (Monthly)",
+        "time": "13:30 - 14:30",
+        "organizer": "Maya Chen",
+        "status": "Confirmed"
+      },
+      "overlap_duration": "30 minutes",
+      "priority_note": "Investor call is fixed; All-Hands prep can happen earlier in the day."
+    }
+  ]
+}

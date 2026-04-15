@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.2.0",
+  "required_fields": [
+    "problem_statement",
+    "target_user_segment",
+    "scope_in",
+    "scope_out",
+    "success_metric"
+  ],
+  "field_definitions": {
+    "problem_statement": {
+      "type": "string",
+      "description": "A concise description of the specific pain point or gap in the market identified from the competitive analysis and user voice data.",
+      "min_length": 50,
+      "max_length": 500
+    },
+    "target_user_segment": {
+      "type": "string",
+      "description": "A specific description of the persona most likely to adopt this MVP, including behavioral traits and current tool usage.",
+      "max_length": 300
+    },
+    "scope_in": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Explicit list of features or capabilities that must be present in the MVP to address the primary unmet need."
+    },
+    "scope_out": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Features or technical requirements explicitly excluded from the MVP to maintain the 10h/week constraint and speed to market."
+    },
+    "success_metric": {
+      "type": "object",
+      "properties": {
+        "metric_name": {
+          "type": "string"
+        },
+        "target_value": {
+          "type": "string"
+        },
+        "measurement_window": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric_name",
+        "target_value"
+      ]
+    }
+  },
+  "validation_rules": {
+    "grounding_requirement": "All features in scope_in must map directly to an unmet need cited in user_voice.json with a frequency count > 10.",
+    "resource_check": "Total scope must be achievable within the 1-week build plan provided in the output."
+  }
+}

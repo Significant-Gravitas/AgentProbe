@@ -1,0 +1,144 @@
+{
+  "roster": [
+    {
+      "name": "Sarah Chen",
+      "email": "sarah.chen@lumina-growth.io",
+      "asana_user_id": "12044598210345",
+      "role": "CEO",
+      "department": "Executive"
+    },
+    {
+      "name": "Marcus Thorne",
+      "email": "marcus.t@lumina-growth.io",
+      "asana_user_id": "12044598210388",
+      "role": "Chief of Staff",
+      "department": "Executive"
+    },
+    {
+      "name": "Elena Rodriguez",
+      "email": "elena.r@lumina-growth.io",
+      "asana_user_id": "12044598210412",
+      "role": "Head of Product",
+      "department": "Product"
+    },
+    {
+      "name": "David Wu",
+      "email": "david.wu@lumina-growth.io",
+      "asana_user_id": "12044598210556",
+      "role": "CTO",
+      "department": "Engineering"
+    },
+    {
+      "name": "Jordan Smith",
+      "email": "jordan.s@lumina-growth.io",
+      "asana_user_id": "12044598210677",
+      "role": "VP of Sales",
+      "department": "Sales"
+    },
+    {
+      "name": "Priya Kapoor",
+      "email": "priya.k@lumina-growth.io",
+      "asana_user_id": "12044598210721",
+      "role": "Lead Engineer",
+      "department": "Engineering"
+    },
+    {
+      "name": "Alex Rivera",
+      "email": "alex.rivera@lumina-growth.io",
+      "asana_user_id": "12044598210803",
+      "role": "Marketing Manager",
+      "department": "Marketing"
+    },
+    {
+      "name": "Sam Taylor",
+      "email": "sam.taylor@lumina-growth.io",
+      "asana_user_id": "12044598210944",
+      "role": "Customer Success Lead",
+      "department": "Operations"
+    },
+    {
+      "name": "Jamie Vance",
+      "email": "jamie.v@lumina-growth.io",
+      "asana_user_id": "12044598211012",
+      "role": "Financial Controller",
+      "department": "Finance"
+    },
+    {
+      "name": "Leo Kim",
+      "email": "leo.kim@lumina-growth.io",
+      "asana_user_id": "12044598211159",
+      "role": "Senior Designer",
+      "department": "Product"
+    },
+    {
+      "name": "Casey Morgan",
+      "email": "casey.m@lumina-growth.io",
+      "asana_user_id": "12044598211288",
+      "role": "Recruiter",
+      "department": "HR"
+    },
+    {
+      "name": "Morgan Lee",
+      "email": "morgan.lee@lumina-growth.io",
+      "asana_user_id": "12044598211340",
+      "role": "Frontend Developer",
+      "department": "Engineering"
+    },
+    {
+      "name": "Taylor Swift",
+      "email": "taylor.s@lumina-growth.io",
+      "asana_user_id": "12044598211492",
+      "role": "Backend Developer",
+      "department": "Engineering"
+    },
+    {
+      "name": "Robin Banks",
+      "email": "robin.b@lumina-growth.io",
+      "asana_user_id": "12044598211556",
+      "role": "Sales Development Rep",
+      "department": "Sales"
+    },
+    {
+      "name": "Quinn Fabray",
+      "email": "quinn.f@lumina-growth.io",
+      "asana_user_id": "12044598211601",
+      "role": "UX Researcher",
+      "department": "Product"
+    },
+    {
+      "name": "Pat Riley",
+      "email": "pat.riley@lumina-growth.io",
+      "asana_user_id": "12044598211712",
+      "role": "DevOps Engineer",
+      "department": "Engineering"
+    },
+    {
+      "name": "Chris Evans",
+      "email": "chris.e@lumina-growth.io",
+      "asana_user_id": "12044598211844",
+      "role": "Content Strategist",
+      "department": "Marketing"
+    },
+    {
+      "name": "Sidney Prescott",
+      "email": "sidney.p@lumina-growth.io",
+      "asana_user_id": "12044598211933",
+      "role": "Office Manager",
+      "department": "Operations"
+    },
+    {
+      "name": "Laurie Strode",
+      "email": "laurie.s@lumina-growth.io",
+      "asana_user_id": "12044598212005",
+      "role": "QA Engineer",
+      "department": "Engineering"
+    },
+    {
+      "name": "Gale Weathers",
+      "email": "gale.w@lumina-growth.io",
+      "asana_user_id": "12044598212119",
+      "role": "Account Executive",
+      "department": "Sales"
+    }
+  ]
+}

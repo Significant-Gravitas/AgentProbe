@@ -1,0 +1,46 @@
+[0:00:00] Alex (Corridor): Hey Paula, great to see you again. Thanks for taking the time today. I know the Aldwin team has been heads-down on the Q3 rollout.
+
+[0:00:12] Paula (Aldwin): Hey Alex. Yeah, it’s been a bit of a whirlwind. We just launched the new loyalty tier system, so my team is currently drowning in tickets about points not syncing correctly across the mobile app and the web storefront.
+
+[0:00:28] Alex (Corridor): That's actually a perfect segue into why I wanted to chat. We’re looking at how Corridor can better handle those real-time state changes between platforms. But before we dive into the technical side, I’d love to hear more about your high-level goals for the next six months.
+
+[0:00:45] Paula (Aldwin): Honestly, the biggest thing for us right now is "Single Source of Truth." I know everyone says that, but for us, it’s a literal nightmare. We have customer data in Shopify, we have it in Klaviyo, we have it in our Zendesk instance, and then we have this legacy ERP that handles our warehouse stuff. When a customer calls in to change an order, the CS agent sees one thing, but the marketing automation might still send them a "Buy this again!" email for the item they just returned. It makes us look disorganized.
+
+[0:04:15] Alex (Corridor): That makes sense. So, if we could centralize that, what’s the first "job" you’d want that data to do?
+
+[0:04:25] Paula (Aldwin): It’s the attribution for the "VIP" segment. Right now, to figure out who our top 1% of customers are, my data analyst has to spend four hours running a manual SQL query every Monday morning. By the time I get the list, it's already out of date. I want a way to define "VIP" once—say, anyone who spent $500 in the last 30 days AND hasn't returned more than 10% of their lifetime value—and have that list update automatically across all our tools.
+
+[0:12:30] Alex (Corridor): Let's talk about the Linear ticket I saw your team open last week regarding the identity stitching. You mentioned some issues with guest checkouts?
+
+[0:12:42] Paula (Aldwin): Yes! This is a huge pain point. About 40% of our first-time buyers use guest checkout. Then they come back two weeks later, create an account with the same email, but Corridor—or at least how we have it configured—treats them as two different people for the first 24 hours. It’s creating duplicate profiles in Klaviyo, which means we’re paying for the same contact twice. It’s also messing up our "First Purchase" discount logic. If they already bought as a guest, they shouldn't get a "Welcome! Here is 10% off your first order" email when they sign up for an account.
+
+[0:18:20] Alex (Corridor): I hear you. So the requirement is faster merging of guest-to-account profiles, specifically to suppress redundant marketing flows.
+
+[0:18:35] Paula (Aldwin): Exactly. And while we're on the subject of the dashboard, can we talk about the "Segment Builder"? It’s a bit... clunky. My marketing manager, Sarah, finds it really difficult to build complex logic. For example, if she wants to find people who bought "Mens Denim" but NOT "Sale Items," she has to create two separate segments and then use a third "exclusion" segment. It's three steps for something that should be one toggle.
+
+[0:25:10] Alex (Corridor): That’s fair feedback. We’re actually redesigning the boolean logic UI next month. I’ll make sure to include Sarah in the beta for that. Now, about the commitments from our last QBR—I know we promised a tighter integration with the Zendesk Sunshine platform. How is that performing?
+
+[0:25:35] Paula (Aldwin): To be blunt, it’s not. The data latency is about 15 minutes. In a customer service context, 15 minutes is an eternity. If a customer updates their address, the agent needs to see that change in Zendesk immediately. If it takes 15 minutes for Corridor to sync that through, the package might already be labeled in the warehouse with the wrong info. We need that latency down to under 60 seconds.
+
+[0:32:45] Alex (Corridor): Under 60 seconds. Got it. I'm going to talk to the engineering team about the webhook priority for the Zendesk connector. I'll also check if we can move you to a dedicated worker node to speed that up.
+
+[0:38:12] Paula (Aldwin): That would be life-changing. One more thing—reporting. Your current "Insights" tab shows us revenue, but it doesn't show us "Net Revenue" after returns. For a retail brand like Aldwin, gross revenue is a vanity metric. We have a 25% return rate. If Corridor is telling me a campaign made $100k, but $30k was returned, I’m making bad budget decisions for the next month. Can you add a "Returns" filter to the revenue dashboards?
+
+[0:42:00] Alex (Corridor): I can definitely see how that’s a gap. Let me write that up as a formal feature request. We already ingest the 'refund' event from Shopify, so it's really just a matter of surfacing it in the UI.
+
+[0:50:15] Paula (Aldwin): Great. To recap from my side: we need the guest-checkout merging fixed to save on Klaviyo costs, we need the Zendesk sync to be near real-time, and we need that "Net Revenue" reporting. If you can get those three things moving, I can probably get the budget approved for the Pro tier upgrade in October.
+
+[0:55:20] Alex (Corridor): That's very clear, Paula. Here is what I’m committing to: I will get a technical update to you by Friday on the guest checkout merging issue. I’m going to open a high-priority ticket for the Zendesk latency. And I’ll personally walk your marketing manager, Sarah, through the new Segment Builder mockups to get her input. I’ll also see where "Net Revenue" sits on the product roadmap and try to get a firm date for you.
+
+[0:58:45] Paula (Aldwin): Perfect. I appreciate you listening, Alex. It feels like you guys actually give a damn about how we use the tool, not just the contract value.
+
+[0:59:30] Alex (Corridor): Always. I’ll send over a summary email this afternoon. Talk soon, Paula.
+
+[1:00:00] [End of Call]
+
+[Detailed Notes Appendix]
+- Customer: Aldwin Apparel (Mid-market retail, $50M ARR)
+- Tech Stack: Shopify Plus, Klaviyo, Zendesk, NetSuite (ERP)
+- Key Pain Points: Data latency in Zendesk (15 mins), Identity resolution for guest checkouts, Boolean logic in Segment Builder, Lack of "Net Revenue" (post-return) reporting.
+- Business Impact: High Klaviyo costs due to duplicate profiles, incorrect shipping due to sync delays, manual labor for VIP list generation (4 hours/week).
+- Commitments: Friday update on guest merging, Linear ticket for Zendesk latency, Sarah (Marketing) to join Beta for Segment Builder, Roadmap update on Net Revenue filter.

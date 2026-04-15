@@ -1,0 +1,52 @@
+funnel_stages:
+  TOFU:
+    name: Top of Funnel (Awareness)
+    objective: Education and brand resonance. Focus on industry pain points, "the old way vs. the new way," and high-level trends in data engineering.
+    audience_mindset: Unaware of Rivet; may be experiencing "data pipeline debt" but hasn't named it yet.
+    content_strategy: Narrative-driven, contrarian takes, and educational frameworks.
+    expected_ctas:
+      - "Subscribe to our newsletter for weekly data insights"
+      - "Download the State of Data Integration 2024 Report"
+      - "Follow Rivet for more data engineering tips"
+      - "Save this post for your next sprint planning"
+    primary_channels:
+      - LinkedIn (Organic)
+      - Blog (Educational/SEO)
+      - Industry Podcasts
+
+  MOFU:
+    name: Middle of Funnel (Consideration)
+    objective: Solution validation and trust building. Demonstrating how Rivet specifically solves the problems identified in TOFU.
+    audience_mindset: Evaluating tools; comparing build vs. buy; looking for technical feasibility and architectural fit.
+    content_strategy: How-to guides, architectural deep dives, feature spotlights, and ROI calculators.
+    expected_ctas:
+      - "Register for our upcoming technical workshop"
+      - "Read the [Company Name] Migration Case Study"
+      - "Download the B2B Integration Checklist"
+      - "Watch the 5-minute product walkthrough"
+    primary_channels:
+      - Webinars
+      - Blog (Technical/Comparison)
+      - LinkedIn (Case Study Snippets)
+
+  BOFU:
+    name: Bottom of Funnel (Decision)
+    objective: Conversion and friction removal. Proving immediate value and ease of implementation.
+    audience_mindset: Ready to purchase or start a trial; needs security clearance, pricing clarity, and implementation timelines.
+    content_strategy: Proof points, security documentation, competitor head-to-heads, and "get started" documentation.
+    expected_ctas:
+      - "Book a personalized demo with a solutions architect"
+      - "Start your 14-day free trial"
+      - "Get a custom ROI assessment"
+      - "Talk to Sales"
+    primary_channels:
+      - Direct Outreach
+      - Product Documentation
+      - Webinar (Live Q&A)
+
+mapping_logic:
+  pillar_alignment:
+    - Pillar 1 (Scalability): 40% TOFU, 40% MOFU, 20% BOFU
+    - Pillar 2 (Security/Compliance): 20% TOFU, 40% MOFU, 40% BOFU
+    - Pillar 3 (Developer Experience): 30% TOFU, 50% MOFU, 20% BOFU
+    - Pillar 4 (Time-to-Value): 10% TOFU, 30% MOFU, 60% BOFU

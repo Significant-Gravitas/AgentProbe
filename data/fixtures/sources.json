@@ -1,0 +1,90 @@
+{
+  "curated_sources": [
+    {
+      "type": "peer-reviewed-paper",
+      "title": "Health benefits of fermented foods: microbiota and beyond",
+      "authors": ["Marco, M. L.", "Hill, C.", "Hutkins, R.", "Slavin, J."],
+      "journal": "Current Opinion in Biotechnology",
+      "year": 2020,
+      "doi": "10.1016/j.copbio.2020.03.002",
+      "relevance": "Provides a comprehensive framework for how fermented foods interact with the human gut microbiome and the physiological mechanisms involved."
+    },
+    {
+      "type": "peer-reviewed-paper",
+      "title": "Fermented Foods: Dietary Choices and Human Health",
+      "authors": ["Gille, D.", "Schmid, A.", "Walther, B.", "Vergeres, G."],
+      "journal": "Nutrients",
+      "year": 2021,
+      "doi": "10.3390/nu13072254",
+      "relevance": "Focuses on the epidemiological evidence linking fermented dairy and vegetable consumption to reduced risks of non-communicable diseases."
+    },
+    {
+      "type": "peer-reviewed-paper",
+      "title": "The Microbiota of Fermented Foods as a Source of Beneficial Microorganisms",
+      "authors": ["Tamang, J. P.", "Shin, D. H.", "Jung, S. J.", "Chae, S. W."],
+      "journal": "Frontiers in Microbiology",
+      "year": 2016,
+      "doi": "10.3389/fmicb.2016.01216",
+      "relevance": "Detailed analysis of the taxonomic diversity of microbes in global fermented products and their survival through the gastrointestinal tract."
+    },
+    {
+      "type": "peer-reviewed-paper",
+      "title": "Impact of a fermented food intervention on the gut microbiome and immune status",
+      "authors": ["Wastyk, H. C.", "Fragiadakis, G. K.", "Perelman, D."],
+      "journal": "Cell",
+      "year": 2021,
+      "doi": "10.1016/j.cell.2021.06.021",
+      "relevance": "A landmark clinical trial showing that high-fermented-food diets increase microbiome diversity and decrease inflammatory markers."
+    },
+    {
+      "type": "peer-reviewed-paper",
+      "title": "Lactic acid bacteria in contemporary fermentation: Role in food safety and nutrition",
+      "authors": ["Mokoena, M. P."],
+      "journal": "Microorganisms",
+      "year": 2017,
+      "doi": "10.3390/microorganisms5040079",
+      "relevance": "Explores the biopreservative properties of LAB and their role in synthesizing bioactive metabolites like vitamins and exopolysaccharides."
+    },
+    {
+      "type": "peer-reviewed-paper",
+      "title": "Metagenomic analysis of the food-gut axis",
+      "authors": ["Pasolli, E.", "De Filippis, F.", "Mauriello, I. E."],
+      "journal": "Nature Communications",
+      "year": 2020,
+      "doi": "10.1038/s41467-020-14738-0",
+      "relevance": "Uses computational biology to track specific microbial strains from fermented foods as they colonize the human gut."
+    },
+    {
+      "type": "book-chapter",
+      "title": "Chapter 4: Biochemistry of Fermentation",
+      "source_book": "Principles of Food Fermentation",
+      "authors": ["Hutkins, R. W."],
+      "publisher": "Wiley-Blackwell",
+      "pages": "112-145",
+      "relevance": "Technical breakdown of metabolic pathways (glycolysis, proteolysis, lipolysis) that transform raw substrates into fermented products."
+    },
+    {
+      "type": "book-chapter",
+      "title": "Chapter 12: Probiotics and Prebiotics in Fermented Dairy",
+      "source_book": "The Gut-Brain Axis: Dietary, Therapeutic and Therapeutic Perspectives",
+      "authors": ["O'Sullivan, O.", "Cotter, P. D."],
+      "publisher": "Academic Press",
+      "pages": "289-310",
+      "relevance": "Discusses the specific interaction between fermented dairy metabolites and the enteric nervous system."
+    },
+    {
+      "type": "nature-overview",
+      "title": "The intricate web of the human gut microbiome",
+      "url": "https://www.nature.com/subjects/microbiology/microbiome-overview",
+      "access_date": "2023-10-15",
+      "relevance": "General overview of microbiome stability, resilience, and the factors that influence community composition."
+    },
+    {
+      "type": "nature-overview",
+      "title": "Microbial ecology in food systems",
+      "url": "https://www.nature.com/subjects/microbiology/food-ecology",
+      "access_date": "2023-10-15",
+      "relevance": "Examines how environmental factors during fermentation dictate the succession of microbial species."
+    }
+  ]
+}

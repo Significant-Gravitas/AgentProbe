@@ -1,0 +1,113 @@
+{
+  "NSF_AGS_PRF": [
+    {
+      "year": 2023,
+      "awardees": [
+        {"name": "Dr. Elena Rodriguez", "institution": "UC San Diego", "theme": "Aerosol-cloud interactions in marine stratocumulus", "amount": 260000},
+        {"name": "Dr. Marcus Chen", "institution": "MIT", "theme": "Machine learning for sub-seasonal precipitation forecasting", "amount": 254000}
+      ]
+    },
+    {
+      "year": 2022,
+      "awardees": [
+        {"name": "Dr. Sarah Jenkins", "institution": "Colorado State", "theme": "Vertical transport of organic tracers in deep convection", "amount": 248000},
+        {"name": "Dr. Amit Patel", "institution": "University of Washington", "theme": "Arctic sea ice-atmosphere feedback loops", "amount": 250000}
+      ]
+    },
+    {
+      "year": 2021,
+      "awardees": [
+        {"name": "Dr. Chloe Whitmore", "institution": "Columbia University", "theme": "Stratospheric polar vortex variability and surface weather", "amount": 245000},
+        {"name": "Dr. Julian Voss", "institution": "NCAR", "theme": "Microphysical modeling of mixed-phase clouds", "amount": 245000}
+      ]
+    },
+    {
+      "year": 2020,
+      "awardees": [
+        {"name": "Dr. Kevin Liang", "institution": "Princeton", "theme": "High-resolution modeling of tropical cyclone intensification", "amount": 240000},
+        {"name": "Dr. Maya Gupta", "institution": "Georgia Tech", "theme": "Secondary organic aerosol formation from wildfires", "amount": 240000}
+      ]
+    },
+    {
+      "year": 2019,
+      "awardees": [
+        {"name": "Dr. Robert Hales", "institution": "University of Utah", "theme": "Orographic precipitation mechanisms in the Intermountain West", "amount": 235000},
+        {"name": "Dr. Linda Zhao", "institution": "Harvard", "theme": "Methane emissions quantification via satellite inversion", "amount": 235000}
+      ]
+    }
+  ],
+  "NASA_FINESST": [
+    {
+      "year": 2023,
+      "awardees": [
+        {"name": "Talia Schaffer", "institution": "Caltech", "theme": "Retrieval of methane isotopes from EMIT data", "amount": 150000},
+        {"name": "Jordan Smith", "institution": "UMD", "theme": "Lightning nitrogen oxide production in the upper troposphere", "amount": 150000}
+      ]
+    },
+    {
+      "year": 2022,
+      "awardees": [
+        {"name": "Isaac Newton", "institution": "Penn State", "theme": "Gravity wave propagation in the mesosphere", "amount": 145000},
+        {"name": "Fiona Gallagher", "institution": "University of Arizona", "theme": "Dust-radiative forcing in the Saharan Air Layer", "amount": 145000}
+      ]
+    },
+    {
+      "year": 2021,
+      "awardees": [
+        {"name": "Derek Low", "institution": "Stanford", "theme": "Deep learning for cloud phase classification from MODIS", "amount": 135000},
+        {"name": "Sita Ramaswamy", "institution": "Cornell", "theme": "Impact of volcanic sulfur on stratospheric chemistry", "amount": 135000}
+      ]
+    },
+    {
+      "year": 2020,
+      "awardees": [
+        {"name": "Grant Miller", "institution": "UC Berkeley", "theme": "Ocean-atmosphere exchange of dimethyl sulfide", "amount": 135000},
+        {"name": "Hannah Abbott", "institution": "Florida State", "theme": "Hurricane boundary layer turbulence structure", "amount": 135000}
+      ]
+    },
+    {
+      "year": 2019,
+      "awardees": [
+        {"name": "Leo Kim", "institution": "Yale", "theme": "Paleoclimate reconstruction of Eocene precipitation", "amount": 135000},
+        {"name": "Rachel Green", "institution": "UCLA", "theme": "Atmospheric rivers and California snowpack reliability", "amount": 135000}
+      ]
+    }
+  ],
+  "Sloan_Fellowship": [
+    {
+      "year": 2023,
+      "awardees": [
+        {"name": "Dr. Peter Zhang", "institution": "University of Chicago", "theme": "Geophysical fluid dynamics and planetary atmospheres", "amount": 75000},
+        {"name": "Dr. Maria Rossi", "institution": "Scripps Oceanography", "theme": "Chemical oceanography and air-sea carbon flux", "amount": 75000}
+      ]
+    },
+    {
+      "year": 2022,
+      "awardees": [
+        {"name": "Dr. Samira Khan", "institution": "University of Michigan", "theme": "Boundary layer meteorology and urban heat islands", "amount": 75000},
+        {"name": "Dr. Thomas Wright", "institution": "Rice University", "theme": "Atmospheric chemistry and radical kinetics", "amount": 75000}
+      ]
+    },
+    {
+      "year": 2021,
+      "awardees": [
+        {"name": "Dr. Emily Tran", "institution": "UT Austin", "theme": "Hydrometeorology and extreme flooding events", "amount": 75000},
+        {"name": "Dr. David Brooks", "institution": "Brown University", "theme": "Computational modeling of paleoclimate transitions", "amount": 75000}
+      ]
+    },
+    {
+      "year": 2020,
+      "awardees": [
+        {"name": "Dr. Alice Wong", "institution": "Johns Hopkins", "theme": "Atmospheric physics and radiative transfer", "amount": 75000},
+        {"name": "Dr. Victor Hugo", "institution": "Duke University", "theme": "Forest-atmosphere interactions and VOC emissions", "amount": 75000}
+      ]
+    },
+    {
+      "year": 2019,
+      "awardees": [
+        {"name": "Dr. Karen O'Neil", "institution": "Northwestern", "theme": "Stable isotopes in the hydrological cycle", "amount": 70000},
+        {"name": "Dr. James Bond", "institution": "SUNY Albany", "theme": "Synoptic-dynamic meteorology and Rossby wave breaking", "amount": 70000}
+      ]
+    }
+  ]
+}

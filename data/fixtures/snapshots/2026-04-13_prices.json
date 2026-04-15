@@ -1,0 +1,89 @@
+{
+  "timestamp": "2026-04-13T02:00:04Z",
+  "data": {
+    "netlify": {
+      "plans": {
+        "starter": {
+          "price_monthly": 0,
+          "bandwidth_gb": 100,
+          "build_minutes": 300,
+          "concurrent_builds": 1
+        },
+        "pro": {
+          "price_monthly": 19,
+          "bandwidth_gb": 1000,
+          "build_minutes": 25000,
+          "concurrent_builds": 3,
+          "member_seats": 1
+        },
+        "business": {
+          "price_monthly": 99,
+          "bandwidth_gb": 1500,
+          "build_minutes": 35000,
+          "concurrent_builds": 5,
+          "member_seats": 5
+        }
+      },
+      "add_ons": {
+        "extra_bandwidth_per_100gb": 55,
+        "extra_build_minutes_per_2500": 7
+      }
+    },
+    "cloudflare_pages": {
+      "plans": {
+        "free": {
+          "price_monthly": 0,
+          "builds_per_month": "unlimited",
+          "concurrent_builds": 1,
+          "bandwidth": "unlimited"
+        },
+        "pro": {
+          "price_monthly": 20,
+          "builds_per_month": "unlimited",
+          "concurrent_builds": 5,
+          "bandwidth": "unlimited"
+        },
+        "business": {
+          "price_monthly": 200,
+          "builds_per_month": "unlimited",
+          "concurrent_builds": 20,
+          "bandwidth": "unlimited"
+        }
+      },
+      "limits": {
+        "max_file_size_mb": 25,
+        "max_files_per_deployment": 20000,
+        "custom_domains_per_project": 100
+      }
+    },
+    "render": {
+      "plans": {
+        "individual": {
+          "price_monthly": 0,
+          "bandwidth_gb": 100,
+          "build_minutes": 500,
+          "pipeline_concurrency": 1
+        },
+        "team": {
+          "price_monthly": 19,
+          "bandwidth_gb": 500,
+          "build_minutes": 3000,
+          "pipeline_concurrency": 3,
+          "seat_cost": 19
+        },
+        "organization": {
+          "price_monthly": 299,
+          "bandwidth_gb": 1000,
+          "build_minutes": "unlimited",
+          "pipeline_concurrency": 10,
+          "seat_cost": 29
+        }
+      },
+      "compute": {
+        "starter_instance_hourly": 0.001,
+        "standard_instance_hourly": 0.04,
+        "pro_instance_hourly": 0.15
+      }
+    }
+  }
+}

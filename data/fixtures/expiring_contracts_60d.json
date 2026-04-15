@@ -1,0 +1,142 @@
+[
+  {
+    "contract_id": "CONT-2023-0881",
+    "client_id": "CL-4402",
+    "client_name": "Vortex BioTech Inc.",
+    "matter_id": "MAT-9021",
+    "contract_type": "retainer_agreement",
+    "expiration_date": "2024-05-15",
+    "current_fees": 15000.00,
+    "assigned_partner": "Eleanor Stone"
+  },
+  {
+    "contract_id": "CONT-2023-1120",
+    "client_id": "CL-1092",
+    "client_name": "Apex Logistics Group",
+    "matter_id": "MAT-4410",
+    "contract_type": "engagement_letter",
+    "expiration_date": "2024-05-18",
+    "current_fees": 8500.00,
+    "assigned_partner": "Jonathan Harker"
+  },
+  {
+    "contract_id": "CONT-2023-0455",
+    "client_id": "CL-3321",
+    "client_name": "Summit Real Estate Holdings",
+    "matter_id": "MAT-2281",
+    "contract_type": "retainer_agreement",
+    "expiration_date": "2024-05-20",
+    "current_fees": 12000.00,
+    "assigned_partner": "Eleanor Stone"
+  },
+  {
+    "contract_id": "CONT-2023-0912",
+    "client_id": "CL-8872",
+    "client_name": "Blue Horizon Ventures",
+    "matter_id": "MAT-7732",
+    "contract_type": "engagement_letter",
+    "expiration_date": "2024-05-22",
+    "current_fees": 5000.00,
+    "assigned_partner": "Marcus Thorne"
+  },
+  {
+    "contract_id": "CONT-2023-1004",
+    "client_id": "CL-5510",
+    "client_name": "Global Fintech Solutions",
+    "matter_id": "MAT-6619",
+    "contract_type": "retainer_agreement",
+    "expiration_date": "2024-05-25",
+    "current_fees": 25000.00,
+    "assigned_partner": "Jonathan Harker"
+  },
+  {
+    "contract_id": "CONT-2023-0219",
+    "client_id": "CL-1104",
+    "client_name": "Oak & Iron Construction",
+    "matter_id": "MAT-3301",
+    "contract_type": "engagement_letter",
+    "expiration_date": "2024-05-29",
+    "current_fees": 7200.00,
+    "assigned_partner": "Sarah Jenkins"
+  },
+  {
+    "contract_id": "CONT-2023-0773",
+    "client_id": "CL-9923",
+    "client_name": "Nebula Cloud Services",
+    "matter_id": "MAT-1145",
+    "contract_type": "retainer_agreement",
+    "expiration_date": "2024-06-02",
+    "current_fees": 18500.00,
+    "assigned_partner": "Eleanor Stone"
+  },
+  {
+    "contract_id": "CONT-2023-1201",
+    "client_id": "CL-2234",
+    "client_name": "Riverbend Manufacturing",
+    "matter_id": "MAT-8820",
+    "contract_type": "fee_split_agreement",
+    "expiration_date": "2024-06-05",
+    "current_fees": 4500.00,
+    "assigned_partner": "Marcus Thorne"
+  },
+  {
+    "contract_id": "CONT-2023-0552",
+    "client_id": "CL-6671",
+    "client_name": "Starlight Hospitality LLC",
+    "matter_id": "MAT-5541",
+    "contract_type": "engagement_letter",
+    "expiration_date": "2024-06-08",
+    "current_fees": 9000.00,
+    "assigned_partner": "Sarah Jenkins"
+  },
+  {
+    "contract_id": "CONT-2023-0331",
+    "client_id": "CL-4490",
+    "client_name": "Ironclad Security Systems",
+    "matter_id": "MAT-2290",
+    "contract_type": "retainer_agreement",
+    "expiration_date": "2024-06-12",
+    "current_fees": 11000.00,
+    "assigned_partner": "Jonathan Harker"
+  },
+  {
+    "contract_id": "CONT-2024-0115",
+    "client_id": "CL-7712",
+    "client_name": "Green Leaf Organics",
+    "matter_id": "MAT-3342",
+    "contract_type": "engagement_letter",
+    "expiration_date": "2024-06-15",
+    "current_fees": 6500.00,
+    "assigned_partner": "Marcus Thorne"
+  },
+  {
+    "contract_id": "CONT-2023-0889",
+    "client_id": "CL-1129",
+    "client_name": "Titanium Media Group",
+    "matter_id": "MAT-9908",
+    "contract_type": "retainer_agreement",
+    "expiration_date": "2024-06-20",
+    "current_fees": 20000.00,
+    "assigned_partner": "Eleanor Stone"
+  },
+  {
+    "contract_id": "CONT-2023-1042",
+    "client_id": "CL-5532",
+    "client_name": "Windsor Asset Management",
+    "matter_id": "MAT-4456",
+    "contract_type": "fee_split_agreement",
+    "expiration_date": "2024-06-25",
+    "current_fees": 13500.00,
+    "assigned_partner": "Jonathan Harker"
+  },
+  {
+    "contract_id": "CONT-2023-0661",
+    "client_id": "CL-3344",
+    "client_name": "Pinnacle Health Systems",
+    "matter_id": "MAT-1122",
+    "contract_type": "retainer_agreement",
+    "expiration_date": "2024-06-30",
+    "current_fees": 30000.00,
+    "assigned_partner": "Sarah Jenkins"
+  }
+]

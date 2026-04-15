@@ -1,0 +1,427 @@
+[
+  {
+    "id": "R001",
+    "title": "Computer Networking: A Top-Down Approach (8th Ed) - Security Chapter",
+    "author": "Kurose & Ross",
+    "type": "Textbook Chapter",
+    "cost_per_student": 12.50,
+    "topic": "General Networking",
+    "license": "Commercial"
+  },
+  {
+    "id": "R002",
+    "title": "Network Security Essentials: Applications and Standards",
+    "author": "William Stallings",
+    "type": "Textbook",
+    "cost_per_student": 45.00,
+    "topic": "Cryptography/Protocols",
+    "license": "Commercial"
+  },
+  {
+    "id": "R003",
+    "title": "The TCP/IP Guide",
+    "author": "Charles M. Kozierok",
+    "type": "Online Reference",
+    "cost_per_student": 0.00,
+    "topic": "Protocols",
+    "license": "Open Access"
+  },
+  {
+    "id": "R004",
+    "title": "NIST SP 800-53: Security and Privacy Controls for Information Systems",
+    "author": "NIST",
+    "type": "Government Publication",
+    "cost_per_student": 0.00,
+    "topic": "Compliance/Policy",
+    "license": "Public Domain"
+  },
+  {
+    "id": "R005",
+    "title": "Applied Cryptography: Protocols, Algorithms, and Source Code in C",
+    "author": "Bruce Schneier",
+    "type": "Textbook",
+    "cost_per_student": 38.00,
+    "topic": "Cryptography",
+    "license": "Commercial"
+  },
+  {
+    "id": "R006",
+    "title": "Serious Cryptography: A Practical Introduction to Modern Encryption",
+    "author": "Jean-Philippe Aumasson",
+    "type": "E-Book",
+    "cost_per_student": 18.00,
+    "topic": "Cryptography",
+    "license": "Commercial"
+  },
+  {
+    "id": "R007",
+    "title": "OWASP Top 10: 2021",
+    "author": "OWASP Foundation",
+    "type": "Industry Standard",
+    "cost_per_student": 0.00,
+    "topic": "Web Security",
+    "license": "Open Access"
+  },
+  {
+    "id": "R008",
+    "title": "BGP Security: Vulnerabilities and Solutions",
+    "author": "IETF RFC 4271 Analysis",
+    "type": "Whitepaper",
+    "cost_per_student": 0.00,
+    "topic": "Routing Security",
+    "license": "Open Access"
+  },
+  {
+    "id": "R009",
+    "title": "Wireshark Network Analysis (Second Edition)",
+    "author": "Laura Chappell",
+    "type": "Lab Guide",
+    "cost_per_student": 22.00,
+    "topic": "Traffic Analysis",
+    "license": "Commercial"
+  },
+  {
+    "id": "R010",
+    "title": "Nmap Network Scanning",
+    "author": "Gordon Lyon",
+    "type": "Reference",
+    "cost_per_student": 0.00,
+    "topic": "Reconnaissance",
+    "license": "Open Access"
+  },
+  {
+    "id": "R011",
+    "title": "Practical Packet Analysis",
+    "author": "Chris Sanders",
+    "type": "E-Book",
+    "cost_per_student": 15.50,
+    "topic": "Intrusion Detection",
+    "license": "Commercial"
+  },
+  {
+    "id": "R012",
+    "title": "Firewalls and Internet Security: Repelling the Wily Hacker",
+    "author": "Cheswick & Bellovin",
+    "type": "Textbook",
+    "cost_per_student": 5.00,
+    "topic": "Firewalls",
+    "license": "Academic Discount"
+  },
+  {
+    "id": "R013",
+    "title": "DNS Security Extensions (DNSSEC) Guide",
+    "author": "Internet Society",
+    "type": "Technical Manual",
+    "cost_per_student": 0.00,
+    "topic": "DNS Security",
+    "license": "Open Access"
+  },
+  {
+    "id": "R014",
+    "title": "Zero Trust Networks",
+    "author": "Evan Gilman",
+    "type": "E-Book",
+    "cost_per_student": 24.00,
+    "topic": "Network Architecture",
+    "license": "Commercial"
+  },
+  {
+    "id": "R015",
+    "title": "Understanding IPsec",
+    "author": "Cisco Press",
+    "type": "Technical Paper",
+    "cost_per_student": 0.00,
+    "topic": "VPNs",
+    "license": "Open Access"
+  },
+  {
+    "id": "R016",
+    "title": "Metasploit: The Penetration Tester's Guide",
+    "author": "Kennedy et al.",
+    "type": "Lab Manual",
+    "cost_per_student": 19.99,
+    "topic": "Exploitation",
+    "license": "Commercial"
+  },
+  {
+    "id": "R017",
+    "title": "Security Engineering (3rd Edition)",
+    "author": "Ross Anderson",
+    "type": "Textbook",
+    "cost_per_student": 0.00,
+    "topic": "Systems Security",
+    "license": "Open Access (Author Provided)"
+  },
+  {
+    "id": "R018",
+    "title": "IEEE 802.11i-2004 Standard: Wireless Security",
+    "author": "IEEE",
+    "type": "Standard",
+    "cost_per_student": 0.00,
+    "topic": "Wireless Security",
+    "license": "University Licensed"
+  },
+  {
+    "id": "R019",
+    "title": "TLS 1.3 Protocol (RFC 8446)",
+    "author": "IETF",
+    "type": "Standard",
+    "cost_per_student": 0.00,
+    "topic": "Encryption Protocols",
+    "license": "Open Access"
+  },
+  {
+    "id": "R020",
+    "title": "Guide to Intrusion Detection and Prevention Systems (IDPS)",
+    "author": "NIST SP 800-94",
+    "type": "Government Publication",
+    "cost_per_student": 0.00,
+    "topic": "IDS/IPS",
+    "license": "Public Domain"
+  },
+  {
+    "id": "R021",
+    "title": "Social Engineering: The Science of Human Hacking",
+    "author": "Christopher Hadnagy",
+    "type": "E-Book",
+    "cost_per_student": 14.00,
+    "topic": "Social Engineering",
+    "license": "Commercial"
+  },
+  {
+    "id": "R022",
+    "title": "The Art of Memory Forensics",
+    "author": "Ligh et al.",
+    "type": "Textbook",
+    "cost_per_student": 32.00,
+    "topic": "Forensics",
+    "license": "Commercial"
+  },
+  {
+    "id": "R023",
+    "title": "Cloud Security and Privacy",
+    "author": "Mather & Kumaraswamy",
+    "type": "E-Book",
+    "cost_per_student": 11.00,
+    "topic": "Cloud Security",
+    "license": "Commercial"
+  },
+  {
+    "id": "R024",
+    "title": "Designing Secure Software",
+    "author": "Loren Kohnfelder",
+    "type": "E-Book",
+    "cost_per_student": 21.00,
+    "topic": "Software Security",
+    "license": "Commercial"
+  },
+  {
+    "id": "R025",
+    "title": "NIST Guide to Bluetooth Security",
+    "author": "NIST SP 800-121",
+    "type": "Government Publication",
+    "cost_per_student": 0.00,
+    "topic": "Wireless Security",
+    "license": "Public Domain"
+  },
+  {
+    "id": "R026",
+    "title": "Hacking: The Art of Exploitation",
+    "author": "Jon Erickson",
+    "type": "Textbook",
+    "cost_per_student": 28.50,
+    "topic": "Exploitation",
+    "license": "Commercial"
+  },
+  {
+    "id": "R027",
+    "title": "Python for Cybersecurity",
+    "author": "Howard Poston",
+    "type": "Lab Manual",
+    "cost_per_student": 16.00,
+    "topic": "Automation",
+    "license": "Commercial"
+  },
+  {
+    "id": "R028",
+    "title": "MITRE ATT&CK Framework Documentation",
+    "author": "MITRE",
+    "type": "Framework",
+    "cost_per_student": 0.00,
+    "topic": "Threat Intelligence",
+    "license": "Open Access"
+  },
+  {
+    "id": "R029",
+    "title": "Botnets: The Killer Web App",
+    "author": "Schiller et al.",
+    "type": "Case Study",
+    "cost_per_student": 4.50,
+    "topic": "Malware",
+    "license": "Academic Discount"
+  },
+  {
+    "id": "R030",
+    "title": "Analysis of the SSL 3.0 Protocol",
+    "author": "Schneier & Wagner",
+    "type": "Academic Paper",
+    "cost_per_student": 0.00,
+    "topic": "Protocol Analysis",
+    "license": "Open Access"
+  },
+  {
+    "id": "R031",
+    "title": "Modern Operating Systems - Security Chapter",
+    "author": "Andrew Tanenbaum",
+    "type": "Textbook Chapter",
+    "cost_per_student": 9.00,
+    "topic": "OS Security",
+    "license": "Commercial"
+  },
+  {
+    "id": "R032",
+    "title": "The Tangled Web: A Guide to Securing Modern Web Applications",
+    "author": "Michal Zalewski",
+    "type": "E-Book",
+    "cost_per_student": 17.00,
+    "topic": "Web Security",
+    "license": "Commercial"
+  },
+  {
+    "id": "R033",
+    "title": "Incident Response & Computer Forensics",
+    "author": "Luttgens et al.",
+    "type": "Textbook",
+    "cost_per_student": 35.00,
+    "topic": "Incident Response",
+    "license": "Commercial"
+  },
+  {
+    "id": "R034",
+    "title": "Cisco Guide to Harden Cisco IOS Devices",
+    "author": "Cisco Systems",
+    "type": "Technical Guide",
+    "cost_per_student": 0.00,
+    "topic": "Infrastructure",
+    "license": "Open Access"
+  },
+  {
+    "id": "R035",
+    "title": "Introduction to Modern Cryptography",
+    "author": "Katz & Lindell",
+    "type": "Textbook",
+    "cost_per_student": 42.00,
+    "topic": "Cryptography",
+    "license": "Commercial"
+  },
+  {
+    "id": "R036",
+    "title": "Packet Hacking Village: Packet Detective Lab",
+    "author": "DEF CON Labs",
+    "type": "Lab Kit",
+    "cost_per_student": 0.00,
+    "topic": "Traffic Analysis",
+    "license": "Open Access"
+  },
+  {
+    "id": "R037",
+    "title": "A Guide to Vulnerability Reporting",
+    "author": "CERT/CC",
+    "type": "Whitepaper",
+    "cost_per_student": 0.00,
+    "topic": "Policy",
+    "license": "Public Domain"
+  },
+  {
+    "id": "R038",
+    "title": "Cybersecurity for Industrial Control Systems",
+    "author": "Tyson Macaulay",
+    "type": "E-Book",
+    "cost_per_student": 25.00,
+    "topic": "ICS/SCADA",
+    "license": "Commercial"
+  },
+  {
+    "id": "R039",
+    "title": "Docker Security Guide",
+    "author": "Docker Inc.",
+    "type": "Documentation",
+    "cost_per_student": 0.00,
+    "topic": "Container Security",
+    "license": "Open Access"
+  },
+  {
+    "id": "R040",
+    "title": "Practical Malware Analysis",
+    "author": "Sikorski & Honig",
+    "type": "Lab Manual",
+    "cost_per_student": 39.00,
+    "topic": "Malware Analysis",
+    "license": "Commercial"
+  },
+  {
+    "id": "R041",
+    "title": "OpenSSL Documentation and Cookbook",
+    "author": "Ivan Ristić",
+    "type": "Online Reference",
+    "cost_per_student": 0.00,
+    "topic": "Implementation",
+    "license": "Open Access"
+  },
+  {
+    "id": "R042",
+    "title": "Blue Team Handbook: Incident Response Edition",
+    "author": "Don Murdoch",
+    "type": "Reference",
+    "cost_per_student": 13.00,
+    "topic": "Incident Response",
+    "license": "Commercial"
+  },
+  {
+    "id": "R043",
+    "title": "The Practice of Network Security Monitoring",
+    "author": "Richard Bejtlich",
+    "type": "E-Book",
+    "cost_per_student": 20.00,
+    "topic": "Monitoring",
+    "license": "Commercial"
+  },
+  {
+    "id": "R044",
+    "title": "Cryptography Engineering",
+    "author": "Ferguson, Schneier, Kohno",
+    "type": "Textbook",
+    "cost_per_student": 30.00,
+    "topic": "Cryptography",
+    "license": "Commercial"
+  },
+  {
+    "id": "R045",
+    "title": "Attacking Network Protocols",
+    "author": "James Forshaw",
+    "type": "E-Book",
+    "cost_per_student": 26.00,
+    "topic": "Protocol Security",
+    "license": "Commercial"
+  },
+  {
+    "id": "R046",
+    "title": "SNORT Users Manual",
+    "author": "Snort Team",
+    "type": "Technical Guide",
+    "cost_per_student": 0.00,
+    "topic": "IDS",
+    "license": "Open Access"
+  },
+  {
+    "id": "R047",
+    "title": "IPv6 Security",
+    "author": "Hogg & Vyncke",
+    "type": "Textbook",
+    "cost_per_student": 34.00,
+    "topic": "Networking",
+    "license": "Commercial"
+  },
+  {
+    "id": "R048",
+    "title": "Web Application Hacker'

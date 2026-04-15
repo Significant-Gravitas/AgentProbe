@@ -1,0 +1,122 @@
+[
+  {
+    "uuid": "f102-4432-8871-bcde",
+    "organization_name": "Lumina Health",
+    "domain": "luminahealth.io",
+    "funding_round_uuid": "r-99128",
+    "investment_type": "series_b",
+    "announced_on": "2023-10-24",
+    "raised_amount_usd": 24000000,
+    "post_money_valuation_usd": 115000000,
+    "investor_names": ["Sequoia Capital", "Andreessen Horowitz"],
+    "lead_investor_names": ["Sequoia Capital"]
+  },
+  {
+    "uuid": "e882-1123-9901-afcc",
+    "organization_name": "QuantFlow Systems",
+    "domain": "quantflow.ai",
+    "funding_round_uuid": "r-88214",
+    "investment_type": "series_a",
+    "announced_on": "2023-10-25",
+    "raised_amount_usd": 12500000,
+    "post_money_valuation_usd": 48000000,
+    "investor_names": ["Index Ventures", "First Round Capital"],
+    "lead_investor_names": ["Index Ventures"]
+  },
+  {
+    "uuid": "a331-5542-0092-bbba",
+    "organization_name": "DataShield Security",
+    "domain": "datashield.com",
+    "funding_round_uuid": "r-77211",
+    "investment_type": "seed",
+    "announced_on": "2023-10-26",
+    "raised_amount_usd": 3200000,
+    "post_money_valuation_usd": 12000000,
+    "investor_names": ["Y Combinator", "BoxGroup"],
+    "lead_investor_names": ["Y Combinator"]
+  },
+  {
+    "uuid": "c992-8812-4451-ddde",
+    "organization_name": "GreenGrid Energy",
+    "domain": "greengrid.tech",
+    "funding_round_uuid": "r-11029",
+    "investment_type": "series_c",
+    "announced_on": "2023-10-23",
+    "raised_amount_usd": 85000000,
+    "post_money_valuation_usd": 450000000,
+    "investor_names": ["BlackRock", "Temasek Holdings", "GV"],
+    "lead_investor_names": ["BlackRock"]
+  },
+  {
+    "uuid": "b221-3321-4456-ffee",
+    "organization_name": "OmniCommerce",
+    "domain": "omnicommerce.shop",
+    "funding_round_uuid": "r-55210",
+    "investment_type": "series_a",
+    "announced_on": "2023-10-27",
+    "raised_amount_usd": 15000000,
+    "post_money_valuation_usd": 65000000,
+    "investor_names": ["Accel", "Lightspeed Venture Partners"],
+    "lead_investor_names": ["Accel"]
+  },
+  {
+    "uuid": "d443-1122-9988-ccaa",
+    "organization_name": "NeuralPath AI",
+    "domain": "neuralpath.ai",
+    "funding_round_uuid": "r-33219",
+    "investment_type": "seed",
+    "announced_on": "2023-10-24",
+    "raised_amount_usd": 4500000,
+    "post_money_valuation_usd": 18000000,
+    "investor_names": ["Greylock", "Village Global"],
+    "lead_investor_names": ["Greylock"]
+  },
+  {
+    "uuid": "9910-ffee-1122-3344",
+    "organization_name": "Velocity Logistics",
+    "domain": "velocity.io",
+    "funding_round_uuid": "r-44102",
+    "investment_type": "series_b",
+    "announced_on": "2023-10-26",
+    "raised_amount_usd": 32000000,
+    "post_money_valuation_usd": 140000000,
+    "investor_names": ["Tiger Global Management", "SoftBank Vision Fund"],
+    "lead_investor_names": ["Tiger Global Management"]
+  },
+  {
+    "uuid": "8821-aabb-ccdd-eeff",
+    "organization_name": "FinEdge",
+    "domain": "finedge.app",
+    "funding_round_uuid": "r-22109",
+    "investment_type": "angel",
+    "announced_on": "2023-10-25",
+    "raised_amount_usd": 850000,
+    "post_money_valuation_usd": 5000000,
+    "investor_names": ["Naval Ravikant", "Jason Calacanis"],
+    "lead_investor_names": []
+  },
+  {
+    "uuid": "7712-bbcc-ddee-ffaa",
+    "organization_name": "Skybound Robotics",
+    "domain": "skybound.io",
+    "funding_round_uuid": "r-66103",
+    "investment_type": "series_a",
+    "announced_on": "2023-10-27",
+    "raised_amount_usd": 18000000,
+    "post_money_valuation_usd": 72000000,
+    "investor_names": ["Founders Fund", "Kholsa Ventures"],
+    "lead_investor_names": ["Founders Fund"]
+  },
+  {
+    "uuid": "6613-ccdd-eeff-aabb",
+    "organization_name": "CloudNode",
+    "domain": "cloudnode.net",
+    "funding_round_uuid": "r-11204",
+    "investment_type": "series_d",
+    "announced_on": "2023-10-23",
+    "raised_amount_usd": 120000000,
+    "post_money_valuation_usd": 1200000000,
+    "investor_names": ["Insight Partners", "Bessemer Venture Partners"],
+    "lead_investor_names": ["Insight Partners"]
+  }
+]
