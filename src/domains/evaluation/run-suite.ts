@@ -1,3 +1,4 @@
+import { existsSync, statSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 
 import {
@@ -718,8 +719,13 @@ export async function runScenario(
             turn.attachments.length > 0 &&
             currentAdapter.uploadFile
           ) {
-            const scenarioSourcePath = options.scenariosPath ?? "data";
-            const baseDir = dirname(resolve(scenarioSourcePath));
+            const scenarioSourcePath = resolve(
+              options.scenariosPath ?? "data",
+            );
+            const baseDir = existsSync(scenarioSourcePath) &&
+              statSync(scenarioSourcePath).isDirectory()
+              ? scenarioSourcePath
+              : dirname(scenarioSourcePath);
             const uploaded: UploadedFile[] = [];
             for (const attachment of turn.attachments) {
               const resolvedPath = resolve(baseDir, attachment.path);
