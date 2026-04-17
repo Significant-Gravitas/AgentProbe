@@ -10,18 +10,30 @@ Linear: [SYM-18](https://linear.app/autogpt/issue/SYM-18/agent-probe-server-desi
 1. One command (`agentprobe start-server`) starts a long-lived HTTP server
    that hosts a UI and an API for controlling and inspecting AgentProbe
    evaluation runs.
-2. The server is Dockerable with zero external dependencies beyond the local
-   filesystem. SQLite run history and suite YAMLs mount in, OPEN_ROUTER_API_KEY
-   flows in through the environment.
+2. The server is Dockerable. Default container persistence is SQLite on a
+   mounted volume; when that volume is absent (ephemeral container) an
+   operator can point the server at an external Postgres instance so run
+   history survives container restarts. Suite YAMLs mount in,
+   `OPEN_ROUTER_API_KEY` flows in through the environment.
 3. The UI lets operators start runs, watch live progress, and browse a
-   history of past runs and transcripts without dropping to the shell. UI
-   shape is inspired by [tolitius/cupel](https://github.com/tolitius/cupel):
-   a leaderboard-style overview, filterable run list, and drill-down detail
-   views wired through SSE.
-4. Historical runs stay browsable: transcripts, judge scores, tool calls,
+   history of past runs and transcripts without dropping to the shell. The
+   UI borrows design **direction** from
+   [tolitius/cupel](https://github.com/tolitius/cupel) — palette,
+   typographic density, filterable list + drill-down split layout — rather
+   than copying it. Concretely that means: a compact dark theme; a
+   filterable run list; drill-down detail panes; and live SSE updates.
+4. The UI lets operators build a run as a **preset**: a named selection of
+   scenarios chosen across any number of scenario files in `data/`, plus a
+   fixed endpoint, personas, rubric, parallel factor, and repeat count. A
+   preset is saved once and re-run by name. Each run is tagged with its
+   originating preset so later runs of the same preset can be compared
+   side-by-side.
+5. Historical runs stay browsable: transcripts, judge scores, tool calls,
    checkpoints, and render of the existing HTML report — without re-running
-   evaluations.
-5. The design preserves AgentProbe's layered architecture and repo contract:
+   evaluations. Preset runs get a dedicated comparison view that diffs
+   pass/fail, score deltas, and per-scenario outcome changes across two or
+   more past executions.
+6. The design preserves AgentProbe's layered architecture and repo contract:
    new server code lands in `src/runtime/server/`, reuses existing
    `domains/evaluation` and `domains/reporting`, and never leaks transport
    into higher layers.
@@ -32,7 +44,8 @@ Linear: [SYM-18](https://linear.app/autogpt/issue/SYM-18/agent-probe-server-desi
   a single operator running on their own machine or an internal VM.
 - Distributed run orchestration across workers. Runs still execute in-process
   on the host that runs the server. Concurrency is bounded by the existing
-  `--parallel` semantics.
+  `--parallel` semantics; the parallel factor is selectable per run from the
+  UI start form (see §7.6).
 - Hosted, internet-facing deployments. The server binds by default to
   `127.0.0.1` and requires explicit opt-in to listen externally.
 - Replacing the CLI. `agentprobe run`, `validate`, `list`, and `report` keep
@@ -93,6 +106,8 @@ src/runtime/server/
   routes/
     runs.ts             # REST handlers: list, get, start, cancel
     suites.ts           # REST handlers: list suites, scenarios, personas, rubrics
+    presets.ts          # REST handlers: CRUD presets + launch from preset
+    comparisons.ts      # REST handlers: diff two or more runs (same preset)
     reports.ts          # HTML report proxy: render + stream
     health.ts           # /healthz, /readyz
     static.ts           # dashboard/dist serving with safeStaticPath
@@ -102,6 +117,8 @@ src/runtime/server/
   controllers/
     run-controller.ts   # Starts, tracks, and cancels runs; owns worker slots
     suite-controller.ts # Enumerates suites from the configured data dir
+    preset-controller.ts # Persists presets; resolves scenario selection lists
+    comparison-controller.ts # Aggregates historical runs for diffing
   auth/
     token.ts            # Optional shared-secret bearer check
   config.ts             # Loads AGENTPROBE_SERVER_* env into a validated struct
@@ -130,7 +147,7 @@ agentprobe start-server \
   [--host 127.0.0.1]          # bind address; 0.0.0.0 requires --unsafe-expose
   [--port 7878]               # bind port; 0 picks an ephemeral port
   [--data ./data]             # suite root mounted into the server
-  [--db ./runs.sqlite]        # run history database path
+  [--db ./runs.sqlite]        # SQLite path; ignored when AGENTPROBE_DB_URL is set
   [--dashboard-dist ./dashboard/dist] # override bundle location (Docker)
   [--token <shared secret>]   # enable bearer auth on /api/*
   [--unsafe-expose]           # required to bind any non-loopback host
@@ -174,40 +191,101 @@ the same error envelope on non-2xx responses:
 | `GET` | `/readyz` | Readiness; returns 200 once the DB opened and the suite root resolved |
 | `GET` | `/api/suites` | List suites discovered under `--data`, with scenario/persona/rubric counts |
 | `GET` | `/api/suites/:id/scenarios` | List scenarios in a suite, including tags and repeat-friendly IDs |
-| `GET` | `/api/runs` | List runs with pagination (`?limit=&cursor=`), filters (`?status=&suite=&since=`), and summary fields |
-| `GET` | `/api/runs/:runId` | Full run record: scenario list, averages, judge metadata |
+| `GET` | `/api/scenarios` | Flat index of every scenario across every file under `--data`, with `{suite_id, file, id, tags, personas, rubric_ref}`. Used by the start form to build cross-file selections. |
+| `GET` | `/api/runs` | List runs with pagination (`?limit=&cursor=`), filters (`?status=&suite=&preset=&since=`), and summary fields |
+| `GET` | `/api/runs/:runId` | Full run record: scenario list, averages, judge metadata, preset ref |
 | `GET` | `/api/runs/:runId/scenarios/:ordinal` | Single scenario detail: transcript, tool calls, checkpoints, judge output |
 | `GET` | `/api/runs/:runId/events` | Server-Sent Events stream for live progress (see §6.3) |
 | `GET` | `/api/runs/:runId/report.html` | HTML report rendered from persisted run history |
 | `GET` | `/api/runs/:runId/artifacts/:name` | Raw artifact download (transcript JSON, judge JSON) |
+| `GET` | `/api/presets` | List saved presets with last-run summary |
+| `GET` | `/api/presets/:presetId` | Preset definition: resolved scenario selection, endpoint, personas, rubric, parallel factor, repeat |
+| `GET` | `/api/presets/:presetId/runs` | Chronological list of runs launched from this preset |
+| `GET` | `/api/comparisons` | Compare two or more runs by `?run_ids=a,b,c`. Returns scenario-aligned pass/fail, score delta, and judge-reason diffs (see §6.5) |
 
 ### 6.2 Write endpoints
 
 | Method | Path | Purpose |
 |---|---|---|
-| `POST` | `/api/runs` | Start a run against a known suite + optional filters |
+| `POST` | `/api/runs` | Start a run from an ad-hoc spec (suite + filters) or a saved preset |
 | `POST` | `/api/runs/:runId/cancel` | Signal an active run to stop after the current scenario |
+| `POST` | `/api/presets` | Create a preset (scenario selection, endpoint, personas, rubric, parallel, repeat) |
+| `PUT` | `/api/presets/:presetId` | Update a preset; older runs keep their frozen snapshot (see §8.2) |
+| `DELETE` | `/api/presets/:presetId` | Soft-delete a preset; past runs remain browsable and comparable |
+| `POST` | `/api/presets/:presetId/runs` | Launch a new run from a saved preset (optional `label`, `overrides`) |
 
 `POST /api/runs` body:
 
 ```json
 {
-  "suite_id": "baseline",
-  "endpoint": "data/endpoints/autogpt.yaml",
-  "scenarios": "data/scenarios/baseline",
-  "personas": "data/personas/baseline.yaml",
-  "rubric": "data/rubric.yaml",
-  "scenario_filter": { "ids": ["multi_session_memory"], "tags": ["memory"] },
-  "parallel": { "enabled": true, "limit": 3 },
-  "repeat": 5,
-  "dry_run": false,
-  "label": "nightly-baseline-2026-04-17"
+  "preset_id": "nightly-memory",
+  "label": "nightly-baseline-2026-04-17",
+  "overrides": {
+    "parallel": { "enabled": true, "limit": 4 },
+    "repeat": 3,
+    "dry_run": false
+  }
 }
 ```
 
-Every field except `suite_id` (or equivalent explicit `endpoint`/
-`scenarios`/`personas`/`rubric`) is optional. The handler validates the
-body with a schema before calling into the run controller.
+or, when launching ad-hoc (no preset), explicit selection:
+
+```json
+{
+  "endpoint": "data/endpoints/autogpt.yaml",
+  "selection": [
+    { "file": "data/scenarios/baseline/memory.yaml", "id": "multi_session_memory" },
+    { "file": "data/scenarios/regression/auth.yaml", "id": "signin_happy_path" }
+  ],
+  "personas": "data/personas/baseline.yaml",
+  "rubric": "data/rubric.yaml",
+  "parallel": { "enabled": true, "limit": 3 },
+  "repeat": 5,
+  "dry_run": false,
+  "label": "exploratory-2026-04-17",
+  "save_as_preset": { "name": "memory+auth-smoke", "description": "..." }
+}
+```
+
+The handler validates the body with a schema before calling into the run
+controller. `selection[]` accepts any mix of scenarios from any file
+beneath `--data`; the controller resolves each `{file, id}` pair through
+the existing scenario loader. `save_as_preset` is optional — operators
+can freeze today's ad-hoc selection as a named preset in the same request.
+
+### 6.5 Comparison payload
+
+`GET /api/comparisons?run_ids=runA,runB,runC` (2–10 run IDs, same preset
+recommended but not required) returns:
+
+```json
+{
+  "runs": [
+    { "run_id": "runA", "label": "2026-04-12", "started_at": "...", "pass_rate": 0.9, "score_mean": 0.81 },
+    { "run_id": "runB", "label": "2026-04-17", "started_at": "...", "pass_rate": 0.7, "score_mean": 0.74 }
+  ],
+  "scenarios": [
+    {
+      "scenario_id": "multi_session_memory",
+      "per_run": [
+        { "run_id": "runA", "status": "pass", "score": 0.88, "judge_reason": "..." },
+        { "run_id": "runB", "status": "fail", "score": 0.42, "judge_reason": "..." }
+      ],
+      "delta_score": -0.46,
+      "status_change": "regressed"
+    }
+  ],
+  "summary": {
+    "regressed": ["multi_session_memory"],
+    "improved": [],
+    "unchanged": ["signin_happy_path"]
+  }
+}
+```
+
+Alignment is by `scenario_id` within the same preset. Runs without a
+shared preset still compare by scenario ID, but missing scenarios show up
+as `"present_in": ["runA"]` entries rather than failing the request.
 
 ### 6.3 Live events
 
@@ -255,20 +333,25 @@ to keep SQLite and transcript state consistent.
   `docs/design-docs/frontend-react.md`.
 - Data fetching via `fetch` + SSE. No React Query unless a clear win emerges
   from three or more consumer sites.
-- Visual grammar modelled on cupel: compact top bar with global stats, a
-  left-side list of runs, a right-side detail pane, and an overlay panel
-  for scenario drill-down.
+- Visual grammar takes **design direction** from cupel rather than
+  replicating it: dark-first palette with accent color on status chips,
+  dense monospace-leaning typography for run/scenario tables, filterable
+  list-plus-detail split layouts, and keyboard-driven navigation. Copy
+  is the AgentProbe vocabulary (runs, scenarios, personas, rubrics).
 
 ### 7.2 Route map
 
 | Path | View |
 |---|---|
 | `/` | Overview: active runs, last N completed, aggregate pass rate |
-| `/runs` | Run list with filters (status, suite, label, date range) |
+| `/runs` | Run list with filters (status, suite, preset, label, date range) |
 | `/runs/:runId` | Live run detail: scenario table, stats bar, averages, SSE-driven updates, report link |
 | `/runs/:runId/scenarios/:ordinal` | Scenario drill-down: transcript, tool calls, checkpoints, rubric scores |
-| `/suites` | Discovered suites with "start run" affordance |
-| `/suites/:id/start` | Form to launch a run (scenario filter, parallel, repeat, dry-run, label) |
+| `/suites` | Discovered suites, flat scenario index, preset picker |
+| `/start` | Run builder: multi-file scenario picker, parallel/repeat knobs, save-as-preset (see §7.6) |
+| `/presets` | Saved presets list with last-run summary, "run again" and "edit" affordances |
+| `/presets/:presetId` | Preset detail: resolved scenarios, endpoint/personas/rubric, run history timeline |
+| `/compare` | Comparison workspace: pick 2–N past runs (optionally scoped to a preset) and diff (see §7.7) |
 | `/settings` | Shows current server config (read-only); redacts secrets |
 
 ### 7.3 Overview page
@@ -304,7 +387,64 @@ so operators can share a URL to a specific transcript. New additions:
 - Copy-as-cURL for each endpoint turn, for replay outside AgentProbe.
 - "Download artifacts" button that hits `/api/runs/:runId/artifacts/...`.
 
-### 7.6 Accessibility & theming
+### 7.6 Start run builder
+
+`/start` is the canonical entrypoint for launching a run. Form layout,
+top to bottom:
+
+1. **Preset slot.** Dropdown of saved presets plus "new (ad-hoc)". Picking
+   an existing preset hydrates the rest of the form; edits can either
+   overwrite the preset (`Save`), fork it (`Save as…`), or stay as a
+   one-off (`Run once`).
+2. **Scenario selector.** A searchable, virtualized tree over
+   `/api/scenarios`. Grouped by file with a flat "All scenarios" tab.
+   Each row is a checkbox; tag and text filters narrow the tree; "select
+   all visible" adds everything currently in view. The selection persists
+   across group toggles and is shown as a chips row above the tree. The
+   same row accepts free-text tag filters (`tags:memory status:regression`)
+   that expand into concrete scenario IDs at submit time — but the
+   submitted preset stores the *resolved* IDs, not the filter text, so
+   re-runs stay deterministic even if new scenarios get added to `data/`
+   later.
+3. **Endpoint / personas / rubric.** Three selects fed by the suite
+   controller. Endpoint is required; the others default to suite
+   conventions.
+4. **Execution knobs.**
+   - Parallel factor: a stepper `1..N` (default `1`); the server caps `N`
+     at the config ceiling. Shown alongside a live "estimated wall clock"
+     based on the prior run's per-scenario timing when available.
+   - Repeat: stepper `1..20` (default `1`).
+   - Dry-run toggle.
+   - Label (free-text, optional).
+5. **Save as preset.** Toggle plus name/description fields. When enabled,
+   the run submit also calls `POST /api/presets` in the same request so
+   the operator's one-click rerun exists immediately.
+
+Submitting sends a single `POST /api/runs` (with either `preset_id` or an
+explicit `selection[]`). The UI then navigates to `/runs/:runId` and
+subscribes to the SSE stream.
+
+### 7.7 Comparison workspace
+
+`/compare` supports two flows:
+
+- **From a preset.** Opens `/presets/:presetId` and selects "Compare
+  runs"; the picker pre-filters to that preset's run history and defaults
+  to the two most-recent runs.
+- **Ad-hoc.** From `/runs`, select any 2–10 runs via checkboxes, click
+  "Compare selected".
+
+The layout is a scenario-aligned table: one column per run (ordered left
+→ right by `started_at`), one row per scenario. Each cell renders
+`status + score + judge-reason snippet` with a hover that expands to the
+full judge output. A sticky summary row at the top shows per-run pass
+rate, score mean, and elapsed time. Regression rows are tinted; improved
+rows get an up-arrow accent; unchanged rows are dim. A toggle switches
+to "only changes" so an operator can see just the deltas.
+
+Deep links preserve state: `/compare?run_ids=runA,runB,runC&only=changes`.
+
+### 7.8 Accessibility & theming
 
 - Keyboard navigation: `j`/`k` through the run list, `g r` to go to runs,
   `/` to focus search. Parity with cupel's keyboard affordances.
@@ -314,22 +454,86 @@ so operators can share a URL to a specific transcript. New additions:
 
 ## 8. Data model
 
-The server does not introduce a new database. All durable state reuses
-`sqlite-run-history` tables. New fields needed:
+### 8.1 Run record extensions
+
+The server reuses the existing `sqlite-run-history` tables. New fields:
 
 - `runs.label TEXT NULL` — optional human-friendly tag supplied at start.
 - `runs.trigger TEXT NOT NULL DEFAULT 'cli'` — one of `cli|server|api`, so
   operators can filter server-initiated runs.
 - `runs.cancelled_at DATETIME NULL` — stamped when cancellation completes.
+- `runs.preset_id TEXT NULL` — foreign key into `presets(id)`; `NULL` for
+  ad-hoc runs.
+- `runs.preset_snapshot_json TEXT NULL` — the preset as it existed when the
+  run started, so edits to the preset later don't retroactively rewrite
+  historical runs. This is what the comparison view reads from.
 
-A migration ships with the feature and updates the read model in
-`domains/reporting`. Back-filling is not required; missing values read as
-`NULL`/defaults.
+### 8.2 Presets
+
+Two new tables:
+
+```sql
+CREATE TABLE presets (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  description TEXT,
+  endpoint TEXT NOT NULL,
+  personas TEXT,
+  rubric TEXT,
+  parallel_enabled INTEGER NOT NULL DEFAULT 0,
+  parallel_limit INTEGER NOT NULL DEFAULT 1,
+  repeat INTEGER NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  deleted_at DATETIME NULL
+);
+
+CREATE TABLE preset_scenarios (
+  preset_id TEXT NOT NULL REFERENCES presets(id) ON DELETE CASCADE,
+  file TEXT NOT NULL,
+  scenario_id TEXT NOT NULL,
+  position INTEGER NOT NULL,
+  PRIMARY KEY (preset_id, file, scenario_id)
+);
+```
+
+Deletion is soft (`deleted_at`) so historical runs keep a readable preset
+reference. The preset snapshot stored on each run is the source of truth
+for replay and comparison semantics.
+
+### 8.3 Persistence backends
+
+The repo contract keeps SQLite as the default. A Postgres backend is a
+**later-phase** addition for Docker deployments where the container's
+volume is ephemeral:
+
+- `AGENTPROBE_DB_URL` selects the backend. Accepted schemes: `sqlite://`
+  (default when the env var is absent; path resolves like today's `--db`
+  flag) and `postgres://`.
+- The persistence layer already sits behind `sqlite-run-history`'s
+  repository-style interface (see `docs/ARCHITECTURE.md`). Adding
+  Postgres is a new implementation of the same `RunHistoryRepo` contract,
+  not a rewrite of callers.
+- Schema migrations live under `src/providers/persistence/migrations/`,
+  one file per migration, with a dispatcher per backend. The SQL is kept
+  portable where possible; backend-specific divergence (e.g., `JSONB`
+  vs `TEXT` for `preset_snapshot_json`) goes through a narrow adapter.
+- Presets and run records are written through the same repo, so switching
+  backends swaps one provider without touching controllers or the UI.
+- Operational guidance: when `AGENTPROBE_DB_URL=postgres://…`, the server
+  refuses to boot if the schema is behind HEAD; operators run
+  `agentprobe db:migrate` (new CLI subcommand) before starting. SQLite
+  keeps its today's behavior of opening and migrating in-process.
+
+This lands in Phase 3 (see §13). Phase 1 ships SQLite-only so shape is
+validated before the second backend goes in.
+
+### 8.4 Derived state
 
 Suite discovery is derived state, not persisted. `SuiteController` scans
-the `--data` root at request time and caches the parsed structure in memory
-with a 30s TTL. Validation errors are surfaced in the UI inline rather than
-being persisted.
+the `--data` root at request time and caches the parsed structure in
+memory with a 30s TTL. Validation errors are surfaced in the UI inline
+rather than being persisted.
 
 ## 9. Security posture
 
@@ -401,7 +605,18 @@ feature ships.
 
 ## 11. Docker packaging
 
-A new `Dockerfile` and `docker-compose.yml` at the repo root:
+A new `Dockerfile` and `docker-compose.yml` at the repo root.
+
+### 11.1 Dockerfile
+
+The image's CMD must satisfy the security contract in §5. Because binding
+`127.0.0.1` inside a container isn't reachable from the host, the default
+CMD binds `0.0.0.0` *and* includes `--unsafe-expose`. The required
+`--token` is sourced from `AGENTPROBE_SERVER_TOKEN` at boot; if the env
+var is missing, the config loader fails fast with a clear message rather
+than starting an unprotected server. This keeps the server's own rules
+(`non-loopback ⇒ --unsafe-expose AND --token`) intact while giving the
+image a working-by-default entrypoint.
 
 ```Dockerfile
 # Multi-stage: build dashboard bundle, then ship a minimal runtime image.
@@ -416,13 +631,20 @@ WORKDIR /app
 COPY --from=build /app /app
 ENV NODE_ENV=production
 EXPOSE 7878
+
+# Server boot will abort if AGENTPROBE_SERVER_TOKEN is unset, per §5.
 ENTRYPOINT ["bun", "run", "./src/cli/main.ts", "start-server"]
-CMD ["--host", "0.0.0.0", "--port", "7878"]
+CMD ["--host", "0.0.0.0", "--port", "7878", "--unsafe-expose"]
 ```
 
-`docker-compose.yml` mounts `./data`, `./runs.sqlite`, and reads
-`OPEN_ROUTER_API_KEY` from `.env`. It binds the host port to `127.0.0.1`
-by default:
+`AGENTPROBE_SERVER_TOKEN` is read by `runtime/server/config.ts`; passing
+it via env keeps the value out of the image history and `ps` output.
+
+### 11.2 docker-compose.yml
+
+Mounts `./data`, `./runs.sqlite`, and reads `OPEN_ROUTER_API_KEY` from
+`.env`. Host port binds to `127.0.0.1` so exposure is explicit even when
+the container binds `0.0.0.0`:
 
 ```yaml
 services:
@@ -432,22 +654,36 @@ services:
       - "127.0.0.1:7878:7878"
     environment:
       OPEN_ROUTER_API_KEY: ${OPEN_ROUTER_API_KEY}
-      AGENTPROBE_SERVER_TOKEN: ${AGENTPROBE_SERVER_TOKEN:-}
+      AGENTPROBE_SERVER_TOKEN: ${AGENTPROBE_SERVER_TOKEN:?set a non-empty token}
+      # Optional: switch persistence to Postgres so run history survives
+      # container restarts without relying on a mounted sqlite file.
+      # AGENTPROBE_DB_URL: postgres://agentprobe:${PGPASSWORD}@db:5432/agentprobe
     volumes:
       - ./data:/app/data:ro
       - ./runs.sqlite:/app/runs.sqlite
-    command:
-      - --host
-      - 0.0.0.0
-      - --port
-      - "7878"
-      - --unsafe-expose
-      - --token
-      - ${AGENTPROBE_SERVER_TOKEN}
 ```
 
+The Compose file's `${VAR:?…}` syntax ensures `docker compose up` fails
+locally if the operator forgot to set `AGENTPROBE_SERVER_TOKEN`, matching
+the server's boot-time refusal.
+
+### 11.3 Persistent storage in Docker
+
+Two supported patterns:
+
+- **SQLite on a volume (default).** Mount a host path at
+  `/app/runs.sqlite` or use a named volume. Simple, single-process
+  friendly, matches CLI behavior. Containers on the same host share run
+  history across restarts.
+- **Postgres (later phase).** Set `AGENTPROBE_DB_URL=postgres://…`. A
+  second service in Compose runs Postgres; `./runs.sqlite` is no longer
+  required. This pattern is the recommended setup for deployments where
+  the AgentProbe container is ephemeral (autoscaled nodes, CI sidecars)
+  because losing the container must not lose run history. See §8.3 for
+  backend semantics and §13 for the phase this lands in.
+
 Docs update: add `docs/playbooks/agent-probe-server.md` with the concrete
-steps for local + Docker bring-up.
+steps for local bring-up, SQLite-on-volume, and Postgres-backed Docker.
 
 ## 12. Testing strategy
 
@@ -472,17 +708,28 @@ Incremental rollout keeps the existing `--dashboard` mode stable:
 
 1. **Phase 0 — Contract.** Add scenarios to `docs/product-specs/platform.md`
    covering `start-server` behavior (start, list, detail, SSE, cancel,
-   auth gate). No code yet.
-2. **Phase 1 — Read-only server.** Implement `start-server`, suite/runs
-   read endpoints, health, static bundle, and SSE. Dashboard gets the
-   overview + runs list + read-only detail views. No `POST /api/runs` yet.
-3. **Phase 2 — Run control.** Add `POST /api/runs`, cancel, and the start
-   form in the UI. Ship Docker and compose files.
-4. **Phase 3 — Polish.** Keyboard shortcuts, SSE reconnect tuning,
-   metrics, and the operational playbook.
+   auth gate, presets, comparison). No code yet.
+2. **Phase 1 — Read-only server (SQLite).** Implement `start-server`,
+   suite/runs read endpoints, health, static bundle, and SSE. Dashboard
+   gets the overview + runs list + read-only detail views. No
+   `POST /api/runs` yet.
+3. **Phase 2 — Run control + presets.** Add `POST /api/runs`, cancel, the
+   `/start` run builder (cross-file scenario selection, parallel factor,
+   repeat), preset CRUD and "run from preset". Ship Dockerfile and
+   docker-compose with SQLite-on-volume. This is the first phase the
+   ticket's acceptance criteria describe end-to-end.
+4. **Phase 3 — Comparison + Postgres.** Ship `/compare` workspace and
+   `/api/comparisons`. Add Postgres backend behind `AGENTPROBE_DB_URL`
+   with migration tooling and a Compose example. Document operational
+   guidance for ephemeral container deployments.
+5. **Phase 4 — Polish.** Keyboard shortcuts, SSE reconnect tuning,
+   metrics, soak-test harness, and the operational playbook.
 
 Each phase is a PR. Phase 1 is feature-flagless; subsequent phases gate
-write behavior behind explicit config if needed mid-migration.
+write behavior behind explicit config if needed mid-migration. Postgres
+lands after the comparison UI because that UI is the first consumer
+whose performance envelope might actually need it (SQLite handles up to
+tens of thousands of runs on a single node without contention).
 
 ## 14. Risks and open questions
 
@@ -491,27 +738,52 @@ write behavior behind explicit config if needed mid-migration.
    serialize via a per-DB mutex or open WAL mode. Decision: open WAL mode
    in `sqlite-run-history.ts` at boot when `trigger=server`, and document
    the limit as "one concurrent run per suite" for v1.
-2. **Dashboard bundle location in Docker.** Today the path resolves
+2. **Preset drift.** Scenarios referenced by a preset can be renamed,
+   moved, or deleted between runs. The resolver fails soft: missing
+   `{file, id}` pairs are surfaced as warnings at preset fetch time and
+   skipped (with a `skipped` outcome record) at run time, so comparison
+   is still meaningful. Presets can be edited to prune stale entries.
+3. **Comparison alignment.** Scenario IDs are assumed unique within a
+   preset. When two presets are compared (ad-hoc flow), duplicate IDs
+   from different files fall back to `{file}::{id}` as the alignment
+   key, with an info banner in the UI.
+4. **Postgres migration parity.** Two backends drift easily. Mitigation:
+   the shared integration test suite runs against both backends in CI
+   once Phase 3 lands; SQLite-only runs continue to gate earlier phases.
+5. **Dashboard bundle location in Docker.** Today the path resolves
    relative to `src/domains/reporting/dashboard.ts`. In Docker this works
    because we copy the source tree, but a future slim image might ship
    only compiled JS. `--dashboard-dist` is the escape hatch.
-3. **SSE through proxies.** Some reverse proxies buffer SSE. The docs will
+6. **SSE through proxies.** Some reverse proxies buffer SSE. The docs will
    call out the required `proxy_buffering off` for nginx and equivalents.
-4. **Long-running stability.** `Bun.serve` has matured, but long uptime
-   under heavy load is untested in this repo. Phase 3 adds a soak-test
+7. **Long-running stability.** `Bun.serve` has matured, but long uptime
+   under heavy load is untested in this repo. Phase 4 adds a soak-test
    harness to `tests/` that runs the server for 1h with synthetic runs.
-5. **Browser caching of the SPA.** The dashboard bundle is hashed by
+8. **Browser caching of the SPA.** The dashboard bundle is hashed by
    Vite. Server sets `Cache-Control: public, max-age=31536000, immutable`
    for hashed assets and `no-store` for `index.html`.
 
 ## 15. Acceptance criteria for this design
 
 - [x] Single-command start path described (`agentprobe start-server`).
-- [x] UI control-dashboard shape specified, grounded in cupel inspiration
-      and the existing `dashboard/` stack.
+- [x] UI control-dashboard shape specified, grounded in cupel design
+      *direction* (palette, density, list+detail split, keyboard-first)
+      rather than a direct copy.
+- [x] Run builder supports selecting scenarios across any combination of
+      scenario files under `data/`, with a parallel-factor control on the
+      same form.
+- [x] Presets: scenario selection + execution knobs are saved by name and
+      re-runnable without re-specifying anything.
+- [x] Comparison view for multiple runs of the same preset (or ad-hoc run
+      sets) with scenario-aligned diffs.
 - [x] Browsable run logs: REST + SSE + HTML report reuse defined; drill-
       down routes named.
-- [x] Docker packaging described with concrete Dockerfile and compose.
+- [x] Docker packaging described with concrete Dockerfile and compose;
+      the default CMD satisfies the server's own non-loopback security
+      contract.
+- [x] Persistence path documented for ephemeral-container deployments:
+      SQLite on mount by default, Postgres as a later-phase option
+      behind `AGENTPROBE_DB_URL`.
 - [x] Security defaults (loopback, auth token, secret redaction) defined.
 - [x] Boundary rules, layering, and observability mapped to repo contracts.
 - [x] Phased rollout identified so implementation PRs stay reviewable.
