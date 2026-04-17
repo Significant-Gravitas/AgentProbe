@@ -13,10 +13,7 @@ import {
   SqliteRunRecorder,
 } from "../../src/providers/persistence/sqlite-run-history.ts";
 import type { Endpoints } from "../../src/shared/types/contracts.ts";
-import {
-  AgentProbeConfigError,
-  AgentProbeRuntimeError,
-} from "../../src/shared/utils/errors.ts";
+import { AgentProbeConfigError } from "../../src/shared/utils/errors.ts";
 import {
   adapterReply,
   asResponsesClient,
@@ -221,7 +218,7 @@ describe("sqlite recorder", () => {
       }
       expect(
         database.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 2 });
+      ).toEqual({ schema_version: 3 });
     } finally {
       database.close();
     }
@@ -251,13 +248,12 @@ describe("sqlite recorder", () => {
     expect(result.exitCode).toBe(0);
     expect(persisted?.runId).toBe(result.runId ?? undefined);
     expect(persisted?.status).toBe("completed");
-    expect(result.results[0]?.userId).toMatch(
-      /^[0-9a-f-]{36}$/i,
-    );
+    expect(result.results[0]?.userId).toMatch(/^[0-9a-f-]{36}$/i);
     expect(persisted?.aggregateCounts).toEqual({
       scenarioTotal: 1,
       scenarioPassedCount: 1,
       scenarioFailedCount: 0,
+      scenarioHarnessFailedCount: 0,
       scenarioErroredCount: 0,
     });
 
@@ -418,35 +414,37 @@ describe("sqlite recorder", () => {
     expect(configRun.exitCode).toBe(2);
     expect(configRun.finalError).toEqual({
       type: "AgentProbeConfigError",
-      message: "No scenarios matched the requested filters.",
+      message:
+        'No scenario matching "missing-scenario" found. Available: smoke-scenario (Smoke)',
     });
 
     const runtimeRoot = makeTempDir("db-runtime-error");
     const runtimePaths = writeSuiteFiles(runtimeRoot);
     const runtimeRecorder = new SqliteRunRecorder(dbUrlFor(runtimeRoot));
-    await expect(
-      runSuite({
-        ...runtimePaths,
-        client: asResponsesClient(
-          new FakeResponsesClient([buildScore()]),
-        ) as never,
-        recorder: runtimeRecorder,
-        adapterFactory: (_endpoint: Endpoints) =>
-          new FailingAdapter("endpoint down"),
-      }),
-    ).rejects.toThrow(AgentProbeRuntimeError);
+    const runtimeResult = await runSuite({
+      ...runtimePaths,
+      client: asResponsesClient(
+        new FakeResponsesClient([buildScore()]),
+      ) as never,
+      recorder: runtimeRecorder,
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FailingAdapter("endpoint down"),
+    });
+    expect(runtimeResult.passed).toBe(false);
+    expect(runtimeResult.exitCode).toBe(1);
 
     const runtimeRun = listRuns({ dbUrl: dbUrlFor(runtimeRoot) })[0];
     expect(runtimeRun).toBeDefined();
     if (!runtimeRun) {
       throw new Error("Expected a persisted runtime-error run.");
     }
-    expect(runtimeRun.status).toBe("runtime_error");
-    expect(runtimeRun.exitCode).toBe(3);
+    expect(runtimeRun.status).toBe("completed");
+    expect(runtimeRun.exitCode).toBe(1);
     expect(runtimeRun.aggregateCounts).toEqual({
       scenarioTotal: 1,
       scenarioPassedCount: 0,
       scenarioFailedCount: 0,
+      scenarioHarnessFailedCount: 0,
       scenarioErroredCount: 1,
     });
 
@@ -460,6 +458,80 @@ describe("sqlite recorder", () => {
     });
   });
 
+  test("upload rejections count as harness failures in persisted aggregate counts", async () => {
+    const { AgentProbeHarnessError } = await import(
+      "../../src/shared/utils/errors.ts"
+    );
+    class UploadRejectingAdapter extends FakeAdapter {
+      constructor() {
+        super([adapterReply("never reached")]);
+      }
+      async uploadFile(_filePath: string, _fileName: string): Promise<never> {
+        throw new AgentProbeHarnessError(
+          "File upload rejected for foo.csv: 413 Payload Too Large.",
+        );
+      }
+    }
+
+    const root = makeTempDir("db-harness-fail");
+    const paths = writeSuiteFiles(root);
+    mkdirSync(join(root, "fixtures"), { recursive: true });
+    writeFileSync(join(root, "fixtures", "foo.csv"), "id,name\n1,a\n");
+    writeFileSync(
+      paths.scenarios,
+      [
+        "defaults:",
+        "  max_turns: 1",
+        "scenarios:",
+        "  - id: upload-scenario",
+        "    name: Upload",
+        "    tags: [upload]",
+        "    priority: high",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    context:",
+        "      injected_data:",
+        "        booking_id: FLT-29481",
+        "    turns:",
+        "      - role: user",
+        "        attachments:",
+        "          - path: fixtures/foo.csv",
+        "        use_exact_message: true",
+        "        content: Process attached file.",
+        "    expectations:",
+        "      expected_behavior: Help the user quickly.",
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const recorder = new SqliteRunRecorder(dbUrlFor(root));
+    const result = await runSuite({
+      ...paths,
+      client: asResponsesClient(
+        new FakeResponsesClient([buildScore()]),
+      ) as never,
+      recorder,
+      adapterFactory: (_endpoint: Endpoints) => new UploadRejectingAdapter(),
+    });
+
+    expect(result.passed).toBe(false);
+    expect(result.exitCode).toBe(1);
+    expect(result.results[0]?.failureKind).toBe("harness");
+
+    const persisted = getRun(result.runId ?? "", { dbUrl: dbUrlFor(root) });
+    expect(persisted?.aggregateCounts).toEqual({
+      scenarioTotal: 1,
+      scenarioPassedCount: 0,
+      scenarioFailedCount: 1,
+      scenarioHarnessFailedCount: 1,
+      scenarioErroredCount: 0,
+    });
+    expect(persisted?.scenarios[0]?.failureKind).toBe("harness");
+    expect(persisted?.scenarios[0]?.status).toBe("completed");
+  });
+
   test("normalizes naive timestamps when resolving latestRunForSuite cutoffs", () => {
     const root = makeTempDir("db-cutoff");
     const dbUrl = dbUrlFor(root);
@@ -468,46 +540,50 @@ describe("sqlite recorder", () => {
 
     const database = new Database(dbPath);
     try {
-      database.query(
-        `insert into runs (
+      database
+        .query(
+          `insert into runs (
           id, status, passed, exit_code, suite_fingerprint, started_at, updated_at,
           completed_at, scenario_total, scenario_passed_count, scenario_failed_count,
           scenario_errored_count
         ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ).run(
-        "run-older",
-        "completed",
-        1,
-        0,
-        "suite-1",
-        "2026-04-10T10:00:00",
-        "2026-04-10T10:05:00",
-        "2026-04-10T10:05:00",
-        0,
-        0,
-        0,
-        0,
-      );
-      database.query(
-        `insert into runs (
+        )
+        .run(
+          "run-older",
+          "completed",
+          1,
+          0,
+          "suite-1",
+          "2026-04-10T10:00:00",
+          "2026-04-10T10:05:00",
+          "2026-04-10T10:05:00",
+          0,
+          0,
+          0,
+          0,
+        );
+      database
+        .query(
+          `insert into runs (
           id, status, passed, exit_code, suite_fingerprint, started_at, updated_at,
           completed_at, scenario_total, scenario_passed_count, scenario_failed_count,
           scenario_errored_count
         ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ).run(
-        "run-newer",
-        "completed",
-        1,
-        0,
-        "suite-1",
-        "2026-04-10T12:00:00",
-        "2026-04-10T12:05:00",
-        "2026-04-10T12:05:00",
-        0,
-        0,
-        0,
-        0,
-      );
+        )
+        .run(
+          "run-newer",
+          "completed",
+          1,
+          0,
+          "suite-1",
+          "2026-04-10T12:00:00",
+          "2026-04-10T12:05:00",
+          "2026-04-10T12:05:00",
+          0,
+          0,
+          0,
+          0,
+        );
     } finally {
       database.close();
     }
@@ -609,7 +685,7 @@ describe("sqlite recorder", () => {
       expect(columns.includes("user_id")).toBe(true);
       expect(
         migrated.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 2 });
+      ).toEqual({ schema_version: 3 });
     } finally {
       migrated.close();
     }

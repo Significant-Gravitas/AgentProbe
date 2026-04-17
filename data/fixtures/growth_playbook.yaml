@@ -1,0 +1,80 @@
+levers:
+  - id: lever_001
+    name: New-Subscriber Offer Optimization
+    description: Test 15% off vs. Free Gift with Purchase for new email signups to improve CVR.
+    expected_90d_revenue_lift: 12000
+    confidence: 0.8
+    effort_person_weeks: 1
+    category: Conversion
+
+  - id: lever_002
+    name: Bundle Discounts (Core Collection)
+    description: Create a "Starter Kit" bundling the Cleanser, Toner, and Moisturizer at a 20% discount.
+    expected_90d_revenue_lift: 18000
+    confidence: 0.7
+    effort_person_weeks: 2
+    category: AOV
+
+  - id: lever_003
+    name: TikTok Creator Program
+    description: Seed 50 micro-influencers per month with product in exchange for organic content and Spark Ads whitelisting.
+    expected_90d_revenue_lift: 45000
+    confidence: 0.85
+    effort_person_weeks: 3
+    category: Acquisition
+
+  - id: lever_004
+    name: Email Win-back Sequence
+    description: Automated 3-part sequence targeting customers who haven't purchased in 60 days with a personalized "We Miss You" offer.
+    expected_90d_revenue_lift: 15000
+    confidence: 0.9
+    effort_person_weeks: 1
+    category: Retention
+
+  - id: lever_005
+    name: Subscription SKU Launch
+    description: Implement "Subscribe & Save" (15% off) on the top-selling Hydration Serum using Recharge.
+    expected_90d_revenue_lift: 22000
+    confidence: 0.8
+    effort_person_weeks: 2
+    category: Retention
+
+  - id: lever_006
+    name: B2B Wholesale Outreach
+    description: Cold outreach to 100 local boutique spas and independent beauty retailers.
+    expected_90d_revenue_lift: 30000
+    confidence: 0.4
+    effort_person_weeks: 6
+    category: Expansion
+
+  - id: lever_007
+    name: Amazon Brand Store Launch
+    description: Set up Seller Central, FBA shipments, and basic A+ content for the top 3 SKUs.
+    expected_90d_revenue_lift: 25000
+    confidence: 0.5
+    effort_person_weeks: 5
+    category: Expansion
+
+  - id: lever_008
+    name: Podcast Ad Placement
+    description: Sponsor 4 niche beauty/wellness podcasts with host-read spots.
+    expected_90d_revenue_lift: 10000
+    confidence: 0.3
+    effort_person_weeks: 3
+    category: Brand
+
+  - id: lever_009
+    name: Affiliate Tier Restructure
+    description: Move from flat 10% commission to a tiered system (10/12/15%) based on monthly sales volume.
+    expected_90d_revenue_lift: 8000
+    confidence: 0.6
+    effort_person_weeks: 2
+    category: Acquisition
+
+  - id: lever_010
+    name: Pricing Test (Core Serum)
+    description: Increase MSRP of Hydration Serum from $38 to $42 to test price elasticity.
+    expected_90d_revenue_lift: 9000
+    confidence: 0.5
+    effort_person_weeks: 1
+    category: Margin

@@ -7,7 +7,9 @@ Last validated against `platform.md`: 2026-04-13
 - [x] YAML validation succeeds for well-formed data
 - [x] Evaluation run records ordered results and artifacts
 - [x] Scenario filters narrow execution to matching scenarios
+- [x] List command shows available scenarios
 - [x] Dry-run mode records intent without contacting external systems
+- [x] Judge requests preserve cache-friendly prompt prefixes
 - [x] Parallel mode overlaps scenario execution while preserving ordering
 - [ ] Multi-session memory scenarios preserve pinned identity and session controls
 - [ ] AutoGPT preset forges auth tokens internally
@@ -31,6 +33,9 @@ Last validated against `platform.md`: 2026-04-13
   and persisted run metadata records the selected scenario IDs.
 - Dry-run intentionally records run-level selection metadata without creating
   scenario-run rows or contacting target systems.
+- Judge-model requests now preserve a stable rubric-first prefix, add a stable
+  prompt cache key, and enable supported provider caching on the OpenRouter
+  Responses path.
 - The OpenClaw CLI surface is implemented behind websocket endpoint presets and
   can create sessions, send chat turns, and read session history.
 - `bun run fast-feedback` now enforces Biome linting, strict TypeScript checks,

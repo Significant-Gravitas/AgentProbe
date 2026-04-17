@@ -1,0 +1,435 @@
+[
+  {
+    "id": "trace_001",
+    "input": "How do I reset my password? I'm locked out.",
+    "expected_output": {
+      "tool_calls": ["trigger_password_reset_email"],
+      "response_contains": "sent a password reset link",
+      "category": "Account Access"
+    }
+  },
+  {
+    "id": "trace_002",
+    "input": "Can I export my contacts to a CSV file?",
+    "expected_output": {
+      "tool_calls": ["export_data_to_format"],
+      "response_contains": "Settings > Data Export",
+      "category": "Data Management"
+    }
+  },
+  {
+    "id": "trace_003",
+    "input": "My billing address is wrong. It should be 123 Maple St, NY.",
+    "expected_output": {
+      "tool_calls": ["update_billing_profile"],
+      "response_contains": "updated your billing address",
+      "category": "Billing"
+    }
+  },
+  {
+    "id": "trace_004",
+    "input": "Why was I charged $49 this month instead of $29?",
+    "expected_output": {
+      "tool_calls": ["get_subscription_details", "get_invoice_history"],
+      "response_contains": "Professional Tier",
+      "category": "Billing"
+    }
+  },
+  {
+    "id": "trace_005",
+    "input": "I need to delete a duplicate lead record #8821.",
+    "expected_output": {
+      "tool_calls": ["delete_crm_record"],
+      "response_contains": "deleted record #8821",
+      "category": "Lead Management"
+    }
+  },
+  {
+    "id": "trace_006",
+    "input": "How do I integrate Cascade with Slack?",
+    "expected_output": {
+      "tool_calls": ["get_integration_guide"],
+      "response_contains": "App Marketplace",
+      "category": "Integrations"
+    }
+  },
+  {
+    "id": "trace_007",
+    "input": "I'm getting a 403 error when trying to access the API.",
+    "expected_output": {
+      "tool_calls": ["check_api_key_status", "validate_permissions"],
+      "response_contains": "API key permissions",
+      "category": "Technical Support"
+    }
+  },
+  {
+    "id": "trace_008",
+    "input": "Can I schedule a demo for my team of 20?",
+    "expected_output": {
+      "tool_calls": ["schedule_sales_call"],
+      "response_contains": "calendar link",
+      "category": "Sales"
+    }
+  },
+  {
+    "id": "trace_009",
+    "input": "Change my account email from old@work.com to new@work.com.",
+    "expected_output": {
+      "tool_calls": ["update_user_email"],
+      "response_contains": "verification email sent",
+      "category": "Account Access"
+    }
+  },
+  {
+    "id": "trace_010",
+    "input": "What is the storage limit for the Basic plan?",
+    "expected_output": {
+      "tool_calls": ["get_plan_limits"],
+      "response_contains": "5GB",
+      "category": "General Inquiry"
+    }
+  },
+  {
+    "id": "trace_011",
+    "input": "The dashboard isn't loading, just showing a white screen.",
+    "expected_output": {
+      "tool_calls": ["check_system_status", "get_user_session_logs"],
+      "response_contains": "clear your cache",
+      "category": "Technical Support"
+    }
+  },
+  {
+    "id": "trace_012",
+    "input": "I want to upgrade to the Enterprise plan immediately.",
+    "expected_output": {
+      "tool_calls": ["initiate_plan_upgrade"],
+      "response_contains": "Enterprise plan features",
+      "category": "Billing"
+    }
+  },
+  {
+    "id": "trace_013",
+    "input": "How do I set up an automated follow-up email for new leads?",
+    "expected_output": {
+      "tool_calls": ["create_workflow_automation"],
+      "response_contains": "Automation Builder",
+      "category": "Productivity"
+    }
+  },
+  {
+    "id": "trace_014",
+    "input": "My team needs to share a single calendar. How?",
+    "expected_output": {
+      "tool_calls": ["configure_shared_calendar"],
+      "response_contains": "Team Settings",
+      "category": "Productivity"
+    }
+  },
+  {
+    "id": "trace_015",
+    "input": "Is my data encrypted at rest?",
+    "expected_output": {
+      "tool_calls": ["get_security_whitepaper"],
+      "response_contains": "AES-256 encryption",
+      "category": "Security"
+    }
+  },
+  {
+    "id": "trace_016",
+    "input": "I accidentally deleted my 'Q3 Forecast' report. Can you recover it?",
+    "expected_output": {
+      "tool_calls": ["restore_deleted_item"],
+      "response_contains": "restored your report",
+      "category": "Data Management"
+    }
+  },
+  {
+    "id": "trace_017",
+    "input": "How do I add a new custom field to the Contact object?",
+    "expected_output": {
+      "tool_calls": ["create_custom_field"],
+      "response_contains": "Schema Manager",
+      "category": "Customization"
+    }
+  },
+  {
+    "id": "trace_018",
+    "input": "The mobile app keeps crashing on iOS 17.",
+    "expected_output": {
+      "tool_calls": ["log_bug_report", "check_app_version"],
+      "response_contains": "engineering team",
+      "category": "Technical Support"
+    }
+  },
+  {
+    "id": "trace_019",
+    "input": "I need a list of all users who haven't logged in for 30 days.",
+    "expected_output": {
+      "tool_calls": ["run_user_audit_report"],
+      "response_contains": "inactive users",
+      "category": "Admin"
+    }
+  },
+  {
+    "id": "trace_020",
+    "input": "Does Cascade support multi-currency for international sales?",
+    "expected_output": {
+      "tool_calls": ["check_feature_availability"],
+      "response_contains": "Multi-currency support",
+      "category": "General Inquiry"
+    }
+  },
+  {
+    "id": "trace_021",
+    "input": "Can I BCC my emails into the CRM?",
+    "expected_output": {
+      "tool_calls": ["get_bcc_address"],
+      "response_contains": "unique BCC email",
+      "category": "Integrations"
+    }
+  },
+  {
+    "id": "trace_022",
+    "input": "I want to cancel my subscription at the end of the term.",
+    "expected_output": {
+      "tool_calls": ["schedule_account_cancellation"],
+      "response_contains": "cancel your subscription",
+      "category": "Billing"
+    }
+  },
+  {
+    "id": "trace_023",
+    "input": "How do I bulk update the 'Lead Source' for 500 records?",
+    "expected_output": {
+      "tool_calls": ["bulk_update_records"],
+      "response_contains": "Bulk Edit tool",
+      "category": "Data Management"
+    }
+  },
+  {
+    "id": "trace_024",
+    "input": "What's the difference between a Lead and a Contact?",
+    "expected_output": {
+      "tool_calls": ["get_kb_article"],
+      "response_contains": "unqualified vs qualified",
+      "category": "General Inquiry"
+    }
+  },
+  {
+    "id": "trace_025",
+    "input": "Is there a Zapier integration available?",
+    "expected_output": {
+      "tool_calls": ["list_available_integrations"],
+      "response_contains": "Zapier",
+      "category": "Integrations"
+    }
+  },
+  {
+    "id": "trace_026",
+    "input": "I need to change the owner of Account 'Global Tech' to Sarah.",
+    "expected_output": {
+      "tool_calls": ["transfer_record_ownership"],
+      "response_contains": "ownership transferred",
+      "category": "Account Management"
+    }
+  },
+  {
+    "id": "trace_027",
+    "input": "Can I use my own domain for the client portal?",
+    "expected_output": {
+      "tool_calls": ["configure_custom_domain"],
+      "response_contains": "CNAME record",
+      "category": "Customization"
+    }
+  },
+  {
+    "id": "trace_028",
+    "input": "Where can I find my API documentation?",
+    "expected_output": {
+      "tool_calls": ["get_api_docs_url"],
+      "response_contains": "developers.cascade.com",
+      "category": "Technical Support"
+    }
+  },
+  {
+    "id": "trace_029",
+    "input": "I'm not receiving desktop notifications for new tasks.",
+    "expected_output": {
+      "tool_calls": ["check_notification_settings"],
+      "response_contains": "browser permissions",
+      "category": "Technical Support"
+    }
+  },
+  {
+    "id": "trace_030",
+    "input": "Can I merge two duplicate accounts?",
+    "expected_output": {
+      "tool_calls": ["merge_duplicate_records"],
+      "response_contains": "Merge tool",
+      "category": "Data Management"
+    }
+  },
+  {
+    "id": "trace_031",
+    "input": "How do I create a web-to-lead form?",
+    "expected_output": {
+      "tool_calls": ["generate_web_form_code"],
+      "response_contains": "HTML snippet",
+      "category": "Lead Management"
+    }
+  },
+  {
+    "id": "trace_032",
+    "input": "I want to set up 2FA for my account.",
+    "expected_output": {
+      "tool_calls": ["enable_mfa"],
+      "response_contains": "Security settings",
+      "category": "Security"
+    }
+  },
+  {
+    "id": "trace_033",
+    "input": "What happens to my data if I cancel?",
+    "expected_output": {
+      "tool_calls": ["get_data_retention_policy"],
+      "response_contains": "30 days to export",
+      "category": "General Inquiry"
+    }
+  },
+  {
+    "id": "trace_034",
+    "input": "Can I track email opens and clicks?",
+    "expected_output": {
+      "tool_calls": ["enable_email_tracking"],
+      "response_contains": "Email Tracking enabled",
+      "category": "Productivity"
+    }
+  },
+  {
+    "id": "trace_035",
+    "input": "How do I assign a task to multiple people?",
+    "expected_output": {
+      "tool_calls": ["create_shared_task"],
+      "response_contains": "multiple assignees",
+      "category": "Productivity"
+    }
+  },
+  {
+    "id": "trace_036",
+    "input": "I need to download all my invoices for 2023.",
+    "expected_output": {
+      "tool_calls": ["bulk_download_invoices"],
+      "response_contains": "ZIP file",
+      "category": "Billing"
+    }
+  },
+  {
+    "id": "trace_037",
+    "input": "The 'Amount' field on my opportunities is showing the wrong currency symbol.",
+    "expected_output": {
+      "tool_calls": ["update_locale_settings"],
+      "response_contains": "Currency settings",
+      "category": "Customization"
+    }
+  },
+  {
+    "id": "trace_038",
+    "input": "How do I import data from Salesforce?",
+    "expected_output": {
+      "tool_calls": ["start_migration_wizard"],
+      "response_contains": "Salesforce importer",
+      "category": "Data Management"
+    }
+  },
+  {
+    "id": "trace_039",
+    "input": "I'm hit my limit for custom objects. Can I buy more?",
+    "expected_output": {
+      "tool_calls": ["get_addon_pricing"],
+      "response_contains": "add-on pack",
+      "category": "Billing"
+    }
+  },
+  {
+    "id": "trace_040",
+    "input": "Can I restrict user access by IP address?",
+    "expected_output": {
+      "tool_calls": ["configure_ip_whitelist"],
+      "response_contains": "IP Whitelisting",
+      "category": "Security"
+    }
+  },
+  {
+    "id": "trace_041",
+    "input": "How do I change the columns in my Lead list view?",
+    "expected_output": {
+      "tool_calls": ["modify_list_view_config"],
+      "response_contains": "Select Columns",
+      "category": "Customization"
+    }
+  },
+  {
+    "id": "trace_042",
+    "input": "I want to receive a daily summary of my team's activity.",
+    "expected_output": {
+      "tool_calls": ["configure_daily_digest"],
+      "response_contains": "Daily Digest",
+      "category": "Admin"
+    }
+  },
+  {
+    "id": "trace_043",
+    "input": "My API calls are being rate limited. What are the limits?",
+    "expected_output": {
+      "tool_calls": ["get_api_limits"],
+      "response_contains": "requests per minute",
+      "category": "Technical Support"
+    }
+  },
+  {
+    "id": "trace_044",
+    "input": "Can I sync my Google Calendar with Cascade?",
+    "expected_output": {
+      "tool_calls": ["link_external_calendar"],
+      "response_contains": "Google Calendar sync",
+      "category": "Integrations"
+    }
+  },
+  {
+    "id": "trace_045",
+    "input": "I need to deactivate a user who left the company.",
+    "expected_output": {
+      "tool_calls": ["deactivate_user_account"],
+      "response_contains": "user deactivated",
+      "category": "Admin"
+    }
+  },
+  {
+    "id": "trace_046",
+    "input": "How do I set up a round-robin lead assignment?",
+    "expected_output": {
+      "tool_calls": ["configure_lead_routing"],
+      "response_contains": "Round-robin rules",
+      "category": "Lead Management"
+    }
+  },
+  {
+    "id": "trace_047",
+    "input": "Is there a way to see the history of changes on a record?",
+    "expected_output": {
+      "tool_calls": ["get_record_audit_log"],
+      "response_contains": "Audit Trail",
+      "category": "Data Management"
+    }
+  },
+  {
+    "id": "trace_048",
+    "input": "I'm getting a 'Session Expired' message too frequently.",
+    "expected_output": {
+      "tool_calls": ["update_session_timeout_policy"],
+      "response_contains": "Session Timeout",
+      "category": "Security"
+    }
+  },
+  {
+    "id": "trace_049

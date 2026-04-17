@@ -1,0 +1,89 @@
+grants:
+  - id: nsf_ags_prf_2024
+    name: NSF AGS Postdoctoral Research Fellowships
+    agency: National Science Foundation
+    division: Division of Atmospheric and Geospace Sciences
+    deadline: "2024-11-15T17:00:00-05:00"
+    required_sections:
+      - field: project_summary
+        limit_type: pages
+        limit_value: 1
+        description: "Must include Overview, Intellectual Merit, and Broader Impacts."
+      - field: project_description
+        limit_type: pages
+        limit_value: 10
+        description: "Includes research plan, career goals, and data management."
+      - field: specific_aims
+        limit_type: words
+        limit_value: 500
+        description: "Tailored research objectives and hypothesis-driven goals."
+      - field: references_cited
+        limit_type: none
+        description: "Full bibliographic details; no page limit."
+      - field: biographical_sketch
+        limit_type: pages
+        limit_value: 3
+        description: "NSF-approved format (SciENcv)."
+      - field: mentoring_plan
+        limit_type: pages
+        limit_value: 1
+      - field: host_institution_letter
+        limit_type: pages
+        limit_value: 2
+    submission_portal: Research.gov
+
+  - id: nasa_finesst_2024
+    name: Future Investigators in NASA Earth and Space Science and Technology
+    agency: NASA
+    division: Science Mission Directorate (SMD)
+    deadline: "2025-02-05T23:59:59-05:00"
+    required_sections:
+      - field: scientific_technical_management_section
+        limit_type: pages
+        limit_value: 6
+        description: "Core research proposal including figures and tables."
+      - field: specific_aims
+        limit_type: words
+        limit_value: 500
+        description: "Alignment with NASA Science Plan objectives."
+      - field: references
+        limit_type: none
+        description: "Citations must follow SMD formatting guidelines."
+      - field: biographical_sketch
+        limit_type: pages
+        limit_value: 2
+        description: "Required for FI and PI."
+      - field: budget_narrative
+        limit_type: none
+        description: "Detailed breakdown of the $50k/year allocation."
+      - field: data_management_plan
+        limit_type: characters
+        limit_value: 8000
+    submission_portal: NSPIRES
+
+  - id: sloan_fellowship_2024
+    name: Sloan Research Fellowship
+    agency: Alfred P. Sloan Foundation
+    division: Earth System Science
+    deadline: "2024-09-15T12:00:00-04:00"
+    required_sections:
+      - field: research_statement
+        limit_type: pages
+        limit_value: 2
+        description: "A representative summary of past and future research."
+      - field: specific_aims
+        limit_type: words
+        limit_value: 500
+        description: "Concise description of the most significant research accomplishments and future plans."
+      - field: representative_publications
+        limit_type: count
+        limit_value: 2
+        description: "PDFs of two most significant papers published."
+      - field: cv
+        limit_type: none
+        description: "Comprehensive academic curriculum vitae."
+      - field: letters_of_recommendation
+        limit_type: count
+        limit_value: 3
+        description: "Submitted directly by referees."
+    submission_portal: Sloan Portal

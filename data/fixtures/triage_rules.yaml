@@ -1,0 +1,78 @@
+version: 1.2
+last_updated: 2023-10-27
+brand: Fjord Apparel
+default_action: auto_reply
+
+rules:
+  - rule_id: R001
+    name: High Value Order Escalation
+    description: Escalate any inquiry related to an order with a total value exceeding $500.
+    condition:
+      metadata: "order_value > 500"
+      keywords: ["my order", "order status", "spent", "total", "cost"]
+    action: escalate
+    target_system: zendesk
+    priority: high
+
+  - rule_id: R002
+    name: Sizing and Fit
+    description: Auto-respond to questions regarding garment measurements, fit guides, or size recommendations.
+    condition:
+      keywords: ["size", "fit", "small", "medium", "large", "xl", "waist", "inseam", "measurements", "run big", "run small"]
+    action: auto_reply
+    reference_data: product_catalog.json
+    template: "Hey there! Our [Product Name] typically fits [Fit Description]. You can find our detailed size guide here: [Link]"
+
+  - rule_id: R003
+    name: General Complaint
+    description: Escalate negative sentiment, product defects, or shipping delays.
+    condition:
+      sentiment: negative
+      keywords: ["broken", "rip", "tear", "late", "never arrived", "angry", "disappointed", "terrible", "worst", "refund"]
+    action: escalate
+    target_system: zendesk
+    priority: medium
+
+  - rule_id: R004
+    name: Common Product Questions
+    description: Auto-respond to availability, material, and feature questions.
+    condition:
+      keywords: ["waterproof", "material", "fabric", "recycled", "stock", "restock", "available", "colors"]
+    action: auto_reply
+    reference_data: product_catalog.json
+
+  - rule_id: R005
+    name: Shipping Quotes
+    description: Auto-respond with standard shipping timelines.
+    condition:
+      keywords: ["how long", "shipping time", "delivery", "transit"]
+    action: auto_reply
+    template: "Standard shipping takes 3-5 business days. Expedited options are available at checkout!"
+
+  - rule_id: R006
+    name: Influencer/Collab Requests
+    description: Route partnership inquiries to the marketing team queue.
+    condition:
+      keywords: ["collab", "promote", "ambassador", "influencer", "partnership"]
+    action: escalate
+    target_system: zendesk
+    priority: low
+
+  - rule_id: R007
+    name: Safety/Legal
+    description: Immediate escalation for any mention of injury or legal action.
+    condition:
+      keywords: ["lawyer", "sue", "legal", "hurt", "injury", "safety hazard"]
+    action: escalate
+    target_system: zendesk
+    priority: urgent
+
+sentiment_analysis:
+  enabled: true
+  aggregation_period: weekly
+  report_day: Monday
+  metrics:
+    - net_sentiment_score
+    - top_complaint_themes
+    - product_praise_frequency
+    - response_efficiency

@@ -1,0 +1,94 @@
+{
+  "calendar_id": "ethan.park@circuit-saas.com",
+  "timezone": "America/Los_Angeles",
+  "events": [
+    {
+      "id": "cal_9821",
+      "summary": "Internal: Weekly Exec Sync",
+      "start": "2023-10-23T09:00:00Z",
+      "end": "2023-10-23T10:00:00Z",
+      "location": "Conference Room A / Zoom",
+      "description": "Reviewing Q4 targets and hiring roadmap for Engineering."
+    },
+    {
+      "id": "cal_9822",
+      "summary": "Deep Work: Product Strategy",
+      "start": "2023-10-23T10:30:00Z",
+      "end": "2023-10-23T12:30:00Z",
+      "location": "Office",
+      "description": "Finalizing specs for the automated dispatching module."
+    },
+    {
+      "id": "cal_9823",
+      "summary": "Lunch w/ Sarah (Venture Partner)",
+      "start": "2023-10-23T13:00:00Z",
+      "end": "2023-10-23T14:30:00Z",
+      "location": "The Terrace",
+      "description": "General catch-up on Series B timing."
+    },
+    {
+      "id": "cal_9824",
+      "summary": "Demo: Blue Sky Mechanical (Enterprise Tier)",
+      "start": "2023-10-24T10:00:00Z",
+      "end": "2023-10-24T11:00:00Z",
+      "location": "Zoom",
+      "description": "Primary contact: Marcus Thorne. Focus on multi-state fleet management."
+    },
+    {
+      "id": "cal_9825",
+      "summary": "1:1 w/ Head of Sales",
+      "start": "2023-10-24T14:00:00Z",
+      "end": "2023-10-24T14:45:00Z",
+      "location": "Office",
+      "description": "Pipeline review and churn analysis for Small Business segment."
+    },
+    {
+      "id": "cal_9826",
+      "summary": "Board Meeting Prep",
+      "start": "2023-10-25T09:00:00Z",
+      "end": "2023-10-25T11:00:00Z",
+      "location": "Office",
+      "description": "Aggregating metrics for the November board deck."
+    },
+    {
+      "id": "cal_9827",
+      "summary": "Customer Success: Onboarding Review",
+      "start": "2023-10-25T13:00:00Z",
+      "end": "2023-10-25T14:00:00Z",
+      "location": "Zoom",
+      "description": "Reviewing implementation bottlenecks for the last 5 accounts."
+    },
+    {
+      "id": "cal_9828",
+      "summary": "Hiring: Engineering Manager Final Interview",
+      "start": "2023-10-26T11:00:00Z",
+      "end": "2023-10-26T12:00:00Z",
+      "location": "Zoom",
+      "description": "Candidate: David Wu."
+    },
+    {
+      "id": "cal_9829",
+      "summary": "Circuit All-Hands",
+      "start": "2023-10-26T15:00:00Z",
+      "end": "2023-10-26T16:00:00Z",
+      "location": "Main Hall / Zoom",
+      "description": "Company updates, monthly awards, and Q&A."
+    },
+    {
+      "id": "cal_9830",
+      "summary": "Product/Engineering Sync",
+      "start": "2023-10-27T10:00:00Z",
+      "end": "2023-10-27T11:00:00Z",
+      "location": "Conference Room B",
+      "description": "Sprint planning and resource allocation."
+    },
+    {
+      "id": "cal_9831",
+      "summary": "Founder Office Hours",
+      "start": "2023-10-27T14:00:00Z",
+      "end": "2023-10-27T15:30:00Z",
+      "location": "Office",
+      "description": "Open door for any team member to discuss ideas or concerns."
+    }
+  ]
+}

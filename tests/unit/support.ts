@@ -196,10 +196,12 @@ export function buildScore(
     dimensionId?: string;
     score?: number;
     passed?: boolean;
+    failureKind?: "agent" | "harness";
     failureModeDetected?: string | null;
   } = {},
 ): RubricScore {
   const score = options.score ?? 4;
+  const passed = options.passed ?? score / 5 >= 0.7;
   return {
     dimensions: {
       [options.dimensionId ?? "task_completion"]: {
@@ -209,7 +211,8 @@ export function buildScore(
       },
     },
     overallNotes: "Solid answer.",
-    passed: options.passed ?? score / 5 >= 0.7,
+    passed,
+    failureKind: passed ? undefined : (options.failureKind ?? "agent"),
     failureModeDetected: options.failureModeDetected,
   };
 }
@@ -305,6 +308,21 @@ export function asResponsesClient(client: FakeResponsesClient) {
       request: OpenAiResponsesRequest,
     ) => Promise<OpenAiResponsesResponse>;
   };
+}
+
+export function judgeInputText(
+  request: OpenAiResponsesRequest | undefined,
+): string {
+  if (!request) {
+    return "";
+  }
+  const { input } = request;
+  if (typeof input === "string") {
+    return input;
+  }
+  return input
+    .flatMap((message) => message.content.map((part) => part.text))
+    .join("\n");
 }
 
 export function asEndpoint(endpoint: Endpoints): Endpoints {

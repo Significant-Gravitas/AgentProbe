@@ -1,0 +1,72 @@
+friction_events:
+  - id: FAILED_IMPORT
+    name: CRM Data Import Failure
+    description: User attempts to upload a CSV/XLSX but the process fails due to mapping errors or file corruption.
+    severity: high
+    trigger_condition: event_name == "import_process_failed" OR (event_name == "import_started" AND time_since > 300s AND NO "import_completed")
+
+  - id: STUCK_ON_ONBOARDING_STEP
+    name: Onboarding Progress Stall
+    description: User has been on the same onboarding checklist item for more than 4 minutes without completion.
+    severity: medium
+    trigger_condition: current_step_duration > 240s AND progress_percentage < 100
+
+  - id: INVITE_BOUNCE
+    name: Team Invitation Bounce
+    description: An invitation sent to a new team member returned a hard bounce or invalid email error.
+    severity: medium
+    trigger_condition: event_name == "team_invite_sent" AND event_status == "permanent_bounce"
+
+  - id: INTEGRATION_AUTH_ERROR
+    name: Third-Party Auth Failure
+    description: User fails to connect Gmail, Slack, or Salesforce due to credential rejection or API timeout.
+    severity: high
+    trigger_condition: event_name == "integration_attempt" AND error_code IN ["AUTH_DENIED", "TOKEN_EXPIRED"]
+
+  - id: REPETITIVE_UI_LOOP
+    name: Navigation Circularity
+    description: User toggles between the same two dashboard views more than 4 times in 60 seconds.
+    severity: low
+    trigger_condition: unique_page_views == 2 AND total_page_views > 5 AND window <= 60s
+
+  - id: SEARCH_ZERO_RESULTS
+    name: Null Search Results
+    description: User performs three or more consecutive searches in the Global Search bar that return zero results.
+    severity: low
+    trigger_condition: consecutive_null_searches >= 3
+
+  - id: PERMISSION_DENIED_CONFUSION
+    name: Unauthorized Feature Access
+    description: User attempts to click a restricted "Pro" feature button more than twice despite the upgrade lock icon.
+    severity: medium
+    trigger_condition: event_name == "access_denied_modal_shown" AND count >= 2
+
+  - id: BULK_ACTION_ABANDON
+    name: Bulk Action Abandonment
+    description: User selects >50 records but exits the bulk action menu without confirming the change.
+    severity: medium
+    trigger_condition: records_selected > 50 AND menu_closed_without_action == true
+
+  - id: EXPORT_LIMIT_REACHED
+    name: Data Export Throttling
+    description: User hits the trial limit for data exports (e.g., 100 rows) and stops activity.
+    severity: medium
+    trigger_condition: event_name == "export_limit_warning" AND session_inactivity > 60s
+
+  - id: DASHBOARD_EMPTY_STATE_STALL
+    name: Empty State Inactivity
+    description: User lands on a dashboard with no data and stays inactive for 90 seconds without clicking "Create New".
+    severity: low
+    trigger_condition: data_count == 0 AND page_id == "dashboard_main" AND dwell_time > 90s
+
+  - id: API_KEY_GEN_CONFUSION
+    name: Developer Tool Friction
+    description: User visits the API settings page, clicks "Generate Key", but fails to copy or save the key.
+    severity: medium
+    trigger_condition: event_name == "api_key_generated" AND NO "api_key_copied" AND page_exit == true
+
+  - id: FILTER_LOGIC_ERROR
+    name: Complex Filter Failure
+    description: User builds a nested segment filter that results in a syntax error or "too complex" notification.
+    severity: low
+    trigger_condition: event_name == "segment_filter_save" AND error_type == "logic_complexity"

@@ -1,0 +1,64 @@
+channels:
+  - id: university_career_services
+    name: University Career Services Alumni Network
+    reach: High (Targeted)
+    cost: Free
+    pros:
+      - High trust factor for academic research
+      - Verified early-career status via graduation dates
+      - No cost to researcher
+    cons:
+      - Slower response rate
+      - Limited to specific institutional alumni
+    suitability_score: 0.85
+
+  - id: reddit_cscareerquestions
+    name: r/cscareerquestions (Subreddit)
+    reach: Very High
+    cost: Free
+    pros:
+      - Dense concentration of the target demographic
+      - Active community engagement
+      - Direct access to "entry-level" and "new grad" flaired users
+    cons:
+      - Subject to strict moderator approval
+      - Potential for "troll" or low-effort responses
+    suitability_score: 0.92
+
+  - id: stack_overflow_newsletter
+    name: Stack Overflow Talent/Newsletter Sponsorship
+    reach: Extremely High
+    cost: High ($2,000+)
+    pros:
+      - Professional context
+      - Massive global reach
+      - High technical credibility
+    cons:
+      - Prohibitively expensive for most Masters budgets
+      - Broad targeting may include senior engineers
+    suitability_score: 0.40
+
+  - id: linkedin_sales_navigator
+    name: LinkedIn Sales Navigator / InMail Outreach
+    reach: High (Granular)
+    cost: Moderate (Subscription based)
+    pros:
+      - Precision targeting (Job title: "Software Engineer", Experience: "< 3 years")
+      - Direct, professional communication channel
+    cons:
+      - High manual effort for outreach
+      - Often perceived as "spam" by recipients
+    suitability_score: 0.70
+
+  - id: prolific
+    name: Prolific Academic Research Panel
+    reach: Moderate
+    cost: Moderate (Per-participant fee)
+    pros:
+      - Participants are pre-vetted for "Software Engineering" roles
+      - High data quality and fast turnaround
+      - Built-in fairness and ethical compensation controls
+    cons:
+      - Requires per-response payment
+      - Potential for "professional survey takers" bias
+    suitability_score: 0.95

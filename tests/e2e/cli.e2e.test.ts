@@ -66,7 +66,10 @@ async function waitForStderrMatch(
     const read = await Promise.race([
       reader.read(),
       new Promise<never>((_resolve, reject) => {
-        setTimeout(() => reject(new Error("Timed out waiting for stderr output.")), remaining);
+        setTimeout(
+          () => reject(new Error("Timed out waiting for stderr output.")),
+          remaining,
+        );
       }),
     ]);
     if (read.done) {
@@ -525,6 +528,85 @@ describe("bun e2e baseline for the typescript cli", () => {
     expect(backend.countByKind("send_message")).toBe(1);
   });
 
+  test("--scenario flag alias works like --scenario-id", async () => {
+    await workspace.writeOpenAiScript(buildOpenAiRules());
+
+    const result = await runAgentprobe(
+      [
+        "run",
+        "--endpoint",
+        workspace.endpointPath,
+        "--scenarios",
+        workspace.scenariosPath,
+        "--personas",
+        workspace.personasPath,
+        "--rubric",
+        workspace.rubricPath,
+        "--scenario",
+        "billing-followup",
+      ],
+      {
+        backendUrl: backend.url,
+        suiteDir: workspace.suiteDir,
+        workspace,
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).not.toContain("refund-smoke");
+    expect(result.stdout).toContain("PASS billing-followup score=0.80");
+
+    const runRows = queryRows(
+      workspace.dbPath,
+      ["selected_scenario_ids_json"],
+      "runs",
+      "started_at DESC",
+    );
+    expect(runRows[0]?.selected_scenario_ids_json).toEqual([
+      "billing-followup",
+    ]);
+  });
+
+  test("--scenario filters by scenario name", async () => {
+    await workspace.writeOpenAiScript(buildOpenAiRules());
+
+    const result = await runAgentprobe(
+      [
+        "run",
+        "--endpoint",
+        workspace.endpointPath,
+        "--scenarios",
+        workspace.scenariosPath,
+        "--personas",
+        workspace.personasPath,
+        "--rubric",
+        workspace.rubricPath,
+        "--scenario",
+        "Billing escalation follow-up",
+      ],
+      {
+        backendUrl: backend.url,
+        suiteDir: workspace.suiteDir,
+        workspace,
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).not.toContain("refund-smoke");
+    expect(result.stdout).toContain("PASS billing-followup score=0.80");
+
+    const runRows = queryRows(
+      workspace.dbPath,
+      ["selected_scenario_ids_json"],
+      "runs",
+      "started_at DESC",
+    );
+    expect(runRows[0]?.selected_scenario_ids_json).toEqual([
+      "billing-followup",
+    ]);
+    expect(backend.countByKind("send_message")).toBe(1);
+  });
+
   test("tag filtering runs only matching scenarios", async () => {
     await workspace.writeOpenAiScript(buildOpenAiRules());
 
@@ -563,6 +645,83 @@ describe("bun e2e baseline for the typescript cli", () => {
     expect(backend.countByKind("send_message")).toBe(1);
   });
 
+  test("comma-separated --scenario-id runs multiple specific scenarios", async () => {
+    await workspace.writeOpenAiScript(buildOpenAiRules());
+
+    const result = await runAgentprobe(
+      [
+        "run",
+        "--endpoint",
+        workspace.endpointPath,
+        "--scenarios",
+        workspace.scenariosPath,
+        "--personas",
+        workspace.personasPath,
+        "--rubric",
+        workspace.rubricPath,
+        "--scenario-id",
+        "refund-smoke,billing-followup",
+      ],
+      {
+        backendUrl: backend.url,
+        suiteDir: workspace.suiteDir,
+        workspace,
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain("PASS refund-smoke score=1.00");
+    expect(result.stdout).toContain("PASS billing-followup score=0.80");
+
+    const runRows = queryRows(
+      workspace.dbPath,
+      ["selected_scenario_ids_json"],
+      "runs",
+      "started_at DESC",
+    );
+    expect(runRows[0]?.selected_scenario_ids_json).toEqual([
+      "refund-smoke",
+      "billing-followup",
+    ]);
+    expect(backend.countByKind("send_message")).toBe(2);
+  });
+
+  test("list command shows available scenarios", async () => {
+    const result = await runAgentprobe(
+      ["list", "--scenarios", workspace.scenariosPath],
+      {
+        backendUrl: backend.url,
+        suiteDir: workspace.suiteDir,
+        workspace,
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain(
+      "refund-smoke: Refund smoke question [smoke]",
+    );
+    expect(result.stdout).toContain(
+      "billing-followup: Billing escalation follow-up [regression]",
+    );
+  });
+
+  test("list command with --tags filters scenarios", async () => {
+    const result = await runAgentprobe(
+      ["list", "--scenarios", workspace.scenariosPath, "--tags", "smoke"],
+      {
+        backendUrl: backend.url,
+        suiteDir: workspace.suiteDir,
+        workspace,
+      },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain(
+      "refund-smoke: Refund smoke question [smoke]",
+    );
+    expect(result.stdout).not.toContain("billing-followup");
+  });
+
   test("no-match filtering returns a configuration error without target traffic", async () => {
     await workspace.writeOpenAiScript({ rules: [] });
 
@@ -593,6 +752,37 @@ describe("bun e2e baseline for the typescript cli", () => {
     );
     expect(backend.requestLog).toHaveLength(0);
     expect(await readOpenAiLog(workspace.openAiLogPath)).toHaveLength(0);
+  });
+
+  test("no-match scenario-id returns a configuration error with available ids", async () => {
+    await workspace.writeOpenAiScript({ rules: [] });
+
+    const result = await runAgentprobe(
+      [
+        "run",
+        "--endpoint",
+        workspace.endpointPath,
+        "--scenarios",
+        workspace.scenariosPath,
+        "--personas",
+        workspace.personasPath,
+        "--rubric",
+        workspace.rubricPath,
+        "--scenario-id",
+        "does-not-exist",
+      ],
+      {
+        backendUrl: backend.url,
+        suiteDir: workspace.suiteDir,
+        workspace,
+      },
+    );
+
+    expect(result.exitCode).toBe(2);
+    expect(result.stderr).toContain("does-not-exist");
+    expect(result.stderr).toContain("refund-smoke");
+    expect(result.stderr).toContain("billing-followup");
+    expect(backend.requestLog).toHaveLength(0);
   });
 
   test("dry-run avoids backend and openai calls while still recording the run", async () => {
@@ -668,6 +858,7 @@ describe("bun e2e baseline for the typescript cli", () => {
         "--rubric",
         workspace.rubricPath,
         "--parallel",
+        "2",
       ],
       {
         backendUrl: backend.url,
@@ -748,9 +939,7 @@ describe("bun e2e baseline for the typescript cli", () => {
       .map((entry) => jwtSubject(entry.headers.authorization))
       .filter((value): value is string => typeof value === "string");
     expect(new Set(subjects).size).toBe(2);
-    expect(subjects).toEqual(
-      scenarioRows.map((row) => String(row.user_id)),
-    );
+    expect(subjects).toEqual(scenarioRows.map((row) => String(row.user_id)));
   });
 
   test("dashboard mode serves live state from the Bun dashboard server", async () => {

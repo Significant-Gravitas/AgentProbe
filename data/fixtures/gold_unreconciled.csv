@@ -1,0 +1,24 @@
+bank_ref,bank_amount,date,suggested_ledger_entry_id,match_confidence_0_1,reason
+CHASE-302-WIRE-IN,4250.00,2026-03-02,ERP-9822,0.95,Exact amount match with vendor 'Shopify Payout' on same date
+MERC-882-STRIPE,1240.50,2026-03-02,ERP-9841,0.88,Amount match with 'Stripe' but date shifted by 1 day
+BOFA-991-ZELLE,500.00,2026-03-04,ERP-9855,0.75,Amount match with 'Internal Transfer' but vendor name mismatch
+CHASE-411-AMZN,214.20,2026-03-05,ERP-9860,0.92,Exact amount match with 'Amazon Web Services'
+MERC-102-GCP,89.99,2026-03-06,ERP-9865,0.91,Exact amount match with 'Google Cloud'
+BOFA-223-RENT,5500.00,2026-03-01,ERP-9810,0.98,Exact amount and date match for 'Bridge Street Equity'
+CHASE-552-TAX,1240.00,2026-03-10,ERP-9888,0.60,Partial vendor name match 'IRS' vs 'US Treasury'
+MERC-404-ADOBE,52.99,2026-03-12,ERP-9901,0.94,Exact amount match for software subscription
+BOFA-331-UTIL,342.12,2026-03-14,ERP-9915,0.85,Amount match with 'ConEd' but ledger date is 2 days prior
+CHASE-771-REFUND,-120.00,2026-03-15,ERP-9922,0.82,Negative amount match for customer refund
+MERC-902-CANVA,15.00,2026-03-15,ERP-9925,0.90,Exact amount match for 'Canva Pty'
+BOFA-112-FEDEX,45.60,2026-03-18,ERP-9940,0.96,Exact amount match for shipping vendor
+CHASE-882-INT,12.45,2026-03-31,,0.00,No match found for bank interest credit
+MERC-551-FEES,-25.00,2026-03-31,,0.00,No match found for monthly service fee
+BOFA-002-DEP,10000.00,2026-03-20,ERP-9955,0.45,Amount match but ledger entry is marked 'Pending'
+CHASE-119-TRAVEL,842.00,2026-03-22,ERP-9962,0.78,Amount match with 'Delta Air' but bank desc is generic
+MERC-223-APPLE,0.99,2026-03-23,ERP-9970,0.99,Exact amount and date match for iCloud storage
+BOFA-661-LUNCH,34.50,2026-03-24,ERP-9975,0.89,Amount match with 'Sweetgreen'
+CHASE-441-UPS,22.10,2026-03-25,ERP-9980,0.93,Exact amount match for shipping
+MERC-331-SLACK,1200.00,2026-03-26,ERP-9985,0.97,Exact amount match for annual subscription
+BOFA-552-GAS,45.00,2026-03-27,ERP-9990,0.70,Amount match but vendor 'Shell' vs ledger 'Vehicle Fuel'
+CHASE-991-OFFICE,112.40,2026-03-28,ERP-9995,0.81,Amount match with 'Staples'
+MERC-772-MISC,250.00,2026-03-29,,0.00,No ledger entry found for miscellaneous debit

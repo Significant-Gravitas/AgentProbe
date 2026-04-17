@@ -1,0 +1,214 @@
+{
+  "inventory_version": "2.1.0",
+  "total_widgets": 23,
+  "global_refresh_interval_ms": 30000,
+  "widgets": [
+    {
+      "id": "W-001",
+      "name": "Real-time Revenue Ticker",
+      "endpoint": "/api/v1/metrics/revenue",
+      "type": "metric_card",
+      "interactions": ["click_to_expand", "date_range_filter"],
+      "data_keys": ["current_total", "currency", "delta_percentage"],
+      "legacy_selector": "#revenue-ticker-container"
+    },
+    {
+      "id": "W-002",
+      "name": "Active User Heatmap",
+      "endpoint": "/api/v1/geo/active_users",
+      "type": "leaflet_map",
+      "interactions": ["zoom", "pan", "region_hover"],
+      "data_keys": ["coordinates", "intensity", "region_id"],
+      "legacy_selector": ".js-heatmap-canvas"
+    },
+    {
+      "id": "W-003",
+      "name": "System Health Monitor",
+      "endpoint": "/api/v1/status/health",
+      "type": "status_indicator",
+      "interactions": ["manual_refresh"],
+      "data_keys": ["db_status", "redis_status", "api_latency_ms"],
+      "legacy_selector": "#health-check-widget"
+    },
+    {
+      "id": "W-004",
+      "name": "Sales Funnel Conversion",
+      "endpoint": "/api/v1/analytics/funnel",
+      "type": "bar_chart",
+      "interactions": ["toggle_segments", "export_csv"],
+      "data_keys": ["steps", "dropoff_rate", "conversion_rate"],
+      "legacy_selector": ".funnel-chart-wrapper"
+    },
+    {
+      "id": "W-005",
+      "name": "Top Referrers List",
+      "endpoint": "/api/v1/traffic/referrers",
+      "type": "data_table",
+      "interactions": ["sort", "search"],
+      "data_keys": ["source_url", "hit_count", "bounce_rate"],
+      "legacy_selector": "#referrer-table"
+    },
+    {
+      "id": "W-006",
+      "name": "Server Load Average",
+      "endpoint": "/api/v1/infra/load",
+      "type": "sparkline",
+      "interactions": ["tooltip_show"],
+      "data_keys": ["timestamp", "load_1m", "load_5m", "load_15m"],
+      "legacy_selector": ".sparkline-cpu"
+    },
+    {
+      "id": "W-007",
+      "name": "Customer Support Queue",
+      "endpoint": "/api/v1/tickets/active",
+      "type": "list",
+      "interactions": ["click_to_route", "assign_ticket"],
+      "data_keys": ["ticket_id", "priority", "wait_time"],
+      "legacy_selector": "#support-queue-container"
+    },
+    {
+      "id": "W-008",
+      "name": "Inventory Alert Thresholds",
+      "endpoint": "/api/v1/inventory/alerts",
+      "type": "gauge",
+      "interactions": ["set_threshold"],
+      "data_keys": ["sku_count", "threshold_min", "status_color"],
+      "legacy_selector": ".inventory-gauge"
+    },
+    {
+      "id": "W-009",
+      "name": "Social Media Mentions",
+      "endpoint": "/api/v1/social/stream",
+      "type": "feed",
+      "interactions": ["external_link", "dismiss_item"],
+      "data_keys": ["platform", "handle", "content", "sentiment"],
+      "legacy_selector": "#social-feed"
+    },
+    {
+      "id": "W-010",
+      "name": "API Usage Quota",
+      "endpoint": "/api/v1/billing/usage",
+      "type": "progress_bar",
+      "interactions": ["view_billing_details"],
+      "data_keys": ["used_units", "total_limit", "reset_date"],
+      "legacy_selector": ".usage-progress"
+    },
+    {
+      "id": "W-011",
+      "name": "User Growth Forecast",
+      "endpoint": "/api/v1/predictive/growth",
+      "type": "line_chart",
+      "interactions": ["toggle_confidence_interval"],
+      "data_keys": ["projected_users", "historical_users", "months"],
+      "legacy_selector": "#growth-chart"
+    },
+    {
+      "id": "W-012",
+      "name": "Incident Log",
+      "endpoint": "/api/v1/status/incidents",
+      "type": "timeline",
+      "interactions": ["filter_severity"],
+      "data_keys": ["event_name", "start_time", "end_time", "severity"],
+      "legacy_selector": ".incident-timeline"
+    },
+    {
+      "id": "W-013",
+      "name": "Average Order Value",
+      "endpoint": "/api/v1/metrics/aov",
+      "type": "metric_card",
+      "interactions": ["compare_previous_period"],
+      "data_keys": ["aov_value", "currency", "percentage_change"],
+      "legacy_selector": "#aov-stat"
+    },
+    {
+      "id": "W-014",
+      "name": "Regional Sales Distribution",
+      "endpoint": "/api/v1/sales/regions",
+      "type": "pie_chart",
+      "interactions": ["drill_down_region"],
+      "data_keys": ["region_name", "sales_volume"],
+      "legacy_selector": "#sales-pie"
+    },
+    {
+      "id": "W-015",
+      "name": "New User Signups",
+      "endpoint": "/api/v1/users/recent",
+      "type": "metric_card",
+      "interactions": ["view_user_list"],
+      "data_keys": ["count_24h", "growth_rate"],
+      "legacy_selector": ".signup-metric"
+    },
+    {
+      "id": "W-016",
+      "name": "Database Query Latency",
+      "endpoint": "/api/v1/infra/db_latency",
+      "type": "histogram",
+      "interactions": ["select_time_bucket"],
+      "data_keys": ["latency_ms", "frequency"],
+      "legacy_selector": "#db-latency-chart"
+    },
+    {
+      "id": "W-017",
+      "name": "Email Campaign Performance",
+      "endpoint": "/api/v1/marketing/email",
+      "type": "data_table",
+      "interactions": ["preview_email"],
+      "data_keys": ["campaign_id", "open_rate", "click_rate"],
+      "legacy_selector": ".marketing-table"
+    },
+    {
+      "id": "W-018",
+      "name": "Error Rate (5xx)",
+      "endpoint": "/api/v1/status/errors",
+      "type": "area_chart",
+      "interactions": ["set_alert_webhook"],
+      "data_keys": ["error_count", "timestamp"],
+      "legacy_selector": "#error-rate-graph"
+    },
+    {
+      "id": "W-019",
+      "name": "Mobile vs Desktop Traffic",
+      "endpoint": "/api/v1/traffic/devices",
+      "type": "donut_chart",
+      "interactions": ["toggle_legend"],
+      "data_keys": ["device_type", "session_share"],
+      "legacy_selector": ".device-split"
+    },
+    {
+      "id": "W-020",
+      "name": "Live Log Stream",
+      "endpoint": "/api/v1/logs/tail",
+      "type": "terminal_view",
+      "interactions": ["pause_stream", "clear_logs"],
+      "data_keys": ["message", "level", "service"],
+      "legacy_selector": "#log-tail-container"
+    },
+    {
+      "id": "W-021",
+      "name": "Subscription Churn Rate",
+      "endpoint": "/api/v1/billing/churn",
+      "type": "metric_card",
+      "interactions": ["view_cohort_analysis"],
+      "data_keys": ["monthly_churn", "prev_month_churn"],
+      "legacy_selector": ".churn-metric"
+    },
+    {
+      "id": "W-022",
+      "name": "Active Promotions",
+      "endpoint": "/api/v1/marketing/promos",
+      "type": "list",
+      "interactions": ["deactivate_promo"],
+      "data_keys": ["promo_code", "usage_count", "expiry"],
+      "legacy_selector": "#promos-list"
+    },
+    {
+      "id": "W-023",
+      "name": "Ad Spend vs ROI",
+      "endpoint": "/api/v1/marketing/roi",
+      "type": "scatter_plot",
+      "interactions": ["filter_channel"],
+      "data_keys": ["spend", "return", "channel_name"],
+      "legacy_selector": "#roi-scatter"
+    }
+  ]
+}

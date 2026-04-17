@@ -1,0 +1,148 @@
+{
+  "interviewers": [
+    {
+      "company": "Stripe",
+      "name": "Sarah Chen",
+      "role": "Head of Product, Checkout & Payment Links",
+      "background": "Former Engineering Manager at Google. Joined Stripe in 2019. Focuses on reducing friction in the global payment flow.",
+      "public_writing": [
+        {
+          "title": "The Long Tail of Global Payment Methods",
+          "platform": "Stripe Engineering Blog",
+          "summary": "Discusses the technical and UX challenges of integrating local payment methods (LPMs) like Pix and iDEAL."
+        }
+      ],
+      "recent_talks": [
+        {
+          "event": "Stripe Sessions 2025",
+          "topic": "The Future of One-Click Checkout",
+          "key_point": "Conversion is the ultimate metric for merchants; every millisecond of latency is a lost sale."
+        }
+      ],
+      "likely_questions": [
+        "How would you prioritize adding a new payment method versus improving the reliability of an existing one?",
+        "Tell me about a time you had to balance a highly technical constraint with a seamless user experience."
+      ]
+    },
+    {
+      "company": "Stripe",
+      "name": "Marcus Thorne",
+      "role": "Senior Staff Engineer, Billing & Revenue Delivery",
+      "background": "Infrastructure specialist. Passionate about API design and backward compatibility. 8 years at Stripe.",
+      "public_writing": [
+        {
+          "title": "API Versioning at Scale",
+          "platform": "Personal Blog",
+          "summary": "Deep dive into why Stripe rarely breaks APIs and how to build 'forever' infrastructure."
+        }
+      ],
+      "recent_talks": [
+        {
+          "event": "Internal Engineering Offsite",
+          "topic": "Consistency over Features",
+          "key_point": "A PM's most important job is ensuring the product feels like it was built by one person, not ten teams."
+        }
+      ],
+      "likely_questions": [
+        "How do you handle a situation where a product requirement threatens the simplicity of our API surface?",
+        "Describe a complex system you managed where the migration path was harder than the build."
+      ]
+    },
+    {
+      "company": "Anthropic",
+      "name": "Dr. Aris Varma",
+      "role": "Product Lead, Claude Core Research",
+      "background": "PhD in Computational Linguistics. Previously at OpenAI. Focuses on RLHF and model alignment.",
+      "public_writing": [
+        {
+          "title": "Constitutional AI: A Product Perspective",
+          "platform": "Anthropic Research Blog",
+          "summary": "Explaining how safety guardrails can actually improve model utility rather than just being a 'filter'."
+        }
+      ],
+      "recent_talks": [
+        {
+          "event": "AI Safety Summit 2025",
+          "topic": "Steerability in LLMs",
+          "key_point": "Users don't want 'safe' models that refuse to answer; they want models that understand nuance and intent."
+        }
+      ],
+      "likely_questions": [
+        "What is the biggest product risk in LLM deployment over the next 24 months?",
+        "How do you define 'quality' for a generative output that has no single 'right' answer?"
+      ]
+    },
+    {
+      "company": "Anthropic",
+      "name": "Elena Rodriguez",
+      "role": "Product Manager, Developer Platform",
+      "background": "Ex-AWS. Scaling developer ecosystems. Joined Anthropic to lead the API and Workbench initiatives.",
+      "public_writing": [
+        {
+          "title": "The Prompt Engineering Trap",
+          "platform": "Medium",
+          "summary": "Argues that the goal of a platform should be to make prompt engineering unnecessary through better model defaults."
+        }
+      ],
+      "recent_talks": [
+        {
+          "event": "Developer Experience Conf",
+          "topic": "Building for the AI Engineer",
+          "key_point": "The new 'stack' is evolving weekly; PMs must build for flexibility, not just fixed features."
+        }
+      ],
+      "likely_questions": [
+        "How would you entice developers to switch from OpenAI to Claude for their core production workloads?",
+        "Walk me through how you would design an evaluation framework for a new enterprise API feature."
+      ]
+    },
+    {
+      "company": "Linear",
+      "name": "Karri Saarinen",
+      "role": "CEO & Co-Founder (Interviews for Senior PM roles)",
+      "background": "Former Principal Designer at Airbnb. Created the Airbnb Design System. Obsessed with craft and tool quality.",
+      "public_writing": [
+        {
+          "title": "The Linear Method",
+          "platform": "Linear Guide",
+          "summary": "Principles of modern software development: focus, momentum, and high-fidelity execution."
+        }
+      ],
+      "recent_talks": [
+        {
+          "event": "Config 2024",
+          "topic": "Software as Craft",
+          "key_point": "We don't do A/B testing for features; we build based on opinion and taste."
+        }
+      ],
+      "likely_questions": [
+        "What is a piece of software you find beautiful, and why?",
+        "Linear is opinionated software. How do you decide when to listen to a customer versus sticking to our philosophy?"
+      ]
+    },
+    {
+      "company": "Linear",
+      "name": "Nan Yu",
+      "role": "Head of Product",
+      "background": "Former CTO at several startups. Focuses on the intersection of engineering velocity and product management.",
+      "public_writing": [
+        {
+          "title": "Why Your PM Doesn't Need Jira",
+          "platform": "Substack",
+          "summary": "A critique of bloated enterprise tools and a plea for 'un-management'."
+        }
+      ],
+      "recent_talks": [
+        {
+          "event": "Product Led Growth Summit",
+          "topic": "The Invisible PM",
+          "key_point": "A great PM creates the environment for engineers to ship, rather than managing the shipping themselves."
+        }
+      ],
+      "likely_questions": [
+        "How do you maintain momentum in a team when a project hits a technical dead end?",
+        "Give me an example of a feature you chose *not* to build despite high user demand."
+      ]
+    }
+  ]
+}

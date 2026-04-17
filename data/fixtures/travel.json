@@ -1,0 +1,30 @@
+{
+  "travel_date": "2024-05-23",
+  "origin_city": "San Francisco",
+  "destination_city": "Seattle",
+  "outbound_flight": {
+    "flight_number": "AS1204",
+    "airline": "Alaska Airlines",
+    "departure_airport": "SFO",
+    "arrival_airport": "SEA",
+    "departure_time": "2024-05-23T07:00:00",
+    "arrival_time": "2024-05-23T09:12:00",
+    "status": "Confirmed",
+    "confirmation_code": "QLM89P"
+  },
+  "return_flight": {
+    "flight_number": "AS1455",
+    "airline": "Alaska Airlines",
+    "departure_airport": "SEA",
+    "arrival_airport": "SFO",
+    "departure_time": "2024-05-23T18:00:00",
+    "arrival_time": "2024-05-23T20:15:00",
+    "status": "Confirmed",
+    "confirmation_code": "QLM89P"
+  },
+  "ground_transportation": {
+    "to_sfo": "Uber scheduled for 05:15",
+    "at_sea": "Rental car reserved - Hertz"
+  },
+  "notes": "Requires 30-minute buffer before 7am departure and after 8:15pm arrival at home airport. Ensure no meetings are scheduled during transit or flight windows."
+}

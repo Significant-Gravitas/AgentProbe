@@ -1,0 +1,44 @@
+entry_id,date,vendor,amount,account,memo
+ERP-1001,2026-03-01,Shopify Payout,12450.50,Cash-Chase,Daily Sales Batch
+ERP-1002,2026-03-01,Amazon Marketplace,8240.00,Cash-Chase,Settlement ID 88291
+ERP-1003,2026-03-02,Google Ads,-4500.00,Cash-Mercury,Adwords Campaign March
+ERP-1004,2026-03-02,Meta Platforms,-3200.00,Cash-Mercury,Instagram Ads
+ERP-1005,2026-03-03,WeWork,-12500.00,Cash-BofA,Monthly Rent Suite 400
+ERP-1006,2026-03-03,Zendesk Inc,-890.00,Cash-Mercury,Support Software Subscription
+ERP-1007,2026-03-04,Stripe Payout,4560.25,Cash-Chase,Daily Sales Batch
+ERP-1008,2026-03-05,Uline,-412.55,Cash-BofA,Shipping Supplies
+ERP-1009,2026-03-05,FedEx,-125.40,Cash-BofA,Express Shipping
+ERP-1010,2026-03-06,Shopify Payout,11300.20,Cash-Chase,Daily Sales Batch
+ERP-1011,2026-03-06,Slack Technologies,-240.00,Cash-Mercury,Monthly Pro Plan
+ERP-1012,2026-03-08,Amazon Marketplace,7100.00,Cash-Chase,Settlement ID 88304
+ERP-1013,2026-03-09,Gusto Payroll,-54200.00,Cash-BofA,Salaries Mar 1-15
+ERP-1014,2026-03-09,Gusto Tax,-18450.00,Cash-BofA,Payroll Taxes Mar 1-15
+ERP-1015,2026-03-10,Adobe Systems,-54.99,Cash-Mercury,Creative Cloud
+ERP-1016,2026-03-11,Stripe Payout,3200.15,Cash-Chase,Daily Sales Batch
+ERP-1017,2026-03-12,Blue Host,-15.99,Cash-Mercury,Domain Renewal
+ERP-1018,2026-03-12,Grainger,-340.20,Cash-BofA,Warehouse Maintenance
+ERP-1019,2026-03-13,Shopify Payout,14200.80,Cash-Chase,Daily Sales Batch
+ERP-1020,2026-03-14,AWS,-1240.50,Cash-Mercury,Cloud Services Feb usage
+ERP-1021,2026-03-15,Amazon Marketplace,9400.00,Cash-Chase,Settlement ID 88319
+ERP-1022,2026-03-16,Comcast Business,-215.00,Cash-BofA,Internet Services
+ERP-1023,2026-03-17,Stripe Payout,5100.40,Cash-Chase,Daily Sales Batch
+ERP-1024,2026-03-18,UPS,-88.45,Cash-BofA,Ground Shipping
+ERP-1025,2026-03-19,Shopify Payout,9800.60,Cash-Chase,Daily Sales Batch
+ERP-1026,2026-03-20,GitHub,-49.00,Cash-Mercury,Team Subscription
+ERP-1027,2026-03-21,Amazon Marketplace,8800.00,Cash-Chase,Settlement ID 88330
+ERP-1028,2026-03-22,Apple Inc,-1299.00,Cash-Mercury,Macbook Pro - Designer
+ERP-1029,2026-03-23,Stripe Payout,4300.90,Cash-Chase,Daily Sales Batch
+ERP-1030,2026-03-24,Gusto Payroll,-55100.00,Cash-BofA,Salaries Mar 16-31
+ERP-1031,2026-03-24,Gusto Tax,-18900.00,Cash-BofA,Payroll Taxes Mar 16-31
+ERP-1032,2026-03-25,Shopify Payout,12100.30,Cash-Chase,Daily Sales Batch
+ERP-1033,2026-03-26,Con Edison,-412.00,Cash-BofA,Electricity Bill
+ERP-1034,2026-03-27,Amazon Marketplace,10200.00,Cash-Chase,Settlement ID 88345
+ERP-1035,2026-03-28,Stripe Payout,3900.55,Cash-Chase,Daily Sales Batch
+ERP-1036,2026-03-29,Mailchimp,-150.00,Cash-Mercury,Email Marketing
+ERP-1037,2026-03-30,Shopify Payout,11500.45,Cash-Chase,Daily Sales Batch
+ERP-1038,2026-03-31,Internal Transfer,50000.00,Cash-Mercury,Transfer from BofA
+ERP-1039,2026-03-31,Internal Transfer,-50000.00,Cash-BofA,Transfer to Mercury
+ERP-1040,2026-03-20,Inventory Vendor A,-15400.00,Cash-BofA,PO #4459 Bulk Order
+ERP-1041,2026-03-15,Refund - Customer 99,-85.00,Cash-Chase,Return Order #9910
+ERP-1042,2026-03-25,Office Depot,-112.45,Cash-BofA,Stationery
+ERP-1043,2026-03-28,Hubspot,-400.00,Cash-Mercury,CRM Monthly fee

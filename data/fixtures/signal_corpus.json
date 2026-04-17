@@ -1,0 +1,184 @@
+{
+  "signals": [
+    {
+      "account_id": "ACC-001",
+      "company_name": "Vortex Systems",
+      "signal_type": "funding",
+      "event_date": "2023-11-15",
+      "description": "Closed $45M Series C led by Insight Partners to scale global infrastructure.",
+      "signal_text": "congratulations on the recent Series C funding round led by Insight Partners",
+      "source_url": "https://techcrunch.com/vortex-series-c"
+    },
+    {
+      "account_id": "ACC-012",
+      "company_name": "CloudKnot",
+      "signal_type": "hiring",
+      "event_date": "2023-12-01",
+      "description": "Opened 12 new roles for Senior Backend Engineers with Kubernetes and Go expertise.",
+      "signal_text": "I noticed CloudKnot is aggressively hiring for several Senior Backend and Kubernetes roles",
+      "source_url": "https://cloudknot.io/careers"
+    },
+    {
+      "account_id": "ACC-045",
+      "company_name": "DataMeld",
+      "signal_type": "product_launch",
+      "event_date": "2023-11-28",
+      "description": "Launched a new distributed tracing feature for their core analytics engine.",
+      "signal_text": "saw the launch of your new distributed tracing capabilities last week",
+      "source_url": "https://blog.datameld.com/new-tracing-engine"
+    },
+    {
+      "account_id": "ACC-089",
+      "company_name": "SecureFlow",
+      "signal_type": "funding",
+      "event_date": "2023-10-10",
+      "description": "Raised $30M Series B to expand zero-trust architecture for microservices.",
+      "signal_text": "impressive work securing the $30M Series B to double down on zero-trust",
+      "source_url": "https://venturebeat.com/secureflow-funding"
+    },
+    {
+      "account_id": "ACC-112",
+      "company_name": "AetherOps",
+      "signal_type": "hiring",
+      "event_date": "2023-12-05",
+      "description": "Appointed Sarah Jenkins as the new VP of Engineering to oversee cloud migration.",
+      "signal_text": "congrats on bringing Sarah Jenkins on board as your new VP of Engineering",
+      "source_url": "https://linkedin.com/posts/aetherops-hiring"
+    },
+    {
+      "account_id": "ACC-156",
+      "company_name": "PixelLogic",
+      "signal_type": "product_launch",
+      "event_date": "2023-11-20",
+      "description": "Migrated entire monolithic checkout system to a service-mesh architecture.",
+      "signal_text": "was reading about PixelLogic's successful migration to a service-mesh architecture",
+      "source_url": "https://engineering.pixellogic.com/monolith-to-mesh"
+    },
+    {
+      "account_id": "ACC-201",
+      "company_name": "Quantify",
+      "signal_type": "funding",
+      "event_date": "2023-12-12",
+      "description": "Announced $60M Series D to expand into the European market.",
+      "signal_text": "the recent $60M Series D announcement and your upcoming expansion into Europe",
+      "source_url": "https://reuters.com/business/quantify-series-d"
+    },
+    {
+      "account_id": "ACC-244",
+      "company_name": "BrightCore",
+      "signal_type": "hiring",
+      "event_date": "2023-11-10",
+      "description": "Hiring a Head of DevOps to lead their transition to a multi-cloud environment.",
+      "signal_text": "saw you are looking for a Head of DevOps to spearhead the multi-cloud transition",
+      "source_url": "https://brightcore.com/jobs"
+    },
+    {
+      "account_id": "ACC-305",
+      "company_name": "StreamLine",
+      "signal_type": "product_launch",
+      "event_date": "2023-12-08",
+      "description": "Released public API for their real-time logistics tracking platform.",
+      "signal_text": "congrats on the public release of the StreamLine API",
+      "source_url": "https://streamline.io/developers"
+    },
+    {
+      "account_id": "ACC-412",
+      "company_name": "NexusHealth",
+      "signal_type": "funding",
+      "event_date": "2023-09-25",
+      "description": "Raised $25M Series B to scale HIPAA-compliant microservices infrastructure.",
+      "signal_text": "your $25M Series B to build out more HIPAA-compliant microservices",
+      "source_url": "https://medtech.com/nexushealth-funding"
+    },
+    {
+      "account_id": "ACC-550",
+      "company_name": "OmniSync",
+      "signal_type": "hiring",
+      "event_date": "2023-12-14",
+      "description": "Scaling the SRE team by 40% over the next two quarters.",
+      "signal_text": "I noticed OmniSync is planning to grow the SRE team by 40% soon",
+      "source_url": "https://omnisync.com/careers/sre"
+    },
+    {
+      "account_id": "ACC-610",
+      "company_name": "KubeScale",
+      "signal_type": "product_launch",
+      "event_date": "2023-11-05",
+      "description": "Integrated OpenTelemetry across all production environments.",
+      "signal_text": "great to see KubeScale adopting OpenTelemetry across all environments",
+      "source_url": "https://medium.com/kubescale-eng/otel-adoption"
+    },
+    {
+      "account_id": "ACC-722",
+      "company_name": "Veritas AI",
+      "signal_type": "funding",
+      "event_date": "2023-10-30",
+      "description": "Closed $80M Series C to build proprietary LLM infrastructure.",
+      "signal_text": "the massive $80M Series C round to accelerate your LLM infrastructure",
+      "source_url": "https://ai-news.com/veritas-funding"
+    },
+    {
+      "account_id": "ACC-815",
+      "company_name": "GripSecurity",
+      "signal_type": "hiring",
+      "event_date": "2023-12-11",
+      "description": "Hiring for Platform Engineering roles focused on developer experience (DevEx).",
+      "signal_text": "your focus on hiring Platform Engineers to improve internal DevEx",
+      "source_url": "https://gripsecurity.com/jobs"
+    },
+    {
+      "account_id": "ACC-944",
+      "company_name": "Lumina",
+      "signal_type": "product_launch",
+      "event_date": "2023-12-02",
+      "description": "Open-sourced their internal Kubernetes operator for database management.",
+      "signal_text": "congrats on open-sourcing your Kubernetes operator for DBs",
+      "source_url": "https://github.com/lumina-hq/k8s-operator"
+    },
+    {
+      "account_id": "ACC-1050",
+      "company_name": "BlueShift",
+      "signal_type": "funding",
+      "event_date": "2023-11-12",
+      "description": "Secured $35M in Series B funding for autonomous supply chain software.",
+      "signal_text": "congratulations on the $35M Series B for the autonomous supply chain platform",
+      "source_url": "https://supplychain247.com/blueshift-funding"
+    },
+    {
+      "account_id": "ACC-1200",
+      "company_name": "IronClad Devs",
+      "signal_type": "hiring",
+      "event_date": "2023-12-15",
+      "description": "Adding 20+ Software Engineers to their distributed systems group in Berlin.",
+      "signal_text": "saw you are scaling the distributed systems team in Berlin with 20+ new roles",
+      "source_url": "https://ironclad.com/careers/engineering"
+    },
+    {
+      "account_id": "ACC-1355",
+      "company_name": "CoreLogic SaaS",
+      "signal_type": "product_launch",
+      "event_date": "2023-11-18",
+      "description": "Migrated from AWS Lambda to EKS to handle increased traffic loads.",
+      "signal_text": "your recent transition from Lambda to EKS to support higher traffic",
+      "source_url": "https://corelogic-saas.com/blog/scaling-with-eks"
+    },
+    {
+      "account_id": "ACC-1502",
+      "company_name": "Syncro",
+      "signal_type": "funding",
+      "event_date": "2023-12-04",
+      "description": "Raised $55M Series C led by Sequoia Capital.",
+      "signal_text": "the exciting news about your $55M Series C led by Sequoia",
+      "source_url": "https://sequoiacap.com/news/syncro-series-c"
+    },
+    {
+      "account_id": "ACC-1999",
+      "company_name": "Zenith Cloud",
+      "signal_type": "hiring",
+      "event_date": "2023-12-13",
+      "description": "Hiring a Director of Cloud Infrastructure to manage multi-region deployments.",
+      "signal_text": "saw the opening for a Director of Cloud Infrastructure to lead multi-region strategy",
+      "source_url": "https://zenithcloud.com/jobs"
+    }
+  ]
+}

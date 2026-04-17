@@ -1,0 +1,25 @@
+Month,Daypart,Revenue,Transaction_Count
+2023-11,Early Morning (6am-9am),14250.75,1583
+2023-11,Mid-Day (9am-2pm),18940.50,1262
+2023-11,Afternoon (2pm-6pm),9120.25,760
+2023-11,Evening (6pm-9pm),3105.00,207
+2023-12,Early Morning (6am-9am),13890.20,1543
+2023-12,Mid-Day (9am-2pm),21450.60,1430
+2023-12,Afternoon (2pm-6pm),10840.40,903
+2023-12,Evening (6pm-9pm),4250.00,283
+2024-01,Early Morning (6am-9am),15120.40,1680
+2024-01,Mid-Day (9am-2pm),17540.25,1169
+2024-01,Afternoon (2pm-6pm),8450.60,704
+2024-01,Evening (6pm-9pm),2980.50,198
+2024-02,Early Morning (6am-9am),14880.50,1653
+2024-02,Mid-Day (9am-2pm),18200.75,1213
+2024-02,Afternoon (2pm-6pm),9230.15,769
+2024-02,Evening (6pm-9pm),3410.25,227
+2024-03,Early Morning (6am-9am),16240.80,1804
+2024-03,Mid-Day (9am-2pm),20150.40,1343
+2024-03,Afternoon (2pm-6pm),11560.20,963
+2024-03,Evening (6pm-9pm),4120.80,274
+2024-04,Early Morning (6am-9am),15980.25,1775
+2024-04,Mid-Day (9am-2pm),22840.90,1522
+2024-04,Afternoon (2pm-6pm),12450.50,1037
+2024-04,Evening (6pm-9pm),5120.40,341

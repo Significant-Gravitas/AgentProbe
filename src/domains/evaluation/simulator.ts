@@ -329,6 +329,47 @@ function isTerminalPlaceholder(message: unknown): boolean {
   return !/[a-z0-9]/i.test(normalized);
 }
 
+function looksLikeMetaCommentary(message: string): boolean {
+  const trimmed = message.trim();
+  if (!trimmed) {
+    return false;
+  }
+  const firstLine = trimmed.split("\n")[0]?.toLowerCase() ?? "";
+  const metaStarts = [
+    "the user (persona",
+    "the user is being",
+    "the user is asking",
+    "the user has",
+    "the user wants",
+    "the user needs",
+    "the persona is",
+    "the persona would",
+    "the persona has",
+    "the persona needs",
+    "as the persona",
+    "as this persona",
+    "the assistant asked",
+    "the assistant is",
+    "the assistant has",
+    "the assistant just",
+    "persona:",
+  ];
+  if (metaStarts.some((marker) => firstLine.startsWith(marker))) {
+    return true;
+  }
+  const normalized = trimmed.toLowerCase();
+  if (/\bas the [a-z-]+ (persona|i need to|,? i)\b/.test(normalized)) {
+    return true;
+  }
+  if (/\bi need to:\s*(?:\n|\r)?\s*\d+\./.test(normalized)) {
+    return true;
+  }
+  if (/\bstay (fully )?in character\b/.test(normalized)) {
+    return true;
+  }
+  return false;
+}
+
 function looksLikeTerminalAcknowledgement(message: string): boolean {
   const lowered = message.trim().toLowerCase();
   const markers = [
@@ -489,6 +530,14 @@ function validatePersonaStep(
   return { status: step.status, message: null };
 }
 
+const META_CORRECTION_NOTE = [
+  "",
+  "IMPORTANT: your previous reply contained out-of-character narration (e.g., describing the persona in third person or listing what they should do).",
+  "Return exactly one natural-language user message in the persona's first-person voice. No role labels, no planning, no meta commentary.",
+].join("\n");
+
+const MAX_PERSONA_ATTEMPTS = 3;
+
 export async function generatePersonaStep(
   persona: Persona,
   history: ConversationHistory,
@@ -499,10 +548,15 @@ export async function generatePersonaStep(
   } = {},
 ): Promise<PersonaStep> {
   const requireResponse = options.requireResponse === true;
+  const baseInput = buildSimulatorInput(
+    history,
+    options.guidance,
+    requireResponse,
+  );
   const request: OpenAiResponsesRequest = {
     model: resolvePersonaModel(persona),
     instructions: simulatorInstructions(persona, requireResponse),
-    input: buildSimulatorInput(history, options.guidance, requireResponse),
+    input: baseInput,
     text: {
       format: {
         type: "json_schema",
@@ -516,10 +570,29 @@ export async function generatePersonaStep(
     },
   };
 
-  const response = await client.create(request);
-  return validatePersonaStep(
-    parsePersonaPayload(response.outputText, requireResponse),
-    requireResponse,
+  let lastStep: PersonaStep | undefined;
+  for (let attempt = 1; attempt <= MAX_PERSONA_ATTEMPTS; attempt += 1) {
+    const response = await client.create(request);
+    const step = validatePersonaStep(
+      parsePersonaPayload(response.outputText, requireResponse),
+      requireResponse,
+    );
+    lastStep = step;
+    if (
+      step.status !== "continue" ||
+      !step.message ||
+      !looksLikeMetaCommentary(step.message)
+    ) {
+      return step;
+    }
+    request.input = `${baseInput}${META_CORRECTION_NOTE}`;
+  }
+
+  if (lastStep && (!requireResponse || lastStep.status === "continue")) {
+    return lastStep;
+  }
+  throw new AgentProbeRuntimeError(
+    "Persona simulator kept returning meta commentary instead of a natural user message.",
   );
 }
 

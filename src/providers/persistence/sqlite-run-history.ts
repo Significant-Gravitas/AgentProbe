@@ -25,7 +25,7 @@ import {
 
 export const DEFAULT_DB_DIRNAME = ".agentprobe";
 export const DEFAULT_DB_FILENAME = "runs.sqlite3";
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 const REDACTED_VALUE = "[REDACTED]";
 const sensitiveExactKeys = new Set([
   "access_token",
@@ -215,17 +215,28 @@ function ensureColumn(
   if (tableColumns(database, tableName).has(columnName)) {
     return;
   }
-  database.exec(`alter table ${tableName} add column ${columnName} ${definition}`);
+  database.exec(
+    `alter table ${tableName} add column ${columnName} ${definition}`,
+  );
 }
 
 function migrateDatabase(database: Database, currentVersion: number): void {
   let version = currentVersion;
   if (version < 2) {
     ensureColumn(database, "scenario_runs", "user_id", "text");
-    database
-      .query("update meta set schema_version = ? where id = 1")
-      .run(2);
+    database.query("update meta set schema_version = ? where id = 1").run(2);
     version = 2;
+  }
+  if (version < 3) {
+    ensureColumn(database, "scenario_runs", "failure_kind", "text");
+    ensureColumn(
+      database,
+      "runs",
+      "scenario_harness_failed_count",
+      "integer not null default 0",
+    );
+    database.query("update meta set schema_version = ? where id = 1").run(3);
+    version = 3;
   }
 
   if (version !== SCHEMA_VERSION) {
@@ -276,6 +287,7 @@ export function initDb(dbUrl?: string): void {
         scenario_total integer not null default 0,
         scenario_passed_count integer not null default 0,
         scenario_failed_count integer not null default 0,
+        scenario_harness_failed_count integer not null default 0,
         scenario_errored_count integer not null default 0,
         final_error_json text,
         started_at text not null,
@@ -300,6 +312,7 @@ export function initDb(dbUrl?: string): void {
         rubric_snapshot_json text,
         status text not null,
         passed integer,
+        failure_kind text,
         overall_score real,
         pass_threshold real,
         judge_provider text,
@@ -404,15 +417,25 @@ export function initDb(dbUrl?: string): void {
 function refreshRunCounts(database: Database, runId: string): void {
   const rows = database
     .query(
-      "select status, passed from scenario_runs where run_id = ? order by ordinal asc",
+      "select status, passed, failure_kind from scenario_runs where run_id = ? order by ordinal asc",
     )
-    .all(runId) as Array<{ status: string; passed: number | null }>;
+    .all(runId) as Array<{
+    status: string;
+    passed: number | null;
+    failure_kind: string | null;
+  }>;
   const scenarioTotal = rows.length;
   const scenarioPassedCount = rows.filter(
     (row) => row.status === "completed" && row.passed === 1,
   ).length;
   const scenarioFailedCount = rows.filter(
     (row) => row.status === "completed" && row.passed === 0,
+  ).length;
+  const scenarioHarnessFailedCount = rows.filter(
+    (row) =>
+      row.status === "completed" &&
+      row.passed === 0 &&
+      row.failure_kind === "harness",
   ).length;
   const scenarioErroredCount = rows.filter((row) =>
     ["runtime_error", "error"].includes(row.status),
@@ -425,6 +448,7 @@ function refreshRunCounts(database: Database, runId: string): void {
         set scenario_total = ?,
             scenario_passed_count = ?,
             scenario_failed_count = ?,
+            scenario_harness_failed_count = ?,
             scenario_errored_count = ?,
             updated_at = ?
         where id = ?
@@ -434,6 +458,7 @@ function refreshRunCounts(database: Database, runId: string): void {
       scenarioTotal,
       scenarioPassedCount,
       scenarioFailedCount,
+      scenarioHarnessFailedCount,
       scenarioErroredCount,
       utcNow(),
       runId,
@@ -904,6 +929,7 @@ export class SqliteRunRecorder {
           update scenario_runs
           set status = 'completed',
               passed = ?,
+              failure_kind = ?,
               overall_score = ?,
               completed_at = ?,
               updated_at = ?
@@ -912,6 +938,7 @@ export class SqliteRunRecorder {
       )
       .run(
         options.result.passed ? 1 : 0,
+        options.result.failureKind ?? null,
         options.result.overallScore,
         utcNow(),
         utcNow(),
@@ -967,6 +994,9 @@ function mapRunSummaryRow(row: Record<string, unknown>): RunSummary {
       scenarioTotal: Number(row.scenario_total ?? 0),
       scenarioPassedCount: Number(row.scenario_passed_count ?? 0),
       scenarioFailedCount: Number(row.scenario_failed_count ?? 0),
+      scenarioHarnessFailedCount: Number(
+        row.scenario_harness_failed_count ?? 0,
+      ),
       scenarioErroredCount: Number(row.scenario_errored_count ?? 0),
     },
   };
@@ -1039,6 +1069,12 @@ function getScenarioRecords(
         row.passed === null || row.passed === undefined
           ? null
           : Number(row.passed) === 1,
+      failureKind:
+        row.failure_kind === "harness"
+          ? "harness"
+          : row.failure_kind === "agent"
+            ? "agent"
+            : null,
       overallScore:
         row.overall_score === null || row.overall_score === undefined
           ? null

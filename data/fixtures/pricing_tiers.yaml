@@ -1,0 +1,47 @@
+tiers:
+  standard:
+    display_name: "Standard Professional Services"
+    description: "Standard hourly rates with a 10% retainer buffer for ad-hoc corporate governance and general counsel services."
+    markup_percentage: 5
+    billing_structure: "Hourly"
+    included_services:
+      - "Quarterly compliance review"
+      - "Unlimited basic document templates"
+      - "Dedicated associate contact"
+    discount_rate: 0.0
+
+  relationship_discount:
+    display_name: "Preferred Relationship Tier"
+    description: "Preferential pricing for long-term clients with high-volume recurring needs. Includes a capped fee structure for standard filings."
+    markup_percentage: 0
+    billing_structure: "Hybrid (Fixed + Hourly)"
+    included_services:
+      - "Monthly strategy briefing"
+      - "Capped fees on standard SEC filings"
+      - "Direct Partner access"
+    discount_rate: 15.0
+    eligibility_criteria: "Minimum 24 months tenure or >$100k annual billings"
+
+  premium:
+    display_name: "Strategic Partnership Tier"
+    description: "High-touch, priority service for complex litigation, M&A readiness, and 24/7 crisis management support."
+    markup_percentage: 25
+    billing_structure: "Value-Based Retainer"
+    included_services:
+      - "24/7 emergency legal support"
+      - "On-site board meeting attendance"
+      - "Priority resource allocation for M&A"
+      - "Executive personal legal audit"
+    discount_rate: -10.0
+
+calculations:
+  base_rate_calculation: "average_monthly_spend_last_12m"
+  proposal_options:
+    option_1: "standard"
+    option_2: "relationship_discount"
+    option_3: "premium"
+
+approval_flags:
+  partner_review_required: true
+  auto_apply_loyalty_discount: true
+  min_contract_term_months: 12

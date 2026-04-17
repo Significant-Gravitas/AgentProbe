@@ -36,7 +36,8 @@ endpoints:
       {
         "message": {{ last_message.content | tojson }},
         "is_user_message": true{% if copilot_mode is defined and copilot_mode %},
-        "mode": {{ copilot_mode | tojson }}{% endif %}
+        "mode": {{ copilot_mode | tojson }}{% endif %}{% if file_ids is defined and file_ids %},
+        "file_ids": {{ file_ids | tojson }}{% endif %}
       }
 
 session:

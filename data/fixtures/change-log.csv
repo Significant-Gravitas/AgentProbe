@@ -1,0 +1,10 @@
+competitor,field,old_value,new_value,detected_at
+Netlify,Pro Plan Monthly Price,$19 per member / month,$25 per member / month,2026-04-14T02:00:04Z
+Netlify,Bandwidth Limit (Pro),1TB,1.5TB,2026-04-14T02:00:04Z
+Cloudflare Pages,Build Minutes (Free),500 per month,Unlimited,2026-04-14T02:00:12Z
+Cloudflare Pages,Concurrent Builds (Free),1,1,2026-04-14T02:00:12Z
+Render,Individual Plan Price,$0,$7,2026-04-14T02:00:21Z
+Render,Pro Plan Price,$19,$25,2026-04-14T02:00:21Z
+Render,Free Tier RAM,512MB,256MB,2026-04-14T02:00:21Z
+Netlify,Enterprise Support,Contact Sales,Contact Sales,2026-04-14T02:00:04Z
+Cloudflare Pages,Max File Size,25MB,100MB,2026-04-14T02:00:12Z

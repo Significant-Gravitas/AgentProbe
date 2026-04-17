@@ -1,0 +1,56 @@
+[
+  {
+    "event_id": "EVT-20231002-01",
+    "event_type": "product_release",
+    "title": "v2.4.0 Release: Dark Mode & Biometric Login",
+    "start_timestamp": "2023-10-02T09:00:00Z",
+    "end_timestamp": "2023-10-02T10:30:00Z",
+    "impact_scope": "all_users",
+    "description": "Major feature update including dark mode support and biometric authentication rollout."
+  },
+  {
+    "event_id": "EVT-20231014-04",
+    "event_type": "marketing_campaign",
+    "title": "Fall Referral Bonus Program",
+    "start_timestamp": "2023-10-14T00:00:00Z",
+    "end_timestamp": "2023-10-21T23:59:59Z",
+    "impact_scope": "existing_users",
+    "description": "Double referral points for active users inviting friends."
+  },
+  {
+    "event_id": "EVT-20231018-02",
+    "event_type": "outage",
+    "title": "AWS us-east-1 Service Degradation",
+    "start_timestamp": "2023-10-18T14:15:00Z",
+    "end_timestamp": "2023-10-18T16:40:00Z",
+    "impact_scope": "login_service",
+    "description": "Intermittent 500 errors during login flow due to downstream cloud provider latency."
+  },
+  {
+    "event_id": "EVT-20231025-09",
+    "event_type": "marketing_campaign",
+    "title": "TikTok Viral Post - @TechTrendsDaily",
+    "start_timestamp": "2023-10-25T18:30:00Z",
+    "end_timestamp": "2023-10-26T23:59:59Z",
+    "impact_scope": "organic_growth",
+    "description": "Unpaid feature by major tech influencer highlighting the 'Smart Planner' feature. Significant traffic spike observed from referral source: tiktok.com."
+  },
+  {
+    "event_id": "EVT-20231026-01",
+    "event_type": "product_release",
+    "title": "Hotfix v2.4.1: Notification Bug",
+    "start_timestamp": "2023-10-26T11:00:00Z",
+    "end_timestamp": "2023-10-26T11:15:00Z",
+    "impact_scope": "ios_users",
+    "description": "Resolved an issue where push tokens were not refreshing correctly on iOS 17."
+  },
+  {
+    "event_id": "EVT-20231027-05",
+    "event_type": "marketing_campaign",
+    "title": "Weekly Newsletter Blast",
+    "start_timestamp": "2023-10-27T10:00:00Z",
+    "end_timestamp": "2023-10-27T12:00:00Z",
+    "impact_scope": "lapsed_users",
+    "description": "Standard Friday re-engagement email sent to 450k users."
+  }
+]

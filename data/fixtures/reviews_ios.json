@@ -1,0 +1,302 @@
+[
+  {
+    "id": "ios-001",
+    "review_id": "829410321",
+    "author": "SkyeDreamer",
+    "rating": 1,
+    "title": "Crashes on startup",
+    "content": "Ever since the update yesterday, the app won't even open. It just shows the splash screen and then closes immediately. Using iPhone 14 Pro.",
+    "date": "2023-10-26T08:12:44Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-002",
+    "review_id": "829410550",
+    "author": "CoffeeLover99",
+    "rating": 5,
+    "title": "Love the new UI",
+    "content": "The latest redesign is so clean. Navigating between groups is much faster now. Great job team!",
+    "date": "2023-10-26T08:45:12Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-003",
+    "review_id": "829410912",
+    "author": "TechGeek_NY",
+    "rating": 3,
+    "title": "Good but missing Dark Mode",
+    "content": "Solid app for community building, but please add a native dark mode. The bright white is killing my eyes at night.",
+    "date": "2023-10-26T09:01:05Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-004",
+    "review_id": "829411204",
+    "author": "Maria_S",
+    "rating": 2,
+    "title": "Notification issues",
+    "content": "I'm not getting push notifications for direct messages anymore. I've checked my settings and everything is turned on. Missing important chats.",
+    "date": "2023-10-26T09:30:18Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-005",
+    "review_id": "829411883",
+    "author": "User8821",
+    "rating": 4,
+    "title": "Smooth experience",
+    "content": "Really enjoying the app so far. It's much better than the alternatives we were using for our neighborhood group.",
+    "date": "2023-10-26T10:15:33Z",
+    "version": "2.4.0"
+  },
+  {
+    "id": "ios-006",
+    "review_id": "829412101",
+    "author": "BikerDude",
+    "rating": 1,
+    "title": "Photo upload broken",
+    "content": "Whenever I try to upload a photo to a thread, the progress bar gets to 90% and then says 'Upload Failed'. Every single time.",
+    "date": "2023-10-26T10:42:01Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-007",
+    "review_id": "829412445",
+    "author": "DesignLover",
+    "rating": 3,
+    "title": "Confusing navigation",
+    "content": "I find it really hard to find the 'Settings' menu now. Why is it hidden under three sub-menus? The old layout was better.",
+    "date": "2023-10-26T11:20:55Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-008",
+    "review_id": "829413002",
+    "author": "CryptoScamDetector",
+    "rating": 1,
+    "title": "SPAM",
+    "content": "FREE BITCOIN CLICK HERE WWW.SCAM-LINK.COM GET RICH QUICK NOW",
+    "date": "2023-10-26T12:05:12Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-009",
+    "review_id": "829413556",
+    "author": "ParentingPro",
+    "rating": 5,
+    "title": "Essential tool",
+    "content": "We use Kindred for our school PTA and it has revolutionized how we organize events. Highly recommend.",
+    "date": "2023-10-26T13:40:44Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-010",
+    "review_id": "829414012",
+    "author": "J_Miller",
+    "rating": 2,
+    "title": "Search is useless",
+    "content": "Searching for past messages is a nightmare. It doesn't seem to index anything older than a week. Please fix the search algorithm.",
+    "date": "2023-10-26T14:12:10Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-011",
+    "review_id": "829414678",
+    "author": "FitnessFan",
+    "rating": 4,
+    "title": "Feature request: Calendar sync",
+    "content": "Can you please add an option to sync Kindred events to my Apple Calendar? It would make scheduling so much easier.",
+    "date": "2023-10-26T15:05:22Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-012",
+    "review_id": "829415221",
+    "author": "AngryVoter",
+    "rating": 1,
+    "title": "Laggy keyboard",
+    "content": "Typing long messages is impossible. There is a huge delay between hitting a key and the letter appearing on screen. Fix this bug!",
+    "date": "2023-10-26T15:55:30Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-013",
+    "review_id": "829415880",
+    "author": "Sarah_K",
+    "rating": 5,
+    "title": "Love it!",
+    "content": "Best community app out there. Simple and effective.",
+    "date": "2023-10-26T16:30:15Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-014",
+    "review_id": "829416443",
+    "author": "DevOpsDan",
+    "rating": 3,
+    "title": "Battery drain",
+    "content": "Kindred is consuming 25% of my battery in the background. Is it constantly polling for updates? Needs optimization.",
+    "date": "2023-10-26T17:15:45Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-015",
+    "review_id": "829417001",
+    "author": "YogaWithMe",
+    "rating": 4,
+    "title": "Great but needs video",
+    "content": "Would love to be able to host live video sessions directly in the app instead of linking to Zoom.",
+    "date": "2023-10-26T18:02:11Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-016",
+    "review_id": "829417552",
+    "author": "Mikey_T",
+    "rating": 2,
+    "title": "Double notifications",
+    "content": "I get two notifications for every single message. One from the app and one that seems like a ghost notification. Super annoying.",
+    "date": "2023-10-26T19:22:33Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-017",
+    "review_id": "829418119",
+    "author": "GreenThumb",
+    "rating": 5,
+    "title": "Perfect for our garden club",
+    "content": "Easy to share photos of our plants and coordinate watering schedules. Five stars!",
+    "date": "2023-10-26T20:10:05Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-018",
+    "review_id": "829418664",
+    "author": "Traveler_101",
+    "rating": 3,
+    "title": "Offline mode?",
+    "content": "The app is basically a blank screen when I don't have internet. It would be nice to see cached messages offline.",
+    "date": "2023-10-26T21:45:50Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-019",
+    "review_id": "829419220",
+    "author": "GamerGal",
+    "rating": 1,
+    "title": "Login loop",
+    "content": "I enter my credentials, it says success, then kicks me back to the login screen. I can't get into my account at all.",
+    "date": "2023-10-26T22:30:12Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-020",
+    "review_id": "829419885",
+    "author": "SimpleLife",
+    "rating": 4,
+    "title": "Nice app",
+    "content": "Does exactly what it says on the tin. No complaints, just works.",
+    "date": "2023-10-26T23:50:59Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-021",
+    "review_id": "829420111",
+    "author": "UX_Critique",
+    "rating": 2,
+    "title": "Too much friction",
+    "content": "Creating a new group takes 6 steps. It should be one button. The UI feels very clunky for a modern app.",
+    "date": "2023-10-26T00:15:22Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-022",
+    "review_id": "829420555",
+    "author": "HappyCamper",
+    "rating": 5,
+    "title": "Brilliant",
+    "content": "I've tried every community app and Kindred is by far the most intuitive. The team clearly cares about user feedback.",
+    "date": "2023-10-26T01:40:11Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-023",
+    "review_id": "829421002",
+    "author": "BugHunter_99",
+    "rating": 1,
+    "title": "Emoji bug",
+    "content": "Using the 'rocket' emoji in a thread title causes the whole app to freeze and requires a force quit.",
+    "date": "2023-10-26T02:55:40Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-024",
+    "review_id": "829421663",
+    "author": "FeatureSeeker",
+    "rating": 4,
+    "title": "Polls please!",
+    "content": "It would be great if we could create polls within the groups to vote on meeting times or topics.",
+    "date": "2023-10-26T04:20:15Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-025",
+    "review_id": "829422110",
+    "author": "DisappointedUser",
+    "rating": 2,
+    "title": "Font size is tiny",
+    "content": "The text is so small I have to squint to read it. It doesn't respect the system font size settings on my iPhone.",
+    "date": "2023-10-26T05:45:30Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-026",
+    "review_id": "829422774",
+    "author": "AdBot_4000",
+    "rating": 1,
+    "title": "Cheap Meds",
+    "content": "Buy cheap medication online without prescription. Visit our site for 50% off today!",
+    "date": "2023-10-26T06:12:05Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-027",
+    "review_id": "829423221",
+    "author": "MamaBear",
+    "rating": 5,
+    "title": "Safety first",
+    "content": "I love the moderation tools. It makes me feel safe having my teenagers use this for their school clubs.",
+    "date": "2023-10-26T07:30:55Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-028",
+    "review_id": "829423880",
+    "author": "TechSupport_Hater",
+    "rating": 1,
+    "title": "Support is non-existent",
+    "content": "I emailed support about a billing issue 3 days ago and haven't heard back. The app is broken and nobody cares.",
+    "date": "2023-10-26T08:50:12Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-029",
+    "review_id": "829424445",
+    "author": "CleanLines",
+    "rating": 4,
+    "title": "Great aesthetic",
+    "content": "The visual design is top-notch. Just wish the 'Reply' button was a bit larger, I keep missing it.",
+    "date": "2023-10-26T10:05:40Z",
+    "version": "2.4.1"
+  },
+  {
+    "id": "ios-030",
+    "review_id": "829425001",
+    "author": "PowerUser_X",
+    "rating": 3,
+    "title": "Needs iPad optimization",
+    "content": "It's just the iPhone app scaled up on iPad. Please make a proper iPadOS version with sidebar support.",
+    "date": "2023-10-26T11:22:18Z",
+    "version": "2.4.1"
+  }
+]

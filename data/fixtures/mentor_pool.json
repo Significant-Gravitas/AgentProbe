@@ -1,0 +1,62 @@
+[
+  {
+    "id": "MNT-001",
+    "name": "Marcus Thorne",
+    "role": "Staff Data Engineer",
+    "team": "Infrastructure",
+    "office_location": "Remote (EST)",
+    "expertise": [
+      "Airflow",
+      "AWS",
+      "Infrastructure-as-Code"
+    ],
+    "current_load": 1,
+    "availability": "High",
+    "bio": "Marcus has been with Hexproof for 3 years and led the migration to our current Airflow setup. He specializes in data pipeline reliability."
+  },
+  {
+    "id": "MNT-002",
+    "name": "Sarah Chen",
+    "role": "Senior Analytics Engineer",
+    "team": "Business Intelligence",
+    "office_location": "New York (EST)",
+    "expertise": [
+      "dbt",
+      "Snowflake",
+      "Looker"
+    ],
+    "current_load": 0,
+    "availability": "High",
+    "bio": "Sarah manages our dbt core models and is the primary point of contact for Snowflake optimization. She is based in the same city as Eva."
+  },
+  {
+    "id": "MNT-003",
+    "name": "David Okafor",
+    "role": "Senior Data Engineer",
+    "team": "Core Data",
+    "office_location": "Remote (CST)",
+    "expertise": [
+      "Airbyte",
+      "Python",
+      "Sentry"
+    ],
+    "current_load": 2,
+    "availability": "Medium",
+    "bio": "David focuses on ingestion patterns and third-party API integrations. He recently overhauled our Airbyte connectors."
+  },
+  {
+    "id": "MNT-004",
+    "name": "Elena Rodriguez",
+    "role": "Principal Engineer",
+    "team": "Platform",
+    "office_location": "San Francisco (PST)",
+    "expertise": [
+      "Security",
+      "GitHub",
+      "Datadog"
+    ],
+    "current_load": 1,
+    "availability": "Medium",
+    "bio": "Elena oversees the entire data observability stack. She is an expert in our CI/CD workflows and security protocols."
+  }
+]

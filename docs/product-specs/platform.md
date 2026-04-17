@@ -27,10 +27,20 @@ humans can use to inspect pass/fail outcomes
 
 **Given** valid endpoint, scenario, persona, and rubric YAML files that define
 multiple scenarios and tags
-**When** the user runs an evaluation suite with `--scenario-id` or `--tags`
+**When** the user runs an evaluation suite with `--scenario` (or `--scenario-id`)
+or `--tags`
 **Then** the CLI runs only the matching scenarios, records the selected
 scenario IDs in run history, and fails fast before any endpoint traffic when no
-scenario matches the requested filters
+scenario matches the requested filters. The `--scenario` flag accepts one or
+more comma-separated values that match by scenario ID or scenario name. When no
+match is found, the error message lists all available scenario IDs and names.
+
+### List command shows available scenarios
+
+**Given** a scenario file or directory containing scenario YAML files
+**When** the user runs the `list` command with `--scenarios`
+**Then** the CLI prints each scenario's ID, name, and tags, and returns a
+non-zero exit code when no scenarios match the optional `--tags` filter
 
 ### Dry-run mode records intent without contacting external systems
 
@@ -40,14 +50,23 @@ scenario matches the requested filters
 scores, records the run selection metadata, and skips endpoint traffic and
 judge-model calls
 
+### Judge requests preserve cache-friendly prompt prefixes
+
+**Given** repeated evaluations that share the same rendered rubric context
+**When** AgentProbe sends judge-model requests
+**Then** the CLI keeps stable rubric instructions at the start of the request,
+pushes transcript-specific content to the tail, and enables supported provider
+prompt caching without changing the scoring contract
+
 ### Parallel mode overlaps scenario execution while preserving ordering
 
 **Given** valid endpoint, scenario, persona, and rubric YAML files with more
 than one selected scenario
-**When** the user runs an evaluation suite with `--parallel`
+**When** the user runs an evaluation suite with `--parallel` or
+`--parallel <limit>`
 **Then** the CLI overlaps scenario execution, emits progress for each selected
-scenario, and preserves the original scenario ordering in summaries and stored
-run history
+scenario, honors the requested concurrency cap when provided, and preserves the
+original scenario ordering in summaries and stored run history
 
 ### Multi-session memory scenarios preserve pinned identity and session controls
 

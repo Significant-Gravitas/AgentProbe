@@ -1,0 +1,80 @@
+{
+  "territories": [
+    {
+      "agent_id": "agent_001",
+      "agent_name": "Marcus Thorne",
+      "territory_name": "Downtown / Central",
+      "zip_codes": [
+        "90012",
+        "90013",
+        "90014",
+        "90015",
+        "90017",
+        "90021",
+        "90071"
+      ],
+      "focus_area": "Luxury Condos & Lofts",
+      "max_daily_leads": 10
+    },
+    {
+      "agent_id": "agent_002",
+      "agent_name": "Sarah Chen",
+      "territory_name": "Westside / Coastal",
+      "zip_codes": [
+        "90210",
+        "90211",
+        "90212",
+        "90401",
+        "90402",
+        "90403",
+        "90404",
+        "90405"
+      ],
+      "focus_area": "High-End Residential",
+      "max_daily_leads": 8
+    },
+    {
+      "agent_id": "agent_003",
+      "agent_name": "Elena Rodriguez",
+      "territory_name": "Northeast / Foothills",
+      "zip_codes": [
+        "90026",
+        "90031",
+        "90039",
+        "90041",
+        "90042",
+        "90065",
+        "91001"
+      ],
+      "focus_area": "Single Family Homes",
+      "max_daily_leads": 12
+    },
+    {
+      "agent_id": "agent_004",
+      "agent_name": "David Miller",
+      "territory_name": "South Bay / Valley",
+      "zip_codes": [
+        "90254",
+        "90266",
+        "90277",
+        "90278",
+        "91301",
+        "91302",
+        "91364"
+      ],
+      "focus_area": "Suburban Developments",
+      "max_daily_leads": 15
+    }
+  ],
+  "routing_logic": {
+    "default_agent_id": "agent_001",
+    "unmatched_zip_behavior": "assign_to_default",
+    "lead_rotation": "round_robin_within_territory",
+    "speed_to_lead_sla_seconds": 120
+  },
+  "metadata": {
+    "last_updated": "2023-11-01T10:00:00Z",
+    "version": "2.1.0",
+    "organization": "Ridge Realty"
+  }
+}

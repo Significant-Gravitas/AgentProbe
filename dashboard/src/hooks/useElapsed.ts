@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 export function useElapsed(serverElapsed: number, allDone: boolean) {
   const [offset, setOffset] = useState(0);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: serverElapsed reset triggers offset zeroing so we don't double-count
   useEffect(() => {
     if (allDone) return;
     const start = performance.now();

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "li-001",
+    "topic": "The fallacy of the backlog",
+    "content": "Most product teams are drowning in a 'backlog' that is actually just a graveyard for ideas that will never happen.\n\nAt Linear, we don't believe in the infinite list. If a task isn't important enough to do in the next two weeks, it shouldn't be clogging up your mental space. We call this the 'Active vs. Backlog' divide. \n\nWhen you treat every bug report and feature request as a 'to-do' for some mythical future date, you create a heavy cognitive tax on your engineers. They spend more time triaging and re-ordering lists than they do writing code. \n\nOur approach: \n1. Keep the active queue lean.\n2. Use Cycles to create a steady heartbeat of momentum.\n3. Be ruthless about archiving. If it hasn't been touched in 6 months, it's gone.\n\nSpeed isn't just about typing faster. It's about deciding what not to do so you can focus on what matters.\n\nBuild for momentum.",
+    "metrics": {
+      "reactions": 1420,
+      "comments": 89,
+      "shares": 215
+    },
+    "tone_notes": "Authoritative, contrarian, minimalist formatting."
+  },
+  {
+    "id": "li-002",
+    "topic": "Why we built Cycles",
+    "content": "Why do most sprints feel like a forced march? \n\nTraditional Scrum often turns into a ritual of 'pointing' stories and 'clearing tickets' rather than shipping value. We replaced the sprint with the Cycle.\n\nCycles aren't about deadlines; they are about rhythm. \n\nUnlike sprints, cycles don't have a 'failure' state if you don't finish every task. They are designed to keep the team moving in a synchronized direction without the overhead of heavy ceremony. If a task doesn't finish, it rolls over or gets reconsidered. No shame, just data.\n\nWhen you focus on the rhythm of shipping rather than the pressure of a deadline, the quality of the work naturally increases. Engineers feel more agency, and the product feels more cohesive.\n\nHow does your team find its rhythm?",
+    "metrics": {
+      "reactions": 980,
+      "comments": 112,
+      "shares": 95
+    },
+    "tone_notes": "Philosophical but practical, engineer-centric."
+  },
+  {
+    "id": "li-003",
+    "topic": "The overhead of 'Agile'",
+    "content": "Agile was meant to liberate developers. Somewhere along the way, it became a management layer that slowed everyone down.\n\nDaily standups became status reports. \nStory points became a proxy for productivity.\nPlanning meetings became multi-hour marathons.\n\nWe built Linear to get back to the basics of high-performance software craft. We believe tools should be opinionated so you don't have to spend your energy configuring workflows. \n\nSoftware is built by people, not processes. If your process is getting in the way of the craft, burn the process down.\n\nFocus on the work.",
+    "metrics": {
+      "reactions": 2105,
+      "comments": 240,
+      "shares": 412
+    },
+    "tone_notes": "Direct, slightly provocative, high-conviction."
+  },
+  {
+    "id": "li-004",
+    "topic": "Precision in Issue Tracking",
+    "content": "A well-written issue is a love letter to your future self.\n\nIn most companies, issues are vague: 'The button is broken.' \nIn high-velocity teams, issues are precise. They contain the 'what', the 'why', and the 'how to verify'.\n\nAt Linear, we optimize for speed. Our keyboard shortcuts and command menu mean you can create, assign, and label an issue in under three seconds. But that speed is useless if the content of the issue is garbage.\n\nWe believe in:\n- Clear, actionable titles.\n- Minimal but sufficient context.\n- Single owners, not 'shared' responsibility.\n\nWhen the tool is fast, you spend less time 'managing' and more time 'solving'.",
+    "metrics": {
+      "reactions": 750,
+      "comments": 45,
+      "shares": 60
+    },
+    "tone_notes": "Technical, craft-focused, benefit-driven."
+  },
+  {
+    "id": "li-005",
+    "topic": "Shipping as a habit",
+    "content": "The best teams don't 'launch'—they ship.\n\nLaunching is a one-time event fraught with anxiety. Shipping is a daily habit. \n\nWhen you move to a continuous shipping model, the stakes for any single release drop, which ironically leads to better code. You stop over-engineering for 'what ifs' and start building for 'what is'. \n\nThis is why we emphasize the 'Linear Method'. It’s not just a set of features; it’s a philosophy of work that prioritizes momentum over perfectionism. \n\n1. Small, manageable cycles.\n2. High visibility across the team.\n3. A tool that stays out of your way.\n\nDon't wait for the big reveal. Just keep shipping.",
+    "metrics": {
+      "reactions": 1830,
+      "comments": 67,
+      "shares": 188
+    },
+    "tone_notes": "Inspirational, disciplined, concise."
+  }
+]

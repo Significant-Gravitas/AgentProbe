@@ -1,0 +1,107 @@
+[
+  {
+    "client_id": "C001",
+    "name": "Apex Outdoor Gear",
+    "google_ads_customer_id": "492-118-4402",
+    "ga4_property_id": "312294001",
+    "branded_template_url": "templates/apex_outdoor_report_v2.pptx"
+  },
+  {
+    "client_id": "C002",
+    "name": "Blue Horizon Fintech",
+    "google_ads_customer_id": "833-291-7721",
+    "ga4_property_id": "298441052",
+    "branded_template_url": "templates/blue_horizon_brand_kit.pptx"
+  },
+  {
+    "client_id": "C003",
+    "name": "Crimson Coffee Roasters",
+    "google_ads_customer_id": "104-556-3390",
+    "ga4_property_id": "441092338",
+    "branded_template_url": "templates/crimson_coffee_deck.pptx"
+  },
+  {
+    "client_id": "C004",
+    "name": "Deltos Cybersecurity",
+    "google_ads_customer_id": "672-109-8834",
+    "ga4_property_id": "229104885",
+    "branded_template_url": "templates/deltos_cyber_template.pptx"
+  },
+  {
+    "client_id": "C005",
+    "name": "Evergreen Wellness",
+    "google_ads_customer_id": "551-332-1198",
+    "ga4_property_id": "388210447",
+    "branded_template_url": "templates/evergreen_wellness_master.pptx"
+  },
+  {
+    "client_id": "C006",
+    "name": "Frontier Logistics",
+    "google_ads_customer_id": "902-114-5562",
+    "ga4_property_id": "402119332",
+    "branded_template_url": "templates/frontier_logistics_v1.pptx"
+  },
+  {
+    "client_id": "C007",
+    "name": "Glow Skincare Co",
+    "google_ads_customer_id": "334-887-2210",
+    "ga4_property_id": "552109334",
+    "branded_template_url": "templates/glow_skincare_branded.pptx"
+  },
+  {
+    "client_id": "C008",
+    "name": "Harbor Real Estate",
+    "google_ads_customer_id": "119-445-3321",
+    "ga4_property_id": "211449008",
+    "branded_template_url": "templates/harbor_re_template.pptx"
+  },
+  {
+    "client_id": "C009",
+    "name": "Ionic SaaS Solutions",
+    "google_ads_customer_id": "776-334-1109",
+    "ga4_property_id": "331224991",
+    "branded_template_url": "templates/ionic_saas_deck.pptx"
+  },
+  {
+    "client_id": "C010",
+    "name": "Juniper Home Goods",
+    "google_ads_customer_id": "544-221-8876",
+    "ga4_property_id": "119223445",
+    "branded_template_url": "templates/juniper_home_master.pptx"
+  },
+  {
+    "client_id": "C011",
+    "name": "Kinetic Fitness App",
+    "google_ads_customer_id": "221-990-4453",
+    "ga4_property_id": "449001223",
+    "branded_template_url": "templates/kinetic_fitness_report.pptx"
+  },
+  {
+    "client_id": "C012",
+    "name": "Lumina Solar",
+    "google_ads_customer_id": "884-112-6675",
+    "ga4_property_id": "551002339",
+    "branded_template_url": "templates/lumina_solar_v4.pptx"
+  },
+  {
+    "client_id": "C013",
+    "name": "Marlowe Law Firm",
+    "google_ads_customer_id": "339-114-8821",
+    "ga4_property_id": "662110443",
+    "branded_template_url": "templates/marlowe_law_branded.pptx"
+  },
+  {
+    "client_id": "C014",
+    "name": "Nova EdTech",
+    "google_ads_customer_id": "445-882-1104",
+    "ga4_property_id": "771004221",
+    "branded_template_url": "templates/nova_edtech_deck.pptx"
+  },
+  {
+    "client_id": "C015",
+    "name": "Orion Pet Supplies",
+    "google_ads_customer_id": "223-441-9987",
+    "ga4_property_id": "882113440",
+    "branded_template_url": "templates/orion_pet_reporting.pptx"
+  }
+]

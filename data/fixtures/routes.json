@@ -1,0 +1,138 @@
+{
+  "lanes": [
+    {
+      "lane_id": "L-10024",
+      "origin_zip": "60601",
+      "dest_zip": "94105",
+      "description": "Chicago Hub to San Francisco Bay",
+      "distance_miles": 2130,
+      "volume_class": "High",
+      "primary_mode": "LTL",
+      "modal_options": [
+        {
+          "mode": "LTL",
+          "average_lead_time_days": 4,
+          "base_rate_per_cwt": 82.50,
+          "fuel_surcharge_pct": 28.5,
+          "carriers": ["SwiftLink", "MidwestExpress", "PacificFreight", "GlobalLogistics"]
+        },
+        {
+          "mode": "FTL",
+          "average_lead_time_days": 3,
+          "base_rate_per_mile": 2.45,
+          "fuel_surcharge_pct": 32.0,
+          "carriers": ["SwiftLink", "TitanTrucking"]
+        },
+        {
+          "mode": "Intermodal",
+          "average_lead_time_days": 7,
+          "base_rate_per_mile": 1.65,
+          "fuel_surcharge_pct": 18.0,
+          "carriers": ["RailPass"]
+        }
+      ]
+    },
+    {
+      "lane_id": "L-30015",
+      "origin_zip": "07001",
+      "dest_zip": "02108",
+      "description": "NJ Consolidation Center to Boston Metro",
+      "distance_miles": 225,
+      "volume_class": "High",
+      "primary_mode": "Parcel",
+      "modal_options": [
+        {
+          "mode": "Parcel",
+          "average_lead_time_days": 1,
+          "base_rate_per_pkg": 14.20,
+          "zone": 2,
+          "carriers": ["FedUps", "SpeedyPost"]
+        },
+        {
+          "mode": "LTL",
+          "average_lead_time_days": 2,
+          "base_rate_per_cwt": 34.10,
+          "carriers": ["MidwestExpress", "NortheastHaulage"]
+        }
+      ],
+      "zone_skipping_eligible": true,
+      "consolidation_point": "07001"
+    },
+    {
+      "lane_id": "L-30018",
+      "origin_zip": "07001",
+      "dest_zip": "19104",
+      "description": "NJ Consolidation Center to Philadelphia",
+      "distance_miles": 85,
+      "volume_class": "High",
+      "primary_mode": "Parcel",
+      "modal_options": [
+        {
+          "mode": "Parcel",
+          "average_lead_time_days": 1,
+          "base_rate_per_pkg": 11.50,
+          "zone": 2,
+          "carriers": ["FedUps", "SpeedyPost"]
+        }
+      ],
+      "zone_skipping_eligible": true
+    },
+    {
+      "lane_id": "L-50082",
+      "origin_zip": "30303",
+      "dest_zip": "75201",
+      "description": "Atlanta to Dallas",
+      "distance_miles": 780,
+      "volume_class": "Medium",
+      "primary_mode": "LTL",
+      "modal_options": [
+        {
+          "mode": "LTL",
+          "average_lead_time_days": 2,
+          "base_rate_per_cwt": 54.20,
+          "carriers": ["SwiftLink", "SouthLine"]
+        }
+      ]
+    },
+    {
+      "lane_id": "L-90041",
+      "origin_zip": "90001",
+      "dest_zip": "98101",
+      "description": "Los Angeles to Seattle",
+      "distance_miles": 1135,
+      "volume_class": "Medium",
+      "primary_mode": "LTL",
+      "modal_options": [
+        {
+          "mode": "LTL",
+          "average_lead_time_days": 3,
+          "base_rate_per_cwt": 68.90,
+          "carriers": ["PacificFreight", "WestCoastRelay"]
+        }
+      ]
+    }
+  ],
+  "weight_break_rules": [
+    {
+      "min_lbs": 0,
+      "max_lbs": 150,
+      "preferred_mode": "Parcel"
+    },
+    {
+      "min_lbs": 151,
+      "max_lbs": 400,
+      "preferred_mode": "Parcel-Oversize",
+      "optimization_target": "LTL-Hybrid"
+    },
+    {
+      "min_lbs": 401,
+      "max_lbs": 10000,
+      "preferred_mode": "LTL"
+    }
+  ],
+  "service_levels": {
+    "Standard": {"on_time_threshold": 0.92, "max_transit_days": 5},
+    "Expedited": {"on_time_threshold": 0.98, "max_transit_days": 2},
+    "Economy": {"on_time_threshold": 0.85, "max_transit_days": 10}
+  }
+}

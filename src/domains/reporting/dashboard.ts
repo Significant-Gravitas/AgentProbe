@@ -7,16 +7,12 @@ import type {
   RunProgressEvent,
   ScenarioRecord,
 } from "../../shared/types/contracts.ts";
-import {
-  logDebug,
-  logInfo,
-  logWarn,
-} from "../../shared/utils/logging.ts";
+import { logDebug, logInfo, logWarn } from "../../shared/utils/logging.ts";
 
 export type DashboardScenarioState = {
   scenario_id: string;
   scenario_name: string | null;
-  status: "pending" | "running" | "pass" | "fail" | "error";
+  status: "pending" | "running" | "pass" | "fail" | "harness_fail" | "error";
   score: number | null;
   error: string | null;
   started_at: number | null;
@@ -28,6 +24,7 @@ export type DashboardScenarioDetail = {
   scenario_name: string;
   user_id?: string;
   passed: boolean;
+  failure_kind?: "agent" | "harness";
   overall_score: number | null;
   pass_threshold: number | null;
   status: string;
@@ -81,6 +78,7 @@ export type DashboardStateSnapshot = {
   elapsed: number;
   passed: number;
   failed: number;
+  harness_failed: number;
   errored: number;
   running: number;
   done: number;
@@ -103,10 +101,7 @@ type AverageAccumulator = {
   scores: number[];
   passCount: number;
   failCount: number;
-  dimensions: Map<
-    string,
-    { dimensionName: string; values: number[] }
-  >;
+  dimensions: Map<string, { dimensionName: string; values: number[] }>;
   failureModes: Map<string, number>;
   judgeNotes: string[];
   ordinals: number[];
@@ -144,7 +139,10 @@ function displayStatus(
     return "running";
   }
   if (record.status === "completed") {
-    return record.passed ? "pass" : "fail";
+    if (record.passed) {
+      return "pass";
+    }
+    return record.failureKind === "harness" ? "harness_fail" : "fail";
   }
   return "error";
 }
@@ -189,6 +187,12 @@ function mapScenarioDetail(
     scenario_name: record.scenarioName,
     user_id: record.userId ?? undefined,
     passed: record.passed === true,
+    failure_kind:
+      record.failureKind === "harness"
+        ? "harness"
+        : record.failureKind === "agent"
+          ? "agent"
+          : undefined,
     overall_score: record.overallScore ?? null,
     pass_threshold: record.passThreshold ?? null,
     status: record.status,
@@ -239,11 +243,14 @@ function buildAverages(
         scores: [] as number[],
         passCount: 0,
         failCount: 0,
-        dimensions: new Map<string, { dimensionName: string; values: number[] }>(),
+        dimensions: new Map<
+          string,
+          { dimensionName: string; values: number[] }
+        >(),
         failureModes: new Map<string, number>(),
         judgeNotes: [] as string[],
         ordinals: [] as number[],
-      }) satisfies AverageAccumulator;
+      } satisfies AverageAccumulator);
 
     if (!existing) {
       groups.set(baseId, group);
@@ -395,7 +402,8 @@ export class LiveDashboardState {
 
     this.ensureScenarioCapacity(Math.max(this.total, ordinal + 1));
     const displayId = event.scenarioId ?? `scenario-${ordinal + 1}`;
-    const scenarioName = event.scenarioName ?? this.scenarioNames.get(ordinal) ?? null;
+    const scenarioName =
+      event.scenarioName ?? this.scenarioNames.get(ordinal) ?? null;
     this.displayIds.set(ordinal, displayId);
     this.scenarioNames.set(ordinal, scenarioName);
 
@@ -447,17 +455,28 @@ export class LiveDashboardState {
   snapshot(): DashboardStateSnapshot {
     this.refreshFromDb();
     const scenarios = this.scenarios.slice(0, this.total);
-    const passed = scenarios.filter((scenario) => scenario.status === "pass").length;
-    const failed = scenarios.filter((scenario) => scenario.status === "fail").length;
-    const errored = scenarios.filter((scenario) => scenario.status === "error").length;
-    const running = scenarios.filter((scenario) => scenario.status === "running").length;
-    const done = passed + failed + errored;
+    const passed = scenarios.filter(
+      (scenario) => scenario.status === "pass",
+    ).length;
+    const failed = scenarios.filter(
+      (scenario) => scenario.status === "fail",
+    ).length;
+    const harnessFailedCount = scenarios.filter(
+      (scenario) => scenario.status === "harness_fail",
+    ).length;
+    const errored = scenarios.filter(
+      (scenario) => scenario.status === "error",
+    ).length;
+    const running = scenarios.filter(
+      (scenario) => scenario.status === "running",
+    ).length;
+    const done = passed + failed + harnessFailedCount + errored;
     const allDone =
       this.completedAt !== undefined || (this.total > 0 && done >= this.total);
     const startedAt = this.startedAt ?? nowSeconds();
     const elapsed = Math.max(
       0,
-      (allDone ? this.completedAt ?? startedAt : nowSeconds()) - startedAt,
+      (allDone ? (this.completedAt ?? startedAt) : nowSeconds()) - startedAt,
     );
 
     return {
@@ -465,6 +484,7 @@ export class LiveDashboardState {
       elapsed,
       passed,
       failed,
+      harness_failed: harnessFailedCount,
       errored,
       running,
       done,
@@ -545,7 +565,8 @@ export type DashboardServerHandle = {
 };
 
 function safeStaticPath(distDir: string, pathname: string): string | undefined {
-  const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  const relative =
+    pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
   const candidate = resolve(distDir, relative);
   if (candidate === distDir || candidate.startsWith(`${distDir}${sep}`)) {
     return candidate;
@@ -553,12 +574,14 @@ function safeStaticPath(distDir: string, pathname: string): string | undefined {
   return undefined;
 }
 
-export function startDashboardServer(options: {
-  dbUrl?: string;
-  distDir?: string;
-  hostname?: string;
-  port?: number;
-} = {}): DashboardServerHandle | undefined {
+export function startDashboardServer(
+  options: {
+    dbUrl?: string;
+    distDir?: string;
+    hostname?: string;
+    port?: number;
+  } = {},
+): DashboardServerHandle | undefined {
   const distDir = resolve(options.distDir ?? DEFAULT_DASHBOARD_DIST_DIR);
   const entryPath = join(distDir, "index.html");
   if (!existsSync(entryPath)) {

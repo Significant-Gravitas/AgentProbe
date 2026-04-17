@@ -1,8 +1,9 @@
+import { createHash } from "node:crypto";
+import type { OpenAiResponsesClient } from "../../providers/sdk/openai-responses.ts";
 import {
   OpenAiResponsesApiError,
   OpenAiResponsesAuthenticationError,
 } from "../../providers/sdk/openai-responses.ts";
-import type { OpenAiResponsesClient } from "../../providers/sdk/openai-responses.ts";
 import type {
   JsonValue,
   OpenAiResponsesRequest,
@@ -13,6 +14,8 @@ import { AgentProbeRuntimeError } from "../../shared/utils/errors.ts";
 
 const DEFAULT_RETRY_DELAY_MS = 2000;
 const MAX_JUDGE_ATTEMPTS = 3;
+const JUDGE_SYSTEM_INSTRUCTIONS =
+  "You are an expert rubric judge. Evaluate only the provided response using the supplied evaluation context.";
 
 function judgeRetryDelayMs(): number {
   const raw = Bun.env.AGENTPROBE_JUDGE_RETRY_DELAY_MS?.trim();
@@ -146,37 +149,65 @@ function judgeJsonSchema(rubric: Rubric): Record<string, unknown> {
         type: "boolean",
         description: "Whether the evaluated response passes the rubric.",
       },
+      failure_kind: {
+        type: "string",
+        enum: ["agent", "harness"],
+        description:
+          "When pass is false, classify whether the failure is due to the agent under test ('agent') or a defect in the test harness itself such as missing files or incorrect persona behavior ('harness'). When pass is true, set to 'agent'.",
+      },
       failure_mode_detected: {
         type: ["string", "null"],
         description:
           "Named failure mode detected in the response, or null when none apply.",
       },
     },
-    required: ["dimensions", "overall_notes", "pass", "failure_mode_detected"],
+    required: [
+      "dimensions",
+      "overall_notes",
+      "pass",
+      "failure_kind",
+      "failure_mode_detected",
+    ],
     additionalProperties: false,
   };
 }
 
-function judgeInstructions(
-  rubric: Rubric,
-  schema: Record<string, unknown>,
-): string {
+function judgeEvaluationContext(rubric: Rubric): string {
   const dimensionIds = rubric.dimensions
     .map((item) => item.id)
     .sort()
     .join(", ");
   return [
-    "You are an expert rubric judge. Evaluate only the provided response.",
-    "",
     rubricToPromptMarkdown(rubric),
     "",
-    "Return structured output matching the requested schema exactly.",
+    "Use the structured output schema attached to this request.",
     `The \`dimensions\` object must contain exactly these rubric dimension ids: ${dimensionIds}.`,
     "If the scenario defines failure modes, set `failure_mode_detected` to the matching named failure mode or null when none apply.",
-    "",
-    "JSON schema:",
-    JSON.stringify(schema, null, 2),
   ].join("\n");
+}
+
+function judgePromptCacheKey(
+  rubric: Rubric,
+  evaluationContext: string,
+  schema: Record<string, unknown>,
+): string {
+  const fingerprint = createHash("sha256")
+    .update(rubric.id)
+    .update("\n")
+    .update(evaluationContext)
+    .update("\n")
+    .update(JSON.stringify(schema))
+    .digest("hex")
+    .slice(0, 16);
+  return `agentprobe:judge:${rubric.id}:${fingerprint}`;
+}
+
+function judgeCacheControl(
+  model: string,
+): OpenAiResponsesRequest["cacheControl"] | undefined {
+  return model.startsWith("anthropic/claude")
+    ? { type: "ephemeral" }
+    : undefined;
 }
 
 function parseRubricScore(payload: string): RubricScore {
@@ -224,6 +255,12 @@ function parseRubricScore(payload: string): RubricScore {
     overallNotes:
       typeof record.overall_notes === "string" ? record.overall_notes : "",
     passed: record.pass === true,
+    failureKind:
+      record.pass === false
+        ? record.failure_kind === "harness"
+          ? "harness"
+          : "agent"
+        : undefined,
     failureModeDetected:
       typeof record.failure_mode_detected === "string"
         ? record.failure_mode_detected
@@ -272,10 +309,32 @@ export async function judgeResponse(
   }
 
   const schema = judgeJsonSchema(rubric);
+  const evaluationContext = judgeEvaluationContext(rubric);
   const request: OpenAiResponsesRequest = {
     model: rubric.judge.model,
-    instructions: judgeInstructions(rubric, schema),
-    input: `Response to evaluate:\n\n${responseText}`,
+    instructions: JUDGE_SYSTEM_INSTRUCTIONS,
+    input: [
+      {
+        type: "message",
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: evaluationContext,
+          },
+        ],
+      },
+      {
+        type: "message",
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: `Response to evaluate:\n\n${responseText}`,
+          },
+        ],
+      },
+    ],
     text: {
       format: {
         type: "json_schema",
@@ -287,6 +346,8 @@ export async function judgeResponse(
     },
     temperature: rubric.judge.temperature,
     maxOutputTokens: rubric.judge.maxTokens,
+    promptCacheKey: judgePromptCacheKey(rubric, evaluationContext, schema),
+    cacheControl: judgeCacheControl(rubric.judge.model),
   };
 
   let lastError: unknown;
@@ -311,7 +372,12 @@ export async function judgeResponse(
 
       if (error instanceof OpenAiResponsesApiError) {
         const statusCode = error.statusCode;
-        if (statusCode && statusCode >= 400 && statusCode < 500 && statusCode !== 429) {
+        if (
+          statusCode &&
+          statusCode >= 400 &&
+          statusCode < 500 &&
+          statusCode !== 429
+        ) {
           throw error;
         }
         if (attempt < MAX_JUDGE_ATTEMPTS) {
@@ -338,9 +404,7 @@ export async function judgeResponse(
     }
   }
 
-  throw (
-    lastError instanceof Error
-      ? lastError
-      : new AgentProbeRuntimeError(String(lastError))
-  );
+  throw lastError instanceof Error
+    ? lastError
+    : new AgentProbeRuntimeError(String(lastError));
 }

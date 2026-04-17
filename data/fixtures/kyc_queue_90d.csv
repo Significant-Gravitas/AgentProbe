@@ -1,0 +1,51 @@
+case_id,team,document_type,opened_at,closed_at,outcome,reviewer_id,duration_hours
+KYC-1001,Team A,Passport,2024-01-02 09:00,2024-01-02 11:30,Approved,RV-01,2.5
+KYC-1002,Team B,Commercial Registry,2024-01-02 09:15,2024-01-04 14:00,Approved,RV-09,52.75
+KYC-1003,Team A,Utility Bill,2024-01-02 10:00,2024-01-02 14:00,Approved,RV-02,4.0
+KYC-1004,Team C,PEP Screening,2024-03-05 08:00,2024-03-08 17:00,Rejected,RV-15,81.0
+KYC-1005,Team B,Commercial Registry,2024-01-03 09:00,2024-01-05 16:30,Approved,RV-09,55.5
+KYC-1006,Team A,Passport,2024-01-03 10:30,2024-01-03 13:00,Approved,RV-01,2.5
+KYC-1007,Team B,Articles of Association,2024-01-04 09:00,2024-01-04 15:00,Approved,RV-10,6.0
+KYC-1008,Team C,PEP Screening,2024-03-06 09:00,2024-03-10 11:00,Approved,RV-14,98.0
+KYC-1009,Team B,Commercial Registry,2024-01-05 08:30,2024-01-09 10:00,Rejected,RV-09,97.5
+KYC-1010,Team A,ID Card,2024-01-05 09:00,2024-01-05 11:45,Approved,RV-03,2.75
+KYC-1011,Team B,Trust Deed,2024-01-05 10:00,2024-01-05 17:00,Approved,RV-11,7.0
+KYC-1012,Team C,PEP Screening,2024-03-07 10:00,2024-03-11 16:00,Approved,RV-15,102.0
+KYC-1013,Team B,Commercial Registry,2024-01-08 09:00,2024-01-11 13:00,Approved,RV-09,76.0
+KYC-1014,Team A,Proof of Address,2024-01-08 11:00,2024-01-08 14:30,Approved,RV-04,3.5
+KYC-1015,Team C,Sanction List,2024-01-08 13:00,2024-01-09 09:00,Approved,RV-16,20.0
+KYC-1016,Team B,Commercial Registry,2024-01-09 09:00,2024-01-12 10:15,Approved,RV-09,73.25
+KYC-1017,Team A,Passport,2024-01-09 10:00,2024-01-09 12:00,Approved,RV-01,2.0
+KYC-1018,Team C,PEP Screening,2024-03-10 09:00,2024-03-14 15:45,Rejected,RV-15,126.75
+KYC-1019,Team B,UBO Declaration,2024-01-10 09:00,2024-01-10 16:30,Approved,RV-12,7.5
+KYC-1020,Team B,Commercial Registry,2024-01-11 10:00,2024-01-15 11:00,Rejected,RV-09,97.0
+KYC-1021,Team C,PEP Screening,2024-03-12 08:00,2024-03-16 11:30,Approved,RV-14,100.0
+KYC-1022,Team A,Utility Bill,2024-01-12 11:00,2024-01-12 15:00,Approved,RV-02,4.0
+KYC-1023,Team B,Commercial Registry,2024-01-15 09:00,2024-01-18 16:00,Approved,RV-09,79.0
+KYC-1024,Team C,PEP Screening,2024-03-14 09:00,2024-03-19 10:00,Approved,RV-15,121.0
+KYC-1025,Team A,ID Card,2024-01-15 13:00,2024-01-15 15:45,Approved,RV-03,2.75
+KYC-1026,Team B,Certificate of Incumbency,2024-01-16 09:00,2024-01-16 17:00,Approved,RV-13,8.0
+KYC-1027,Team B,Commercial Registry,2024-01-17 09:30,2024-01-22 10:30,Rejected,RV-09,121.0
+KYC-1028,Team C,PEP Screening,2024-03-18 08:30,2024-03-22 16:00,Approved,RV-14,103.5
+KYC-1029,Team A,Passport,2024-01-18 10:00,2024-01-18 12:45,Approved,RV-01,2.75
+KYC-1030,Team B,Commercial Registry,2024-01-19 09:00,2024-01-23 15:00,Approved,RV-09,102.0
+KYC-1031,Team C,Sanction List,2024-01-19 11:00,2024-01-20 13:00,Approved,RV-16,26.0
+KYC-1032,Team B,Commercial Registry,2024-01-22 09:00,2024-01-25 10:00,Approved,RV-09,73.0
+KYC-1033,Team A,Proof of Address,2024-01-22 13:00,2024-01-22 17:00,Rejected,RV-04,4.0
+KYC-1034,Team C,PEP Screening,2024-03-20 09:00,2024-03-25 14:00,Approved,RV-15,125.0
+KYC-1035,Team B,Commercial Registry,2024-01-23 10:00,2024-01-26 16:45,Approved,RV-09,78.75
+KYC-1036,Team A,ID Card,2024-01-24 09:00,2024-01-24 11:30,Approved,RV-03,2.5
+KYC-1037,Team B,Commercial Registry,2024-01-25 08:30,2024-01-30 11:00,Rejected,RV-09,122.5
+KYC-1038,Team C,PEP Screening,2024-03-22 10:00,2024-03-27 15:00,Approved,RV-14,125.0
+KYC-1039,Team B,Commercial Registry,2024-01-26 09:00,2024-01-31 13:00,Approved,RV-09,124.0
+KYC-1040,Team A,Passport,2024-01-26 14:00,2024-01-26 16:30,Approved,RV-01,2.5
+KYC-1041,Team B,Articles of Association,2024-01-29 09:00,2024-01-29 15:30,Approved,RV-10,6.5
+KYC-1042,Team C,PEP Screening,2024-03-25 08:00,2024-03-29 17:00,Approved,RV-15,105.0
+KYC-1043,Team B,Commercial Registry,2024-01-30 09:00,2024-02-02 16:00,Approved,RV-09,79.0
+KYC-1044,Team A,Utility Bill,2024-01-30 10:30,2024-01-30 14:15,Approved,RV-02,3.75
+KYC-1045,Team B,Commercial Registry,2024-01-31 11:00,2024-02-05 10:00,Approved,RV-09,119.0
+KYC-1046,Team C,PEP Screening,2024-03-27 09:00,2024-04-01 14:00,Rejected,RV-15,125.0
+KYC-1047,Team B,Trust Deed,2024-02-01 09:00,2024-02-01 16:45,Approved,RV-11,7.75
+KYC-1048,Team A,ID Card,2024-02-01 13:00,2024-02-01 15:30,Approved,RV-03,2.5
+KYC-1049,Team B,Commercial Registry,2024-02-02 09:00,2024-02-07 10:30,Approved,RV-09,121.5
+KYC-1050,Team C,Sanction List,2024-02-02 11:00,2024-02-03 14:00,Approved,RV-16,27.0

@@ -37,6 +37,7 @@ function buildRun(): RunRecord {
       scenarioTotal: 1,
       scenarioPassedCount: 1,
       scenarioFailedCount: 0,
+      scenarioHarnessFailedCount: 0,
       scenarioErroredCount: 0,
     },
     scenarios: [

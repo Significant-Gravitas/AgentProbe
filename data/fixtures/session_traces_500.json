@@ -1,0 +1,167 @@
+[
+  {
+    "trace_id": "tr-001",
+    "user_id": "u-8821",
+    "segment": "SMB_Free_Trial",
+    "events": [
+      {"timestamp": "2023-10-27T09:00:01Z", "type": "LOGIN", "meta": {"browser": "Chrome"}},
+      {"timestamp": "2023-10-27T09:02:15Z", "type": "NAVIGATE", "meta": {"page": "Import_Wizard"}},
+      {"timestamp": "2023-10-27T09:03:45Z", "type": "FILE_UPLOAD_ATTEMPT", "meta": {"filename": "leads_october.csv", "size_kb": 450}},
+      {"timestamp": "2023-10-27T09:03:47Z", "type": "IMPORT_ERROR", "meta": {"code": "ERR_MALFORMED_CSV", "row": 0}},
+      {"timestamp": "2023-10-27T09:04:10Z", "type": "FILE_UPLOAD_ATTEMPT", "meta": {"filename": "leads_october.csv", "size_kb": 450}},
+      {"timestamp": "2023-10-27T09:04:12Z", "type": "IMPORT_ERROR", "meta": {"code": "ERR_MALFORMED_CSV", "row": 0}},
+      {"timestamp": "2023-10-27T09:05:00Z", "type": "SESSION_IDLE", "meta": {"duration_seconds": 60}}
+    ],
+    "gold_label": {
+      "friction_event": "FAILED_IMPORT",
+      "template_id": "nudge_import_help_01",
+      "rubric_match": "multiple_failures_same_file"
+    }
+  },
+  {
+    "trace_id": "tr-002",
+    "user_id": "u-4412",
+    "segment": "Enterprise_Trial",
+    "events": [
+      {"timestamp": "2023-10-27T10:15:00Z", "type": "NAVIGATE", "meta": {"page": "Team_Settings"}},
+      {"timestamp": "2023-10-27T10:15:30Z", "type": "CLICK", "meta": {"element": "invite_member_btn"}},
+      {"timestamp": "2023-10-27T10:15:45Z", "type": "INVITE_SENT", "meta": {"recipient": "marketing-lead@globalcorp.com"}},
+      {"timestamp": "2023-10-27T10:15:47Z", "type": "WEBHOOK_EVENT", "meta": {"type": "EMAIL_BOUNCE", "reason": "invalid_address"}}
+    ],
+    "gold_label": {
+      "friction_event": "INVITE_BOUNCE",
+      "template_id": "nudge_invite_correction",
+      "rubric_match": "immediate_bounce_on_first_invite"
+    }
+  },
+  {
+    "trace_id": "tr-003",
+    "user_id": "u-9901",
+    "segment": "SMB_Free_Trial",
+    "events": [
+      {"timestamp": "2023-10-27T11:00:00Z", "type": "NAVIGATE", "meta": {"page": "Onboarding_Step_2"}},
+      {"timestamp": "2023-10-27T11:05:00Z", "type": "HEARTBEAT", "meta": {"page": "Onboarding_Step_2"}},
+      {"timestamp": "2023-10-27T11:10:00Z", "type": "HEARTBEAT", "meta": {"page": "Onboarding_Step_2"}},
+      {"timestamp": "2023-10-27T11:13:00Z", "type": "CLICK", "meta": {"element": "help_docs_search"}},
+      {"timestamp": "2023-10-27T11:13:10Z", "type": "SEARCH", "meta": {"query": "how to connect api"}}
+    ],
+    "gold_label": {
+      "friction_event": "STUCK_ON_ONBOARDING_STEP",
+      "template_id": "nudge_onboarding_guide",
+      "rubric_match": "time_on_page_exceeds_threshold_with_help_search"
+    }
+  },
+  {
+    "trace_id": "tr-004",
+    "user_id": "u-1234",
+    "segment": "Mid_Market",
+    "events": [
+      {"timestamp": "2023-10-27T12:00:00Z", "type": "NAVIGATE", "meta": {"page": "Dashboard"}},
+      {"timestamp": "2023-10-27T12:01:00Z", "type": "NAVIGATE", "meta": {"page": "Integrations"}},
+      {"timestamp": "2023-10-27T12:01:30Z", "type": "CLICK", "meta": {"element": "connect_salesforce"}},
+      {"timestamp": "2023-10-27T12:01:35Z", "type": "AUTH_REDIRECT_START", "meta": {"provider": "salesforce"}},
+      {"timestamp": "2023-10-27T12:01:40Z", "type": "AUTH_CALLBACK_ERROR", "meta": {"error": "access_denied", "details": "insufficient_permissions_in_sf"}}
+    ],
+    "gold_label": {
+      "friction_event": "INTEGRATION_AUTH_FAILURE",
+      "template_id": "nudge_sf_permissions_fix",
+      "rubric_match": "auth_error_insufficient_permissions"
+    }
+  },
+  {
+    "trace_id": "tr-005",
+    "user_id": "u-5567",
+    "segment": "SMB_Free_Trial",
+    "events": [
+      {"timestamp": "2023-10-27T13:20:00Z", "type": "NAVIGATE", "meta": {"page": "Billing_Setup"}},
+      {"timestamp": "2023-10-27T13:21:00Z", "type": "INPUT_CHANGE", "meta": {"field": "card_number"}},
+      {"timestamp": "2023-10-27T13:21:15Z", "type": "CLICK", "meta": {"element": "submit_payment"}},
+      {"timestamp": "2023-10-27T13:21:17Z", "type": "PAYMENT_FAILED", "meta": {"reason": "declined_by_bank", "card_brand": "Visa"}}
+    ],
+    "gold_label": {
+      "friction_event": "PAYMENT_DECLINE",
+      "template_id": "nudge_billing_retry_tips",
+      "rubric_match": "bank_decline_during_trial_conversion"
+    }
+  },
+  {
+    "trace_id": "tr-006",
+    "user_id": "u-6678",
+    "segment": "Enterprise_Trial",
+    "events": [
+      {"timestamp": "2023-10-27T14:00:00Z", "type": "NAVIGATE", "meta": {"page": "Report_Builder"}},
+      {"timestamp": "2023-10-27T14:02:00Z", "type": "CLICK", "meta": {"element": "run_report"}},
+      {"timestamp": "2023-10-27T14:02:45Z", "type": "UI_TIMEOUT", "meta": {"component": "report_grid", "duration": 45000}},
+      {"timestamp": "2023-10-27T14:03:00Z", "type": "REFRESH_BROWSER", "meta": {}}
+    ],
+    "gold_label": {
+      "friction_event": "SLOW_REPORT_LATENCY",
+      "template_id": "nudge_latency_apology",
+      "rubric_match": "timeout_followed_by_refresh"
+    }
+  },
+  {
+    "trace_id": "tr-007",
+    "user_id": "u-7789",
+    "segment": "SMB_Free_Trial",
+    "events": [
+      {"timestamp": "2023-10-27T15:10:00Z", "type": "NAVIGATE", "meta": {"page": "Email_Campaigns"}},
+      {"timestamp": "2023-10-27T15:11:00Z", "type": "CLICK", "meta": {"element": "create_new_campaign"}},
+      {"timestamp": "2023-10-27T15:11:05Z", "type": "MODAL_SHOWN", "meta": {"id": "feature_locked_pro"}},
+      {"timestamp": "2023-10-27T15:11:10Z", "type": "CLICK", "meta": {"element": "close_modal"}}
+    ],
+    "gold_label": {
+      "friction_event": "FEATURE_GATE_HIT",
+      "template_id": "nudge_upsell_campaigns",
+      "rubric_match": "attempted_access_to_locked_feature"
+    }
+  },
+  {
+    "trace_id": "tr-008",
+    "user_id": "u-1122",
+    "segment": "Mid_Market",
+    "events": [
+      {"timestamp": "2023-10-27T16:00:00Z", "type": "NAVIGATE", "meta": {"page": "API_Keys"}},
+      {"timestamp": "2023-10-27T16:00:30Z", "type": "CLICK", "meta": {"element": "generate_new_key"}},
+      {"timestamp": "2023-10-27T16:01:00Z", "type": "API_REQUEST", "meta": {"endpoint": "/v1/leads", "method": "POST"}},
+      {"timestamp": "2023-10-27T16:01:01Z", "type": "API_RESPONSE", "meta": {"status": 401, "error": "invalid_api_key"}}
+    ],
+    "gold_label": {
+      "friction_event": "INVALID_API_KEY_USAGE",
+      "template_id": "nudge_api_auth_help",
+      "rubric_match": "401_immediately_after_key_generation"
+    }
+  },
+  {
+    "trace_id": "tr-009",
+    "user_id": "u-3344",
+    "segment": "SMB_Free_Trial",
+    "events": [
+      {"timestamp": "2023-10-27T17:00:00Z", "type": "NAVIGATE", "meta": {"page": "Dashboard"}},
+      {"timestamp": "2023-10-27T17:00:15Z", "type": "CLICK", "meta": {"element": "onboarding_checklist"}},
+      {"timestamp": "2023-10-27T17:00:20Z", "type": "NAVIGATE", "meta": {"page": "Calendar_Sync"}},
+      {"timestamp": "2023-10-27T17:00:30Z", "type": "CLICK", "meta": {"element": "connect_google_cal"}},
+      {"timestamp": "2023-10-27T17:00:35Z", "type": "AUTH_WINDOW_CLOSED", "meta": {"manual": true}}
+    ],
+    "gold_label": {
+      "friction_event": "ABANDONED_AUTH_FLOW",
+      "template_id": "nudge_cal_sync_reminder",
+      "rubric_match": "user_closed_auth_popup_manually"
+    }
+  },
+  {
+    "trace_id": "tr-010",
+    "user_id": "u-5599",
+    "segment": "Enterprise_Trial",
+    "events": [
+      {"timestamp": "2023-10-27T18:00:00Z", "type": "NAVIGATE", "meta": {"page": "Bulk_Delete"}},
+      {"timestamp": "2023-10-27T18:00:45Z", "type": "CLICK", "meta": {"element": "confirm_delete_all"}},
+      {"timestamp": "2023-10-27T18:00:46Z", "type": "ERROR_TOAST", "meta": {"message": "You do not have permission to perform bulk deletes."}}
+    ],
+    "gold_label": {
+      "friction_event": "INSUFFICIENT_PERMISSIONS",
+      "template_id": "nudge_request_admin_access",
+      "rubric_match": "rbac_error_on_restricted_action"
+    }
+  }
+]

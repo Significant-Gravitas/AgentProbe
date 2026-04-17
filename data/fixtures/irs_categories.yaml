@@ -1,0 +1,137 @@
+line_items:
+  advertising:
+    schedule_c_line: 8
+    description: "Advertising and marketing costs to promote the business."
+    examples:
+      - "Google Ads"
+      - "LinkedIn Sponsored Posts"
+      - "Business cards"
+      - "Signage for job sites"
+      - "Sponsorship of local design gala"
+  car_and_truck_expenses:
+    schedule_c_line: 9
+    description: "Costs for operating business vehicles (actual expenses or standard mileage)."
+    examples:
+      - "Fuel for company truck"
+      - "Vehicle maintenance"
+      - "Parking for client site visits"
+      - "Tolls"
+  commissions_and_fees:
+    schedule_c_line: 10
+    description: "Payments to non-employees for services rendered."
+    examples:
+      - "Sales commissions to independent reps"
+      - "Referral fees"
+  depletion:
+    schedule_c_line: 12
+    description: "Depletion of natural resources (rare for design-build)."
+    examples: []
+  employee_benefit_programs:
+    schedule_c_line: 14
+    description: "Employee health insurance, life insurance, and other benefit programs."
+    examples:
+      - "Blue Cross Blue Shield group premiums"
+      - "Dental plan contributions"
+  insurance_other_than_health:
+    schedule_c_line: 15
+    description: "Business liability, professional indemnity, and property insurance."
+    examples:
+      - "General Liability Insurance"
+      - "Professional Liability (E&O)"
+      - "Workers Compensation"
+  interest_mortgage:
+    schedule_c_line: 16a
+    description: "Interest paid on business-related mortgages."
+    examples:
+      - "Studio mortgage interest"
+  interest_other:
+    schedule_c_line: 16b
+    description: "Interest on business loans or credit cards."
+    examples:
+      - "Interest on Chase Ink Business card"
+      - "Equipment loan interest"
+  legal_and_professional_services:
+    schedule_c_line: 17
+    description: "Fees paid to lawyers, accountants, and consultants."
+    examples:
+      - "Annual tax preparation fee"
+      - "Contract review by legal counsel"
+      - "Bookkeeping services"
+  office_expense:
+    schedule_c_line: 18
+    description: "Supplies and small equipment used in the office."
+    examples:
+      - "Paper and toner"
+      - "Software subscriptions (Adobe Creative Cloud, AutoCAD)"
+      - "Postage and shipping"
+      - "Small office furniture under $2,500"
+  pension_and_profit_sharing:
+    schedule_c_line: 19
+    description: "Contributions to employee retirement plans."
+    examples:
+      - "401(k) employer matching"
+  rent_or_lease_vehicles_machinery:
+    schedule_c_line: 20a
+    description: "Lease payments for business vehicles and equipment."
+    examples:
+      - "Forklift rental for project"
+      - "Truck lease payments"
+  rent_or_lease_other_business_property:
+    schedule_c_line: 20b
+    description: "Rent for office space or storage."
+    examples:
+      - "Monthly studio rent"
+      - "Storage unit for architectural models"
+  repairs_and_maintenance:
+    schedule_c_line: 21
+    description: "Routine maintenance and minor repairs to business property."
+    examples:
+      - "Office cleaning services"
+      - "HVAC repair in studio"
+      - "Laptop screen replacement"
+  supplies:
+    schedule_c_line: 22
+    description: "Materials and supplies used in the business (not for resale)."
+    examples:
+      - "Drafting supplies"
+      - "Safety gear (Hard hats, vests)"
+      - "Small tools"
+  taxes_and_licenses:
+    schedule_c_line: 23
+    description: "Business taxes and professional licensing fees."
+    examples:
+      - "State architectural licensing board fees"
+      - "Property taxes on studio"
+      - "Payroll taxes (Employer share)"
+  travel:
+    schedule_c_line: 24a
+    description: "Lodging and transportation for business trips away from home."
+    examples:
+      - "Hotel for out-of-state site visit"
+      - "Airfare for design conference"
+      - "Uber/Lyft while traveling"
+  meals:
+    schedule_c_line: 24b
+    description: "Business-related meals (usually 50% deductible)."
+    examples:
+      - "Lunch with prospective client"
+      - "Dinner for team during project deadline"
+  utilities:
+    schedule_c_line: 25
+    description: "Electricity, water, and trash services for the business."
+    examples:
+      - "Electric bill for studio"
+      - "Business internet and phone"
+  wages:
+    schedule_c_line: 26
+    description: "Total wages paid to employees (W-2)."
+    examples:
+      - "Gross salaries for designers"
+      - "Administrative assistant wages"
+  other_expenses:
+    schedule_c_line: 27a
+    description: "Miscellaneous expenses not covered by other categories."
+    examples:
+      - "Professional memberships (AIA)"
+      - "Continuing education/CEUs"
+      - "Bank service charges"

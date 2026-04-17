@@ -1,0 +1,160 @@
+{
+  "updates": [
+    {
+      "prospect_id": "hs_9021",
+      "full_name": "Sarah Jenkins",
+      "company": "CloudScale AI",
+      "recent_activity": [
+        {
+          "type": "POST",
+          "date": "2023-10-24",
+          "content": "Thrilled to announce we've officially closed our Series B! Big thanks to the team for the hard work on our new data privacy architecture.",
+          "url": "linkedin.com/posts/sjenkins-cloudscale-series-b"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_4432",
+      "full_name": "Marcus Thorne",
+      "company": "Nexus Logistics",
+      "recent_activity": [
+        {
+          "type": "ARTICLE_SHARE",
+          "date": "2023-10-26",
+          "content": "Shared: 'Why Real-time Visibility is the Death of Traditional Warehousing'. This resonates with our current shift toward predictive modeling.",
+          "url": "linkedin.com/posts/mthorne-nexus-visibility"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_1129",
+      "full_name": "Elena Rodriguez",
+      "company": "FinStream",
+      "recent_activity": [
+        {
+          "type": "PROMOTION",
+          "date": "2023-10-20",
+          "content": "Started a new position as VP of Revenue Operations at FinStream.",
+          "url": "linkedin.com/posts/erodriguez-promotion"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_7761",
+      "full_name": "David Wu",
+      "company": "GreenGrid",
+      "recent_activity": [
+        {
+          "type": "POST",
+          "date": "2023-10-27",
+          "content": "We just released our 2023 ESG Impact Report. Proud to see our carbon footprint reduction targets are ahead of schedule.",
+          "url": "linkedin.com/posts/dwu-greengrid-esg"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_3309",
+      "full_name": "Jessica Mayer",
+      "company": "HealthSync",
+      "recent_activity": [
+        {
+          "type": "COMMENT",
+          "date": "2023-10-25",
+          "content": "Commented on 'The Future of HIPAA Compliance': 'Interoperability remains our biggest hurdle for 2024.'",
+          "url": "linkedin.com/posts/jmayer-healthsync-comment"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_5540",
+      "full_name": "Brian O'Connor",
+      "company": "Vertex SaaS",
+      "recent_activity": [
+        {
+          "type": "POST",
+          "date": "2023-10-22",
+          "content": "Just wrapped up a panel at SaaStr on PLG motions. The consensus? Data silos are the silent killer of conversion rates.",
+          "url": "linkedin.com/posts/boconnor-saastr-panel"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_2287",
+      "full_name": "Linda Shao",
+      "company": "Orbital Media",
+      "recent_activity": [
+        {
+          "type": "POST",
+          "date": "2023-10-28",
+          "content": "Excited to be speaking at the upcoming AdTech Summit in NYC next month about attribution modeling.",
+          "url": "linkedin.com/posts/lshao-adtech-nyc"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_8812",
+      "full_name": "Kevin Park",
+      "company": "Ironclad Security",
+      "recent_activity": [
+        {
+          "type": "POST",
+          "date": "2023-10-21",
+          "content": "Cybersecurity isn't just about defense anymore; it's about business continuity and trust in the data supply chain.",
+          "url": "linkedin.com/posts/kpark-ironclad-security-trust"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_6654",
+      "full_name": "Amanda Grier",
+      "company": "BlueChip Retail",
+      "recent_activity": [
+        {
+          "type": "ARTICLE_SHARE",
+          "date": "2023-10-23",
+          "content": "Shared: 'Personalization at Scale: How AI is Changing the Holiday Shopping Season.'",
+          "url": "linkedin.com/posts/agrier-bluechip-holiday-ai"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_4490",
+      "full_name": "Tom Henderson",
+      "company": "SolarFlow",
+      "recent_activity": [
+        {
+          "type": "POST",
+          "date": "2023-10-25",
+          "content": "Big win for the SolarFlow engineering team today—we just hit 99.99% uptime for our monitoring dashboard.",
+          "url": "linkedin.com/posts/thenderson-solarflow-uptime"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_1203",
+      "full_name": "Rachel Zane",
+      "company": "LegalTech Corp",
+      "recent_activity": [
+        {
+          "type": "POST",
+          "date": "2023-10-24",
+          "content": "We are hiring! Looking for a Head of Analytics to help us make sense of our growing litigation database.",
+          "url": "linkedin.com/posts/rzane-legaltech-hiring"
+        }
+      ]
+    },
+    {
+      "prospect_id": "hs_9921",
+      "full_name": "Samir Gupta",
+      "company": "Quantify",
+      "recent_activity": [
+        {
+          "type": "COMMENT",
+          "date": "2023-10-26",
+          "content": "Commented on 'Modern Data Stack Trends': 'The move from ELT to dbt-heavy transformations is saving us weeks of manual work.'",
+          "url": "linkedin.com/posts/sgupta-quantify-dbt"
+        }
+      ]
+    }
+  ]
+}

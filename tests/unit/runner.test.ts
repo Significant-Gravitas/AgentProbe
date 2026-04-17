@@ -22,6 +22,7 @@ import {
   FailingAdapter,
   FakeAdapter,
   FakeResponsesClient,
+  judgeInputText,
   makeTempDir,
   sendMessages,
 } from "./support.ts";
@@ -47,8 +48,14 @@ describe("runner", () => {
             role: "user",
             content: "Please change booking {{ booking_id }}.",
             useExactMessage: false,
+            attachments: [],
           },
-          { role: "user", content: undefined, useExactMessage: false },
+          {
+            role: "user",
+            content: undefined,
+            useExactMessage: false,
+            attachments: [],
+          },
         ],
       }),
       buildPersona(),
@@ -96,6 +103,7 @@ describe("runner", () => {
             role: "user",
             content: "Where is order 123?",
             useExactMessage: true,
+            attachments: [],
           },
           {
             role: "checkpoint",
@@ -162,6 +170,7 @@ describe("runner", () => {
             role: "user",
             content: "Where is order 123?",
             useExactMessage: true,
+            attachments: [],
           },
         ],
       }),
@@ -172,10 +181,10 @@ describe("runner", () => {
       },
     );
 
-    expect(client.calls.at(-1)?.input).toContain(
+    expect(judgeInputText(client.calls.at(-1))).toContain(
       '- lookup_order: {"order_id":"123"}',
     );
-    expect(client.calls.at(-1)?.input).toContain(
+    expect(judgeInputText(client.calls.at(-1))).toContain(
       'Output: {"status":"found","tracking_number":"ZX9"}',
     );
   });
@@ -210,11 +219,13 @@ describe("runner", () => {
             role: "user",
             content: "Please change booking {{ booking_id }}.",
             useExactMessage: false,
+            attachments: [],
           },
           {
             role: "user",
             content: "Mention that arrival must be before noon.",
             useExactMessage: false,
+            attachments: [],
           },
         ],
       }),
@@ -231,7 +242,7 @@ describe("runner", () => {
       "I need to land before noon.",
       "What options are available?",
     ]);
-    expect(client.calls.at(-1)?.instructions).toContain(
+    expect(judgeInputText(client.calls.at(-1))).toContain(
       "User asked: Please change booking FLT-29481.",
     );
   });
@@ -248,7 +259,12 @@ describe("runner", () => {
       adapter,
       buildScenario({
         turns: [
-          { role: "user", content: "First turn", useExactMessage: false },
+          {
+            role: "user",
+            content: "First turn",
+            useExactMessage: false,
+            attachments: [],
+          },
         ],
       }),
       buildPersona(),
@@ -262,10 +278,12 @@ describe("runner", () => {
     expect(sendMessages(adapter)).toEqual(["First turn"]);
     expect(result.passed).toBe(false);
     expect(result.overallScore).toBeCloseTo(0.4);
-    expect(client.calls.at(-1)?.input).toContain(
+    expect(judgeInputText(client.calls.at(-1))).toContain(
       "Scenario flight-rebooking exceeded max_turns=1.",
     );
-    expect(client.calls.at(-1)?.input).toContain("Assistant: First reply.");
+    expect(judgeInputText(client.calls.at(-1))).toContain(
+      "Assistant: First reply.",
+    );
   });
 
   test("runScenario handles multi-session resets", async () => {
@@ -303,6 +321,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Remember that Sarah should be CC'd.",
                 useExactMessage: false,
+                attachments: [],
               },
             ],
           },
@@ -315,6 +334,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Who should I CC on outgoing client proposals?",
                 useExactMessage: false,
+                attachments: [],
               },
             ],
           },
@@ -355,6 +375,7 @@ describe("runner", () => {
             role: "user",
             content: "Can you help with my refund?",
             useExactMessage: true,
+            attachments: [],
           },
           {
             role: "checkpoint",
@@ -405,6 +426,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Remember Sarah handles proposals.",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -417,6 +439,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Who handles proposals?",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -468,6 +491,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Remember that Sarah handles proposals.",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -480,6 +504,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Who handles proposals?",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -497,7 +522,9 @@ describe("runner", () => {
       "Remember that Sarah handles proposals.",
     ]);
     expect(sendMessages(secondAdapter)).toEqual(["Who handles proposals?"]);
-    expect(result.transcript.filter((turn) => turn.role === "assistant")).toHaveLength(2);
+    expect(
+      result.transcript.filter((turn) => turn.role === "assistant"),
+    ).toHaveLength(2);
   });
 
   test("runScenario warns and degrades when fresh_agent is requested without an adapter factory", async () => {
@@ -531,6 +558,7 @@ describe("runner", () => {
                   role: "user",
                   content: "Remember this for later.",
                   useExactMessage: true,
+                  attachments: [],
                 },
               ],
             },
@@ -543,6 +571,7 @@ describe("runner", () => {
                   role: "user",
                   content: "What did I ask you to remember?",
                   useExactMessage: true,
+                  attachments: [],
                 },
               ],
             },
@@ -590,6 +619,7 @@ describe("runner", () => {
                 role: "user",
                 content: "Remember Sarah for later.",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -602,6 +632,7 @@ describe("runner", () => {
                 role: "user",
                 content: "What did I ask you to remember?",
                 useExactMessage: true,
+                attachments: [],
               },
             ],
           },
@@ -625,6 +656,310 @@ describe("runner", () => {
       ),
     ).toBe(false);
     expect(result.passed).toBe(true);
+  });
+
+  test("runSuite filters by scenarioId and reports available ids on mismatch", async () => {
+    const root = makeTempDir("run-suite-scenario-id");
+    mkdirSync(root, { recursive: true });
+    const endpointPath = join(root, "endpoint.yaml");
+    const personasPath = join(root, "personas.yaml");
+    const rubricPath = join(root, "rubric.yaml");
+    const scenariosPath = join(root, "scenarios.yaml");
+
+    writeFileSync(
+      endpointPath,
+      [
+        "transport: http",
+        "connection:",
+        "  base_url: http://example.test",
+        "request:",
+        "  method: POST",
+        '  url: "{{ base_url }}/chat"',
+        "response:",
+        "  format: text",
+        '  content_path: "$"',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      personasPath,
+      [
+        "personas:",
+        "  - id: business-traveler",
+        "    name: Business Traveler",
+        "    demographics:",
+        "      role: business customer",
+        "      tech_literacy: high",
+        "      domain_expertise: intermediate",
+        "      language_style: terse",
+        "    personality:",
+        "      patience: 2",
+        "      assertiveness: 4",
+        "      detail_orientation: 5",
+        "      cooperativeness: 4",
+        "      emotional_intensity: 2",
+        "    behavior:",
+        "      opening_style: Be direct.",
+        "      follow_up_style: Answer follow-up questions directly.",
+        "      escalation_triggers: []",
+        "      topic_drift: none",
+        "      clarification_compliance: high",
+        "    system_prompt: You are a direct business traveler.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      rubricPath,
+      [
+        "judge:",
+        "  provider: openai",
+        "  model: anthropic/claude-opus-4.6",
+        "  temperature: 0.0",
+        "  max_tokens: 500",
+        "rubrics:",
+        "  - id: customer-support",
+        "    name: Customer Support",
+        "    pass_threshold: 0.7",
+        "    meta_prompt: Judge behavior.",
+        "    dimensions:",
+        "      - id: task_completion",
+        "        name: Task Completion",
+        "        weight: 1.0",
+        "        scale:",
+        "          type: likert",
+        "          points: 5",
+        "          labels:",
+        "            1: bad",
+        "            5: good",
+        "        judge_prompt: Check task completion.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      scenariosPath,
+      [
+        "scenarios:",
+        "  - id: scenario-a",
+        "    name: Scenario A",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        "        content: Hello A",
+        "        use_exact_message: true",
+        "    expectations:",
+        "      expected_behavior: Help.",
+        "      expected_outcome: resolved",
+        "  - id: scenario-b",
+        "    name: Scenario B",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        "        content: Hello B",
+        "        use_exact_message: true",
+        "    expectations:",
+        "      expected_behavior: Help.",
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const matchedClient = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+    const matched = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      scenarioId: "scenario-b",
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FakeAdapter([adapterReply("Handled.")]),
+      client: asResponsesClient(matchedClient) as never,
+    });
+
+    expect(matched.exitCode).toBe(0);
+    expect(matched.results.map((item) => item.scenarioId)).toEqual([
+      "scenario-b",
+    ]);
+
+    try {
+      await runSuite({
+        endpoint: endpointPath,
+        scenarios: scenariosPath,
+        personas: personasPath,
+        rubric: rubricPath,
+        scenarioId: "nonexistent",
+        adapterFactory: (_endpoint: Endpoints) =>
+          new FakeAdapter([adapterReply("Handled.")]),
+        client: asResponsesClient(new FakeResponsesClient([])) as never,
+      });
+      expect.unreachable("Should have thrown for unknown scenario id");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).toContain("nonexistent");
+      expect(message).toContain("scenario-a");
+      expect(message).toContain("scenario-b");
+    }
+  });
+
+  test("runSuite filters by scenario name when scenarioId matches name but not id", async () => {
+    const root = makeTempDir("run-suite-scenario-name");
+    mkdirSync(root, { recursive: true });
+    const endpointPath = join(root, "endpoint.yaml");
+    const personasPath = join(root, "personas.yaml");
+    const rubricPath = join(root, "rubric.yaml");
+    const scenariosPath = join(root, "scenarios.yaml");
+
+    writeFileSync(
+      endpointPath,
+      [
+        "transport: http",
+        "connection:",
+        "  base_url: http://example.test",
+        "request:",
+        "  method: POST",
+        '  url: "{{ base_url }}/chat"',
+        "response:",
+        "  format: text",
+        '  content_path: "$"',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      personasPath,
+      [
+        "personas:",
+        "  - id: business-traveler",
+        "    name: Business Traveler",
+        "    demographics:",
+        "      role: business customer",
+        "      tech_literacy: high",
+        "      domain_expertise: intermediate",
+        "      language_style: terse",
+        "    personality:",
+        "      patience: 2",
+        "      assertiveness: 4",
+        "      detail_orientation: 5",
+        "      cooperativeness: 4",
+        "      emotional_intensity: 2",
+        "    behavior:",
+        "      opening_style: Be direct.",
+        "      follow_up_style: Answer follow-up questions directly.",
+        "      escalation_triggers: []",
+        "      topic_drift: none",
+        "      clarification_compliance: high",
+        "    system_prompt: You are a direct business traveler.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      rubricPath,
+      [
+        "judge:",
+        "  provider: openai",
+        "  model: anthropic/claude-opus-4.6",
+        "  temperature: 0.0",
+        "  max_tokens: 500",
+        "rubrics:",
+        "  - id: customer-support",
+        "    name: Customer Support",
+        "    pass_threshold: 0.7",
+        "    meta_prompt: Judge behavior.",
+        "    dimensions:",
+        "      - id: task_completion",
+        "        name: Task Completion",
+        "        weight: 1.0",
+        "        scale:",
+        "          type: likert",
+        "          points: 5",
+        "          labels:",
+        "            1: bad",
+        "            5: good",
+        "        judge_prompt: Check task completion.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      scenariosPath,
+      [
+        "scenarios:",
+        "  - id: smoke-a",
+        "    name: Smoke Alpha",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        "        content: Hello A",
+        "        use_exact_message: true",
+        "    expectations:",
+        "      expected_behavior: Help.",
+        "      expected_outcome: resolved",
+        "  - id: smoke-b",
+        "    name: Smoke Beta",
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        "        content: Hello B",
+        "        use_exact_message: true",
+        "    expectations:",
+        "      expected_behavior: Help.",
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const nameMatchClient = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+    const result = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      scenarioId: "Smoke Beta",
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FakeAdapter([adapterReply("Handled.")]),
+      client: asResponsesClient(nameMatchClient) as never,
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.results.map((item) => item.scenarioId)).toEqual(["smoke-b"]);
+
+    const multiMatchClient = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore(),
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+    const multiResult = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      scenarioId: "smoke-a,Smoke Beta",
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FakeAdapter([adapterReply("Handled.")]),
+      client: asResponsesClient(multiMatchClient) as never,
+    });
+
+    expect(multiResult.exitCode).toBe(0);
+    expect(multiResult.results.map((item) => item.scenarioId)).toEqual([
+      "smoke-a",
+      "smoke-b",
+    ]);
   });
 
   test("runSuite filters tags, merges directories, emits progress, and preserves parallel order", async () => {
@@ -801,6 +1136,191 @@ describe("runner", () => {
     expect(
       events.filter((event) => event.kind === "scenario_finished"),
     ).toHaveLength(2);
+  });
+
+  test("runSuite honors parallel limits while preserving result ordering", async () => {
+    const root = makeTempDir("run-suite-parallel-limit");
+    const endpointPath = join(root, "endpoint.yaml");
+    const personasPath = join(root, "personas.yaml");
+    const rubricPath = join(root, "rubric.yaml");
+    const scenariosPath = join(root, "scenarios.yaml");
+
+    writeFileSync(
+      endpointPath,
+      [
+        "transport: http",
+        "connection:",
+        "  base_url: http://example.test",
+        "request:",
+        "  method: POST",
+        '  url: "{{ base_url }}/chat"',
+        "response:",
+        "  format: text",
+        '  content_path: "$"',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      personasPath,
+      [
+        "personas:",
+        "  - id: business-traveler",
+        '    name: "Business Traveler"',
+        "    demographics:",
+        "      role: business customer",
+        "      tech_literacy: high",
+        "      domain_expertise: intermediate",
+        "      language_style: terse",
+        "    personality:",
+        "      patience: 3",
+        "      assertiveness: 4",
+        "      detail_orientation: 4",
+        "      cooperativeness: 4",
+        "      emotional_intensity: 2",
+        "    behavior:",
+        '      opening_style: "Be direct."',
+        '      follow_up_style: "Be concise."',
+        "      escalation_triggers: []",
+        '      topic_drift: "none"',
+        '      clarification_compliance: "high"',
+        '    system_prompt: "You are direct."',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      rubricPath,
+      [
+        "judge:",
+        "  provider: openai",
+        "  model: anthropic/claude-opus-4.6",
+        "  temperature: 0.0",
+        "  max_tokens: 500",
+        "rubrics:",
+        "  - id: customer-support",
+        '    name: "Customer Support"',
+        "    pass_threshold: 0.7",
+        '    meta_prompt: "Judge behavior."',
+        "    dimensions:",
+        "      - id: task_completion",
+        '        name: "Task Completion"',
+        "        weight: 1.0",
+        "        scale:",
+        "          type: likert",
+        "          points: 5",
+        "          labels:",
+        '            1: "bad"',
+        '            5: "good"',
+        '        judge_prompt: "Check task completion."',
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    writeFileSync(
+      scenariosPath,
+      [
+        "scenarios:",
+        "  - id: smoke-a",
+        '    name: "Smoke A"',
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello A"',
+        "        use_exact_message: true",
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "  - id: smoke-b",
+        '    name: "Smoke B"',
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello B"',
+        "        use_exact_message: true",
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "  - id: smoke-c",
+        '    name: "Smoke C"',
+        "    persona: business-traveler",
+        "    rubric: customer-support",
+        "    turns:",
+        "      - role: user",
+        '        content: "Hello C"',
+        "        use_exact_message: true",
+        "    expectations:",
+        '      expected_behavior: "Help."',
+        "      expected_outcome: resolved",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+
+    const concurrency = {
+      active: 0,
+      max: 0,
+    };
+
+    const result = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      client: {
+        async create(request: {
+          text: { format: { name?: string } };
+        }): Promise<{ outputText: string }> {
+          if (request.text.format.name === "persona_step") {
+            return {
+              outputText: JSON.stringify(buildPersonaStep("completed")),
+            };
+          }
+          return {
+            outputText: JSON.stringify({
+              dimensions: {
+                task_completion: {
+                  reasoning: "The agent completed the request.",
+                  evidence: ["The transcript shows a direct answer."],
+                  score: 4,
+                },
+              },
+              overall_notes: "Solid answer.",
+              pass: true,
+              failure_mode_detected: null,
+            }),
+          };
+        },
+      } as never,
+      adapterFactory: (_endpoint: Endpoints) => ({
+        async healthCheck(): Promise<void> {},
+        async openScenario(): Promise<Record<string, unknown>> {
+          return {};
+        },
+        async sendUserTurn() {
+          concurrency.active += 1;
+          concurrency.max = Math.max(concurrency.max, concurrency.active);
+          try {
+            await Bun.sleep(25);
+            return adapterReply("Handled.");
+          } finally {
+            concurrency.active -= 1;
+          }
+        },
+        async closeScenario(): Promise<void> {},
+      }),
+      parallelLimit: 2,
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.results.map((item) => item.scenarioId)).toEqual([
+      "smoke-a",
+      "smoke-b",
+      "smoke-c",
+    ]);
+    expect(concurrency.max).toBe(2);
   });
 
   test("runSuite emits repeat display ids, run ids, and distinct pinned users", async () => {
@@ -1044,24 +1564,82 @@ describe("runner", () => {
 
     const events: RunProgressEvent[] = [];
 
-    await expect(
-      runSuite({
-        endpoint: endpointPath,
-        scenarios: scenariosPath,
-        personas: personasPath,
-        rubric: rubricPath,
-        client: asResponsesClient(new FakeResponsesClient([])) as never,
-        adapterFactory: (_endpoint: Endpoints) =>
-          new FailingAdapter("endpoint down"),
-        progressCallback: (event) => {
-          events.push(event);
-        },
-        parallel: true,
-      }),
-    ).rejects.toThrow("endpoint down");
+    const result = await runSuite({
+      endpoint: endpointPath,
+      scenarios: scenariosPath,
+      personas: personasPath,
+      rubric: rubricPath,
+      client: asResponsesClient(new FakeResponsesClient([])) as never,
+      adapterFactory: (_endpoint: Endpoints) =>
+        new FailingAdapter("endpoint down"),
+      progressCallback: (event) => {
+        events.push(event);
+      },
+      parallel: true,
+    });
 
     expect(
       events.filter((event) => event.kind === "scenario_error"),
     ).toHaveLength(2);
+    expect(result.passed).toBe(false);
+    expect(result.exitCode).toBe(1);
+    expect(result.results).toHaveLength(2);
+    expect(result.results.every((item) => item.passed === false)).toBe(true);
+    expect(
+      result.results.every((item) =>
+        item.judgeScore?.overallNotes.includes("endpoint down"),
+      ),
+    ).toBe(true);
+  });
+
+  test("runScenario records upload rejections as harness failures", async () => {
+    class UploadRejectingAdapter extends FakeAdapter {
+      async uploadFile(_filePath: string, _fileName: string): Promise<never> {
+        const { AgentProbeHarnessError } = await import(
+          "../../src/shared/utils/errors.ts"
+        );
+        throw new AgentProbeHarnessError(
+          "File upload rejected for foo.csv: 413 Payload Too Large.",
+        );
+      }
+    }
+
+    const tempDir = makeTempDir("upload-harness-fail");
+    const fixtureDir = join(tempDir, "fixtures");
+    mkdirSync(fixtureDir, { recursive: true });
+    writeFileSync(join(fixtureDir, "foo.csv"), "id,name\n1,a\n");
+    const scenariosPath = join(tempDir, "scenarios.yaml");
+
+    const adapter = new UploadRejectingAdapter([]);
+    const client = new FakeResponsesClient([]);
+
+    const result = await runScenario(
+      adapter as unknown as Parameters<typeof runScenario>[0],
+      buildScenario({
+        turns: [
+          {
+            role: "user",
+            content: "Process this file.",
+            useExactMessage: true,
+            attachments: [{ path: "fixtures/foo.csv" }],
+          },
+        ],
+      }),
+      buildPersona(),
+      buildRubric(),
+      {
+        client: asResponsesClient(client) as never,
+        scenariosPath,
+      },
+    );
+
+    expect(result.passed).toBe(false);
+    expect(result.failureKind).toBe("harness");
+    expect(result.judgeScore?.failureKind).toBe("harness");
+    expect(result.judgeScore?.overallNotes).toContain("Harness failure");
+    expect(result.judgeScore?.overallNotes).toContain("413");
+    expect(result.overallScore).toBe(0);
+    // Judge must NOT have been called.
+    expect(client.calls).toHaveLength(0);
   });
 });

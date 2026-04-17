@@ -1,0 +1,51 @@
+{
+  "paper_title": "Attention Is All You Need",
+  "paper_id": "arXiv:1706.03762v5",
+  "task": "Machine Translation (WMT 2014 English-to-German)",
+  "metric": "BLEU",
+  "tokenization": "byte-pair encoding (BPE)",
+  "benchmark_results": {
+    "transformer_base": {
+      "bleu_score": 27.3,
+      "training_cost_flops": 3.3e18,
+      "parameters": 65000000,
+      "published_final_score": 28.4,
+      "note": "Reported on WMT 2014 English-to-German test set"
+    },
+    "transformer_big": {
+      "bleu_score": 28.4,
+      "training_cost_flops": 2.3e19,
+      "parameters": 213000000,
+      "published_final_score": 28.9,
+      "note": "State-of-the-art at time of publication"
+    }
+  },
+  "hyperparameters": {
+    "base": {
+      "d_model": 512,
+      "d_ff": 2048,
+      "h": 8,
+      "d_k": 64,
+      "d_v": 64,
+      "p_drop": 0.1,
+      "warmup_steps": 4000
+    },
+    "big": {
+      "d_model": 1024,
+      "d_ff": 4096,
+      "h": 16,
+      "d_k": 64,
+      "d_v": 64,
+      "p_drop": 0.3,
+      "warmup_steps": 4000
+    }
+  },
+  "reproduction_guidelines": {
+    "averaging": "Last 5 checkpoints for base, last 20 checkpoints for big",
+    "beam_search": {
+      "beam_size": 4,
+      "length_penalty": 0.6
+    },
+    "dataset_split": "WMT 2014 English-German (4.5M sentence pairs)"
+  }
+}

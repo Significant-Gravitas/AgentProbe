@@ -1,0 +1,286 @@
+[
+  {
+    "id": "msg-001",
+    "from": "sarah.j@vortex-ventures.com",
+    "subject": "Urgent: Series B Term Sheet Signature",
+    "body": "Hi, we need the signed term sheet by EOD today to stay on track for the Monday announcement. Please review the updated valuation clause.",
+    "received_at": "2023-10-27T08:15:00Z"
+  },
+  {
+    "id": "msg-002",
+    "from": "marketing@newsletter.substack.com",
+    "subject": "Weekly SaaS Trends",
+    "body": "Here is your weekly roundup of what is happening in the world of B2B SaaS...",
+    "received_at": "2023-09-15T10:00:00Z"
+  },
+  {
+    "id": "msg-003",
+    "from": "david.chen@cloud-infra.io",
+    "subject": "Database latency issues in Production",
+    "body": "The US-East-1 cluster is seeing 200ms spikes. We need your approval to scale the instance types immediately.",
+    "received_at": "2023-10-27T09:30:00Z"
+  },
+  {
+    "id": "msg-004",
+    "from": "noreply@github.com",
+    "subject": "[GitHub] Security Alert: dependency vulnerability",
+    "body": "One of your repositories has a critical vulnerability in a sub-dependency.",
+    "received_at": "2023-10-10T22:12:00Z"
+  },
+  {
+    "id": "msg-005",
+    "from": "jessica@talent-scout.com",
+    "subject": "Candidate for Head of Product - Final Interview?",
+    "body": "Alex passed the technical round. Can we get 30 mins on your calendar tomorrow for the final culture fit check?",
+    "received_at": "2023-10-27T11:05:00Z"
+  },
+  {
+    "id": "msg-006",
+    "from": "billing@aws.amazon.com",
+    "subject": "Your AWS Invoice for September is ready",
+    "body": "Your invoice for the period September 1 - September 30 is now available in the console.",
+    "received_at": "2023-10-03T04:00:00Z"
+  },
+  {
+    "id": "msg-007",
+    "from": "mark@competitor-intel.com",
+    "subject": "Competitor X just launched a new feature",
+    "body": "Just a heads up that they released their AI integration this morning. Link attached.",
+    "received_at": "2023-10-27T12:45:00Z"
+  },
+  {
+    "id": "msg-008",
+    "from": "support@linear.app",
+    "subject": "New login from Chrome on macOS",
+    "body": "We noticed a new login to your account. If this wasn't you, please reset your password.",
+    "received_at": "2023-10-12T14:20:00Z"
+  },
+  {
+    "id": "msg-009",
+    "from": "tom@vortex-ventures.com",
+    "subject": "Board Meeting Deck Feedback",
+    "body": "I took a look at slides 4-10. We need more clarity on the churn numbers before the meeting tomorrow.",
+    "received_at": "2023-10-27T13:10:00Z"
+  },
+  {
+    "id": "msg-010",
+    "from": "events@techcrunch.com",
+    "subject": "Early Bird Tickets for Disrupt",
+    "body": "Don't miss out on the early bird pricing ending this Friday.",
+    "received_at": "2023-09-20T09:00:00Z"
+  },
+  {
+    "id": "msg-011",
+    "from": "legal@startup-law.com",
+    "subject": "Revised IP Assignment Agreement",
+    "body": "Please find the attached documents for the new hires. We need these executed by Friday.",
+    "received_at": "2023-10-26T16:00:00Z"
+  },
+  {
+    "id": "msg-012",
+    "from": "hr@mycompany.com",
+    "subject": "Open Enrollment for Benefits",
+    "body": "Reminder: Benefits enrollment for the next fiscal year closes in 3 days.",
+    "received_at": "2023-10-25T08:00:00Z"
+  },
+  {
+    "id": "msg-013",
+    "from": "mike@blue-chip-partners.com",
+    "subject": "Intro: Sarah from Global Logistics",
+    "body": "Hey, I'd like to introduce you to Sarah. They are looking for a solution like yours for their fleet management.",
+    "received_at": "2023-10-27T14:22:00Z"
+  },
+  {
+    "id": "msg-014",
+    "from": "no-reply@slack.com",
+    "subject": "You have 15 unread mentions in Slack",
+    "body": "You have been mentioned in #general, #engineering, and #product-roadmap.",
+    "received_at": "2023-10-27T15:00:00Z"
+  },
+  {
+    "id": "msg-015",
+    "from": "landlord@commercial-realty.com",
+    "subject": "Lease Renewal - Suite 400",
+    "body": "Your lease is up for renewal in 90 days. Please let us know if you intend to extend.",
+    "received_at": "2023-10-24T10:30:00Z"
+  },
+  {
+    "id": "msg-016",
+    "from": "founder-network@clark-street.com",
+    "subject": "Invitation: Founder Dinner next Thursday",
+    "body": "We'd love to have you join a small group of founders for dinner at 7 PM.",
+    "received_at": "2023-10-27T09:00:00Z"
+  },
+  {
+    "id": "msg-017",
+    "from": "delivery@doordash.com",
+    "subject": "Your order from Thai Palace",
+    "body": "Your order has been delivered. Enjoy your meal!",
+    "received_at": "2023-10-10T19:15:00Z"
+  },
+  {
+    "id": "msg-018",
+    "from": "cto@mycompany.com",
+    "subject": "Critical: Database Migration Failed",
+    "body": "The migration we ran at midnight failed. We had to roll back. We need to discuss the strategy for the next attempt.",
+    "received_at": "2023-10-27T01:00:00Z"
+  },
+  {
+    "id": "msg-019",
+    "from": "sales@saas-tool.com",
+    "subject": "Quick question about your workflow",
+    "body": "Hi, I'm reaching out to see if you've considered automating your lead gen...",
+    "received_at": "2023-09-05T11:00:00Z"
+  },
+  {
+    "id": "msg-020",
+    "from": "cfo@mycompany.com",
+    "subject": "Burn rate analysis - September",
+    "body": "Attached is the burn rate report. We are slightly over budget on cloud spend.",
+    "received_at": "2023-10-26T17:45:00Z"
+  },
+  {
+    "id": "msg-021",
+    "from": "news@wsj.com",
+    "subject": "Daily Morning Briefing",
+    "body": "Stock markets open higher as inflation fears ease...",
+    "received_at": "2023-10-27T06:00:00Z"
+  },
+  {
+    "id": "msg-022",
+    "from": "customer-success@stripe.com",
+    "subject": "Action Required: Update your business details",
+    "body": "To comply with new regulations, please provide your updated business address.",
+    "received_at": "2023-10-20T13:00:00Z"
+  },
+  {
+    "id": "msg-023",
+    "from": "alice@vortex-ventures.com",
+    "subject": "Portfolio Company Sync",
+    "body": "Hi, just checking in to see if you're free for our quarterly sync next Tuesday?",
+    "received_at": "2023-10-27T10:15:00Z"
+  },
+  {
+    "id": "msg-024",
+    "from": "promotions@linkedin.com",
+    "subject": "You're getting noticed! 5 people viewed your profile",
+    "body": "See who is looking at your profile and grow your network.",
+    "received_at": "2023-10-14T08:30:00Z"
+  },
+  {
+    "id": "msg-025",
+    "from": "security@google.com",
+    "subject": "Security Alert for your Google Account",
+    "body": "A new device signed into your account. If this was you, you can ignore this email.",
+    "received_at": "2023-10-26T22:00:00Z"
+  },
+  {
+    "id": "msg-026",
+    "from": "bob@big-enterprise.com",
+    "subject": "Contract Negotiation - Final Draft",
+    "body": "We've accepted most of your changes. One final tweak on the liability cap. Let's close this today.",
+    "received_at": "2023-10-27T11:30:00Z"
+  },
+  {
+    "id": "msg-027",
+    "from": "newsletter@producthunt.com",
+    "subject": "Today's Top Products",
+    "body": "Check out the most upvoted products today, including a new AI writing assistant.",
+    "received_at": "2023-10-27T07:00:00Z"
+  },
+  {
+    "id": "msg-028",
+    "from": "support@zoom.us",
+    "subject": "Your meeting recording is ready",
+    "body": "The recording for 'Product Sync' is now available in your account.",
+    "received_at": "2023-10-26T15:00:00Z"
+  },
+  {
+    "id": "msg-029",
+    "from": "jane.doe@major-bank.com",
+    "subject": "Urgent: Wire Transfer Verification",
+    "body": "We need verbal confirmation for the $500k wire initiated this morning. Please call us ASAP.",
+    "received_at": "2023-10-27T09:45:00Z"
+  },
+  {
+    "id": "msg-030",
+    "from": "hello@medium.com",
+    "subject": "Staff Picks: How to scale your startup",
+    "body": "The best stories of the week curated just for you.",
+    "received_at": "2023-09-28T12:00:00Z"
+  },
+  {
+    "id": "msg-031",
+    "from": "recruiting@mycompany.com",
+    "subject": "Offer Letter for New Engineer",
+    "body": "The candidate accepted! Please sign the offer letter so we can start onboarding.",
+    "received_at": "2023-10-27T10:50:00Z"
+  },
+  {
+    "id": "msg-032",
+    "from": "no-reply@uber.com",
+    "subject": "Your trip with Uber",
+    "body": "Thanks for riding with us. Here is your receipt for $24.50.",
+    "received_at": "2023-10-05T20:00:00Z"
+  },
+  {
+    "id": "msg-033",
+    "from": "partner@sequoia-cap.com",
+    "subject": "Quick Catch-up?",
+    "body": "Hearing great things about your growth. Would love to grab coffee if you're in the city next week.",
+    "received_at": "2023-10-27T14:00:00Z"
+  },
+  {
+    "id": "msg-034",
+    "from": "marketing@hubspot.com",
+    "subject": "New Blog Post: 10 Ways to Improve Conversion",
+    "body": "Read our latest guide on improving your website's conversion rate.",
+    "received_at": "2023-10-27T08:00:00Z"
+  },
+  {
+    "id": "msg-035",
+    "from": "ops@mycompany.com",
+    "subject": "Office Internet Down",
+    "body": "The fiber line was cut. We are working with the ISP. ETA for fix is 4 PM.",
+    "received_at": "2023-10-27T11:15:00Z"
+  },
+  {
+    "id": "msg-036",
+    "from": "alerts@google.com",
+    "subject": "New result for your name on Google",
+    "body": "A new mention of your name was found on a tech blog.",
+    "received_at": "2023-10-25T09:30:00Z"
+  },
+  {
+    "id": "msg-037",
+    "from": "vp-sales@major-retailer.com",
+    "subject": "PO #98765 - Approved",
+    "body": "We've approved the purchase order. Please send the invoice so we can process payment.",
+    "received_at": "2023-10-27T13:45:00Z"
+  },
+  {
+    "id": "msg-038",
+    "from": "webinar@zoom.us",
+    "subject": "Reminder: Webinar begins in 1 hour",
+    "body": "Don't forget to join our session on 'Scaling AI Teams'.",
+    "received_at": "2023-10-18T16:00:00Z"
+  },
+  {
+    "id": "msg-039",
+    "from": "product@mycompany.com",
+    "subject": "Roadmap Review - Q4",
+    "body": "I've updated the Q4 roadmap based on our last session. Please review and approve.",
+    "received_at": "2023-10-26T18:30:00Z"
+  },
+  {
+    "id": "msg-040",
+    "from": "noreply@expensify.com",
+    "subject": "Report Approved: Business Trip NYC",
+    "body": "Your expense report has been approved and scheduled for reimbursement.",
+    "received_at": "2023-10-15T11:00:00Z"
+  },
+  {
+    "id": "msg-041",
+    "from": "kevin@vortex-ventures.com",
+    "subject": "Intro: Key Hire for Engineering",
+    "body": "Hey, I just spoke with a former VP Eng from Stripe who is looking for

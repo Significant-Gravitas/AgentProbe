@@ -6,6 +6,10 @@ export class AgentProbeRuntimeError extends Error {
   override name = "AgentProbeRuntimeError";
 }
 
+export class AgentProbeHarnessError extends Error {
+  override name = "AgentProbeHarnessError";
+}
+
 export function errorPayload(error: unknown): {
   type: string;
   message: string;

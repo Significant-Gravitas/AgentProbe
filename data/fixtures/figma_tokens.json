@@ -1,0 +1,118 @@
+{
+  "version": "1.2.0",
+  "name": "Material 3 Marketing Design System",
+  "tokens": {
+    "colors": {
+      "primary": {
+        "main": { "value": "#6750A4", "type": "color" },
+        "on": { "value": "#FFFFFF", "type": "color" },
+        "container": { "value": "#EADDFF", "type": "color" },
+        "onContainer": { "value": "#21005D", "type": "color" }
+      },
+      "secondary": {
+        "main": { "value": "#625B71", "type": "color" },
+        "on": { "value": "#FFFFFF", "type": "color" },
+        "container": { "value": "#E8DEF8", "type": "color" },
+        "onContainer": { "value": "#1D192B", "type": "color" }
+      },
+      "tertiary": {
+        "main": { "value": "#7D5260", "type": "color" },
+        "on": { "value": "#FFFFFF", "type": "color" },
+        "container": { "value": "#FFD8E4", "type": "color" },
+        "onContainer": { "value": "#31111D", "type": "color" }
+      },
+      "error": {
+        "main": { "value": "#B3261E", "type": "color" },
+        "on": { "value": "#FFFFFF", "type": "color" },
+        "container": { "value": "#F9DEDC", "type": "color" },
+        "onContainer": { "value": "#410E0B", "type": "color" }
+      },
+      "background": { "value": "#FFFBFE", "type": "color" },
+      "onBackground": { "value": "#1C1B1F", "type": "color" },
+      "surface": {
+        "main": { "value": "#FFFBFE", "type": "color" },
+        "on": { "value": "#1C1B1F", "type": "color" },
+        "variant": { "value": "#E7E0EC", "type": "color" },
+        "onVariant": { "value": "#49454F", "type": "color" }
+      },
+      "outline": { "value": "#79747E", "type": "color" }
+    },
+    "typography": {
+      "fontFamilies": {
+        "brand": { "value": "Roboto", "type": "fontFamily" },
+        "plain": { "value": "Inter", "type": "fontFamily" }
+      },
+      "headings": {
+        "displayLarge": {
+          "fontFamily": "{typography.fontFamilies.brand}",
+          "fontWeight": "400",
+          "fontSize": "57px",
+          "lineHeight": "64px",
+          "letterSpacing": "-0.25px"
+        },
+        "displayMedium": {
+          "fontFamily": "{typography.fontFamilies.brand}",
+          "fontWeight": "400",
+          "fontSize": "45px",
+          "lineHeight": "52px",
+          "letterSpacing": "0px"
+        },
+        "headlineSmall": {
+          "fontFamily": "{typography.fontFamilies.brand}",
+          "fontWeight": "400",
+          "fontSize": "24px",
+          "lineHeight": "32px",
+          "letterSpacing": "0px"
+        }
+      },
+      "body": {
+        "large": {
+          "fontFamily": "{typography.fontFamilies.plain}",
+          "fontWeight": "400",
+          "fontSize": "16px",
+          "lineHeight": "24px",
+          "letterSpacing": "0.5px"
+        },
+        "medium": {
+          "fontFamily": "{typography.fontFamilies.plain}",
+          "fontWeight": "400",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "letterSpacing": "0.25px"
+        }
+      }
+    },
+    "spacing": {
+      "none": { "value": "0px", "type": "spacing" },
+      "xs": { "value": "4px", "type": "spacing" },
+      "sm": { "value": "8px", "type": "spacing" },
+      "md": { "value": "16px", "type": "spacing" },
+      "lg": { "value": "24px", "type": "spacing" },
+      "xl": { "value": "32px", "type": "spacing" },
+      "xxl": { "value": "48px", "type": "spacing" }
+    },
+    "borderRadius": {
+      "none": { "value": "0px", "type": "borderRadius" },
+      "extraSmall": { "value": "4px", "type": "borderRadius" },
+      "small": { "value": "8px", "type": "borderRadius" },
+      "medium": { "value": "12px", "type": "borderRadius" },
+      "large": { "value": "16px", "type": "borderRadius" },
+      "extraLarge": { "value": "28px", "type": "borderRadius" },
+      "full": { "value": "9999px", "type": "borderRadius" }
+    },
+    "shadows": {
+      "elevation1": {
+        "value": "0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30)",
+        "type": "boxShadow"
+      },
+      "elevation2": {
+        "value": "0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30)",
+        "type": "boxShadow"
+      },
+      "elevation3": {
+        "value": "0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.30)",
+        "type": "boxShadow"
+      }
+    }
+  }
+}

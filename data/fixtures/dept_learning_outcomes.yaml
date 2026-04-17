@@ -1,0 +1,37 @@
+network_security_outcomes:
+  - id: LO-01
+    name: Cryptographic Fundamentals for Networks
+    description: Apply symmetric and asymmetric encryption, hashing, and digital signatures to secure network communications.
+  - id: LO-02
+    name: Protocol Analysis and Security
+    description: Analyze vulnerabilities in core TCP/IP suite protocols including DNS, BGP, ARP, and ICMP.
+  - id: LO-03
+    name: Authentication and Access Control
+    description: Evaluate and implement multi-factor authentication, OAuth2, and RADIUS/TACACS+ frameworks in enterprise environments.
+  - id: LO-04
+    name: Network Defense Architectures
+    description: Design and configure multi-layered defense systems including DMZs, firewalls, and air-gapped segments.
+  - id: LO-05
+    name: Intrusion Detection and Prevention
+    description: Deploy and tune signature-based and anomaly-based IDS/IPS systems to mitigate network-based attacks.
+  - id: LO-06
+    name: Transport Layer Security (TLS)
+    description: Configure and troubleshoot the TLS handshake, certificate chains, and cipher suite negotiation.
+  - id: LO-07
+    name: Wireless and Mobile Security
+    description: Assess security risks and mitigation strategies for 802.11 (WPA3), Bluetooth, and cellular data networks.
+  - id: LO-08
+    name: Virtual Private Networks (VPN)
+    description: Implement secure remote access using IPsec and OpenVPN protocols, focusing on tunneling and encapsulation.
+  - id: LO-09
+    name: Network Forensics and Traffic Analysis
+    description: Perform packet-level analysis using tools like Wireshark to identify indicators of compromise (IoC) and exfiltration.
+  - id: LO-10
+    name: Software-Defined Networking (SDN) Security
+    description: Identify security implications of control-plane and data-plane separation in modern programmable networks.
+  - id: LO-11
+    name: Denial of Service (DoS) Mitigation
+    description: Analyze the mechanics of volumetric and application-layer DDoS attacks and implement rate-limiting and scrubbing strategies.
+  - id: LO-12
+    name: Ethical and Legal Frameworks
+    description: Apply professional ethics and compliance standards (GDPR, HIPAA, NIST 800-53) to network security administration.

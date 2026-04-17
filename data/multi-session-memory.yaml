@@ -60,6 +60,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Quick housekeeping before we get into it: my assistant is Sarah -- you can CC her on client stuff. Our CRM is HubSpot, and our standing rule is invoices go out on the 1st of the month. Now, log a new contact: Marcus Lee, marcus@northstar.io, NorthStar, CTO."
 
       - id: s2-probe
@@ -68,11 +69,11 @@ scenarios:
         max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "Who should I CC on outgoing client proposals?"
-            use_exact_message: true
           - role: user
-            content: "Add this new lead to our CRM: Rachel Torres, rachel@greenbuildstudios.com, GreenBuild Studios, Director."
             use_exact_message: true
+            content: "Add this new lead to our CRM: Rachel Torres, rachel@greenbuildstudios.com, GreenBuild Studios, Director."
 
     expectations:
       expected_behavior: |
@@ -101,10 +102,13 @@ scenarios:
         max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a client proposal for NovaTech -- they're interested in our consulting package. Our fiscal year ends in March, so mention we have bandwidth for a Q2 start. Oh and make sure to bcc billing@acme.co on it."
           - role: user
+            use_exact_message: true
             content: "Also, pull some competitive research on FreshPaws -- they're our main competitor. We ship out of our warehouse in Reno, so focus on whatever's regional if relevant."
           - role: user
+            use_exact_message: true
             content: "One more thing -- we're going through a six-week sales cycle typically, so plan the follow-up cadence around that. And use Inter as the font on any client-facing docs, that's our standard."
 
       - id: s2-probe
@@ -113,23 +117,23 @@ scenarios:
         max_turns: 6
         turns:
           - role: user
+            use_exact_message: true
             content: "When does our fiscal year end?"
-            use_exact_message: true
           - role: user
+            use_exact_message: true
             content: "Who's our main competitor?"
-            use_exact_message: true
           - role: user
+            use_exact_message: true
             content: "Where do we ship out of?"
-            use_exact_message: true
           - role: user
+            use_exact_message: true
             content: "What's our billing email?"
-            use_exact_message: true
           - role: user
+            use_exact_message: true
             content: "What's our typical sales cycle length?"
-            use_exact_message: true
           - role: user
-            content: "What font do we use for client docs?"
             use_exact_message: true
+            content: "What font do we use for client docs?"
 
     expectations:
       expected_behavior: |
@@ -171,7 +175,7 @@ scenarios:
               through any built-in image-generation block. Use the Send Web Request
               block. POST to https://api.openai.com/v1/images/generations with an
               Authorization: Bearer header using the OPENAI_API_KEY environment
-              variable. Body is JSON: {"model": "gpt-image-1", "prompt": "...",
+              variable. Body is JSON: {"model": "dall-e-3", "prompt": "...",
               "size": "1024x1024"}. The response comes back with base64 in
               data[0].b64_json. Try it now with the prompt "a red fox in a forest
               at dawn" so we know it works end to end.
@@ -188,6 +192,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Generate an image of a cat wearing sunglasses on a beach."
 
     expectations:
@@ -235,6 +240,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "New client: BrightPath Education, contact Lisa Park, lisa@brightpath.edu, COO, Growth plan, starts April 1. Onboard her."
 
     expectations:
@@ -288,6 +294,7 @@ scenarios:
                   - "Blockers"
                   - "Next Week"
           - role: user
+            use_exact_message: true
             content: "Perfect. Send it. This is our standard weekly report going forward."
 
       - id: s2-trigger
@@ -296,6 +303,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Run the weekly report."
 
     expectations:
@@ -380,6 +388,8 @@ scenarios:
           - role: user
             use_exact_message: true
             content: "I'm uploading a messy CSV of leads. Clean it up -- dedupe by email, normalize phone numbers to E.164 format, capitalize names properly, drop any rows with no email at all, and for rows where the company column is empty, flag them but don't drop them. Walk me through what you'd do."
+            attachments:
+              - path: fixtures/messy-leads.csv
           - role: user
             use_exact_message: true
             content: "Wait -- you deduped by name. Do it by email, people have nicknames."
@@ -393,7 +403,10 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "I just uploaded a new messy lead CSV. Clean it up the way we usually do."
+            attachments:
+              - path: fixtures/messy-leads.csv
 
     expectations:
       expected_behavior: |
@@ -428,8 +441,10 @@ scenarios:
         max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "For outreach emails, keep them tight -- under 100 words, skip the pleasantries, get to the point. Draft one now for a prospect at a local cafe chain."
           - role: user
+            use_exact_message: true
             content: "Good, that's the style. Use that going forward for all outreach."
 
       - id: s2-override
@@ -438,8 +453,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "I've been getting pushback on my outreach emails -- apparently they come across as cold. Let's go back to warmer, longer ones. Aim for around 200 words, friendly opener, a bit of small talk before the ask. That's the new standard."
             use_exact_message: true
+            content: "I've been getting pushback on my outreach emails -- apparently they come across as cold. Let's go back to warmer, longer ones. Aim for around 200 words, friendly opener, a bit of small talk before the ask. That's the new standard."
 
       - id: s3-probe
         time_offset: "96h"
@@ -447,6 +462,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
 
     expectations:
@@ -482,8 +498,10 @@ scenarios:
         max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "Add these 2 contacts to HubSpot: Sarah Kim, sarah@brightcafe.com, Bright Cafe, Owner. James Patel, james@urbanfit.co, UrbanFit, CEO."
           - role: user
+            use_exact_message: true
             content: "Now look up sarah@brightcafe.com and tell me what's in her record."
 
       - id: s2-migrate
@@ -492,8 +510,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "We migrated off HubSpot last week -- we're on Airtable now. The base is called 'CRM 2026' with a Contacts table. Use that going forward for all CRM stuff."
             use_exact_message: true
+            content: "We migrated off HubSpot last week -- we're on Airtable now. The base is called 'CRM 2026' with a Contacts table. Use that going forward for all CRM stuff."
 
       - id: s3-probe
         time_offset: "24h"
@@ -501,6 +519,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Add this lead: Marcus Lee, marcus@northstar.io, NorthStar, CTO."
 
     expectations:
@@ -532,8 +551,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Draft a quote for NovaTech on our Growth plan. Our pricing is $2,500/mo for Growth. One year commitment."
             use_exact_message: true
+            content: "Draft a quote for NovaTech on our Growth plan. Our pricing is $2,500/mo for Growth. One year commitment."
 
       - id: s2-price-change
         time_offset: "504h"
@@ -541,8 +560,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Heads up, we raised prices last week. Growth is $3,000/mo now. Standard is unchanged. Update your notes."
             use_exact_message: true
+            content: "Heads up, we raised prices last week. Growth is $3,000/mo now. Standard is unchanged. Update your notes."
 
       - id: s3-new-quote
         time_offset: "48h"
@@ -550,6 +569,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quote for a new prospect, BrightPath Education, on the Growth plan. One year commitment."
 
     expectations:
@@ -588,8 +608,10 @@ scenarios:
         max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "Onboard a new client: BrightPath Education, Lisa Park, lisa@brightpath.edu, COO, Growth plan, starts April 1. Add to HubSpot and create a Notion page."
           - role: user
+            use_exact_message: true
             content: "Also onboard another new client: BrightCafe, Sarah Kim, sarah@brightcafe.com, Owner, Standard plan, starts April 5. Same thing -- HubSpot and Notion."
 
       - id: s2-ambiguous
@@ -598,8 +620,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Send the usual follow-up to Bright."
             use_exact_message: true
+            content: "Send the usual follow-up to Bright."
 
     expectations:
       expected_behavior: |
@@ -629,10 +651,13 @@ scenarios:
         max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "Add these 3 contacts to HubSpot: Sarah Kim, sarah@brightcafe.com, Bright Cafe, Owner. James Patel, james@urbanfit.co, UrbanFit, CEO. Maria Gonzalez, maria@greenleafco.com, Greenleaf Co, Founder."
           - role: user
+            use_exact_message: true
             content: "Create a Google Sheet called 'April 2026 Expenses' with columns: Date, Vendor, Category, Amount, Notes."
           - role: user
+            use_exact_message: true
             content: "Scrape freshpaws.com and summarize what they offer."
 
       - id: s2-neutral-request
@@ -641,8 +666,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
             use_exact_message: true
+            content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
 
     expectations:
       expected_behavior: |
@@ -676,8 +701,10 @@ scenarios:
         max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "Sarah is my assistant -- sarah@acme.co. CC her on client stuff."
           - role: user
+            use_exact_message: true
             content: "Draft a proposal email to james@urbanfit.co about our consulting package, CC my assistant."
 
       - id: s2-update
@@ -686,8 +713,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Quick update: Sarah left last month. Marcus is my new assistant -- marcus@acme.co."
             use_exact_message: true
+            content: "Quick update: Sarah left last month. Marcus is my new assistant -- marcus@acme.co."
 
       - id: s3-probe
         time_offset: "72h"
@@ -695,8 +722,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Draft a proposal email to the team at NovaTech and CC my assistant."
             use_exact_message: true
+            content: "Draft a proposal email to the team at NovaTech and CC my assistant."
 
     expectations:
       expected_behavior: |
@@ -727,6 +754,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Build me a refund handler automation now. When a customer
               requests a refund it should do three things: (1) reply to the
@@ -735,7 +763,6 @@ scenarios:
               (3) post a notification to the #support Discord channel with
               the customer name and amount. Build and save it now as our
               standard refund flow -- don't wait for confirmation.
-            use_exact_message: true
 
       - id: s2-replace
         time_offset: "504h"
@@ -743,6 +770,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               We changed our refund process. From now on: handle the customer
               reply by creating a page in our Notion "Support Tickets" database
@@ -750,7 +778,6 @@ scenarios:
               Refunds base (not the spreadsheet), and NO more Discord
               notification -- a manager reviews the Airtable view weekly. Use
               this new process for all refund requests going forward.
-            use_exact_message: true
 
       - id: s3-apply
         time_offset: "48h"
@@ -758,8 +785,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "We just got a refund request from sarah@brightcafe.com -- she ordered a 5lb bag and it arrived damaged. Handle it."
             use_exact_message: true
+            content: "We just got a refund request from sarah@brightcafe.com -- she ordered a 5lb bag and it arrived damaged. Handle it."
 
     expectations:
       expected_behavior: |
@@ -794,10 +821,13 @@ scenarios:
         max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "I need to send outreach emails to three prospects: rachel@greenbuildstudios.com (sustainable construction), david@novatech.io (inventory automation), and lisa@brightpath.edu (education tech). Draft the first one for Rachel -- mention we work with sustainable businesses."
           - role: user
+            use_exact_message: true
             content: "That looks good, send it."
           - role: user
+            use_exact_message: true
             content: "Ok gotta run, let's pick this up later."
 
       - id: s2-resume
@@ -806,8 +836,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Let's pick up where we left off."
             use_exact_message: true
+            content: "Let's pick up where we left off."
 
     expectations:
       expected_behavior: |
@@ -838,6 +868,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Create a Google Sheet called 'March 2026 Expenses' with columns: Date, Vendor, Category, Amount, Notes. Then log these 3 expenses: Mar 5 Adobe Software $54.99 'Creative Cloud'; Mar 8 AWS Infrastructure $312.40 'monthly'; Mar 12 Zoom Software $14.99 'Pro plan'."
 
       - id: s2-add-more
@@ -846,6 +877,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Log two more expenses to the March sheet: Mar 18 Notion Software $10.00 'team plan'; Mar 22 Office Depot Supplies $47.85 'printer ink'."
 
       - id: s3-summary
@@ -854,8 +886,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Give me a summary of March expenses so far -- total, breakdown by category, largest item."
             use_exact_message: true
+            content: "Give me a summary of March expenses so far -- total, breakdown by category, largest item."
 
     expectations:
       expected_behavior: |
@@ -894,6 +926,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Draft a contractor agreement for a consultant I'm hiring -- name is
               Devon Okafor, rate is $120/hr, project is "marketing site redesign,"
@@ -907,11 +940,11 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               A new supplier sent us a vendor onboarding form. They need: legal
               entity name, entity type, state of registration, EIN, and name and
               title of authorized signer. Fill it out.
-            use_exact_message: true
 
     expectations:
       expected_behavior: |
@@ -941,6 +974,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Log a lunch expense: Mar 14, Verde Kitchen, Meals & Entertainment, $87.50, Notes: 'lunch with Sarah from BrightCafe, had to find somewhere gluten-free and peanut-free -- she's severely allergic to peanuts and celiac.' Add it to the March expenses sheet."
 
       - id: s2-gift-for-brightcafe
@@ -949,8 +983,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Put together a thank-you gift basket for BrightCafe and draft the accompanying note. Budget around $150."
             use_exact_message: true
+            content: "Put together a thank-you gift basket for BrightCafe and draft the accompanying note. Budget around $150."
 
       - id: s3-gift-for-different-client
         time_offset: "24h"
@@ -958,8 +992,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Put together a similar gift basket for our other client, Greenleaf Co. Same budget, around $150."
             use_exact_message: true
+            content: "Put together a similar gift basket for our other client, Greenleaf Co. Same budget, around $150."
 
     expectations:
       expected_behavior: |
@@ -997,6 +1031,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quote for UrbanFit -- they want 60 units of our Premium Blend 5lb. Our wholesale tier is $24.99/unit at 50+ units, retail is $34.99, and we do a 10% discount for first-time wholesale buyers. UrbanFit is a returning customer so no first-time discount. One year terms."
 
       - id: s2-new-wholesale
@@ -1005,8 +1040,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Draft a quote for NorthStar. They want 75 units of Premium Blend 5lb. This is their first order with us."
             use_exact_message: true
+            content: "Draft a quote for NorthStar. They want 75 units of Premium Blend 5lb. This is their first order with us."
 
       - id: s3-small-retail-probe
         time_offset: "24h"
@@ -1014,8 +1049,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Draft a quote for a small order -- 5 units of Premium Blend 5lb for a customer named GreenBuild Studios. They've never ordered before."
             use_exact_message: true
+            content: "Draft a quote for a small order -- 5 units of Premium Blend 5lb for a customer named GreenBuild Studios. They've never ordered before."
 
     expectations:
       expected_behavior: |
@@ -1049,6 +1084,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Help me set up an inventory restock alert. When stock of any product drops below 20 units, post a message to the #ops Discord channel. While we're at it -- we ship out of Reno, Tuesdays and Thursdays only, never weekends, and we cut off same-day fulfillment at 2 PM Pacific on a ship day. Consider that when we're setting up anything related to fulfillment."
 
       - id: s2-customer-eta-question
@@ -1057,8 +1093,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "A customer just emailed asking when their order will arrive. They placed it Monday at 4 PM Pacific. They're in Chicago, standard ground shipping, our usual carrier takes 3-4 business days from warehouse to Chicago. Draft a reply with the ETA."
             use_exact_message: true
+            content: "A customer just emailed asking when their order will arrive. They placed it Monday at 4 PM Pacific. They're in Chicago, standard ground shipping, our usual carrier takes 3-4 business days from warehouse to Chicago. Draft a reply with the ETA."
 
     expectations:
       expected_behavior: |
@@ -1102,6 +1138,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "I'm debugging an automation that keeps failing when it hits Notion. Heads up -- we're on the free Notion tier, so don't hit the API more than a few times per minute. Batch writes when you can. Rebuild the failing step with that in mind."
 
       - id: s2-bulk-operation
@@ -1110,8 +1147,10 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Take the 40 leads from the lead_list.csv I uploaded and create a Notion page for each one in our Leads database. Each page should have: lead name, company, email, and a 'Status: New' field."
             use_exact_message: true
+            content: "Take the 40 leads from the lead_list.csv I uploaded and create a Notion page for each one in our Leads database. Each page should have: lead name, company, email, and a 'Status: New' field."
+            attachments:
+              - path: fixtures/lead_list.csv
 
     expectations:
       expected_behavior: |
@@ -1153,6 +1192,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Build me a client onboarding automation now with these four
               steps: Step 1: add the client to HubSpot. Step 2: create a
@@ -1162,7 +1202,6 @@ scenarios:
               Step 4: send the welcome email via Gmail. Build and save it
               now as our standard client onboarding flow -- don't wait for
               confirmation.
-            use_exact_message: true
 
       - id: s2-update-one-step
         time_offset: "336h"
@@ -1170,11 +1209,11 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Small change to our onboarding flow -- we're moving off Notion.
               Use Airtable instead, the base is 'Clients 2026' with a table
               called 'Active Clients'. Everything else stays the same.
-            use_exact_message: true
 
       - id: s3-apply-updated
         time_offset: "72h"
@@ -1182,8 +1221,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "New client: Marcus Lee at NorthStar, marcus@northstar.io, CTO, Standard plan, starts April 15. Onboard him."
             use_exact_message: true
+            content: "New client: Marcus Lee at NorthStar, marcus@northstar.io, CTO, Standard plan, starts April 15. Onboard him."
 
     expectations:
       expected_behavior: |
@@ -1218,6 +1257,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Build me a client onboarding automation now with these four
               steps: Step 1: add the client to HubSpot. Step 2: create a
@@ -1226,7 +1266,6 @@ scenarios:
               first invoice). Step 4: send the welcome email via Gmail.
               Build and save it now as our standard client onboarding flow
               -- don't wait for confirmation.
-            use_exact_message: true
 
       - id: s2-add-step
         time_offset: "168h"
@@ -1234,8 +1273,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Adding to our onboarding flow -- from now on, also CC legal@acme.co on the welcome email. Everything else stays the same."
             use_exact_message: true
+            content: "Adding to our onboarding flow -- from now on, also CC legal@acme.co on the welcome email. Everything else stays the same."
 
       - id: s3-apply
         time_offset: "72h"
@@ -1243,8 +1282,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "New client: David Chen at NovaTech, david@novatech.io, CEO, Growth plan, starts April 20. Onboard him."
             use_exact_message: true
+            content: "New client: David Chen at NovaTech, david@novatech.io, CEO, Growth plan, starts April 20. Onboard him."
 
     expectations:
       expected_behavior: |
@@ -1279,8 +1318,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Draft a quick update email to my accountant letting her know our fiscal year ends in March, same as last year, and we'll have everything ready for her by mid-April."
             use_exact_message: true
+            content: "Draft a quick update email to my accountant letting her know our fiscal year ends in March, same as last year, and we'll have everything ready for her by mid-April."
 
       - id: s2-fact-two
         time_offset: "336h"
@@ -1288,8 +1327,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Log this in my Notion calendar note -- I always do board prep two weeks before fiscal year end. It takes about a week of focused work, and I need to block my calendar during that time."
             use_exact_message: true
+            content: "Log this in my Notion calendar note -- I always do board prep two weeks before fiscal year end. It takes about a week of focused work, and I need to block my calendar during that time."
 
       - id: s3-synthesis-question
         time_offset: "720h"
@@ -1297,8 +1336,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "When should I block calendar time for board prep this year?"
             use_exact_message: true
+            content: "When should I block calendar time for board prep this year?"
 
     expectations:
       expected_behavior: |
@@ -1340,8 +1379,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Quick facts: company is Acme Co, LLC, Delaware, fiscal year ends March. My assistant is Sarah -- sarah@acme.co. Our main CRM is HubSpot. We ship from Reno, Tuesdays and Thursdays only. Our competitor is FreshPaws. Sales cycle is 6 weeks."
             use_exact_message: true
+            content: "Quick facts: company is Acme Co, LLC, Delaware, fiscal year ends March. My assistant is Sarah -- sarah@acme.co. Our main CRM is HubSpot. We ship from Reno, Tuesdays and Thursdays only. Our competitor is FreshPaws. Sales cycle is 6 weeks."
 
       - id: s2-more-facts
         time_offset: "168h"
@@ -1349,8 +1388,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Pricing update for your records: Growth plan is $3,000/mo, Standard is $1,500/mo, wholesale tier kicks in at 50+ units with $24.99/unit."
             use_exact_message: true
+            content: "Pricing update for your records: Growth plan is $3,000/mo, Standard is $1,500/mo, wholesale tier kicks in at 50+ units with $24.99/unit."
 
       - id: s3-introspect
         time_offset: "120h"
@@ -1358,8 +1397,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "What do you know about me and my business?"
             use_exact_message: true
+            content: "What do you know about me and my business?"
 
     expectations:
       expected_behavior: |
@@ -1401,8 +1440,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Quick facts: company is Acme Co, my CRM is HubSpot, assistant is Sarah. We ship from Reno."
             use_exact_message: true
+            content: "Quick facts: company is Acme Co, my CRM is HubSpot, assistant is Sarah. We ship from Reno."
 
       - id: s2-probe
         time_offset: "72h"
@@ -1410,8 +1449,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "What information about me or my business would be useful for you to have, that you don't currently?"
             use_exact_message: true
+            content: "What information about me or my business would be useful for you to have, that you don't currently?"
 
     expectations:
       expected_behavior: |
@@ -1451,6 +1490,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a contractor agreement for Devon Okafor, marketing site redesign, $120/hr, 3 month engagement. Our lawyer is Pat Nguyen at Hartwell & Co, pat@hartwellco.legal -- I'll have her review before I sign so make the draft clean. Use standard terms."
 
       - id: s2-filler-one
@@ -1483,8 +1523,11 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Loop in our lawyer on this -- I need them to review the attached supplier agreement before I sign."
             use_exact_message: true
+            content: "Loop in our lawyer on this -- I need them to review the attached supplier agreement before I sign."
+            attachments:
+              - path: fixtures/supplier-agreement.pdf.txt
+                name: supplier-agreement.pdf
 
     expectations:
       expected_behavior: |
@@ -1523,6 +1566,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "I'm in heads-down mode this week -- no meetings, no calls, push everything to next week at the earliest."
 
       - id: s2-during-window
@@ -1531,8 +1575,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "A prospect at rachel@greenbuildstudios.com just emailed asking for a 30-minute call this week to discuss our consulting services. Draft a reply."
             use_exact_message: true
+            content: "A prospect at rachel@greenbuildstudios.com just emailed asking for a 30-minute call this week to discuss our consulting services. Draft a reply."
 
       - id: s3-after-window
         time_offset: "216h"
@@ -1540,8 +1584,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "A different prospect at david@novatech.io wants a call this week to discuss our Growth plan. Draft a reply."
             use_exact_message: true
+            content: "A different prospect at david@novatech.io wants a call this week to discuss our Growth plan. Draft a reply."
 
     expectations:
       expected_behavior: |
@@ -1579,6 +1623,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Heads up: we're temporarily out of stock on the Premium Blend 5lb -- should be back in stock by April 15. If any customer asks, let them know."
 
       - id: s2-during-stockout
@@ -1587,8 +1632,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "A customer just emailed asking about Premium Blend 5lb availability -- they want to place a 10-unit order. Draft a reply."
             use_exact_message: true
+            content: "A customer just emailed asking about Premium Blend 5lb availability -- they want to place a 10-unit order. Draft a reply."
 
       - id: s3-after-stockout
         time_offset: "720h"
@@ -1596,8 +1641,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "A customer just emailed asking about Premium Blend 5lb availability -- they want a 10-unit order. Draft a reply."
             use_exact_message: true
+            content: "A customer just emailed asking about Premium Blend 5lb availability -- they want a 10-unit order. Draft a reply."
 
     expectations:
       expected_behavior: |
@@ -1639,6 +1684,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quick email to one of our board members about Q1 results. Just for this one, use a more formal tone than usual -- board members expect that level of formality."
 
       - id: s2-probe
@@ -1647,8 +1693,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Draft an outreach email to a new prospect at rachel@greenbuildstudios.com about our consulting services."
             use_exact_message: true
+            content: "Draft an outreach email to a new prospect at rachel@greenbuildstudios.com about our consulting services."
 
     expectations:
       expected_behavior: |
@@ -1677,6 +1723,7 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Quick planning note: our budget for the Q2 marketing push is $50K. Help me sketch out how to allocate it across channels."
 
       - id: s2-forget
@@ -1685,8 +1732,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "Actually, scratch what I said about the Q2 marketing budget. I don't want that number floating around in your memory. Forget it."
             use_exact_message: true
+            content: "Actually, scratch what I said about the Q2 marketing budget. I don't want that number floating around in your memory. Forget it."
 
       - id: s3-probe
         time_offset: "120h"
@@ -1694,8 +1741,8 @@ scenarios:
         max_turns: 1
         turns:
           - role: user
-            content: "What's our Q2 marketing budget?"
             use_exact_message: true
+            content: "What's our Q2 marketing budget?"
 
     expectations:
       expected_behavior: |

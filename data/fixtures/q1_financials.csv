@@ -1,0 +1,11 @@
+Metric,Q1 Plan,Q1 Actual,Variance,Variance %,Notes
+Total Revenue,8800000,8400000,-400000,-4.5%,Slower conversion in Enterprise segment
+Ending ARR,12800000,12100000,-700000,-5.5%,Higher than expected churn in Mid-Market
+New Logo ARR,1400000,950000,-450000,-32.1%,Sales cycle elongated from 4.5 to 6 months
+Expansion ARR,600000,550000,-50000,-8.3%,Upsell motions delayed by product roadmap shift
+Gross Margin %,78,74,-4,-5.1%,Higher cloud infrastructure costs during migration
+OpEx,7200000,7450000,250000,3.5%,Accelerated hiring in engineering (off-cycle)
+Net Burn,3200000,3800000,600000,18.8%,Driven by revenue miss and OpEx overage
+Cash on Hand,24500000,23900000,-600000,-2.4%,Runway reduced by approx 1.5 months
+LTV:CAC,4.2,3.1,-1.1,-26.2%,Increased CAC due to underperforming paid social
+Net Retention Rate (NRR),108,102,-6,-5.6%,Impacted by budget cuts at three Tier-1 accounts
