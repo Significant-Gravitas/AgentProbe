@@ -208,6 +208,16 @@ events, supports reconnect via `Last-Event-ID` from an in-memory replay buffer
 for the most recent events, falls back to persisted run detail for events older
 than the buffer, and always emits a terminal event before closing the stream.
 
+### Run executor failures are logged and persisted
+
+**Given** a run launched through `agentprobe start-server` fails inside the
+server-side run executor
+**When** no SSE client is connected or the connected client disconnects before
+the failure is observed
+**Then** the server writes a structured `run_executor` error line to stderr,
+persists the failure on the run record for later `/api/runs/:runId` reads, and
+publishes a terminal `run_error` event for any active stream subscribers.
+
 ### Run control starts validated ad-hoc or preset-backed runs
 
 **Given** an `agentprobe start-server` instance with a resolvable `./data` root

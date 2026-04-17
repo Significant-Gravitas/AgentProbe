@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -32,6 +32,7 @@ type RunResponse = {
     label?: string | null;
     presetId?: string | null;
     cancelledAt?: string | null;
+    finalError?: { type?: string; message?: string } | null;
     presetSnapshot?: { name?: string };
   };
 };
@@ -46,7 +47,7 @@ type PresetResponse = {
 
 function writeSuite(
   root: string,
-  options: { targetUrl?: string } = {},
+  options: { targetUrl?: string; scenarioPersona?: string } = {},
 ): string {
   const data = join(root, "data");
   mkdirSync(data, { recursive: true });
@@ -129,7 +130,7 @@ function writeSuite(
       "    name: Smoke",
       "    tags: [smoke]",
       "    priority: high",
-      "    persona: analyst",
+      `    persona: ${options.scenarioPersona ?? "analyst"}`,
       "    rubric: support",
       "    turns:",
       "      - role: user",
@@ -181,10 +182,19 @@ describe("server write control", () => {
     Bun.env.AGENTPROBE_E2E_OPENAI_SCRIPT = previousScript;
   });
 
-  async function start(options: { token?: string; targetUrl?: string } = {}) {
+  async function start(
+    options: {
+      token?: string;
+      targetUrl?: string;
+      scenarioPersona?: string;
+    } = {},
+  ) {
     Bun.env.OPEN_ROUTER_API_KEY = "integration-key";
     const root = makeTempDir("server-write");
-    const data = writeSuite(root, { targetUrl: options.targetUrl });
+    const data = writeSuite(root, {
+      targetUrl: options.targetUrl,
+      scenarioPersona: options.scenarioPersona,
+    });
     const args = [
       "--host",
       "127.0.0.1",
@@ -203,6 +213,26 @@ describe("server write control", () => {
     );
     servers.push(server);
     return { server };
+  }
+
+  async function waitForExecutorLog(
+    chunks: string[],
+  ): Promise<Record<string, unknown> | undefined> {
+    for (let attempt = 0; attempt < 80; attempt += 1) {
+      for (const line of chunks.flatMap((chunk) => chunk.split("\n"))) {
+        if (!line.trim()) {
+          continue;
+        }
+        try {
+          const parsed = JSON.parse(line) as Record<string, unknown>;
+          if (parsed.component === "run_executor") {
+            return parsed;
+          }
+        } catch {}
+      }
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    return undefined;
   }
 
   test("starts a dry-run, persists server metadata, and replays SSE progress", async () => {
@@ -237,6 +267,51 @@ describe("server write control", () => {
     const text = await events.text();
     expect(text).toContain("event: scenario_started");
     expect(text).toContain("event: run_finished");
+  });
+
+  test("logs and persists executor errors when runSuite throws", async () => {
+    const stderrChunks: string[] = [];
+    const stderrSpy = spyOn(process.stderr, "write").mockImplementation(((
+      chunk: string | Uint8Array,
+      ..._args: unknown[]
+    ) => {
+      stderrChunks.push(String(chunk));
+      return true;
+    }) as typeof process.stderr.write);
+
+    try {
+      const { server } = await start({ scenarioPersona: "missing-persona" });
+      const started = await json<RunStartResponse>(`${server.url}/api/runs`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          endpoint: "endpoint.yaml",
+          personas: "personas.yaml",
+          rubric: "rubric.yaml",
+          selection: [{ file: "scenarios.yaml", id: "smoke" }],
+          dry_run: true,
+          label: "bad-persona",
+        }),
+      });
+
+      expect(started.status).toBe("accepted");
+      const run = await waitForRun(server, started.run_id);
+      expect(run.status).toBe("config_error");
+      expect(run.finalError?.type).toBe("AgentProbeConfigError");
+      expect(run.finalError?.message).toContain("unknown persona");
+
+      const executorLog = await waitForExecutorLog(stderrChunks);
+      expect(executorLog).toMatchObject({
+        level: "error",
+        component: "run_executor",
+        run_id: started.run_id,
+        error_type: "AgentProbeConfigError",
+      });
+      expect(executorLog?.error_message).toContain("unknown persona");
+      expect(typeof executorLog?.stack).toBe("string");
+    } finally {
+      stderrSpy.mockRestore();
+    }
   });
 
   test("creates, updates, soft-deletes, and launches presets with frozen snapshots", async () => {

@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-04-17T15:44:17.421Z
+Generated: 2026-04-17T16:26:34.861Z
 
 ```text
   AGENTS.md
@@ -426,6 +426,7 @@ tests/unit/
 tests/unit/persistence/
   tests/unit/persistence/factory.test.ts
   tests/unit/persistence/migrations.test.ts
+  tests/unit/persistence/postgres-backend.test.ts
   tests/unit/persistence/url.test.ts
   tests/unit/report.test.ts
   tests/unit/runner.test.ts
@@ -433,6 +434,7 @@ tests/unit/server/
   tests/unit/server/auth.test.ts
   tests/unit/server/comparison.test.ts
   tests/unit/server/config.test.ts
+  tests/unit/server/inline-dashboard.test.ts
   tests/unit/server/selection.test.ts
   tests/unit/server/streams.test.ts
   tests/unit/simulator.test.ts
