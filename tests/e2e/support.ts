@@ -146,14 +146,28 @@ async function assertProcessCompletes(
   process: Bun.Subprocess<"ignore", "pipe", "pipe">,
   timeoutMs: number,
 ): Promise<number> {
+  let timedOut = false;
   const timer = setTimeout(() => {
-    process.kill();
+    timedOut = true;
+    process.kill("SIGTERM");
   }, timeoutMs);
+  const killTimer = setTimeout(() => {
+    if (timedOut) {
+      process.kill("SIGKILL");
+    }
+  }, timeoutMs + 2_000);
 
   try {
-    return await process.exited;
+    const exitCode = await process.exited;
+    if (timedOut) {
+      throw new Error(
+        `agentprobe child did not exit within ${timeoutMs}ms and was terminated (exit=${exitCode}). This timeout fired before the test assertion and the raw exit code should not be trusted.`,
+      );
+    }
+    return exitCode;
   } finally {
     clearTimeout(timer);
+    clearTimeout(killTimer);
   }
 }
 
