@@ -48,6 +48,14 @@ type SeedOptions = {
   }>;
 };
 
+const RUN_A = "11111111111111111111111111111111";
+const RUN_B = "22222222222222222222222222222222";
+const RUN_C = "33333333333333333333333333333333";
+
+function runId(index: number): string {
+  return index.toString(16).padStart(32, "0");
+}
+
 function seedRun(dbPath: string, options: SeedOptions): void {
   const dbUrl = `sqlite:///${dbPath}`;
   initDb(dbUrl);
@@ -141,6 +149,15 @@ type ComparisonResponse = {
   };
 };
 
+async function expectBadRequest(response: Response): Promise<void> {
+  expect(response.status).toBe(400);
+  const body = (await response.json()) as {
+    error?: { code?: string; type?: string };
+  };
+  expect(body.error?.code).toBe("bad_request");
+  expect(body.error?.type).toBe("bad_request");
+}
+
 describe("/api/comparisons integration", () => {
   const servers: StartedServer[] = [];
 
@@ -177,7 +194,7 @@ describe("/api/comparisons integration", () => {
     return server;
   }
 
-  test("returns comparison payload for 2 runs and rejects ranges", async () => {
+  test("returns comparison payload for 2 runs", async () => {
     const snapshot = {
       endpoint: "data/endpoint.yaml",
       personas: "data/p.yaml",
@@ -186,7 +203,7 @@ describe("/api/comparisons integration", () => {
     };
     const server = await startServerWithRuns([
       {
-        runId: "run-a",
+        runId: RUN_A,
         startedAt: "2026-04-17T10:00:00.000Z",
         presetId: "preset-1",
         presetSnapshot: snapshot,
@@ -196,7 +213,7 @@ describe("/api/comparisons integration", () => {
         ],
       },
       {
-        runId: "run-b",
+        runId: RUN_B,
         startedAt: "2026-04-17T11:00:00.000Z",
         presetId: "preset-1",
         presetSnapshot: snapshot,
@@ -213,34 +230,24 @@ describe("/api/comparisons integration", () => {
     ]);
 
     const response = await fetch(
-      `${server.url}/api/comparisons?run_ids=run-a,run-b`,
+      `${server.url}/api/comparisons?run_ids=${RUN_A},${RUN_B}`,
     );
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
     const body = (await response.json()) as ComparisonResponse;
     expect(body.alignment).toBe("preset_snapshot");
-    expect(body.runs.map((r) => r.run_id)).toEqual(["run-a", "run-b"]);
+    expect(body.runs.map((r) => r.run_id)).toEqual([RUN_A, RUN_B]);
     const s1 = body.scenarios.find((row) => row.scenario_id === "s-1");
     expect(s1).toBeDefined();
     expect(s1?.delta_score ?? 0).toBeCloseTo(-0.5, 5);
     expect(s1?.status_change).toBe("regressed");
     expect(body.summary.scenarios_regressed).toBe(1);
-
-    const tooFew = await fetch(`${server.url}/api/comparisons?run_ids=run-a`);
-    expect(tooFew.status).toBe(400);
-    const tooManyIds = Array.from({ length: 11 }, (_v, i) => `run-${i}`).join(
-      ",",
-    );
-    const tooMany = await fetch(
-      `${server.url}/api/comparisons?run_ids=${tooManyIds}`,
-    );
-    expect(tooMany.status).toBe(400);
   });
 
   test("aligns via file::id when scenario_ids collide across files", async () => {
     const server = await startServerWithRuns([
       {
-        runId: "run-a",
+        runId: RUN_A,
         startedAt: "2026-04-17T10:00:00.000Z",
         scenarios: [
           {
@@ -258,7 +265,7 @@ describe("/api/comparisons integration", () => {
         ],
       },
       {
-        runId: "run-b",
+        runId: RUN_B,
         startedAt: "2026-04-17T11:00:00.000Z",
         scenarios: [
           {
@@ -278,12 +285,135 @@ describe("/api/comparisons integration", () => {
     ]);
 
     const response = await fetch(
-      `${server.url}/api/comparisons?run_ids=run-a,run-b`,
+      `${server.url}/api/comparisons?run_ids=${RUN_A},${RUN_B}`,
     );
     expect(response.status).toBe(200);
     const body = (await response.json()) as ComparisonResponse;
     expect(body.alignment).toBe("file_scenario_id");
     const keys = body.scenarios.map((row) => row.alignment_key).sort();
     expect(keys).toEqual(["suite-a.yaml::dup", "suite-b.yaml::dup"]);
+  });
+
+  test("aligns 3 heterogeneous preset runs via file::id", async () => {
+    const server = await startServerWithRuns([
+      {
+        runId: RUN_A,
+        startedAt: "2026-04-17T10:00:00.000Z",
+        presetId: "preset-a",
+        presetSnapshot: { endpoint: "a.yaml", selection: [] },
+        scenarios: [
+          {
+            scenarioId: "dup",
+            passed: true,
+            overallScore: 0.9,
+            sourceFile: "suite-a.yaml",
+          },
+          {
+            scenarioId: "dup",
+            passed: false,
+            overallScore: 0.2,
+            sourceFile: "suite-b.yaml",
+          },
+        ],
+      },
+      {
+        runId: RUN_B,
+        startedAt: "2026-04-17T11:00:00.000Z",
+        presetId: "preset-b",
+        presetSnapshot: { endpoint: "b.yaml", selection: [] },
+        scenarios: [
+          {
+            scenarioId: "dup",
+            passed: true,
+            overallScore: 0.85,
+            sourceFile: "suite-a.yaml",
+          },
+          {
+            scenarioId: "dup",
+            passed: true,
+            overallScore: 0.65,
+            sourceFile: "suite-b.yaml",
+          },
+        ],
+      },
+      {
+        runId: RUN_C,
+        startedAt: "2026-04-17T12:00:00.000Z",
+        presetId: "preset-c",
+        presetSnapshot: { endpoint: "c.yaml", selection: [] },
+        scenarios: [
+          {
+            scenarioId: "dup",
+            passed: false,
+            overallScore: 0.4,
+            sourceFile: "suite-a.yaml",
+          },
+          {
+            scenarioId: "dup",
+            passed: true,
+            overallScore: 0.75,
+            sourceFile: "suite-b.yaml",
+          },
+        ],
+      },
+    ]);
+
+    const response = await fetch(
+      `${server.url}/api/comparisons?run_ids=${RUN_A},${RUN_B},${RUN_C}`,
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as ComparisonResponse;
+    expect(body.alignment).toBe("file_scenario_id");
+    expect(body.runs.map((r) => r.run_id)).toEqual([RUN_A, RUN_B, RUN_C]);
+    expect(body.scenarios.map((row) => row.alignment_key).sort()).toEqual([
+      "suite-a.yaml::dup",
+      "suite-b.yaml::dup",
+    ]);
+  });
+
+  test("returns an empty alignment table when selected runs have no scenarios", async () => {
+    const server = await startServerWithRuns([
+      {
+        runId: RUN_A,
+        startedAt: "2026-04-17T10:00:00.000Z",
+        scenarios: [],
+      },
+      {
+        runId: RUN_B,
+        startedAt: "2026-04-17T11:00:00.000Z",
+        scenarios: [],
+      },
+    ]);
+
+    const response = await fetch(
+      `${server.url}/api/comparisons?run_ids=${RUN_A},${RUN_B}`,
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as ComparisonResponse;
+    expect(body.scenarios).toEqual([]);
+    expect(body.summary.total_scenarios).toBe(0);
+  });
+
+  test("rejects invalid run_id input with structured bad_request errors", async () => {
+    const server = await startServerWithRuns([]);
+
+    await expectBadRequest(
+      await fetch(`${server.url}/api/comparisons?run_ids=${RUN_A}`),
+    );
+
+    const tooManyIds = Array.from({ length: 11 }, (_v, i) => runId(i + 1)).join(
+      ",",
+    );
+    await expectBadRequest(
+      await fetch(`${server.url}/api/comparisons?run_ids=${tooManyIds}`),
+    );
+
+    await expectBadRequest(
+      await fetch(`${server.url}/api/comparisons?run_ids=${RUN_A},not-a-uuid`),
+    );
+
+    await expectBadRequest(
+      await fetch(`${server.url}/api/comparisons?run_ids=${RUN_A},${RUN_A}`),
+    );
   });
 });

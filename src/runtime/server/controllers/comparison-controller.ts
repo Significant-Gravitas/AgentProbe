@@ -8,6 +8,8 @@ import { HttpInputError } from "../validation.ts";
 
 export const MIN_COMPARISON_RUNS = 2;
 export const MAX_COMPARISON_RUNS = 10;
+const RUN_ID_PATTERN =
+  /^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 
 export type ComparisonAlignment =
   | "preset_snapshot"
@@ -411,22 +413,33 @@ export function createComparisonController(options: {
       const trimmed = runIds
         .map((id) => (typeof id === "string" ? id.trim() : ""))
         .filter((id) => id.length > 0);
-      const deduped: string[] = [];
       const seen = new Set<string>();
       for (const id of trimmed) {
-        if (!seen.has(id)) {
-          seen.add(id);
-          deduped.push(id);
+        if (!RUN_ID_PATTERN.test(id)) {
+          throw new HttpInputError(
+            400,
+            "bad_request",
+            "run_ids must contain persisted run UUIDs.",
+          );
         }
+        const normalized = id.toLowerCase();
+        if (seen.has(normalized)) {
+          throw new HttpInputError(
+            400,
+            "bad_request",
+            "run_ids must not contain duplicates.",
+          );
+        }
+        seen.add(normalized);
       }
-      if (deduped.length < MIN_COMPARISON_RUNS) {
+      if (trimmed.length < MIN_COMPARISON_RUNS) {
         throw new HttpInputError(
           400,
           "bad_request",
-          `At least ${MIN_COMPARISON_RUNS} unique run_ids are required for comparison.`,
+          `At least ${MIN_COMPARISON_RUNS} run_ids are required for comparison.`,
         );
       }
-      if (deduped.length > MAX_COMPARISON_RUNS) {
+      if (trimmed.length > MAX_COMPARISON_RUNS) {
         throw new HttpInputError(
           400,
           "bad_request",
@@ -434,7 +447,7 @@ export function createComparisonController(options: {
         );
       }
       const runs = await Promise.all(
-        deduped.map(async (runId) => {
+        trimmed.map(async (runId) => {
           const record = await repository.getRun(runId);
           if (!record) {
             throw new HttpInputError(
