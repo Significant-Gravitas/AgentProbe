@@ -16,6 +16,7 @@ import type {
   PresetSnapshot,
   RunProgressEvent,
 } from "../../../shared/types/contracts.ts";
+import { AgentProbeConfigError } from "../../../shared/utils/errors.ts";
 import type { ServerConfig } from "../config.ts";
 import type { StreamHub } from "../streams/hub.ts";
 import {
@@ -89,6 +90,47 @@ function jsonProgressPayload(event: RunProgressEvent): JsonValue {
 function snapshotFromPreset(preset: PresetRecord): PresetSnapshot {
   const { lastRun: _lastRun, ...snapshot } = preset;
   return snapshot;
+}
+
+function normalizeError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function runErrorExitCode(error: Error): number {
+  return error instanceof AgentProbeConfigError ? 2 : 3;
+}
+
+function writeRunExecutorErrorLog(
+  runId: string | undefined,
+  error: Error,
+): void {
+  process.stderr.write(
+    `${JSON.stringify({
+      level: "error",
+      component: "run_executor",
+      run_id: runId ?? null,
+      error_type: error.name || "Error",
+      error_message: error.message,
+      stack: error.stack,
+    })}\n`,
+  );
+}
+
+function writeRunExecutorPersistenceErrorLog(
+  runId: string | undefined,
+  error: Error,
+): void {
+  process.stderr.write(
+    `${JSON.stringify({
+      level: "error",
+      component: "run_executor",
+      event: "run_error_persist_failed",
+      run_id: runId ?? null,
+      error_type: error.name || "Error",
+      error_message: error.message,
+      stack: error.stack,
+    })}\n`,
+  );
 }
 
 function ensureOpenRouterConfigured(): OpenAiResponsesClient {
@@ -376,13 +418,25 @@ export class RunController {
       });
     } catch (error) {
       const runId = options.recorder.runId;
+      const failure = normalizeError(error);
+      writeRunExecutorErrorLog(runId, failure);
       if (runId) {
+        try {
+          options.recorder.recordRunError(failure, {
+            exitCode: runErrorExitCode(failure),
+          });
+        } catch (persistError) {
+          writeRunExecutorPersistenceErrorLog(
+            runId,
+            normalizeError(persistError),
+          );
+        }
         this.options.streamHub.publish({
           runId,
           kind: "run_error",
           payload: {
-            type: error instanceof Error ? error.name : "Error",
-            message: error instanceof Error ? error.message : String(error),
+            type: failure.name || "Error",
+            message: failure.message,
           },
         });
       }

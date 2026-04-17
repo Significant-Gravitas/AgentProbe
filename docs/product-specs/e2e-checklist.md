@@ -24,6 +24,7 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | API CORS allows only same-origin loopback by default | `tests/integration/server/read-only.test.ts` + `tests/unit/server/config.test.ts` | ✅ covered |
 | Read-only HTTP and UI surfaces browse persisted run history | `tests/integration/server/read-only.test.ts` + dashboard build/typecheck | ✅ covered |
 | Live run events stream through Server-Sent Events with replay support | `tests/integration/server/write-control.test.ts` + `tests/unit/server/streams.test.ts` | ✅ covered |
+| Run executor failures are logged and persisted | `tests/integration/server/write-control.test.ts` | ✅ covered |
 | Run control starts validated ad-hoc or preset-backed runs | `tests/integration/server/write-control.test.ts` | ✅ covered |
 | Cancellation cooperatively stops a server-managed run | `tests/integration/server/write-control.test.ts` | ✅ covered |
 | Presets save cross-file scenario selections for one-click rerun | `tests/integration/server/write-control.test.ts` + `tests/unit/server/selection.test.ts` | ✅ covered |
