@@ -12,6 +12,13 @@ import type {
   ScenarioRecord,
 } from "../../../src/shared/types/contracts.ts";
 
+const RUN_A = "11111111111111111111111111111111";
+const RUN_B = "22222222222222222222222222222222";
+
+function runId(index: number): string {
+  return index.toString(16).padStart(32, "0");
+}
+
 function scenario(partial: Partial<ScenarioRecord>): ScenarioRecord {
   return {
     scenarioRunId: 1,
@@ -60,7 +67,7 @@ function scenario(partial: Partial<ScenarioRecord>): ScenarioRecord {
 
 function run(partial: Partial<RunRecord>): RunRecord {
   const base: RunRecord = {
-    runId: "run-a",
+    runId: RUN_A,
     status: "completed",
     passed: true,
     exitCode: 0,
@@ -98,8 +105,8 @@ describe("comparison controller", () => {
       selection: [{ file: "s.yaml", id: "s-1" }],
     };
     const runs = [
-      run({ runId: "run-a", presetSnapshot: snapshot, presetId: "preset-a" }),
-      run({ runId: "run-b", presetSnapshot: snapshot, presetId: "preset-a" }),
+      run({ runId: RUN_A, presetSnapshot: snapshot, presetId: "preset-a" }),
+      run({ runId: RUN_B, presetSnapshot: snapshot, presetId: "preset-a" }),
     ];
     expect(chooseAlignment(runs).alignment).toBe("preset_snapshot");
   });
@@ -107,12 +114,12 @@ describe("comparison controller", () => {
   test("falls back to preset_id when snapshots differ but preset_id is shared", () => {
     const runs = [
       run({
-        runId: "run-a",
+        runId: RUN_A,
         presetId: "preset-a",
         presetSnapshot: { endpoint: "a.yaml" },
       }),
       run({
-        runId: "run-b",
+        runId: RUN_B,
         presetId: "preset-a",
         presetSnapshot: { endpoint: "b.yaml" },
       }),
@@ -121,14 +128,14 @@ describe("comparison controller", () => {
   });
 
   test("falls back to scenario_id when no preset info is shared", () => {
-    const runs = [run({ runId: "run-a" }), run({ runId: "run-b" })];
+    const runs = [run({ runId: RUN_A }), run({ runId: RUN_B })];
     expect(chooseAlignment(runs).alignment).toBe("scenario_id");
   });
 
   test("uses file::id alignment when duplicate scenario ids span files", () => {
     const runs = [
       run({
-        runId: "run-a",
+        runId: RUN_A,
         scenarios: [
           scenario({
             scenarioId: "dup",
@@ -142,7 +149,7 @@ describe("comparison controller", () => {
           }),
         ],
       }),
-      run({ runId: "run-b" }),
+      run({ runId: RUN_B }),
     ];
     const { alignment } = chooseAlignment(runs);
     expect(alignment).toBe("file_scenario_id");
@@ -156,32 +163,34 @@ describe("comparison controller", () => {
   test("emits delta_score, status_change, and present_in for missing scenarios", () => {
     const runs = [
       run({
-        runId: "run-a",
+        runId: RUN_A,
         scenarios: [scenario({ scenarioId: "s-1", overallScore: 0.9 })],
       }),
       run({
-        runId: "run-b",
+        runId: RUN_B,
         scenarios: [
           scenario({ scenarioId: "s-1", overallScore: 0.4, passed: false }),
         ],
       }),
       run({
-        runId: "run-c",
+        runId: "33333333333333333333333333333333",
         scenarios: [scenario({ scenarioId: "s-2", overallScore: 0.7 })],
       }),
     ];
     const payload = buildComparisonPayload(runs);
     const s1 = payload.scenarios.find((row) => row.scenario_id === "s-1");
     expect(s1).toBeDefined();
-    expect(s1?.present_in.sort()).toEqual(["run-a", "run-b"].sort());
-    expect(s1?.entries["run-c"].status).toBe("missing");
+    expect(s1?.present_in.sort()).toEqual([RUN_A, RUN_B].sort());
+    expect(s1?.entries["33333333333333333333333333333333"].status).toBe(
+      "missing",
+    );
     expect(s1?.delta_score).toBeCloseTo(-0.5, 5);
     expect(s1?.status_change).toBe("mixed");
     const s2 = payload.scenarios.find((row) => row.scenario_id === "s-2");
-    expect(s2?.present_in).toEqual(["run-c"]);
+    expect(s2?.present_in).toEqual(["33333333333333333333333333333333"]);
   });
 
-  test("controller enforces 2–10 run id range and dedupes", async () => {
+  test("controller enforces run id validation", async () => {
     const repository: ReadableRepository = {
       kind: "sqlite",
       dbUrl: "sqlite:///mem",
@@ -193,17 +202,25 @@ describe("comparison controller", () => {
     };
     const controller = createComparisonController({ repository });
 
-    await expect(controller.compare(["a"])).rejects.toThrow(
+    await expect(controller.compare([RUN_A])).rejects.toThrow(
       new RegExp(`${MIN_COMPARISON_RUNS}`),
     );
     await expect(
       controller.compare(
-        Array.from({ length: MAX_COMPARISON_RUNS + 1 }, (_, i) => `r${i}`),
+        Array.from({ length: MAX_COMPARISON_RUNS + 1 }, (_v, i) =>
+          runId(i + 1),
+        ),
       ),
     ).rejects.toThrow(new RegExp(`${MAX_COMPARISON_RUNS}`));
+    await expect(controller.compare([RUN_A, "not-a-uuid"])).rejects.toThrow(
+      /UUIDs/,
+    );
+    await expect(controller.compare([RUN_A, RUN_A])).rejects.toThrow(
+      /duplicates/,
+    );
 
-    const payload = await controller.compare(["a", "a", "b"]);
-    expect(payload.runs.map((row) => row.run_id)).toEqual(["a", "b"]);
+    const payload = await controller.compare([RUN_A, RUN_B]);
+    expect(payload.runs.map((row) => row.run_id)).toEqual([RUN_A, RUN_B]);
   });
 
   test("controller 404s when a run id cannot be resolved", async () => {
@@ -217,8 +234,8 @@ describe("comparison controller", () => {
       getRun: async () => undefined,
     };
     const controller = createComparisonController({ repository });
-    await expect(
-      controller.compare(["missing-a", "missing-b"]),
-    ).rejects.toThrow(/not found/);
+    await expect(controller.compare([RUN_A, RUN_B])).rejects.toThrow(
+      /not found/,
+    );
   });
 });

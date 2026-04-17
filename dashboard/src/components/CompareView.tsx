@@ -155,6 +155,7 @@ export function CompareView({ token, apiBase = "" }: CompareViewProps) {
   const [pickerOpen, setPickerOpen] = useState(runIds.length < 2);
   const [availableRuns, setAvailableRuns] = useState<RunOption[]>([]);
   const [picker, setPicker] = useState<Set<string>>(new Set(runIds));
+  const pickerCanApply = picker.size >= 2 && picker.size <= 10;
 
   const fetchRuns = useCallback(async () => {
     try {
@@ -316,7 +317,9 @@ export function CompareView({ token, apiBase = "" }: CompareViewProps) {
               </li>
             ))}
           </ul>
-          <button type="submit">Apply</button>
+          <button type="submit" disabled={!pickerCanApply}>
+            Apply
+          </button>
         </form>
       )}
 
@@ -401,6 +404,11 @@ export function CompareView({ token, apiBase = "" }: CompareViewProps) {
               ))}
             </tbody>
           </table>
+          {filteredScenarios.length === 0 && (
+            <p className="compare-hint">
+              No aligned scenario rows match this comparison.
+            </p>
+          )}
         </>
       )}
 

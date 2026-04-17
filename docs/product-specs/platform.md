@@ -208,6 +208,16 @@ events, supports reconnect via `Last-Event-ID` from an in-memory replay buffer
 for the most recent events, falls back to persisted run detail for events older
 than the buffer, and always emits a terminal event before closing the stream.
 
+### Run executor failures are logged and persisted
+
+**Given** a run launched through `agentprobe start-server` fails inside the
+server-side run executor
+**When** no SSE client is connected or the connected client disconnects before
+the failure is observed
+**Then** the server writes a structured `run_executor` error line to stderr,
+persists the failure on the run record for later `/api/runs/:runId` reads, and
+publishes a terminal `run_error` event for any active stream subscribers.
+
 ### Run control starts validated ad-hoc or preset-backed runs
 
 **Given** an `agentprobe start-server` instance with a resolvable `./data` root
@@ -246,13 +256,15 @@ snapshot.
 ### Comparison workspace diffs 2 to 10 historical runs
 
 **Given** at least two persisted runs, preferably launched from the same preset
-**When** the operator requests `GET /api/comparisons?run_ids=a,b[,...]` or opens
-the `/compare` workspace
+**When** the operator requests
+`GET /api/comparisons?run_ids=<run-uuid>,<run-uuid>[,...]` or opens the
+`/compare` workspace
 **Then** the server returns a scenario-aligned payload with per-run pass/fail,
 score delta, `status_change`, and summary buckets for improved, regressed, and
 unchanged scenarios; scenarios missing from one side surface as `present_in`
 entries rather than failing the request; and the request rejects any count
-below 2 or above 10 run IDs with a structured validation error.
+below 2 or above 10 run IDs, malformed run UUIDs, or duplicate run IDs with a
+structured validation error.
 
 ### Docker image boots safely with SQLite-on-volume persistence
 

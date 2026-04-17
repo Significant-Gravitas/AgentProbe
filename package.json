@@ -31,6 +31,9 @@
     "@types/node": "^25.6.0",
     "@types/nunjucks": "^3.2.6",
     "bun-types": "^1.3.12",
+    "happy-dom": "^20.9.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "typescript": "^6.0.2"
   }
 }
