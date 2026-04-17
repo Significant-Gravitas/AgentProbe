@@ -23,7 +23,8 @@ Last validated against `platform.md`: 2026-04-17
 ### Server control plane (Phase 1-4)
 
 - [x] Default start-server boot binds loopback with read-only history browsing
-- [x] Non-loopback exposure requires unsafe flag and token
+- [x] Non-loopback exposure requires unsafe flag, token, and CORS origins
+- [x] API CORS allows only same-origin loopback by default
 - [x] Read-only HTTP and UI surfaces browse persisted run history
 - [x] Live run events stream through Server-Sent Events with replay support
 - [x] Run control starts validated ad-hoc or preset-backed runs

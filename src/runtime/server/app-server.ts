@@ -49,6 +49,9 @@ import {
 import { StreamHub } from "./streams/hub.ts";
 
 export const SERVER_VERSION = "0.1.0";
+const CORS_ALLOW_METHODS = "GET, POST, PUT, DELETE, OPTIONS";
+const CORS_ALLOW_HEADERS = "authorization, content-type, x-request-id";
+const CORS_MAX_AGE_SECONDS = "600";
 
 export type ServerContext = {
   config: ServerConfig;
@@ -210,6 +213,127 @@ function matchRoute(
   return undefined;
 }
 
+function isApiPath(pathname: string): boolean {
+  return pathname === "/api" || pathname.startsWith("/api/");
+}
+
+function isLoopbackHostname(hostname: string): boolean {
+  const normalized = hostname.trim().toLowerCase();
+  if (normalized === "localhost" || normalized === "::1") {
+    return true;
+  }
+  const parts = normalized.split(".");
+  if (parts.length !== 4 || parts[0] !== "127") {
+    return false;
+  }
+  return parts.every((part) => {
+    if (!/^\d+$/.test(part)) {
+      return false;
+    }
+    const value = Number(part);
+    return Number.isInteger(value) && value >= 0 && value <= 255;
+  });
+}
+
+function loopbackOriginsFor(url: URL): Set<string> {
+  const origins = new Set<string>([url.origin]);
+  if (!isLoopbackHostname(url.hostname)) {
+    return origins;
+  }
+  const port = url.port ? `:${url.port}` : "";
+  origins.add(`${url.protocol}//localhost${port}`);
+  origins.add(`${url.protocol}//127.0.0.1${port}`);
+  origins.add(`${url.protocol}//[::1]${port}`);
+  return origins;
+}
+
+function normalizedOrigin(raw: string): string | undefined {
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+function allowedCorsOrigin(
+  request: Request,
+  config: ServerConfig,
+): string | undefined {
+  const requestUrl = new URL(request.url);
+  const origin = request.headers.get("origin");
+  if (!origin) {
+    return config.corsOrigins[0] ?? requestUrl.origin;
+  }
+
+  const normalized = normalizedOrigin(origin);
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (config.corsOrigins.length > 0) {
+    return config.corsOrigins.includes(normalized) ? normalized : undefined;
+  }
+  return loopbackOriginsFor(requestUrl).has(normalized)
+    ? normalized
+    : undefined;
+}
+
+function corsHeaders(
+  request: Request,
+  config: ServerConfig,
+): Headers | undefined {
+  const allowOrigin = allowedCorsOrigin(request, config);
+  if (!allowOrigin) {
+    return undefined;
+  }
+  const headers = new Headers();
+  headers.set("access-control-allow-origin", allowOrigin);
+  headers.set("access-control-allow-credentials", "true");
+  headers.set("vary", "Origin");
+  return headers;
+}
+
+function preflightResponse(request: Request, config: ServerConfig): Response {
+  const headers = corsHeaders(request, config);
+  if (!headers) {
+    return new Response(null, {
+      status: 403,
+      headers: { vary: "Origin" },
+    });
+  }
+  headers.set("access-control-allow-methods", CORS_ALLOW_METHODS);
+  headers.set(
+    "access-control-allow-headers",
+    request.headers.get("access-control-request-headers") ?? CORS_ALLOW_HEADERS,
+  );
+  headers.set("access-control-max-age", CORS_MAX_AGE_SECONDS);
+  return new Response(null, {
+    status: 204,
+    headers,
+  });
+}
+
+function withCorsHeaders(
+  request: Request,
+  config: ServerConfig,
+  response: Response,
+): Response {
+  const headers = new Headers(response.headers);
+  const cors = corsHeaders(request, config);
+  if (cors) {
+    for (const [name, value] of cors) {
+      headers.set(name, value);
+    }
+  } else if (request.headers.has("origin")) {
+    headers.append("vary", "Origin");
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 function logRequest(
   config: ServerConfig,
   request: Request,
@@ -295,17 +419,27 @@ export async function startAgentProbeServer(
     let response: Response;
     const context: ServerContext = { ...baseContext, requestId };
     try {
-      const matched = matchRoute(routes, request.method, url.pathname);
-      if (matched) {
-        if (matched.route.requiresAuth && config.token) {
-          if (!verifyBearerToken(request, config.token)) {
-            response = errorResponse({
-              status: 401,
-              type: "Unauthorized",
-              message: "Missing or invalid bearer token.",
-              requestId,
-              headers: { "www-authenticate": 'Bearer realm="agentprobe"' },
-            });
+      if (request.method === "OPTIONS" && isApiPath(url.pathname)) {
+        response = preflightResponse(request, config);
+      } else {
+        const matched = matchRoute(routes, request.method, url.pathname);
+        if (matched) {
+          if (matched.route.requiresAuth && config.token) {
+            if (!verifyBearerToken(request, config.token)) {
+              response = errorResponse({
+                status: 401,
+                type: "Unauthorized",
+                message: "Missing or invalid bearer token.",
+                requestId,
+                headers: { "www-authenticate": 'Bearer realm="agentprobe"' },
+              });
+            } else {
+              response = await matched.route.handler(
+                request,
+                context,
+                matched.params,
+              );
+            }
           } else {
             response = await matched.route.handler(
               request,
@@ -314,14 +448,8 @@ export async function startAgentProbeServer(
             );
           }
         } else {
-          response = await matched.route.handler(
-            request,
-            context,
-            matched.params,
-          );
+          response = await handleStatic(request, context);
         }
-      } else {
-        response = await handleStatic(request, context);
       }
     } catch (error) {
       if (error instanceof AgentProbeConfigError) {
@@ -346,6 +474,10 @@ export async function startAgentProbeServer(
           requestId,
         });
       }
+    }
+
+    if (isApiPath(url.pathname) && request.method !== "OPTIONS") {
+      response = withCorsHeaders(request, config, response);
     }
 
     logRequest(config, request, response, performance.now() - t0, requestId);

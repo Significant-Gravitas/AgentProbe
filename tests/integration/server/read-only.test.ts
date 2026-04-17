@@ -248,7 +248,9 @@ describe("read-only AgentProbe server", () => {
     }
   });
 
-  async function start(options: { token?: string } = {}) {
+  async function start(
+    options: { token?: string; env?: Record<string, string | undefined> } = {},
+  ) {
     const root = makeTempDir("server-integration");
     const data = writeSuite(root);
     const dbPath = join(root, "runs.sqlite3");
@@ -267,7 +269,7 @@ describe("read-only AgentProbe server", () => {
       args.push("--token", options.token);
     }
     const server = await startAgentProbeServer(
-      buildServerConfig({ args, env: {} }),
+      buildServerConfig({ args, env: options.env ?? {} }),
     );
     servers.push(server);
     return { server, runId };
@@ -333,5 +335,87 @@ describe("read-only AgentProbe server", () => {
       headers: { authorization: "Bearer server-token" },
     });
     expect(allowed.status).toBe(200);
+  });
+
+  test("allows same-origin API CORS by default and rejects other preflights", async () => {
+    const { server } = await start();
+
+    const allowed = await fetch(`${server.url}/api/runs`, {
+      method: "OPTIONS",
+      headers: {
+        origin: server.url,
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "authorization, content-type",
+      },
+    });
+    expect(allowed.status).toBe(204);
+    expect(allowed.headers.get("access-control-allow-origin")).toBe(server.url);
+    expect(allowed.headers.get("access-control-allow-methods")).toContain(
+      "POST",
+    );
+    expect(allowed.headers.get("access-control-allow-headers")).toBe(
+      "authorization, content-type",
+    );
+    expect(allowed.headers.get("access-control-allow-credentials")).toBe(
+      "true",
+    );
+    expect(allowed.headers.get("access-control-max-age")).toBe("600");
+
+    const api = await fetch(`${server.url}/api/runs`, {
+      headers: { origin: server.url },
+    });
+    expect(api.status).toBe(200);
+    expect(api.headers.get("access-control-allow-origin")).toBe(server.url);
+
+    const rejected = await fetch(`${server.url}/api/runs`, {
+      method: "OPTIONS",
+      headers: {
+        origin: "https://dashboard.example",
+        "access-control-request-method": "POST",
+      },
+    });
+    expect(rejected.status).toBe(403);
+    expect(rejected.headers.get("access-control-allow-origin")).toBeNull();
+  });
+
+  test("allows configured cross-origin API CORS and rejects unlisted origins", async () => {
+    const dashboardOrigin = "https://dashboard.example";
+    const { server } = await start({
+      env: { AGENTPROBE_SERVER_CORS_ORIGINS: dashboardOrigin },
+    });
+
+    const allowed = await fetch(`${server.url}/api/runs`, {
+      method: "OPTIONS",
+      headers: {
+        origin: dashboardOrigin,
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "authorization, content-type",
+      },
+    });
+    expect(allowed.status).toBe(204);
+    expect(allowed.headers.get("access-control-allow-origin")).toBe(
+      dashboardOrigin,
+    );
+    expect(allowed.headers.get("access-control-allow-credentials")).toBe(
+      "true",
+    );
+
+    const api = await fetch(`${server.url}/api/runs`, {
+      headers: { origin: dashboardOrigin },
+    });
+    expect(api.status).toBe(200);
+    expect(api.headers.get("access-control-allow-origin")).toBe(
+      dashboardOrigin,
+    );
+
+    const rejected = await fetch(`${server.url}/api/runs`, {
+      method: "OPTIONS",
+      headers: {
+        origin: "https://evil.example",
+        "access-control-request-method": "POST",
+      },
+    });
+    expect(rejected.status).toBe(403);
+    expect(rejected.headers.get("access-control-allow-origin")).toBeNull();
   });
 });
