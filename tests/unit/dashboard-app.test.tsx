@@ -63,34 +63,42 @@ function installDom(): void {
 
   Object.defineProperty(globalThis, "window", {
     configurable: true,
+    writable: true,
     value: window,
   });
   Object.defineProperty(globalThis, "document", {
     configurable: true,
+    writable: true,
     value: window.document,
   });
   Object.defineProperty(globalThis, "navigator", {
     configurable: true,
+    writable: true,
     value: window.navigator,
   });
   Object.defineProperty(globalThis, "Element", {
     configurable: true,
+    writable: true,
     value: window.Element,
   });
   Object.defineProperty(globalThis, "HTMLElement", {
     configurable: true,
+    writable: true,
     value: window.HTMLElement,
   });
   Object.defineProperty(globalThis, "EventSource", {
     configurable: true,
+    writable: true,
     value: MockEventSource,
   });
   Object.defineProperty(window, "EventSource", {
     configurable: true,
+    writable: true,
     value: MockEventSource,
   });
   Object.defineProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT", {
     configurable: true,
+    writable: true,
     value: true,
   });
 
@@ -102,30 +110,37 @@ function installDom(): void {
 function restoreDom(): void {
   Object.defineProperty(globalThis, "window", {
     configurable: true,
+    writable: true,
     value: previousWindow,
   });
   Object.defineProperty(globalThis, "document", {
     configurable: true,
+    writable: true,
     value: previousDocument,
   });
   Object.defineProperty(globalThis, "navigator", {
     configurable: true,
+    writable: true,
     value: previousNavigator,
   });
   Object.defineProperty(globalThis, "Element", {
     configurable: true,
+    writable: true,
     value: previousElement,
   });
   Object.defineProperty(globalThis, "HTMLElement", {
     configurable: true,
+    writable: true,
     value: previousHTMLElement,
   });
   Object.defineProperty(globalThis, "EventSource", {
     configurable: true,
+    writable: true,
     value: previousEventSource,
   });
   Object.defineProperty(globalThis, "IS_REACT_ACT_ENVIRONMENT", {
     configurable: true,
+    writable: true,
     value: previousActEnvironment,
   });
 }
