@@ -5,6 +5,7 @@ services:
       - "127.0.0.1:7878:7878"
     environment:
       AGENTPROBE_SERVER_TOKEN: ${AGENTPROBE_SERVER_TOKEN:?set AGENTPROBE_SERVER_TOKEN}
+      AGENTPROBE_SERVER_CORS_ORIGINS: ${AGENTPROBE_SERVER_CORS_ORIGINS:?set AGENTPROBE_SERVER_CORS_ORIGINS}
       OPEN_ROUTER_API_KEY: ${OPEN_ROUTER_API_KEY:?set OPEN_ROUTER_API_KEY}
       AGENTPROBE_SERVER_DATA: /app/data
       # Default backend is SQLite persisted on the named volume below.
@@ -18,6 +19,18 @@ services:
     volumes:
       - ./data:/app/data:ro
       - agentprobe-sqlite:/app/.agentprobe
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bun",
+          "-e",
+          "fetch('http://127.0.0.1:7878/readyz').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     # depends_on:
     #   postgres:
     #     condition: service_healthy
