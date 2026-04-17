@@ -283,6 +283,36 @@ async function readPresetSelection(
   }));
 }
 
+async function readPresetSelections(
+  sql: SqlTag,
+  presetIds: string[],
+): Promise<Map<string, ScenarioSelectionRef[]>> {
+  const selections = new Map<string, ScenarioSelectionRef[]>(
+    presetIds.map((id) => [id, []]),
+  );
+  if (presetIds.length === 0) {
+    return selections;
+  }
+
+  const rows = await sql<UnknownRecord>`
+    select preset_id, file, scenario_id from preset_scenarios
+    where preset_id in ${sql(presetIds)}
+    order by preset_id asc, position asc
+  `;
+  for (const row of rows) {
+    const presetId = String(row.preset_id);
+    const bucket = selections.get(presetId);
+    if (!bucket) {
+      continue;
+    }
+    bucket.push({
+      file: String(row.file),
+      id: String(row.scenario_id),
+    });
+  }
+  return selections;
+}
+
 async function latestRunForPreset(
   sql: SqlTag,
   presetId: string,
@@ -293,6 +323,30 @@ async function latestRunForPreset(
   `;
   const row = rows[0];
   return row ? mapRunSummaryRow(row) : null;
+}
+
+async function latestRunsForPresets(
+  sql: SqlTag,
+  presetIds: string[],
+): Promise<Map<string, RunSummary>> {
+  const latestRuns = new Map<string, RunSummary>();
+  if (presetIds.length === 0) {
+    return latestRuns;
+  }
+
+  const rows = await sql<UnknownRecord>`
+    select distinct on (preset_id) * from runs
+    where preset_id in ${sql(presetIds)}
+    order by preset_id asc, started_at desc
+  `;
+  for (const row of rows) {
+    const presetId = asStringOrNull(row.preset_id);
+    if (!presetId) {
+      continue;
+    }
+    latestRuns.set(presetId, mapRunSummaryRow(row));
+  }
+  return latestRuns;
 }
 
 function mapPresetRow(
@@ -445,16 +499,19 @@ export class PostgresRepository implements PersistenceRepository {
         : await sql<UnknownRecord>`
             select * from presets where deleted_at is null order by updated_at desc
           `;
-      return Promise.all(
-        rows.map(async (row) => {
-          const presetId = String(row.id);
-          const [selection, lastRun] = await Promise.all([
-            readPresetSelection(sql, presetId),
-            latestRunForPreset(sql, presetId),
-          ]);
-          return mapPresetRow(row, selection, lastRun);
-        }),
-      );
+      const presetIds = rows.map((row) => String(row.id));
+      const [selectionsByPreset, latestRunsByPreset] = await Promise.all([
+        readPresetSelections(sql, presetIds),
+        latestRunsForPresets(sql, presetIds),
+      ]);
+      return rows.map((row) => {
+        const presetId = String(row.id);
+        return mapPresetRow(
+          row,
+          selectionsByPreset.get(presetId) ?? [],
+          latestRunsByPreset.get(presetId) ?? null,
+        );
+      });
     });
   }
 
