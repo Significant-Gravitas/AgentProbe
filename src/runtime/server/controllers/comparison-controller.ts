@@ -1,4 +1,4 @@
-import type { PersistenceRepository } from "../../../providers/persistence/types.ts";
+import type { ReadableRepository } from "../../../providers/persistence/types.ts";
 import type {
   JsonValue,
   RunRecord,
@@ -403,7 +403,7 @@ export type ComparisonController = {
 };
 
 export function createComparisonController(options: {
-  repository: PersistenceRepository;
+  repository: ReadableRepository;
 }): ComparisonController {
   const { repository } = options;
   return {
