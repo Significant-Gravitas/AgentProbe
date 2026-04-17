@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
+import { timingSafeEqual } from "node:crypto";
 
 import {
   constantTimeEquals,
   extractBearerToken,
+  TOKEN_COMPARE_BYTE_LENGTH,
   verifyBearerToken,
 } from "../../../src/runtime/server/auth/token.ts";
 
@@ -11,6 +13,56 @@ describe("server token auth", () => {
     expect(constantTimeEquals("secret", "secret")).toBe(true);
     expect(constantTimeEquals("secret", "Secret")).toBe(false);
     expect(constantTimeEquals("secret", "secret-extra")).toBe(false);
+  });
+
+  test("uses the same padded compare path for length mismatches", () => {
+    const comparisons: Array<{
+      leftLength: number;
+      rightLength: number;
+      sameReference: boolean;
+    }> = [];
+    const compare: typeof timingSafeEqual = (left, right) => {
+      comparisons.push({
+        leftLength: left.byteLength,
+        rightLength: right.byteLength,
+        sameReference: Object.is(left, right),
+      });
+      return timingSafeEqual(left, right);
+    };
+
+    expect(constantTimeEquals("secret", "secret", compare)).toBe(true);
+    expect(constantTimeEquals("secret", "Secret", compare)).toBe(false);
+    expect(constantTimeEquals("secret", "secret-extra", compare)).toBe(false);
+    expect(
+      constantTimeEquals(
+        "a".repeat(TOKEN_COMPARE_BYTE_LENGTH + 1),
+        "a".repeat(TOKEN_COMPARE_BYTE_LENGTH + 1),
+        compare,
+      ),
+    ).toBe(false);
+
+    expect(comparisons).toEqual([
+      {
+        leftLength: TOKEN_COMPARE_BYTE_LENGTH,
+        rightLength: TOKEN_COMPARE_BYTE_LENGTH,
+        sameReference: false,
+      },
+      {
+        leftLength: TOKEN_COMPARE_BYTE_LENGTH,
+        rightLength: TOKEN_COMPARE_BYTE_LENGTH,
+        sameReference: false,
+      },
+      {
+        leftLength: TOKEN_COMPARE_BYTE_LENGTH,
+        rightLength: TOKEN_COMPARE_BYTE_LENGTH,
+        sameReference: false,
+      },
+      {
+        leftLength: TOKEN_COMPARE_BYTE_LENGTH,
+        rightLength: TOKEN_COMPARE_BYTE_LENGTH,
+        sameReference: false,
+      },
+    ]);
   });
 
   test("extracts bearer headers and EventSource access_token fallback", () => {

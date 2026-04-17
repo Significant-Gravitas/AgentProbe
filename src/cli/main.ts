@@ -13,7 +13,7 @@ import {
   DEFAULT_DB_FILENAME,
   SqliteRunRecorder,
 } from "../providers/persistence/sqlite-run-history.ts";
-import { parseDbUrl } from "../providers/persistence/url.ts";
+import { parseDbUrl, redactDbUrl } from "../providers/persistence/url.ts";
 import { OpenAiResponsesClient } from "../providers/sdk/openai-responses.ts";
 import {
   loadConfiguredEndpoint,
@@ -544,7 +544,9 @@ async function handleStartServer(
   const server = await startAgentProbeServer(config);
   console.error(`AgentProbe server listening on ${server.url}`);
   console.error(`  data:      ${config.dataPath}`);
-  console.error(`  db_url:    ${config.dbUrl || "(none)"}`);
+  console.error(
+    `  db_url:    ${config.dbUrl ? redactDbUrl(config.dbUrl) : "(none)"}`,
+  );
   console.error(
     `  token:     ${config.token ? "set" : "(none)"}${
       config.unsafeExpose ? " (unsafe-expose)" : ""

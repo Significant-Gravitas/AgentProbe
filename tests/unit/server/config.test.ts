@@ -29,10 +29,11 @@ describe("server config", () => {
       `sqlite:///${resolve(".agentprobe", "runs.sqlite3")}`,
     );
     expect(config.dashboardDist).toBe(resolve("dashboard/dist"));
+    expect(config.corsOrigins).toEqual([]);
     expect(config.openBrowser).toBe(false);
   });
 
-  test("rejects non-loopback exposure without unsafe flag and token", () => {
+  test("rejects non-loopback exposure without unsafe flag, token, and CORS origins", () => {
     const data = makeDataDir();
 
     expect(() =>
@@ -47,6 +48,20 @@ describe("server config", () => {
         env: {},
       }),
     ).toThrow(/token/);
+    expect(() =>
+      buildServerConfig({
+        args: [
+          "--data",
+          data,
+          "--host",
+          "0.0.0.0",
+          "--unsafe-expose",
+          "--token",
+          "secret",
+        ],
+        env: {},
+      }),
+    ).toThrow(/CORS origins/);
 
     const config = buildServerConfig({
       args: [
@@ -58,10 +73,17 @@ describe("server config", () => {
         "--token",
         "secret",
       ],
-      env: {},
+      env: {
+        AGENTPROBE_SERVER_CORS_ORIGINS:
+          "https://dashboard.example, http://localhost:5173",
+      },
     });
     expect(config.unsafeExpose).toBe(true);
     expect(config.token).toBe("secret");
+    expect(config.corsOrigins).toEqual([
+      "https://dashboard.example",
+      "http://localhost:5173",
+    ]);
   });
 
   test("allows loopback ranges and rejects postgres URLs for write-enabled server mode", () => {
@@ -103,6 +125,8 @@ describe("server config", () => {
         AGENTPROBE_SERVER_DATA: data,
         AGENTPROBE_SERVER_DB: dbPath,
         AGENTPROBE_SERVER_TOKEN: "env-token",
+        AGENTPROBE_SERVER_CORS_ORIGINS:
+          "https://dashboard.example, https://dashboard.example",
         AGENTPROBE_SERVER_LOG_FORMAT: "json",
       },
     });
@@ -111,7 +135,50 @@ describe("server config", () => {
     expect(config.port).toBe(0);
     expect(config.dbUrl).toBe(`sqlite:///${resolve(dbPath)}`);
     expect(config.token).toBe("env-token");
+    expect(config.corsOrigins).toEqual(["https://dashboard.example"]);
     expect(config.logFormat).toBe("json");
+  });
+
+  test("redacts unsupported database URL credentials in config errors", () => {
+    const data = makeDataDir();
+
+    try {
+      buildServerConfig({
+        args: ["--data", data],
+        env: {
+          AGENTPROBE_DB_URL: "mysql://user:pa@ss@host/db",
+        },
+      });
+      throw new Error("Expected buildServerConfig to reject mysql URLs.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(AgentProbeConfigError);
+      const message = String((error as Error).message);
+      expect(message).toContain("mysql://user:***@host/db");
+      expect(message).not.toContain("pa@ss");
+      expect(message).not.toContain("ss@host");
+    }
+  });
+
+  test("rejects invalid CORS origins", () => {
+    const data = makeDataDir();
+
+    expect(() =>
+      buildServerConfig({
+        args: ["--data", data],
+        env: {
+          AGENTPROBE_SERVER_CORS_ORIGINS: "https://dashboard.example/app",
+        },
+      }),
+    ).toThrow(/without paths/);
+
+    expect(() =>
+      buildServerConfig({
+        args: ["--data", data],
+        env: {
+          AGENTPROBE_SERVER_CORS_ORIGINS: "file:///tmp/dashboard.html",
+        },
+      }),
+    ).toThrow(/http or https/);
   });
 
   test("server startup refuses postgres before schema probing when config is prebuilt", async () => {
@@ -123,6 +190,7 @@ describe("server config", () => {
         port: 0,
         dataPath: data,
         dbUrl: "postgres://u:p@localhost/agentprobe",
+        corsOrigins: [],
         unsafeExpose: false,
         openBrowser: false,
         logFormat: "text",
