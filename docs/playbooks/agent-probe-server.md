@@ -100,6 +100,7 @@ external binds from silently granting API access to arbitrary web origins.
 
    ```bash
    curl -fsS http://127.0.0.1:7878/healthz
+   curl -fsS http://127.0.0.1:7878/readyz
    curl -fsS \
      -H "Authorization: Bearer $AGENTPROBE_SERVER_TOKEN" \
      http://127.0.0.1:7878/api/presets
@@ -125,6 +126,33 @@ external binds from silently granting API access to arbitrary web origins.
 The Compose service binds `127.0.0.1:7878:7878`, mounts `./data` read-only, and
 stores SQLite history in the `agentprobe-sqlite` volume at
 `/app/.agentprobe/runs.sqlite3`.
+
+Compose also marks `agentprobe` healthy only after the in-container readiness
+probe receives HTTP 200 from `/readyz`:
+
+```bash
+bun -e "fetch('http://127.0.0.1:7878/readyz').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+```
+
+Use the Compose health state before depending on the service from another
+container:
+
+```bash
+docker compose ps agentprobe
+docker inspect --format '{{json .State.Health}}' "$(docker compose ps -q agentprobe)"
+```
+
+When the probe fails, inspect the readiness response from inside the container
+and then read the server logs:
+
+```bash
+docker compose exec agentprobe bun -e "fetch('http://127.0.0.1:7878/readyz').then(async (r) => { console.log(r.status, await r.text()); process.exit(r.ok ? 0 : 1); }).catch((error) => { console.error(error); process.exit(1); })"
+docker compose logs agentprobe
+```
+
+Common causes are a missing `./data` suite root, a SQLite volume that another
+writer is holding open, or a Postgres schema that is behind the target migration
+version.
 
 ## Validation
 
