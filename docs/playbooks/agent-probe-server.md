@@ -159,11 +159,19 @@ bun run fast-feedback
 
 ## Postgres Backend (Phase 3)
 
-The server accepts `sqlite:///…`, `postgres://…`, and `postgresql://…` URLs via
-`--db` or `AGENTPROBE_DB_URL`. SQLite remains the default when the URL is absent
-or points at a filesystem path. Postgres support ships in Phase 3 with a
-dedicated migration CLI, schema-version boot gate, and credential redaction in
-logs and `/api/session`.
+The persistence layer accepts `sqlite:///…`, `postgres://…`, and
+`postgresql://…` URLs via `--db` or `AGENTPROBE_DB_URL`. SQLite remains the
+default when the URL is absent or points at a filesystem path. Postgres support
+ships in Phase 3 with a dedicated migration CLI, schema-version boot gate for
+read-only repository paths, and credential redaction in logs and `/api/session`.
+
+Postgres is intentionally read-only for run recording in this release. The
+repository supports schema migrations, preset CRUD, and historical reads for
+listings and comparisons, but it does not expose the run-recorder capability.
+Because `agentprobe start-server` currently exposes run write routes such as
+`POST /api/runs`, preset run starts, and run cancellation, the server fails fast
+when its database URL resolves to Postgres. Use `sqlite:///…` for the
+write-enabled server until the Postgres recorder ships.
 
 ### Setup
 
@@ -188,13 +196,17 @@ logs and `/api/session`.
    # applied: 1
    ```
 
-4. Boot the server. It performs a **check-only** version probe — it will refuse
-   to start when the schema is behind the expected version, with a message
-   telling you to rerun `agentprobe db:migrate`:
+4. Use SQLite for the write-enabled server. A Postgres URL fails during config
+   loading before run routes can accept traffic:
 
    ```bash
-   bun run agentprobe start-server --data data
+   bun run agentprobe start-server --data data --db sqlite:///absolute/path/to/runs.sqlite3
    ```
+
+   The Postgres **check-only** version probe is reserved for read-only
+   repository paths and future server modes that do not expose run recording.
+   When enabled, it refuses to start if the schema is behind the expected
+   version and tells you to rerun `agentprobe db:migrate`.
 
 ### Rollback / Reset
 
@@ -222,8 +234,8 @@ logs and `/api/session`.
 | --- | --- |
 | `Postgres backend requires Bun ≥ 1.2` | Runtime is too old; upgrade Bun. |
 | `Failed to open Postgres connection: ECONNREFUSED` | Postgres not running or the URL host/port is wrong. |
-| `Postgres schema version N is behind expected M` | Run `agentprobe db:migrate` before `start-server`. |
-| `Recording runs against Postgres is not enabled in this release` | Intentional Phase 3 scope: run recording stays on SQLite while Postgres read/compare/preset CRUD ships first. |
+| `Postgres schema version N is behind expected M` | Run `agentprobe db:migrate` before using Postgres read paths. |
+| `Postgres is read-only for run recording in this release` | Intentional Phase 3 scope: `agentprobe start-server` has run write routes enabled, so use SQLite for server run recording while Postgres read/compare/preset CRUD ships first. |
 | `Unsupported database URL scheme` | Provide one of `sqlite:///…`, `postgres://…`, `postgresql://…`. |
 
 Credentials are never logged: `/readyz`, `/api/session`, and server boot logs

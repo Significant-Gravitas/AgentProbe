@@ -6,16 +6,9 @@ import type {
   ScenarioRecord,
   ScenarioSelectionRef,
 } from "../../shared/types/contracts.ts";
-import {
-  AgentProbeConfigError,
-  AgentProbeRuntimeError,
-} from "../../shared/utils/errors.ts";
+import { AgentProbeRuntimeError } from "../../shared/utils/errors.ts";
 import { createPostgresClient, type SqlTag } from "./postgres-client.ts";
-import type {
-  PersistenceRepository,
-  PresetWriteInput,
-  RunRecorder,
-} from "./types.ts";
+import type { PersistenceRepository, PresetWriteInput } from "./types.ts";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -346,10 +339,9 @@ async function fetchPresetById(
 }
 
 /**
- * Postgres-backed repository. Reads are fully implemented; the recorder
- * (writes) is deferred until a buffered async recorder ships in a follow-up
- * (tracked as a separate issue). Preset CRUD works because it is inherently
- * async already on Postgres.
+ * Postgres-backed repository. Reads and preset CRUD are implemented; run
+ * recording is intentionally absent from this type until a buffered async
+ * recorder ships.
  */
 export class PostgresRepository implements PersistenceRepository {
   readonly kind = "postgres" as const;
@@ -357,14 +349,6 @@ export class PostgresRepository implements PersistenceRepository {
 
   constructor(dbUrl: string) {
     this.dbUrl = dbUrl;
-  }
-
-  createRecorder(): RunRecorder {
-    throw new AgentProbeConfigError(
-      "Recording runs against Postgres is not enabled in this release. " +
-        "Use a `sqlite:///` URL for run recording; Postgres currently supports " +
-        "schema migrations, preset CRUD, and historical reads (comparison, listings).",
-    );
   }
 
   private async withSql<T>(fn: (sql: SqlTag) => Promise<T>): Promise<T> {

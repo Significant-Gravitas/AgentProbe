@@ -5,6 +5,8 @@ import {
   DEFAULT_DB_DIRNAME,
   DEFAULT_DB_FILENAME,
 } from "../../providers/persistence/sqlite-run-history.ts";
+import { POSTGRES_RUN_RECORDING_UNSUPPORTED_MESSAGE } from "../../providers/persistence/types.ts";
+import { isPostgresUrl } from "../../providers/persistence/url.ts";
 import { AgentProbeConfigError } from "../../shared/utils/errors.ts";
 
 export const DEFAULT_HOST = "127.0.0.1";
@@ -320,6 +322,9 @@ export function buildServerConfig(source: FlagSource): ServerConfig {
     merge(cli.db, envFlags.db),
     merge(cli.dbUrl, envFlags.dbUrl),
   );
+  if (isPostgresUrl(dbUrl)) {
+    throw new AgentProbeConfigError(POSTGRES_RUN_RECORDING_UNSUPPORTED_MESSAGE);
+  }
 
   if (!isLoopbackHost(host)) {
     if (!unsafeExpose) {

@@ -1,4 +1,7 @@
-import { createRepository } from "../../providers/persistence/factory.ts";
+import {
+  createRecordingRepository,
+  createRepository,
+} from "../../providers/persistence/factory.ts";
 import {
   checkSchemaVersion,
   POSTGRES_TARGET_VERSION,
@@ -366,6 +369,8 @@ function logRequest(
 export async function startAgentProbeServer(
   config: ServerConfig,
 ): Promise<StartedServer> {
+  const recordingRepository = createRecordingRepository(config.dbUrl);
+
   if (config.dbUrl) {
     if (isPostgresUrl(config.dbUrl)) {
       const report = await checkSchemaVersion(config.dbUrl);
@@ -393,6 +398,7 @@ export async function startAgentProbeServer(
   const presetController = new PresetController({ config, suiteController });
   const runController = new RunController({
     config,
+    repository: recordingRepository,
     suiteController,
     streamHub,
   });

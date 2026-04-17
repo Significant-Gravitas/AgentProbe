@@ -12,13 +12,13 @@ import {
   updatePreset as sqliteUpdatePreset,
 } from "./sqlite-run-history.ts";
 import type {
-  PersistenceRepository,
   PresetWriteInput,
+  RecordingRepository,
   RunRecorder,
 } from "./types.ts";
 
 /** SQLite-backed repository; wraps the existing synchronous free-function API. */
-export class SqliteRepository implements PersistenceRepository {
+export class SqliteRepository implements RecordingRepository {
   readonly kind = "sqlite" as const;
   readonly dbUrl: string;
 

@@ -116,22 +116,34 @@ export interface RunRecorder {
   recordScenarioError(scenarioRunId: number, error: Error): void;
 }
 
+export const POSTGRES_RUN_RECORDING_UNSUPPORTED_MESSAGE =
+  "Postgres is read-only for run recording in this release. " +
+  "`agentprobe start-server` has run write routes enabled (`POST /api/runs`, preset run starts, cancellation), " +
+  "so it requires a `sqlite:///` URL. Postgres currently supports schema migrations, " +
+  "preset CRUD, and historical reads (comparison, listings).";
+
 /**
- * Async-first repository interface. Both SQLite and Postgres backends implement
- * this; existing sync free-function callers keep working through compat wrappers
- * in `sqlite-run-history.ts`.
+ * Read-only repository surface for historical run views and comparisons.
  */
-export interface PersistenceRepository {
+export interface ReadableRepository {
   readonly kind: PersistenceBackendKind;
   readonly dbUrl: string;
 
-  /**
-   * Instantiate a recorder. SQLite returns a synchronous recorder; Postgres may
-   * throw an AgentProbeConfigError when the runtime cannot support synchronous
-   * recording (Phase 3.1 will introduce a buffered async recorder).
-   */
-  createRecorder(): RunRecorder;
+  listRuns(): Promise<RunSummary[]>;
+  listRunsForPreset(presetId: string): Promise<RunSummary[]>;
+  getRun(runId: string): Promise<RunRecord | undefined>;
+  latestRunForSuite(
+    suiteFingerprint: string,
+    options?: { beforeStartedAt?: string },
+  ): Promise<RunRecord | undefined>;
+}
 
+/**
+ * Async-first persistence repository. SQLite and Postgres both implement this
+ * surface; existing sync free-function callers keep working through compat
+ * wrappers in `sqlite-run-history.ts`.
+ */
+export interface PersistenceRepository extends ReadableRepository {
   // Preset operations
   createPreset(input: PresetWriteInput): Promise<PresetRecord>;
   getPreset(
@@ -145,18 +157,17 @@ export interface PersistenceRepository {
   ): Promise<PresetRecord | undefined>;
   softDeletePreset(presetId: string): Promise<PresetRecord | undefined>;
 
-  // Run / scenario reads
-  listRuns(): Promise<RunSummary[]>;
-  listRunsForPreset(presetId: string): Promise<RunSummary[]>;
-  getRun(runId: string): Promise<RunRecord | undefined>;
-  latestRunForSuite(
-    suiteFingerprint: string,
-    options?: { beforeStartedAt?: string },
-  ): Promise<RunRecord | undefined>;
-
   // Cancellation
   markRunCancelled(
     runId: string,
     options?: { exitCode?: number },
   ): Promise<RunRecord | undefined>;
+}
+
+/**
+ * Repository surface required by callers that create run recorders. Postgres is
+ * intentionally excluded until it has an async/buffered recorder.
+ */
+export interface RecordingRepository extends PersistenceRepository {
+  createRecorder(): RunRecorder;
 }
