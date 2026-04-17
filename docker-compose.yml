@@ -1,0 +1,18 @@
+services:
+  agentprobe:
+    build: .
+    ports:
+      - "127.0.0.1:7878:7878"
+    environment:
+      AGENTPROBE_SERVER_TOKEN: ${AGENTPROBE_SERVER_TOKEN:?set AGENTPROBE_SERVER_TOKEN}
+      OPEN_ROUTER_API_KEY: ${OPEN_ROUTER_API_KEY:?set OPEN_ROUTER_API_KEY}
+      AGENTPROBE_SERVER_DATA: /app/data
+      AGENTPROBE_SERVER_DB: /app/.agentprobe/runs.sqlite3
+      AGENTPROBE_SERVER_DASHBOARD_DIST: /app/dashboard/dist
+      AGENTPROBE_SERVER_LOG_FORMAT: json
+    volumes:
+      - ./data:/app/data:ro
+      - agentprobe-sqlite:/app/.agentprobe
+
+volumes:
+  agentprobe-sqlite:

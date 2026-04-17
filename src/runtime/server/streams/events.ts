@@ -2,12 +2,15 @@ import type { JsonValue } from "../../../shared/types/contracts.ts";
 
 export type RunEventKind =
   | "snapshot"
+  | "suite_started"
   | "run_started"
   | "run_progress"
   | "run_finished"
+  | "run_cancelled"
   | "run_error"
   | "scenario_started"
   | "scenario_finished"
+  | "scenario_error"
   | "log";
 
 export type RunEvent = {

@@ -5,14 +5,27 @@ import {
 } from "../../shared/utils/errors.ts";
 import { verifyBearerToken } from "./auth/token.ts";
 import type { ServerConfig } from "./config.ts";
+import { PresetController } from "./controllers/preset-controller.ts";
+import { RunController } from "./controllers/run-controller.ts";
 import { SuiteController } from "./controllers/suite-controller.ts";
 import { ensureRequestId, errorResponse } from "./http-helpers.ts";
 import { handleHealthz, handleReadyz } from "./routes/health.ts";
+import {
+  handleCreatePreset,
+  handleDeletePreset,
+  handleGetPreset,
+  handleListPresets,
+  handlePresetRuns,
+  handleStartPresetRun,
+  handleUpdatePreset,
+} from "./routes/presets.ts";
 import { handleRunReport } from "./routes/reports.ts";
 import {
+  handleCancelRun,
   handleGetRun,
   handleGetScenarioRun,
   handleListRuns,
+  handleStartRun,
 } from "./routes/runs.ts";
 import { handleRunSse } from "./routes/sse.ts";
 import { handleStatic } from "./routes/static.ts";
@@ -27,6 +40,8 @@ export const SERVER_VERSION = "0.1.0";
 
 export type ServerContext = {
   config: ServerConfig;
+  presetController: PresetController;
+  runController: RunController;
   suiteController: SuiteController;
   streamHub: StreamHub;
   requestId: string;
@@ -92,8 +107,15 @@ function buildRoutes(): Route[] {
     ),
     compileRoute("GET", "/api/scenarios", handleListAllScenarios),
     compileRoute("GET", "/api/runs", handleListRuns),
+    compileRoute("POST", "/api/runs", handleStartRun),
     compileRoute("GET", "/api/runs/:runId", (request, context, params) =>
       handleGetRun(request, context, { runId: params.runId ?? "" }),
+    ),
+    compileRoute(
+      "POST",
+      "/api/runs/:runId/cancel",
+      (request, context, params) =>
+        handleCancelRun(request, context, { runId: params.runId ?? "" }),
     ),
     compileRoute(
       "GET",
@@ -112,6 +134,38 @@ function buildRoutes(): Route[] {
       "/api/runs/:runId/report.html",
       (request, context, params) =>
         handleRunReport(request, context, { runId: params.runId ?? "" }),
+    ),
+    compileRoute("GET", "/api/presets", handleListPresets),
+    compileRoute("POST", "/api/presets", handleCreatePreset),
+    compileRoute("GET", "/api/presets/:presetId", (request, context, params) =>
+      handleGetPreset(request, context, { presetId: params.presetId ?? "" }),
+    ),
+    compileRoute("PUT", "/api/presets/:presetId", (request, context, params) =>
+      handleUpdatePreset(request, context, {
+        presetId: params.presetId ?? "",
+      }),
+    ),
+    compileRoute(
+      "DELETE",
+      "/api/presets/:presetId",
+      (request, context, params) =>
+        handleDeletePreset(request, context, {
+          presetId: params.presetId ?? "",
+        }),
+    ),
+    compileRoute(
+      "GET",
+      "/api/presets/:presetId/runs",
+      (request, context, params) =>
+        handlePresetRuns(request, context, { presetId: params.presetId ?? "" }),
+    ),
+    compileRoute(
+      "POST",
+      "/api/presets/:presetId/runs",
+      (request, context, params) =>
+        handleStartPresetRun(request, context, {
+          presetId: params.presetId ?? "",
+        }),
     ),
   ];
 }
@@ -187,11 +241,19 @@ export async function startAgentProbeServer(
   suiteController.inventory();
 
   const streamHub = new StreamHub();
+  const presetController = new PresetController({ config, suiteController });
+  const runController = new RunController({
+    config,
+    suiteController,
+    streamHub,
+  });
   const routes = buildRoutes();
   const startedAt = Date.now();
 
   const baseContext = {
     config,
+    presetController,
+    runController,
     suiteController,
     streamHub,
     startedAt,
@@ -269,6 +331,7 @@ export async function startAgentProbeServer(
   });
 
   const stop = async (): Promise<void> => {
+    await runController.cancelAllAndWait(5_000);
     server.stop(true);
   };
 

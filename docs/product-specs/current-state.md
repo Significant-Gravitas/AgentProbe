@@ -20,17 +20,17 @@ Last validated against `platform.md`: 2026-04-17
 - [ ] Dashboard mode serves live run state from a Bun HTTP server
 - [ ] Reliability signals exist for critical command paths
 
-### Server control plane (planned — Phase 1–4)
+### Server control plane (Phase 1-4)
 
-- [ ] Default start-server boot binds loopback with read-only history browsing
-- [ ] Non-loopback exposure requires unsafe flag and token
-- [ ] Read-only HTTP and UI surfaces browse persisted run history
-- [ ] Live run events stream through Server-Sent Events with replay support
-- [ ] Run control starts validated ad-hoc or preset-backed runs
-- [ ] Cancellation cooperatively stops a server-managed run
-- [ ] Presets save cross-file scenario selections for one-click rerun
+- [x] Default start-server boot binds loopback with read-only history browsing
+- [x] Non-loopback exposure requires unsafe flag and token
+- [x] Read-only HTTP and UI surfaces browse persisted run history
+- [x] Live run events stream through Server-Sent Events with replay support
+- [x] Run control starts validated ad-hoc or preset-backed runs
+- [x] Cancellation cooperatively stops a server-managed run
+- [x] Presets save cross-file scenario selections for one-click rerun
 - [ ] Comparison workspace diffs 2 to 10 historical runs
-- [ ] Docker image boots safely with SQLite-on-volume persistence
+- [x] Docker image boots safely with SQLite-on-volume persistence
 
 ## Notes
 
@@ -52,6 +52,9 @@ Last validated against `platform.md`: 2026-04-17
   can create sessions, send chat turns, and read session history.
 - `bun run fast-feedback` now enforces Biome linting, strict TypeScript checks,
   and Bun tests alongside repo validation.
+- `agentprobe start-server` now supports token-protected write routes for
+  ad-hoc dry-runs, cooperative cancellation, preset CRUD, preset launch, SSE
+  replay, and Docker packaging with SQLite-on-volume persistence.
 - Reliability and latency-budget enforcement are now documented as required, but
   the repo has not fully promoted them into executable checks yet.
 - The repository contract is Bun-first even while some baseline implementation

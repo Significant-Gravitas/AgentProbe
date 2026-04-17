@@ -491,6 +491,7 @@ export type RunResult = {
   runId?: string | null;
   passed: boolean;
   exitCode: number;
+  cancelled?: boolean;
   results: ScenarioRunResult[];
 };
 
@@ -498,7 +499,9 @@ export type RunProgressKind =
   | "suite_started"
   | "scenario_started"
   | "scenario_finished"
-  | "scenario_error";
+  | "scenario_error"
+  | "run_cancelled"
+  | "run_finished";
 
 export type RunProgressEvent = {
   kind: RunProgressKind;
@@ -524,6 +527,10 @@ export type RunSummary = {
   passed?: boolean | null;
   exitCode?: number | null;
   preset?: string | null;
+  label?: string | null;
+  trigger?: string | null;
+  cancelledAt?: string | null;
+  presetId?: string | null;
   startedAt: string;
   completedAt?: string | null;
   suiteFingerprint?: string | null;
@@ -541,8 +548,38 @@ export type RunRecord = RunSummary & {
   sourcePaths?: Record<string, string> | null;
   endpointSnapshot?: Record<string, JsonValue> | null;
   selectedScenarioIds?: string[] | null;
+  presetSnapshot?: Record<string, JsonValue> | null;
   scenarios: ScenarioRecord[];
 };
+
+export type ScenarioSelectionRef = {
+  file: string;
+  id: string;
+};
+
+export type PresetParallelConfig = {
+  enabled: boolean;
+  limit?: number | null;
+};
+
+export type PresetRecord = {
+  id: string;
+  name: string;
+  description?: string | null;
+  endpoint: string;
+  personas: string;
+  rubric: string;
+  selection: ScenarioSelectionRef[];
+  parallel: PresetParallelConfig;
+  repeat: number;
+  dryRun: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string | null;
+  lastRun?: RunSummary | null;
+};
+
+export type PresetSnapshot = Omit<PresetRecord, "lastRun">;
 
 export type ScenarioRecord = {
   scenarioRunId: number;

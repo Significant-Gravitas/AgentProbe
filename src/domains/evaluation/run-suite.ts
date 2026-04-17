@@ -13,7 +13,9 @@ import type {
   CheckpointResult,
   ConversationTurn,
   Endpoints,
+  JsonValue,
   Persona,
+  PresetSnapshot,
   Rubric,
   RubricScore,
   RunProgressEvent,
@@ -21,6 +23,7 @@ import type {
   Scenario,
   ScenarioDefaults,
   ScenarioRunResult,
+  ScenarioSelectionRef,
   ScenarioTermination,
   Session,
   ToolCallRecord,
@@ -53,6 +56,10 @@ export type RunRecorder = {
     rubric: string;
     scenarioFilter?: string;
     tags?: string;
+    label?: string;
+    trigger?: string;
+    presetId?: string | null;
+    presetSnapshot?: PresetSnapshot | Record<string, JsonValue> | null;
   }) => string;
   recordRunConfiguration?: (options: {
     endpointConfig: Endpoints;
@@ -65,6 +72,7 @@ export type RunRecorder = {
   }) => void;
   recordRunFinished?: (result: RunResult) => void;
   recordRunError?: (error: Error, options: { exitCode: number }) => void;
+  recordRunCancelled?: (result?: RunResult) => void;
   recordScenarioStarted?: (options: {
     scenario: Scenario;
     persona: Persona;
@@ -110,6 +118,12 @@ export type RunRecorder = {
       overallScore: number;
     },
   ) => void;
+};
+
+export type PreparedScenarioSelection = {
+  scenarioCollection: ReturnType<typeof parseScenariosInput>;
+  selectedScenarios: Scenario[];
+  selectionRefs?: ScenarioSelectionRef[];
 };
 
 function effectiveSessions(scenario: Scenario): Session[] {
@@ -939,6 +953,12 @@ export async function runSuite(options: {
   rubric: string;
   scenarioId?: string;
   tags?: string;
+  preparedSelection?: PreparedScenarioSelection;
+  signal?: AbortSignal;
+  label?: string;
+  trigger?: string;
+  presetId?: string | null;
+  presetSnapshot?: PresetSnapshot | Record<string, JsonValue> | null;
   adapterFactory?: (endpoint: Endpoints) => EndpointAdapter;
   client: OpenAiResponsesClient;
   recorder?: RunRecorder;
@@ -955,11 +975,17 @@ export async function runSuite(options: {
     rubric: options.rubric,
     scenarioFilter: options.scenarioId,
     tags: options.tags,
+    label: options.label,
+    trigger: options.trigger,
+    presetId: options.presetId,
+    presetSnapshot: options.presetSnapshot,
   });
 
   try {
     const endpointConfig = parseEndpointsYaml(options.endpoint);
-    const scenarioCollection = parseScenariosInput(options.scenarios);
+    const scenarioCollection =
+      options.preparedSelection?.scenarioCollection ??
+      parseScenariosInput(options.scenarios);
     const personaCollection = parsePersonaYaml(options.personas);
     const rubricCollection = parseRubricsYaml(options.rubric);
 
@@ -983,16 +1009,20 @@ export async function runSuite(options: {
         .filter(Boolean),
     );
 
-    let selectedScenarios = [...scenarioCollection.scenarios];
-    if (requestedIds.size > 0) {
-      selectedScenarios = selectedScenarios.filter(
-        (item) => requestedIds.has(item.id) || requestedIds.has(item.name),
-      );
-    }
-    if (requestedTags.size > 0) {
-      selectedScenarios = selectedScenarios.filter((item) =>
-        item.tags.some((tag) => requestedTags.has(tag)),
-      );
+    let selectedScenarios = options.preparedSelection?.selectedScenarios ?? [
+      ...scenarioCollection.scenarios,
+    ];
+    if (!options.preparedSelection) {
+      if (requestedIds.size > 0) {
+        selectedScenarios = selectedScenarios.filter(
+          (item) => requestedIds.has(item.id) || requestedIds.has(item.name),
+        );
+      }
+      if (requestedTags.size > 0) {
+        selectedScenarios = selectedScenarios.filter((item) =>
+          item.tags.some((tag) => requestedTags.has(tag)),
+        );
+      }
     }
     if (selectedScenarios.length === 0) {
       if (options.scenarioId) {
@@ -1106,6 +1136,26 @@ export async function runSuite(options: {
       );
     };
 
+    const cancellationRequested = (): boolean =>
+      options.signal?.aborted === true;
+
+    const cancelledResult = (): RunResult => {
+      const result: RunResult = {
+        runId,
+        passed: false,
+        exitCode: 130,
+        cancelled: true,
+        results,
+      };
+      options.recorder?.recordRunCancelled?.(result);
+      options.progressCallback?.({
+        kind: "run_cancelled",
+        runId,
+        scenarioTotal: preparedRuns.length,
+      });
+      return result;
+    };
+
     const erroredScenarioResult = (
       prepared: PreparedRun,
       error: Error,
@@ -1154,6 +1204,9 @@ export async function runSuite(options: {
       let nextPreparedIndex = 0;
 
       const runNextPrepared = async (): Promise<void> => {
+        if (cancellationRequested()) {
+          return;
+        }
         const prepared = preparedRuns[nextPreparedIndex];
         nextPreparedIndex += 1;
         if (!prepared) {
@@ -1210,8 +1263,14 @@ export async function runSuite(options: {
       results = orderedResults.filter(
         (item): item is ScenarioRunResult => item !== undefined,
       );
+      if (cancellationRequested()) {
+        return cancelledResult();
+      }
     } else {
       for (const prepared of preparedRuns) {
+        if (cancellationRequested()) {
+          return cancelledResult();
+        }
         options.progressCallback?.({
           kind: "scenario_started",
           runId,
@@ -1249,6 +1308,9 @@ export async function runSuite(options: {
         }
       }
     }
+    if (cancellationRequested()) {
+      return cancelledResult();
+    }
 
     const passed = results.every((item) => item.passed);
     const result: RunResult = {
@@ -1258,6 +1320,11 @@ export async function runSuite(options: {
       results,
     };
     options.recorder?.recordRunFinished?.(result);
+    options.progressCallback?.({
+      kind: "run_finished",
+      runId,
+      scenarioTotal: preparedRuns.length,
+    });
     return result;
   } catch (error) {
     const failure = error instanceof Error ? error : new Error(String(error));

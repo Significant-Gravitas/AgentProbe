@@ -1,0 +1,12 @@
+.agentprobe/
+.git/
+.github/
+.tmp-agentprobe-e2e-*/
+.venv/
+coverage/
+dashboard/node_modules/
+node_modules/
+*.sqlite
+*.sqlite3
+*.db
+agentprobe-report-*.html

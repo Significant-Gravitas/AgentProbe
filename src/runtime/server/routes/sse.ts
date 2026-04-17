@@ -111,6 +111,10 @@ export function handleRunSse(
         for (const event of replayEvents) {
           safeEnqueue(formatSseEvent(event));
         }
+        if (historicalRun && historicalRun.status !== "running") {
+          queueMicrotask(close);
+          return;
+        }
       } else if (historicalRun) {
         const snapshot = context.streamHub.publish({
           runId,

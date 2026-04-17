@@ -156,6 +156,94 @@ body {
   gap: 12px;
   margin-bottom: 16px;
 }
+.server-form {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+.server-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.server-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.server-form input,
+.server-form select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 8px 10px;
+  min-width: 0;
+}
+.server-form input:disabled,
+.server-form select:disabled {
+  color: var(--muted);
+  opacity: 0.65;
+}
+.server-toggle-row,
+.server-form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.server-toggle-row label {
+  display: inline-flex;
+  grid-template-columns: none;
+  align-items: center;
+  gap: 6px;
+}
+.server-form button,
+.server-form-actions button,
+table button {
+  background: var(--indigo);
+  color: white;
+  border: 1px solid var(--indigo);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.server-form button.secondary,
+.server-form-actions button.secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+.server-form button:disabled,
+.server-form-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.scenario-picker {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  max-height: 360px;
+  overflow: auto;
+}
+.check-row {
+  display: grid !important;
+  grid-template-columns: auto minmax(120px, 0.35fr) minmax(160px, 1fr);
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--text) !important;
+  font-size: 12px !important;
+}
 .live-badge {
   display: inline-flex;
   align-items: center;

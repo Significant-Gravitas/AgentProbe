@@ -9,6 +9,7 @@ import {
   jsonResponse,
   parsePositiveInt,
 } from "../http-helpers.ts";
+import { HttpInputError } from "../validation.ts";
 
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
@@ -18,6 +19,8 @@ function filterRuns(
   filters: {
     status?: string | null;
     preset?: string | null;
+    presetId?: string | null;
+    trigger?: string | null;
     suiteFingerprint?: string | null;
   },
 ): RunSummary[] {
@@ -26,6 +29,12 @@ function filterRuns(
       return false;
     }
     if (filters.preset && run.preset !== filters.preset) {
+      return false;
+    }
+    if (filters.presetId && run.presetId !== filters.presetId) {
+      return false;
+    }
+    if (filters.trigger && run.trigger !== filters.trigger) {
       return false;
     }
     if (
@@ -74,9 +83,17 @@ export function handleListRuns(
   );
   const status = url.searchParams.get("status");
   const preset = url.searchParams.get("preset");
+  const presetId = url.searchParams.get("preset_id");
+  const trigger = url.searchParams.get("trigger");
   const suiteFingerprint = url.searchParams.get("suite_fingerprint");
 
-  const filtered = filterRuns(allRuns, { status, preset, suiteFingerprint });
+  const filtered = filterRuns(allRuns, {
+    status,
+    preset,
+    presetId,
+    trigger,
+    suiteFingerprint,
+  });
   const start = offset === 0 ? 0 : Math.min(offset, filtered.length);
   const page = filtered.slice(start, start + limit);
   const nextOffset = start + page.length;
@@ -91,6 +108,78 @@ export function handleListRuns(
     },
     { requestId: context.requestId },
   );
+}
+
+export async function handleStartRun(
+  request: Request,
+  context: ServerContext,
+): Promise<Response> {
+  try {
+    context.runController.assertRunnable();
+    const spec = await context.runController.specFromRunRequest(request);
+    const result = context.runController.start(spec);
+    return jsonResponse(
+      {
+        run_id: result.runId,
+        status: result.status,
+      },
+      { status: 202, requestId: context.requestId },
+    );
+  } catch (error) {
+    if (error instanceof HttpInputError) {
+      return errorResponse({
+        status: error.status,
+        type: error.code,
+        message: error.message,
+        requestId: context.requestId,
+      });
+    }
+    if (error instanceof Error && error.name === "AgentProbeConfigError") {
+      return errorResponse({
+        status: 400,
+        type: "bad_request",
+        message: error.message,
+        requestId: context.requestId,
+      });
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    const isConflict = /unique constraint/i.test(message);
+    return errorResponse({
+      status: isConflict ? 409 : 500,
+      type: isConflict ? "conflict" : "run_start_failed",
+      message,
+      requestId: context.requestId,
+    });
+  }
+}
+
+export function handleCancelRun(
+  _request: Request,
+  context: ServerContext,
+  params: { runId: string },
+): Response {
+  try {
+    const result = context.runController.cancel(params.runId);
+    return jsonResponse(result, {
+      status: 202,
+      requestId: context.requestId,
+    });
+  } catch (error) {
+    if (error instanceof HttpInputError) {
+      return errorResponse({
+        status: error.status,
+        type: error.code,
+        message: error.message,
+        requestId: context.requestId,
+      });
+    }
+    return errorResponse({
+      status: 500,
+      type: "cancel_failed",
+      message: error instanceof Error ? error.message : String(error),
+      requestId: context.requestId,
+    });
+  }
 }
 
 export function handleGetRun(

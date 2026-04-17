@@ -1,16 +1,19 @@
 # Workspace Inventory
 
-Generated: 2026-04-17T09:50:30.024Z
+Generated: 2026-04-17T12:55:35.944Z
 
 ```text
   AGENTS.md
   CLAUDE.md
+  Dockerfile
   README.md
   WORKFLOW.md
   agentprobe-spec-v0.2.md
   biome.json
   bun.lock
   bunfig.toml
+coverage/
+  coverage/lcov.info
 dashboard/
   dashboard/index.html
   dashboard/package.json
@@ -284,6 +287,7 @@ data/fixtures/snapshots/
   data/personas.yaml
   data/rubric.yaml
   data/scenarios.yaml
+  docker-compose.yml
 docs/
   docs/ARCHITECTURE.md
   docs/DESIGN.md
@@ -305,6 +309,11 @@ docs/exec-plans/
   docs/exec-plans/README.md
 docs/exec-plans/active/
   docs/exec-plans/active/INDEX.md
+  docs/exec-plans/active/agent-probe-server-phase-0-contract-2026-04.md
+  docs/exec-plans/active/agent-probe-server-phase-1-read-only-server-2026-04.md
+  docs/exec-plans/active/agent-probe-server-phase-2-run-control-presets-2026-04.md
+  docs/exec-plans/active/agent-probe-server-phase-3-comparison-postgres-2026-04.md
+  docs/exec-plans/active/agent-probe-server-phase-4-polish-observability-2026-04.md
 docs/exec-plans/completed/
   docs/exec-plans/completed/INDEX.md
   docs/exec-plans/tech-debt-tracker.md
@@ -313,6 +322,7 @@ docs/generated/
   docs/generated/workspace-inventory.md
 docs/playbooks/
   docs/playbooks/INDEX.md
+  docs/playbooks/agent-probe-server.md
 docs/product-specs/
   docs/product-specs/INDEX.md
   docs/product-specs/README.md
@@ -362,6 +372,17 @@ src/providers/sdk/
   src/providers/sdk/openai-responses.ts
   src/providers/sdk/openclaw.ts
   src/providers/sdk/preset-config.ts
+src/runtime/
+src/runtime/server/
+  src/runtime/server/app-server.ts
+src/runtime/server/auth/
+  src/runtime/server/config.ts
+src/runtime/server/controllers/
+src/runtime/server/dashboard/
+  src/runtime/server/http-helpers.ts
+src/runtime/server/routes/
+src/runtime/server/streams/
+  src/runtime/server/validation.ts
 src/shared/
 src/shared/types/
   src/shared/types/contracts.ts
@@ -369,6 +390,7 @@ src/shared/utils/
   src/shared/utils/errors.ts
   src/shared/utils/json.ts
   src/shared/utils/logging.ts
+  src/shared/utils/safe-static-path.ts
   src/shared/utils/template.ts
 tests/
 tests/e2e/
@@ -376,7 +398,12 @@ tests/e2e/
 tests/e2e/fixtures/
 tests/e2e/fixtures/suite/
   tests/e2e/judge-transcript-order.e2e.test.ts
+  tests/e2e/start-server.e2e.test.ts
   tests/e2e/support.ts
+tests/integration/
+tests/integration/server/
+  tests/integration/server/read-only.test.ts
+  tests/integration/server/write-control.test.ts
 tests/unit/
   tests/unit/adapters.test.ts
   tests/unit/autogpt-auth.test.ts
@@ -388,6 +415,11 @@ tests/unit/
   tests/unit/openclaw.test.ts
   tests/unit/report.test.ts
   tests/unit/runner.test.ts
+tests/unit/server/
+  tests/unit/server/auth.test.ts
+  tests/unit/server/config.test.ts
+  tests/unit/server/selection.test.ts
+  tests/unit/server/streams.test.ts
   tests/unit/simulator.test.ts
   tests/unit/support.ts
   tsconfig.json

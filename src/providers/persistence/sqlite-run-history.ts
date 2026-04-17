@@ -10,6 +10,8 @@ import type {
   Endpoints,
   JsonValue,
   Persona,
+  PresetRecord,
+  PresetSnapshot,
   Rubric,
   RubricScore,
   RunRecord,
@@ -17,6 +19,7 @@ import type {
   RunSummary,
   Scenario,
   ScenarioRunResult,
+  ScenarioSelectionRef,
 } from "../../shared/types/contracts.ts";
 import {
   AgentProbeRuntimeError,
@@ -25,7 +28,7 @@ import {
 
 export const DEFAULT_DB_DIRNAME = ".agentprobe";
 export const DEFAULT_DB_FILENAME = "runs.sqlite3";
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 const REDACTED_VALUE = "[REDACTED]";
 const sensitiveExactKeys = new Set([
   "access_token",
@@ -192,7 +195,14 @@ function resolveDbPath(dbUrl?: string): string {
 }
 
 function openDatabase(dbUrl?: string): Database {
-  return new Database(resolveDbPath(dbUrl));
+  const database = new Database(resolveDbPath(dbUrl));
+  database.exec("pragma foreign_keys = on;");
+  try {
+    database.exec("pragma journal_mode = WAL;");
+  } catch {
+    // Some SQLite targets may not support WAL; writes still work without it.
+  }
+  return database;
 }
 
 function tableColumns(database: Database, tableName: string): Set<string> {
@@ -220,6 +230,14 @@ function ensureColumn(
   );
 }
 
+function ensurePhase2RunColumns(database: Database): void {
+  ensureColumn(database, "runs", "label", "text");
+  ensureColumn(database, "runs", "trigger", "text not null default 'cli'");
+  ensureColumn(database, "runs", "cancelled_at", "text");
+  ensureColumn(database, "runs", "preset_id", "text");
+  ensureColumn(database, "runs", "preset_snapshot_json", "text");
+}
+
 function migrateDatabase(database: Database, currentVersion: number): void {
   let version = currentVersion;
   if (version < 2) {
@@ -238,12 +256,54 @@ function migrateDatabase(database: Database, currentVersion: number): void {
     database.query("update meta set schema_version = ? where id = 1").run(3);
     version = 3;
   }
+  if (version < 4) {
+    ensurePhase2RunColumns(database);
+    ensurePhase2Schema(database);
+    database.query("update meta set schema_version = ? where id = 1").run(4);
+    version = 4;
+  }
 
   if (version !== SCHEMA_VERSION) {
     throw new AgentProbeRuntimeError(
       `Unsupported run-history schema version ${version}; expected ${SCHEMA_VERSION}.`,
     );
   }
+}
+
+function ensurePhase2Schema(database: Database): void {
+  ensurePhase2RunColumns(database);
+  database.exec(`
+    create table if not exists presets (
+      id text primary key,
+      name text not null unique,
+      description text,
+      endpoint text not null,
+      personas text not null,
+      rubric text not null,
+      parallel_enabled integer not null default 0,
+      parallel_limit integer,
+      repeat integer not null default 1,
+      dry_run integer not null default 0,
+      created_at text not null,
+      updated_at text not null,
+      deleted_at text
+    );
+
+    create table if not exists preset_scenarios (
+      preset_id text not null references presets(id) on delete cascade,
+      file text not null,
+      scenario_id text not null,
+      position integer not null,
+      primary key (preset_id, file, scenario_id)
+    );
+
+    create index if not exists idx_runs_status on runs(status);
+    create index if not exists idx_runs_trigger on runs(trigger);
+    create index if not exists idx_runs_preset_id on runs(preset_id);
+    create index if not exists idx_runs_started_at on runs(started_at);
+    create index if not exists idx_preset_scenarios_position
+      on preset_scenarios(preset_id, position);
+  `);
 }
 
 function normalizeUtcTimestamp(value: string): number | undefined {
@@ -275,6 +335,11 @@ export function initDb(dbUrl?: string): void {
         exit_code integer,
         transport text,
         preset text,
+        label text,
+        trigger text not null default 'cli',
+        cancelled_at text,
+        preset_id text,
+        preset_snapshot_json text,
         filters_json text,
         selected_scenario_ids_json text,
         suite_fingerprint text,
@@ -392,6 +457,7 @@ export function initDb(dbUrl?: string): void {
         created_at text not null
       );
     `);
+    ensurePhase2Schema(database);
 
     const meta = database
       .query("select schema_version from meta where id = 1")
@@ -504,6 +570,10 @@ export class SqliteRunRecorder {
     rubric: string;
     scenarioFilter?: string;
     tags?: string;
+    label?: string;
+    trigger?: string;
+    presetId?: string | null;
+    presetSnapshot?: PresetSnapshot | Record<string, JsonValue> | null;
   }): string {
     const runId = randomUUID().replaceAll("-", "");
     const now = utcNow();
@@ -511,14 +581,19 @@ export class SqliteRunRecorder {
       .query(
         `
           insert into runs (
-            id, status, passed, exit_code, filters_json, selected_scenario_ids_json,
+            id, status, passed, exit_code, label, trigger, preset_id,
+            preset_snapshot_json, filters_json, selected_scenario_ids_json,
             source_paths_json, scenario_total, scenario_passed_count,
             scenario_failed_count, scenario_errored_count, started_at, updated_at
-          ) values (?, 'running', null, null, ?, ?, ?, 0, 0, 0, 0, ?, ?)
+          ) values (?, 'running', null, null, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?, ?)
         `,
       )
       .run(
         runId,
+        options.label ?? null,
+        options.trigger ?? "cli",
+        options.presetId ?? null,
+        encodeJson(redactValue(options.presetSnapshot ?? null)),
         encodeJson(
           filtersPayload({
             scenarioFilter: options.scenarioFilter,
@@ -610,21 +685,43 @@ export class SqliteRunRecorder {
       .query(
         `
           update runs
-          set status = 'completed',
+          set status = ?,
               passed = ?,
               exit_code = ?,
               completed_at = ?,
+              cancelled_at = ?,
               updated_at = ?
           where id = ?
         `,
       )
       .run(
-        result.passed ? 1 : 0,
+        result.cancelled ? "cancelled" : "completed",
+        result.cancelled ? 0 : result.passed ? 1 : 0,
         result.exitCode,
         utcNow(),
+        result.cancelled ? utcNow() : null,
         utcNow(),
         this.requireRunId(),
       );
+  }
+
+  recordRunCancelled(result?: RunResult): void {
+    refreshRunCounts(this.database, this.requireRunId());
+    const now = utcNow();
+    this.database
+      .query(
+        `
+          update runs
+          set status = 'cancelled',
+              passed = 0,
+              exit_code = ?,
+              completed_at = ?,
+              cancelled_at = ?,
+              updated_at = ?
+          where id = ?
+        `,
+      )
+      .run(result?.exitCode ?? 130, now, now, now, this.requireRunId());
   }
 
   recordRunError(error: Error, options: { exitCode: number }): void {
@@ -971,6 +1068,324 @@ export class SqliteRunRecorder {
   }
 }
 
+type PresetWriteInput = {
+  name: string;
+  description?: string | null;
+  endpoint: string;
+  personas: string;
+  rubric: string;
+  selection: ScenarioSelectionRef[];
+  parallel?: {
+    enabled?: boolean;
+    limit?: number | null;
+  };
+  repeat?: number;
+  dryRun?: boolean;
+};
+
+function readPresetSelection(
+  database: Database,
+  presetId: string,
+): ScenarioSelectionRef[] {
+  const rows = database
+    .query(
+      "select file, scenario_id from preset_scenarios where preset_id = ? order by position asc",
+    )
+    .all(presetId) as Array<{ file?: string; scenario_id?: string }>;
+  return rows.map((row) => ({
+    file: String(row.file),
+    id: String(row.scenario_id),
+  }));
+}
+
+function mapPresetRow(
+  row: Record<string, unknown>,
+  selection: ScenarioSelectionRef[],
+  lastRun?: RunSummary | null,
+): PresetRecord {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    description: typeof row.description === "string" ? row.description : null,
+    endpoint: String(row.endpoint),
+    personas: String(row.personas),
+    rubric: String(row.rubric),
+    selection,
+    parallel: {
+      enabled: Number(row.parallel_enabled ?? 0) === 1,
+      limit:
+        row.parallel_limit === null || row.parallel_limit === undefined
+          ? null
+          : Number(row.parallel_limit),
+    },
+    repeat: Number(row.repeat ?? 1),
+    dryRun: Number(row.dry_run ?? 0) === 1,
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+    deletedAt: typeof row.deleted_at === "string" ? row.deleted_at : null,
+    lastRun: lastRun ?? null,
+  };
+}
+
+function replacePresetScenarios(
+  database: Database,
+  presetId: string,
+  selection: ScenarioSelectionRef[],
+): void {
+  database
+    .query("delete from preset_scenarios where preset_id = ?")
+    .run(presetId);
+  const insert = database.query(
+    `
+      insert into preset_scenarios (preset_id, file, scenario_id, position)
+      values (?, ?, ?, ?)
+    `,
+  );
+  selection.forEach((item, index) => {
+    insert.run(presetId, item.file, item.id, index);
+  });
+}
+
+function latestRunForPresetRow(
+  database: Database,
+  presetId: string,
+): RunSummary | null {
+  const row = database
+    .query(
+      "select * from runs where preset_id = ? order by started_at desc limit 1",
+    )
+    .get(presetId) as Record<string, unknown> | null;
+  return row ? mapRunSummaryRow(row) : null;
+}
+
+export function createPreset(
+  input: PresetWriteInput,
+  options: { dbUrl?: string } = {},
+): PresetRecord {
+  const database = openDatabase(options.dbUrl);
+  const presetId = randomUUID().replaceAll("-", "");
+  const now = utcNow();
+  try {
+    database.exec("begin immediate;");
+    database
+      .query(
+        `
+          insert into presets (
+            id, name, description, endpoint, personas, rubric,
+            parallel_enabled, parallel_limit, repeat, dry_run, created_at, updated_at
+          ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+      )
+      .run(
+        presetId,
+        input.name,
+        input.description ?? null,
+        input.endpoint,
+        input.personas,
+        input.rubric,
+        input.parallel?.enabled ? 1 : 0,
+        input.parallel?.limit ?? null,
+        input.repeat ?? 1,
+        input.dryRun ? 1 : 0,
+        now,
+        now,
+      );
+    replacePresetScenarios(database, presetId, input.selection);
+    database.exec("commit;");
+    const row = database
+      .query("select * from presets where id = ?")
+      .get(presetId) as Record<string, unknown>;
+    return mapPresetRow(row, input.selection, null);
+  } catch (error) {
+    try {
+      database.exec("rollback;");
+    } catch {}
+    throw error;
+  } finally {
+    database.close();
+  }
+}
+
+export function getPreset(
+  presetId: string,
+  options: { dbUrl?: string; includeDeleted?: boolean } = {},
+): PresetRecord | undefined {
+  const database = openDatabase(options.dbUrl);
+  try {
+    const row = database
+      .query(
+        options.includeDeleted
+          ? "select * from presets where id = ?"
+          : "select * from presets where id = ? and deleted_at is null",
+      )
+      .get(presetId) as Record<string, unknown> | null;
+    if (!row) {
+      return undefined;
+    }
+    return mapPresetRow(
+      row,
+      readPresetSelection(database, presetId),
+      latestRunForPresetRow(database, presetId),
+    );
+  } finally {
+    database.close();
+  }
+}
+
+export function listPresets(
+  options: { dbUrl?: string; includeDeleted?: boolean } = {},
+): PresetRecord[] {
+  const database = openDatabase(options.dbUrl);
+  try {
+    const rows = database
+      .query(
+        options.includeDeleted
+          ? "select * from presets order by updated_at desc"
+          : "select * from presets where deleted_at is null order by updated_at desc",
+      )
+      .all() as Array<Record<string, unknown>>;
+    return rows.map((row) =>
+      mapPresetRow(
+        row,
+        readPresetSelection(database, String(row.id)),
+        latestRunForPresetRow(database, String(row.id)),
+      ),
+    );
+  } finally {
+    database.close();
+  }
+}
+
+export function updatePreset(
+  presetId: string,
+  input: Partial<PresetWriteInput>,
+  options: { dbUrl?: string } = {},
+): PresetRecord | undefined {
+  const existing = getPreset(presetId, options);
+  if (!existing) {
+    return undefined;
+  }
+  const merged: PresetWriteInput = {
+    name: input.name ?? existing.name,
+    description:
+      input.description !== undefined
+        ? input.description
+        : existing.description,
+    endpoint: input.endpoint ?? existing.endpoint,
+    personas: input.personas ?? existing.personas,
+    rubric: input.rubric ?? existing.rubric,
+    selection: input.selection ?? existing.selection,
+    parallel: input.parallel ?? existing.parallel,
+    repeat: input.repeat ?? existing.repeat,
+    dryRun: input.dryRun ?? existing.dryRun,
+  };
+  const database = openDatabase(options.dbUrl);
+  const now = utcNow();
+  try {
+    database.exec("begin immediate;");
+    database
+      .query(
+        `
+          update presets
+          set name = ?,
+              description = ?,
+              endpoint = ?,
+              personas = ?,
+              rubric = ?,
+              parallel_enabled = ?,
+              parallel_limit = ?,
+              repeat = ?,
+              dry_run = ?,
+              updated_at = ?
+          where id = ? and deleted_at is null
+        `,
+      )
+      .run(
+        merged.name,
+        merged.description ?? null,
+        merged.endpoint,
+        merged.personas,
+        merged.rubric,
+        merged.parallel?.enabled ? 1 : 0,
+        merged.parallel?.limit ?? null,
+        merged.repeat ?? 1,
+        merged.dryRun ? 1 : 0,
+        now,
+        presetId,
+      );
+    replacePresetScenarios(database, presetId, merged.selection);
+    database.exec("commit;");
+    return getPreset(presetId, options);
+  } catch (error) {
+    try {
+      database.exec("rollback;");
+    } catch {}
+    throw error;
+  } finally {
+    database.close();
+  }
+}
+
+export function softDeletePreset(
+  presetId: string,
+  options: { dbUrl?: string } = {},
+): PresetRecord | undefined {
+  const database = openDatabase(options.dbUrl);
+  const now = utcNow();
+  try {
+    database
+      .query(
+        "update presets set deleted_at = ?, updated_at = ? where id = ? and deleted_at is null",
+      )
+      .run(now, now, presetId);
+  } finally {
+    database.close();
+  }
+  return getPreset(presetId, { ...options, includeDeleted: true });
+}
+
+export function listRunsForPreset(
+  presetId: string,
+  options: { dbUrl?: string } = {},
+): RunSummary[] {
+  const database = openDatabase(options.dbUrl);
+  try {
+    const rows = database
+      .query("select * from runs where preset_id = ? order by started_at desc")
+      .all(presetId) as Array<Record<string, unknown>>;
+    return rows.map((row) => mapRunSummaryRow(row));
+  } finally {
+    database.close();
+  }
+}
+
+export function markRunCancelled(
+  runId: string,
+  options: { dbUrl?: string; exitCode?: number } = {},
+): RunRecord | undefined {
+  const database = openDatabase(options.dbUrl);
+  const now = utcNow();
+  try {
+    database
+      .query(
+        `
+          update runs
+          set status = 'cancelled',
+              passed = 0,
+              exit_code = ?,
+              cancelled_at = ?,
+              completed_at = coalesce(completed_at, ?),
+              updated_at = ?
+          where id = ?
+        `,
+      )
+      .run(options.exitCode ?? 130, now, now, now, runId);
+  } finally {
+    database.close();
+  }
+  return getRun(runId, options);
+}
+
 function mapRunSummaryRow(row: Record<string, unknown>): RunSummary {
   return {
     runId: String(row.id),
@@ -984,6 +1399,10 @@ function mapRunSummaryRow(row: Record<string, unknown>): RunSummary {
         ? null
         : Number(row.exit_code),
     preset: typeof row.preset === "string" ? row.preset : null,
+    label: typeof row.label === "string" ? row.label : null,
+    trigger: typeof row.trigger === "string" ? row.trigger : null,
+    cancelledAt: typeof row.cancelled_at === "string" ? row.cancelled_at : null,
+    presetId: typeof row.preset_id === "string" ? row.preset_id : null,
     startedAt: String(row.started_at),
     completedAt: typeof row.completed_at === "string" ? row.completed_at : null,
     suiteFingerprint:
@@ -1196,6 +1615,8 @@ export function getRun(
         null,
       selectedScenarioIds:
         decodeJson<string[]>(row.selected_scenario_ids_json) ?? null,
+      presetSnapshot:
+        decodeJson<Record<string, JsonValue>>(row.preset_snapshot_json) ?? null,
       scenarios: getScenarioRecords(database, runId),
     };
   } finally {

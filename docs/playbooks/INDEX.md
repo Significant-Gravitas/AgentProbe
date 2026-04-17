@@ -17,14 +17,15 @@ or human can execute without external tribal knowledge.
 
 ## Files
 
-- No playbooks yet.
+- [agent-probe-server.md](agent-probe-server.md) - Local, token-protected, and
+  Docker bring-up for the SQLite-backed AgentProbe server.
 
 ## Subdirectories
 
 - No tracked subdirectories.
 
 <!-- AUTO-GENERATED FILE LINKS START -->
-- No tracked files in this directory yet.
+- [agent-probe-server.md](agent-probe-server.md)
 <!-- AUTO-GENERATED FILE LINKS END -->
 
 <!-- AUTO-GENERATED SUBDIR LINKS START -->

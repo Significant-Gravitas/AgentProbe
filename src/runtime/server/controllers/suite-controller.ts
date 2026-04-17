@@ -1,8 +1,9 @@
 import { statSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { isAbsolute, join, relative, resolve } from "node:path";
 
 import {
   iterYamlFiles,
+  parseScenarioYaml,
   parseYamlFile,
 } from "../../../domains/validation/load-suite.ts";
 import type {
@@ -10,6 +11,8 @@ import type {
   Persona,
   Rubric,
   Scenario,
+  ScenarioSelectionRef,
+  Scenarios,
 } from "../../../shared/types/contracts.ts";
 import { AgentProbeConfigError } from "../../../shared/utils/errors.ts";
 
@@ -59,6 +62,20 @@ export type SuiteInventory = {
   }>;
   scannedAt: string;
   errors: Array<{ path: string; message: string }>;
+};
+
+export type SelectionResolutionWarning = {
+  file: string;
+  id: string;
+  message: string;
+};
+
+export type ResolvedScenarioSelection = {
+  refs: ScenarioSelectionRef[];
+  selectedScenarios: Scenario[];
+  scenarioCollection: Scenarios;
+  suiteKey: string;
+  warnings: SelectionResolutionWarning[];
 };
 
 type SuiteCacheEntry = {
@@ -281,6 +298,119 @@ export class SuiteController {
 
   get resolvedDataPath(): string {
     return this.dataPath;
+  }
+
+  private isInsideDataPath(path: string): boolean {
+    const rel = relative(this.dataPath, path);
+    return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+  }
+
+  resolveDataFile(path: string): {
+    absolutePath: string;
+    relativePath: string;
+  } {
+    const candidates = [resolve(path), resolve(this.dataPath, path)];
+    const insideCandidates = candidates.filter((candidate) =>
+      this.isInsideDataPath(candidate),
+    );
+    if (insideCandidates.length === 0) {
+      throw new AgentProbeConfigError(
+        `Path \`${path}\` must resolve under data root ${this.dataPath}.`,
+      );
+    }
+    const existing =
+      insideCandidates.find((candidate) => {
+        try {
+          return statSync(candidate).isFile();
+        } catch {
+          return false;
+        }
+      }) ?? insideCandidates[0];
+    if (!existing) {
+      throw new AgentProbeConfigError(
+        `Path \`${path}\` must resolve under data root ${this.dataPath}.`,
+      );
+    }
+    if (!this.isInsideDataPath(existing)) {
+      throw new AgentProbeConfigError(
+        `Path \`${path}\` must resolve under data root ${this.dataPath}.`,
+      );
+    }
+    return {
+      absolutePath: existing,
+      relativePath: relative(this.dataPath, existing),
+    };
+  }
+
+  resolveSelection(
+    refs: ScenarioSelectionRef[],
+    options: { allowMissing?: boolean } = {},
+  ): ResolvedScenarioSelection {
+    const selectedScenarios: Scenario[] = [];
+    const sourcePaths: string[] = [];
+    const collections = new Map<string, Scenarios>();
+    const warnings: SelectionResolutionWarning[] = [];
+    const normalizedRefs: ScenarioSelectionRef[] = [];
+
+    for (const ref of refs) {
+      const resolved = this.resolveDataFile(ref.file);
+      const normalizedRef = { file: resolved.relativePath, id: ref.id };
+      normalizedRefs.push(normalizedRef);
+      try {
+        if (!statSync(resolved.absolutePath).isFile()) {
+          throw new Error("not a file");
+        }
+      } catch {
+        const message = `Scenario file \`${resolved.relativePath}\` was not found.`;
+        if (!options.allowMissing) {
+          throw new AgentProbeConfigError(message);
+        }
+        warnings.push({ ...normalizedRef, message });
+        continue;
+      }
+      let collection = collections.get(resolved.absolutePath);
+      if (!collection) {
+        collection = parseScenarioYaml(resolved.absolutePath);
+        collections.set(resolved.absolutePath, collection);
+        sourcePaths.push(resolved.absolutePath);
+      }
+
+      const scenario = collection.scenarios.find((item) => item.id === ref.id);
+      if (!scenario) {
+        const message = `Scenario \`${ref.id}\` was not found in ${resolved.relativePath}.`;
+        if (!options.allowMissing) {
+          throw new AgentProbeConfigError(message);
+        }
+        warnings.push({ ...normalizedRef, message });
+        continue;
+      }
+      selectedScenarios.push(scenario);
+    }
+
+    const scenarioCollection: Scenarios = {
+      metadata: {
+        sourcePath: this.dataPath,
+        sourcePaths,
+        tagsDefinition: [
+          ...new Set(
+            [...collections.values()].flatMap(
+              (collection) => collection.metadata.tagsDefinition,
+            ),
+          ),
+        ],
+      },
+      scenarios: selectedScenarios,
+    };
+    return {
+      refs: normalizedRefs,
+      selectedScenarios,
+      scenarioCollection,
+      suiteKey: JSON.stringify({
+        dataPath: this.dataPath,
+        selection: normalizedRefs,
+      }),
+      warnings,
+    };
   }
 
   resolveSuitePath(suiteId: string): string | undefined {

@@ -213,12 +213,14 @@ describe("sqlite recorder", () => {
         "tool_calls",
         "checkpoints",
         "judge_dimension_scores",
+        "presets",
+        "preset_scenarios",
       ]) {
         expect(tableNames.has(name)).toBe(true);
       }
       expect(
         database.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 3 });
+      ).toEqual({ schema_version: 4 });
     } finally {
       database.close();
     }
@@ -683,9 +685,24 @@ describe("sqlite recorder", () => {
         }>
       ).map((row) => row.name);
       expect(columns.includes("user_id")).toBe(true);
+      const runColumns = (
+        migrated.query("pragma table_info(runs)").all() as Array<{
+          name: string;
+        }>
+      ).map((row) => row.name);
+      for (const column of [
+        "scenario_harness_failed_count",
+        "label",
+        "trigger",
+        "cancelled_at",
+        "preset_id",
+        "preset_snapshot_json",
+      ]) {
+        expect(runColumns.includes(column)).toBe(true);
+      }
       expect(
         migrated.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 3 });
+      ).toEqual({ schema_version: 4 });
     } finally {
       migrated.close();
     }

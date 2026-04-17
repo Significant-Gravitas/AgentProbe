@@ -19,12 +19,12 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | HTML report renders from recorded run history | `tests/e2e/cli.e2e.test.ts` + `tests/unit/report.test.ts` | ⏳ expanding |
 | Dashboard mode serves live run state from a Bun HTTP server | `tests/unit/dashboard.test.ts` + `tests/e2e/cli.e2e.test.ts` | ⏳ planned |
 | Reliability signals exist for critical command paths | `docs/RELIABILITY.md` + future performance checks | ⏳ planned |
-| Default start-server boot binds loopback with read-only history browsing | `tests/e2e/server-e2e.test.ts` + `tests/unit/server/config.test.ts` | ⏳ planned |
-| Non-loopback exposure requires unsafe flag and token | `tests/unit/server/config.test.ts` + `tests/e2e/server-e2e.test.ts` | ⏳ planned |
-| Read-only HTTP and UI surfaces browse persisted run history | `tests/integration/server/read-only.test.ts` + dashboard read-only component tests | ⏳ planned |
-| Live run events stream through Server-Sent Events with replay support | `tests/integration/server/sse.test.ts` + `tests/unit/server/events.test.ts` | ⏳ planned |
-| Run control starts validated ad-hoc or preset-backed runs | `tests/integration/server/runs.test.ts` + `tests/unit/server/routes.test.ts` | ⏳ planned |
-| Cancellation cooperatively stops a server-managed run | `tests/integration/server/cancel.test.ts` + `tests/unit/server/run-controller.test.ts` | ⏳ planned |
-| Presets save cross-file scenario selections for one-click rerun | `tests/integration/server/presets.test.ts` + dashboard start-form component tests | ⏳ planned |
+| Default start-server boot binds loopback with read-only history browsing | `tests/e2e/start-server.e2e.test.ts` + `tests/unit/server/config.test.ts` | ✅ covered |
+| Non-loopback exposure requires unsafe flag and token | `tests/unit/server/config.test.ts` + Docker Compose token guard | ✅ covered |
+| Read-only HTTP and UI surfaces browse persisted run history | `tests/integration/server/read-only.test.ts` + dashboard build/typecheck | ✅ covered |
+| Live run events stream through Server-Sent Events with replay support | `tests/integration/server/write-control.test.ts` + `tests/unit/server/streams.test.ts` | ✅ covered |
+| Run control starts validated ad-hoc or preset-backed runs | `tests/integration/server/write-control.test.ts` | ✅ covered |
+| Cancellation cooperatively stops a server-managed run | `tests/integration/server/write-control.test.ts` | ✅ covered |
+| Presets save cross-file scenario selections for one-click rerun | `tests/integration/server/write-control.test.ts` + `tests/unit/server/selection.test.ts` | ✅ covered |
 | Comparison workspace diffs 2 to 10 historical runs | `tests/integration/server/comparisons.test.ts` + dashboard compare-view component tests | ⏳ planned |
-| Docker image boots safely with SQLite-on-volume persistence | `tests/e2e/server-e2e.test.ts` (Docker smoke) + `docs/playbooks/agent-probe-server.md` | ⏳ planned |
+| Docker image boots safely with SQLite-on-volume persistence | `Dockerfile` + `docker-compose.yml` + `docs/playbooks/agent-probe-server.md` | ✅ covered |

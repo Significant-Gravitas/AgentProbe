@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { AveragesTable } from "./components/AveragesTable.tsx";
 import { ConversationView } from "./components/ConversationView.tsx";
 import { DetailPanel } from "./components/DetailPanel.tsx";
@@ -32,6 +38,10 @@ type RunSummary = {
   passed?: boolean | null;
   exitCode?: number | null;
   preset?: string | null;
+  label?: string | null;
+  trigger?: string | null;
+  cancelledAt?: string | null;
+  presetId?: string | null;
   startedAt: string;
   completedAt?: string | null;
   suiteFingerprint?: string | null;
@@ -128,6 +138,36 @@ type ScenariosResponse = {
   scenarios: ScenarioSummary[];
 };
 
+type Preset = {
+  id: string;
+  name: string;
+  description: string | null;
+  endpoint: string;
+  personas: string;
+  rubric: string;
+  selection: Array<{ file: string; id: string }>;
+  parallel: { enabled: boolean; limit: number | null };
+  repeat: number;
+  dry_run: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  last_run: RunSummary | null;
+};
+
+type PresetsResponse = {
+  presets: Preset[];
+};
+
+type PresetResponse = {
+  preset: Preset;
+  warnings: Array<{ file: string; id: string; message: string }>;
+};
+
+type PresetRunsResponse = {
+  runs: RunSummary[];
+};
+
 type HealthResponse = {
   status: string;
   version?: string;
@@ -140,6 +180,8 @@ type ReadyResponse = {
   db_url?: string | null;
   reason?: string;
 };
+
+type ServerRequest = <T>(path: string, init?: RequestInit) => Promise<T>;
 
 class ApiError extends Error {
   readonly status: number;
@@ -183,15 +225,23 @@ function errorMessageFromBody(body: unknown, fallback: string): string {
   return typeof message === "string" && message ? message : fallback;
 }
 
-async function api<T>(path: string, token: string): Promise<T> {
+async function api<T>(
+  path: string,
+  token: string,
+  init: RequestInit = {},
+): Promise<T> {
   const headers: Record<string, string> = {
     accept: "application/json",
   };
+  const incomingHeaders = new Headers(init.headers);
+  for (const [key, value] of incomingHeaders.entries()) {
+    headers[key] = value;
+  }
   if (token) {
     headers.authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(path, { headers });
+  const response = await fetch(path, { ...init, headers });
   const text = await response.text();
   let body: unknown = null;
   if (text) {
@@ -533,9 +583,9 @@ function TokenForm({
 
 function useServerRequest(token: string, onAuthRequired: () => void) {
   return useCallback(
-    async <T,>(path: string): Promise<T> => {
+    async <T,>(path: string, init?: RequestInit): Promise<T> => {
       try {
-        return await api<T>(path, token);
+        return await api<T>(path, token, init);
       } catch (error) {
         if (error instanceof ApiError && error.status === 401) {
           onAuthRequired();
@@ -547,11 +597,7 @@ function useServerRequest(token: string, onAuthRequired: () => void) {
   );
 }
 
-function OverviewView({
-  request,
-}: {
-  request: <T>(path: string) => Promise<T>;
-}) {
+function OverviewView({ request }: { request: ServerRequest }) {
   const [runs, setRuns] = useState<RunsResponse | null>(null);
   const [suites, setSuites] = useState<SuitesResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -615,7 +661,7 @@ function OverviewView({
   );
 }
 
-function RunsView({ request }: { request: <T>(path: string) => Promise<T> }) {
+function RunsView({ request }: { request: ServerRequest }) {
   const [data, setData] = useState<RunsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -650,30 +696,75 @@ function RunsView({ request }: { request: <T>(path: string) => Promise<T> }) {
 function RunDetailView({
   runId,
   request,
+  token,
 }: {
   runId: string;
-  request: <T>(path: string) => Promise<T>;
+  request: ServerRequest;
+  token: string;
 }) {
   const [run, setRun] = useState<RunRecord | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrdinal, setSelectedOrdinal] = useState<number | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    request<RunResponse>(`/api/runs/${encodeURIComponent(runId)}`)
+  const loadRun = useCallback(() => {
+    return request<RunResponse>(`/api/runs/${encodeURIComponent(runId)}`)
       .then((data) => {
-        if (cancelled) return;
         setRun(data.run);
         setError(null);
       })
       .catch((err) => {
-        if (cancelled) return;
         setError(err instanceof Error ? err.message : String(err));
       });
+  }, [request, runId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadRun().then(() => {
+      if (cancelled) return;
+    });
     return () => {
       cancelled = true;
     };
-  }, [request, runId]);
+  }, [loadRun]);
+
+  useEffect(() => {
+    if (!run || run.status !== "running") {
+      return;
+    }
+    const tokenQuery = token
+      ? `?access_token=${encodeURIComponent(token)}`
+      : "";
+    const events = new EventSource(
+      `/api/runs/${encodeURIComponent(runId)}/events${tokenQuery}`,
+    );
+    const refetch = () => {
+      void loadRun();
+    };
+    events.addEventListener("suite_started", refetch);
+    events.addEventListener("scenario_started", refetch);
+    events.addEventListener("scenario_finished", refetch);
+    events.addEventListener("scenario_error", refetch);
+    events.addEventListener("run_finished", refetch);
+    events.addEventListener("run_cancelled", refetch);
+    events.addEventListener("run_error", refetch);
+    return () => events.close();
+  }, [loadRun, run, runId, token]);
+
+  const cancelRun = async () => {
+    setCancelling(true);
+    setError(null);
+    try {
+      await request(`/api/runs/${encodeURIComponent(runId)}/cancel`, {
+        method: "POST",
+      });
+      await loadRun();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const dashboardData = useMemo(
     () => (run ? dashboardDataFromRun(run) : null),
@@ -694,9 +785,21 @@ function RunDetailView({
           <div className="server-eyebrow">Run</div>
           <h1>{run.runId}</h1>
         </div>
-        <a href={`/api/runs/${encodeURIComponent(run.runId)}/report.html`}>
-          HTML report
-        </a>
+        <div className="server-form-actions">
+          {run.status === "running" && (
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => void cancelRun()}
+              disabled={cancelling}
+            >
+              {cancelling ? "Cancelling..." : "Cancel"}
+            </button>
+          )}
+          <a href={`/api/runs/${encodeURIComponent(run.runId)}/report.html`}>
+            HTML report
+          </a>
+        </div>
       </div>
       <StatsBar data={dashboardData} />
       <ProgressBar data={dashboardData} />
@@ -734,7 +837,7 @@ function ScenarioDetailView({
 }: {
   runId: string;
   ordinal: string;
-  request: <T>(path: string) => Promise<T>;
+  request: ServerRequest;
 }) {
   const [data, setData] = useState<ScenarioResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -804,7 +907,7 @@ function ScenarioDetailView({
   );
 }
 
-function SuitesView({ request }: { request: <T>(path: string) => Promise<T> }) {
+function SuitesView({ request }: { request: ServerRequest }) {
   const [suites, setSuites] = useState<SuitesResponse | null>(null);
   const [scenarios, setScenarios] = useState<ScenariosResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -890,6 +993,541 @@ function SuitesView({ request }: { request: <T>(path: string) => Promise<T> }) {
           ))}
         </tbody>
       </table>
+    </>
+  );
+}
+
+function jsonBody(method: string, body?: unknown): RequestInit {
+  return {
+    method,
+    headers: { "content-type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  };
+}
+
+function StartRunView({
+  request,
+  navigate,
+}: {
+  request: ServerRequest;
+  navigate: (href: string) => void;
+}) {
+  const [suites, setSuites] = useState<SuitesResponse | null>(null);
+  const [scenarios, setScenarios] = useState<ScenariosResponse | null>(null);
+  const [presets, setPresets] = useState<PresetsResponse | null>(null);
+  const [endpoint, setEndpoint] = useState("");
+  const [personas, setPersonas] = useState("");
+  const [rubric, setRubric] = useState("");
+  const [presetId, setPresetId] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [label, setLabel] = useState("");
+  const [parallelEnabled, setParallelEnabled] = useState(false);
+  const [parallelLimit, setParallelLimit] = useState(2);
+  const [repeat, setRepeat] = useState(1);
+  const [dryRun, setDryRun] = useState(true);
+  const [saveAsPreset, setSaveAsPreset] = useState(false);
+  const [presetName, setPresetName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      request<SuitesResponse>("/api/suites"),
+      request<ScenariosResponse>("/api/scenarios"),
+      request<PresetsResponse>("/api/presets"),
+    ])
+      .then(([nextSuites, nextScenarios, nextPresets]) => {
+        if (cancelled) return;
+        setSuites(nextSuites);
+        setScenarios(nextScenarios);
+        setPresets(nextPresets);
+        setEndpoint(
+          nextSuites.suites.find((suite) => suite.schema === "endpoints")
+            ?.relativePath ?? "",
+        );
+        setPersonas(
+          nextSuites.suites.find((suite) => suite.schema === "personas")
+            ?.relativePath ?? "",
+        );
+        setRubric(
+          nextSuites.suites.find((suite) => suite.schema === "rubrics")
+            ?.relativePath ?? "",
+        );
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : String(err));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [request]);
+
+  const scenarioSelection = useMemo(() => {
+    if (!scenarios) return [];
+    return scenarios.scenarios
+      .filter((scenario) =>
+        selected.has(`${scenario.sourcePath}::${scenario.id}`),
+      )
+      .map((scenario) => ({ file: scenario.sourcePath, id: scenario.id }));
+  }, [scenarios, selected]);
+
+  if (error) return <ErrorBanner message={error} />;
+  if (!suites || !scenarios || !presets) return <Loading />;
+
+  const endpointSuites = suites.suites.filter(
+    (suite) => suite.schema === "endpoints",
+  );
+  const personaSuites = suites.suites.filter(
+    (suite) => suite.schema === "personas",
+  );
+  const rubricSuites = suites.suites.filter(
+    (suite) => suite.schema === "rubrics",
+  );
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      const parallel = {
+        enabled: parallelEnabled,
+        limit: parallelEnabled ? parallelLimit : undefined,
+      };
+      const response = presetId
+        ? await request<{ run_id: string }>(
+            `/api/presets/${encodeURIComponent(presetId)}/runs`,
+            jsonBody("POST", {
+              label: label || undefined,
+              overrides: {
+                parallel,
+                repeat,
+                dry_run: dryRun,
+              },
+            }),
+          )
+        : await request<{ run_id: string }>(
+            "/api/runs",
+            jsonBody("POST", {
+              endpoint,
+              personas,
+              rubric,
+              selection: scenarioSelection,
+              parallel,
+              repeat,
+              dry_run: dryRun,
+              label: label || undefined,
+              save_as_preset:
+                saveAsPreset && presetName.trim()
+                  ? { name: presetName.trim() }
+                  : undefined,
+            }),
+          );
+      navigate(`/runs/${encodeURIComponent(response.run_id)}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="server-heading-row">
+        <div>
+          <div className="server-eyebrow">Start</div>
+          <h1>Run Builder</h1>
+        </div>
+      </div>
+      <form className="server-form" onSubmit={submit}>
+        <label>
+          Preset
+          <select
+            value={presetId}
+            onChange={(e) => setPresetId(e.currentTarget.value)}
+          >
+            <option value="">Ad-hoc</option>
+            {presets.presets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="server-form-grid">
+          <label>
+            Endpoint
+            <select
+              value={endpoint}
+              onChange={(e) => setEndpoint(e.currentTarget.value)}
+              disabled={Boolean(presetId)}
+            >
+              {endpointSuites.map((suite) => (
+                <option key={suite.id} value={suite.relativePath}>
+                  {suite.relativePath}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Personas
+            <select
+              value={personas}
+              onChange={(e) => setPersonas(e.currentTarget.value)}
+              disabled={Boolean(presetId)}
+            >
+              {personaSuites.map((suite) => (
+                <option key={suite.id} value={suite.relativePath}>
+                  {suite.relativePath}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Rubric
+            <select
+              value={rubric}
+              onChange={(e) => setRubric(e.currentTarget.value)}
+              disabled={Boolean(presetId)}
+            >
+              {rubricSuites.map((suite) => (
+                <option key={suite.id} value={suite.relativePath}>
+                  {suite.relativePath}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        {!presetId && (
+          <div className="scenario-picker">
+            <div className="server-form-actions">
+              <span className="section-label">Scenarios</span>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() =>
+                  setSelected(
+                    new Set(
+                      scenarios.scenarios.map(
+                        (scenario) => `${scenario.sourcePath}::${scenario.id}`,
+                      ),
+                    ),
+                  )
+                }
+              >
+                Select all
+              </button>
+            </div>
+            {scenarios.scenarios.slice(0, 80).map((scenario) => {
+              const key = `${scenario.sourcePath}::${scenario.id}`;
+              return (
+                <label className="check-row" key={key}>
+                  <input
+                    type="checkbox"
+                    checked={selected.has(key)}
+                    onChange={(event) => {
+                      const next = new Set(selected);
+                      if (event.currentTarget.checked) {
+                        next.add(key);
+                      } else {
+                        next.delete(key);
+                      }
+                      setSelected(next);
+                    }}
+                  />
+                  <span>{scenario.id}</span>
+                  <span>{scenario.sourcePath}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+        <div className="server-form-grid">
+          <label>
+            Label
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.currentTarget.value)}
+            />
+          </label>
+          <label>
+            Repeat
+            <input
+              type="number"
+              min={1}
+              value={repeat}
+              onChange={(e) => setRepeat(Number(e.currentTarget.value))}
+            />
+          </label>
+          <label>
+            Parallel limit
+            <input
+              type="number"
+              min={1}
+              value={parallelLimit}
+              onChange={(e) => setParallelLimit(Number(e.currentTarget.value))}
+              disabled={!parallelEnabled}
+            />
+          </label>
+        </div>
+        <div className="server-toggle-row">
+          <label>
+            <input
+              type="checkbox"
+              checked={dryRun}
+              onChange={(e) => setDryRun(e.currentTarget.checked)}
+            />
+            Dry run
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={parallelEnabled}
+              onChange={(e) => setParallelEnabled(e.currentTarget.checked)}
+            />
+            Parallel
+          </label>
+          {!presetId && (
+            <label>
+              <input
+                type="checkbox"
+                checked={saveAsPreset}
+                onChange={(e) => setSaveAsPreset(e.currentTarget.checked)}
+              />
+              Save preset
+            </label>
+          )}
+        </div>
+        {saveAsPreset && !presetId && (
+          <label>
+            Preset name
+            <input
+              value={presetName}
+              onChange={(e) => setPresetName(e.currentTarget.value)}
+            />
+          </label>
+        )}
+        <div className="server-form-actions">
+          <button type="submit" disabled={submitting}>
+            {submitting ? "Starting..." : "Start run"}
+          </button>
+        </div>
+      </form>
+    </>
+  );
+}
+
+function PresetsView({
+  request,
+  navigate,
+}: {
+  request: ServerRequest;
+  navigate: (href: string) => void;
+}) {
+  const [data, setData] = useState<PresetsResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    request<PresetsResponse>("/api/presets")
+      .then((next) => {
+        if (cancelled) return;
+        setData(next);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : String(err));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [request]);
+
+  const runPreset = async (preset: Preset) => {
+    try {
+      const response = await request<{ run_id: string }>(
+        `/api/presets/${encodeURIComponent(preset.id)}/runs`,
+        jsonBody("POST"),
+      );
+      navigate(`/runs/${encodeURIComponent(response.run_id)}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  if (error) return <ErrorBanner message={error} />;
+  if (!data) return <Loading />;
+
+  return (
+    <>
+      <div className="server-heading-row">
+        <div>
+          <div className="server-eyebrow">Presets</div>
+          <h1>Saved Runs</h1>
+        </div>
+        <a href="/start">New run</a>
+      </div>
+      {data.presets.length === 0 ? (
+        <div className="server-empty">No presets saved.</div>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Scenarios</th>
+              <th>Repeat</th>
+              <th>Last run</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.presets.map((preset) => (
+              <tr key={preset.id}>
+                <td className="id-cell">
+                  <a href={`/presets/${encodeURIComponent(preset.id)}`}>
+                    {preset.name}
+                  </a>
+                </td>
+                <td>{preset.selection.length}</td>
+                <td>{preset.repeat}</td>
+                <td>{preset.last_run?.status ?? "-"}</td>
+                <td className="score-cell">
+                  <button type="button" onClick={() => void runPreset(preset)}>
+                    Run
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </>
+  );
+}
+
+function PresetDetailView({
+  presetId,
+  request,
+  navigate,
+}: {
+  presetId: string;
+  request: ServerRequest;
+  navigate: (href: string) => void;
+}) {
+  const [preset, setPreset] = useState<PresetResponse | null>(null);
+  const [runs, setRuns] = useState<PresetRunsResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      request<PresetResponse>(`/api/presets/${encodeURIComponent(presetId)}`),
+      request<PresetRunsResponse>(
+        `/api/presets/${encodeURIComponent(presetId)}/runs`,
+      ),
+    ])
+      .then(([nextPreset, nextRuns]) => {
+        if (cancelled) return;
+        setPreset(nextPreset);
+        setRuns(nextRuns);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : String(err));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [request, presetId]);
+
+  const runAgain = async () => {
+    try {
+      const response = await request<{ run_id: string }>(
+        `/api/presets/${encodeURIComponent(presetId)}/runs`,
+        jsonBody("POST"),
+      );
+      navigate(`/runs/${encodeURIComponent(response.run_id)}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const deletePreset = async () => {
+    try {
+      await request(`/api/presets/${encodeURIComponent(presetId)}`, {
+        method: "DELETE",
+      });
+      navigate("/presets");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  if (error) return <ErrorBanner message={error} />;
+  if (!preset || !runs) return <Loading />;
+
+  return (
+    <>
+      <div className="server-heading-row">
+        <div>
+          <div className="server-eyebrow">Preset</div>
+          <h1>{preset.preset.name}</h1>
+        </div>
+        <div className="server-form-actions">
+          <button type="button" onClick={() => void runAgain()}>
+            Run
+          </button>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => void deletePreset()}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+      {preset.warnings.map((warning) => (
+        <ErrorBanner
+          key={`${warning.file}:${warning.id}`}
+          message={warning.message}
+        />
+      ))}
+      <div className="server-settings">
+        <div className="stat">
+          <div className="stat-value">{preset.preset.selection.length}</div>
+          <div className="stat-label">Scenarios</div>
+        </div>
+        <div className="stat">
+          <div className="stat-value">{preset.preset.repeat}</div>
+          <div className="stat-label">Repeat</div>
+        </div>
+        <div className="stat">
+          <div className="stat-value">
+            {preset.preset.dry_run ? "on" : "off"}
+          </div>
+          <div className="stat-label">Dry Run</div>
+        </div>
+      </div>
+      <div className="section-title">Selection</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>File</th>
+          </tr>
+        </thead>
+        <tbody>
+          {preset.preset.selection.map((item) => (
+            <tr key={`${item.file}:${item.id}`}>
+              <td className="id-cell">{item.id}</td>
+              <td>{item.file}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="section-title">Runs</div>
+      <RunsTable runs={runs.runs} />
     </>
   );
 }
@@ -980,6 +1618,12 @@ function ServerDashboard() {
     if (pathname === "/runs") {
       return <RunsView request={request} />;
     }
+    if (pathname === "/start") {
+      return <StartRunView request={request} navigate={navigate} />;
+    }
+    if (pathname === "/presets") {
+      return <PresetsView request={request} navigate={navigate} />;
+    }
     if (pathname === "/suites") {
       return <SuitesView request={request} />;
     }
@@ -1004,6 +1648,17 @@ function ServerDashboard() {
         <RunDetailView
           runId={decodeURIComponent(runMatch[1] ?? "")}
           request={request}
+          token={token}
+        />
+      );
+    }
+    const presetMatch = pathname.match(/^\/presets\/([^/]+)$/);
+    if (presetMatch) {
+      return (
+        <PresetDetailView
+          presetId={decodeURIComponent(presetMatch[1] ?? "")}
+          request={request}
+          navigate={navigate}
         />
       );
     }
@@ -1015,17 +1670,26 @@ function ServerDashboard() {
       <div className="header server-header">
         <div>
           <h1>AgentProbe</h1>
-          <div className="server-subtitle">Read-only server</div>
+          <div className="server-subtitle">Server</div>
         </div>
         <nav className="server-nav">
           <a className={pathname === "/" ? "active" : ""} href="/">
             Overview
+          </a>
+          <a className={pathname === "/start" ? "active" : ""} href="/start">
+            Start
           </a>
           <a
             className={pathname.startsWith("/runs") ? "active" : ""}
             href="/runs"
           >
             Runs
+          </a>
+          <a
+            className={pathname.startsWith("/presets") ? "active" : ""}
+            href="/presets"
+          >
+            Presets
           </a>
           <a
             className={pathname.startsWith("/suites") ? "active" : ""}
