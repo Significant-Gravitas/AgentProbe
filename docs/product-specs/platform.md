@@ -241,6 +241,9 @@ SQLite database mounted at the default volume path
 **Then** the default container `CMD` binds `0.0.0.0:7878` with `--unsafe-expose`
 and the required token so the in-server non-loopback rules still hold, the
 config loader refuses to boot when `AGENTPROBE_SERVER_TOKEN` is missing, the
-server persists runs to the mounted `runs.sqlite` by default, and operators can
-switch to Postgres by setting `AGENTPROBE_DB_URL` for ephemeral-container
-deployments without changing the HTTP or UI contract.
+server persists runs to the mounted `runs.sqlite` by default, and the
+write-enabled server rejects Postgres database URLs until Postgres run recording
+ships. Postgres remains available for explicit migration work and historical
+read/preset repository operations, but `agentprobe start-server` requires a
+`sqlite:///` URL while `POST /api/runs` and related run write routes are
+enabled.
