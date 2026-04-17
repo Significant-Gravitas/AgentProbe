@@ -1,0 +1,150 @@
+name,domain,industry,employee_count,est_revenue,hq_country
+Acme Cloud,acmecloud.io,Software,450,85000000,USA
+Vertex Solutions,vertex-sol.com,IT Services,120,15000000,USA
+Bluebird FinTech,bluebird.fi,FinTech,85,12000000,United Kingdom
+Stellar Robotics,stellar-robotics.ai,Robotics,310,45000000,Germany
+GreenGrid Energy,greengrid.co,Renewables,210,32000000,Canada
+Nova Health,novahealth.com,Healthcare IT,550,110000000,USA
+Quantify Analytics,quantify.ai,Data Science,65,9000000,Israel
+Swift Logistics,swift-logs.com,Logistics,890,240000000,USA
+Lumina Media,lumina-media.com,Marketing,140,22000000,Australia
+Ironclad Security,ironcladsec.io,Cybersecurity,275,55000000,USA
+Nexus Bio,nexusbio.com,Biotech,180,28000000,France
+Peak Performance,peak-perf.co,E-commerce,320,68000000,USA
+CloudScale Systems,cloudscale.tech,Cloud Infrastructure,410,95000000,USA
+Zenthon,zenthon.com,SaaS,95,14000000,Ireland
+Velocity Sales,velocitysales.io,AdTech,130,21000000,USA
+Orbit Space,orbitspace.io,Aerospace,55,8000000,USA
+Titan Manufacturing,titan-mfg.net,Manufacturing,1200,450000000,USA
+Echo Communications,echocomms.com,Telecommunications,670,180000000,UK
+Aura Wellness,aurawellness.app,Health & Wellness,110,16000000,USA
+DeepBlue AI,deepblue.ai,Artificial Intelligence,45,7500000,USA
+Silverline Banking,silverline.bank,Finance,2300,800000000,USA
+OpenRoad Tech,openroad.io,Automotive,190,34000000,Germany
+Pulse HR,pulsehr.com,HR Tech,155,26000000,USA
+Streamline Ops,streamlineops.co,Project Management,80,11000000,Canada
+Beacon Legal,beaconlegal.io,LegalTech,40,5500000,USA
+Verity Insurance,verityinsure.com,Insurance,450,120000000,USA
+Skyline Real Estate,skylinere.com,PropTech,210,48000000,USA
+Forge Metals,forgemetals.com,Materials,800,310000000,USA
+NextGen Learning,nextgen-edu.com,EdTech,125,18000000,USA
+PureWater Tech,purewater.io,Environmental,90,13000000,Netherlands
+Arcade Gaming,arcadegames.com,Gaming,340,75000000,Japan
+Core Networks,corenetworks.net,Networking,520,135000000,USA
+SwiftPay,swiftpay.io,Payments,280,62000000,USA
+Terraform Labs,terra-labs.io,Web3,75,10000000,Singapore
+Insight Retail,insightretail.com,Retail Tech,440,92000000,USA
+Polaris Defense,polaris-def.com,Defense,610,210000000,USA
+Zenith Labs,zenithlabs.io,Pharma,195,42000000,Switzerland
+ClearView Data,clearview.ai,Big Data,115,19000000,USA
+Boundless Travel,boundless.travel,TravelTech,260,54000000,UK
+Motive Auto,motiveauto.io,Automotive,380,88000000,USA
+Vector Design,vectordesign.co,Design,55,7000000,USA
+Solid State,solidstate.io,Hardware,150,30000000,South Korea
+Growth Lab,growthlab.ai,Marketing,45,6000000,USA
+Apex Finance,apex-finance.com,FinTech,130,25000000,USA
+Vivid VR,vividvr.io,AR/VR,70,9500000,USA
+Shield Cyber,shieldcyber.com,Cybersecurity,220,44000000,Israel
+Oasis Apps,oasisapps.co,SaaS,85,12000000,USA
+Pioneer Agri,pioneeragri.com,AgTech,140,23000000,USA
+Modern HR,modernhr.io,HR Tech,110,17000000,USA
+Global Logistics,globallogs.net,Supply Chain,950,280000000,USA
+Altus Aviation,altusair.com,Aviation,300,72000000,USA
+Bright Energy,brightenergy.io,Renewables,180,35000000,Germany
+Sync Software,sync-soft.io,Productivity,60,8500000,USA
+Tidal Marine,tidalmarine.co,Maritime,240,51000000,Norway
+InfiniCloud,infinicloud.net,Cloud,420,98000000,USA
+SecurePass,securepass.io,IAM,135,22000000,USA
+Element Materials,element-mat.com,Manufacturing,700,190000000,USA
+QuickShip,quickship.io,E-commerce,190,41000000,USA
+Frontier Bio,frontierbio.com,Biotech,115,19000000,USA
+Visionary Ads,visionaryads.com,AdTech,145,27000000,USA
+SecureNet,securenet.io,Cybersecurity,310,65000000,USA
+Hyperion Systems,hyperion.io,Enterprise Software,550,125000000,USA
+Bloom Florals,bloom-florals.com,Retail,80,11000000,USA
+Alpha Capital,alphacap.com,Investment,250,95000000,UK
+True North,truenorth.io,Navigation,120,24000000,USA
+Catalyst Lab,catalystlab.co,Chemicals,400,115000000,Germany
+Urban Mobility,urbanmob.io,Transportation,210,46000000,France
+Peak SaaS,peaksaas.io,SaaS,95,15000000,USA
+Evergreen Health,evergreenhealth.com,Healthcare,600,140000000,USA
+IronGate,irongate.io,Cybersecurity,180,38000000,USA
+BlueWave,bluewave.io,Telecom,340,79000000,USA
+DataFlow,dataflow.tech,Data Engineering,75,11000000,USA
+Spark Electric,sparkelec.com,Consumer Electronics,290,64000000,Japan
+Foundry Works,foundryworks.io,DevTools,65,9500000,USA
+Atlas Maps,atlasmaps.io,GIS,110,21000000,USA
+OmniChannel,omnichannel.com,Retail,480,105000000,USA
+SafeHarbor,safeharbor.io,InsurTech,140,29000000,USA
+Velocity Labs,velocitylabs.io,AI,50,7500000,USA
+Prism Analytics,prismanalytics.com,BI,160,33000000,USA
+Solaris Energy,solarisenergy.com,Solar,230,52000000,Spain
+CloudWatchers,cloudwatchers.net,Monitoring,125,26000000,USA
+Swift Talent,swifttalent.io,Recruitment,90,14000000,USA
+Zenith Pharma,zenithpharma.com,Life Sciences,850,320000000,UK
+Falcon Aerospace,falcon-aero.com,Aerospace,410,110000000,USA
+Unity Systems,unity-systems.io,IT,270,58000000,USA
+Grand Hotel Group,grandhotels.com,Hospitality,1500,400000000,USA
+StreamVideo,streamvideo.io,Media,320,72000000,USA
+Nexus Commerce,nexuscommerce.com,E-commerce,190,43000000,USA
+Veritas Legal,veritaslegal.io,Legal,75,12000000,USA
+Summit Financial,summitfin.com,Finance,500,160000000,USA
+BioGenix,biogenix.io,Genomics,140,31000000,USA
+EcoBuild,ecobuild.com,Construction,600,180000000,USA
+SkyLink,skylink.io,Satellites,115,25000000,USA
+Pulse Media,pulsemedia.com,Advertising,200,45000000,USA
+Armor Defense,armordefense.io,Cybersecurity,330,76000000,USA
+Future Mobility,futuremob.io,EV,280,62000000,Sweden
+Core Logic,corelogic.tech,SaaS,105,19000000,USA
+Stellar Labs,stellarlabs.ai,AI Research,45,7000000,USA
+Horizon Pharma,horizonpharma.com,Pharma,900,350000000,USA
+Lumina Light,luminalight.co,Electronics,160,34000000,USA
+Agile Ops,agileops.io,DevOps,85,14000000,USA
+Titan Logistics,titanlogs.com,Logistics,1100,290000000,USA
+Pure Bio,purebio.io,Biotech,120,26000000,USA
+CloudCore,cloudcore.io,Infrastructure,390,91000000,USA
+Vantage Point,vantagepoint.ai,Analytics,130,28000000,USA
+Oceanic,oceanic.io,Marine Tech,175,39000000,USA
+Swift Solutions,swiftsol.com,Consulting,250,55000000,USA
+Shield Tech,shieldtech.io,Security,210,46000000,Israel
+OpenSource Hub,opensourcehub.io,DevTools,55,8000000,USA
+Apex Retail,apexretail.com,Retail,540,115000000,USA
+Zenith Robotics,zenithrobotics.io,Robotics,190,43000000,Germany
+BlueSky Aviation,blueskyair.com,Aviation,320,78000000,USA
+Iron Mountain Tech,ironmtn.tech,Storage,800,220000000,USA
+Nexus Energy,nexusenergy.io,Utilities,450,130000000,USA
+Global Health,globalhealth.org,Non-profit,300,60000000,USA
+Pulse Tech,pulsetech.io,Electronics,140,31000000,USA
+Stellar Fin,stellarfin.io,FinTech,110,23000000,UK
+Velocity Media,velocitymedia.com,Media,260,59000000,USA
+Aura Tech,auratech.io,SaaS,95,17000000,USA
+DeepData,deepdata.ai,AI,65,11000000,USA
+SilverCloud,silvercloud.net,Cloud,410,94000000,USA
+OpenMind,openmind.io,EdTech,125,25000000,USA
+Pulse Analytics,pulseanalytics.io,Big Data,150,33000000,USA
+Streamline Tech,streamlinetech.com,IT,280,62000000,USA
+Beacon Bio,beaconbio.io,Biotech,130,29000000,USA
+Verity Tech,veritytech.io,SaaS,105,21000000,USA
+Skyline Tech,skylinetech.com,PropTech,190,42000000,USA
+Forge Tech,forgetech.io,Manufacturing,750,195000000,USA
+NextGen Tech,nextgentech.io,Software,140,30000000,USA
+PureTech,puretech.io,Environmental,110,22000000,Netherlands
+Arcade Tech,arcadetech.io,Gaming,310,71000000,Japan
+Core Tech,coretech.io,IT,500,125000000,USA
+Swift Tech,swifttech.io,Payments,290,65000000,USA
+Terra Tech,terratech.io,Web3,85,12000000,Singapore
+Insight Tech,insighttech.io,Retail,420,95000000,USA
+Polaris Tech,polaristech.io,Defense,600,205000000,USA
+Zenith Tech,zenithtech.io,Pharma,200,45000000,Switzerland
+Clear Tech,cleartech.io,Data,120,24000000,USA
+Boundless Tech,boundlesstech.io,Travel,250,56000000,UK
+Motive Tech,motivetech.io,Auto,390,89000000,USA
+Vector Tech,vectortech.io,Design,60,9000000,USA
+Solid Tech,solidtech.io,Hardware,160,32000000,South Korea
+Growth Tech,growthtech.io,Marketing,50,7500000,USA
+Apex Tech,apextech.io,FinTech,140,28000000,USA
+Vivid Tech,vividtech.io,VR,75,11000000,USA
+Shield Tech,shieldtech.io,Cyber,230,48000000,Israel
+Oasis Tech,oasistech.io,SaaS,90,14000000,USA
+Pioneer Tech,pioneertech.io,AgTech,150,26000000,USA
+Modern Tech,moderntech.io,HR,120,20000

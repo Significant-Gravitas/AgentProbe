@@ -153,6 +153,7 @@ describe("endpoint adapters", () => {
         expect(JSON.parse(bodyText)).toEqual({
           message: "Hello AutoGPT",
           is_user_message: true,
+          mode: "fast",
         });
         return new Response(
           [
@@ -190,13 +191,14 @@ describe("endpoint adapters", () => {
       scenario: { id: "demo" },
       persona: { id: "shopper" },
       last_message: { content: "Hello AutoGPT" },
+      copilot_mode: "fast",
     };
 
     const session = await adapter.openScenario(baseContext);
     const reply = await adapter.sendUserTurn({ ...baseContext, ...session });
 
     expect(session).toEqual({ session_id: "chat-123" });
-    expect(reply.assistantText).toBe("First chunk\nSecond chunk");
+    expect(reply.assistantText).toBe("First chunk Second chunk");
     expect(reply.toolCalls).toHaveLength(1);
     expect(reply.toolCalls[0]).toMatchObject({
       name: "find_block",

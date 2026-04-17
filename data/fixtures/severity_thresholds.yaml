@@ -1,0 +1,54 @@
+threshold_definitions:
+  CRITICAL:
+    score_range: [9.0, 10.0]
+    description: "Immediate threat to core business operations or data integrity."
+    action_required: "Instant automated isolation and P1 incident response engagement."
+    indicators:
+      - "Successful RCE on production database"
+      - "Exfiltration of >1GB customer PII"
+      - "Unauthorized administrative access to cloud control plane"
+      - "Ransomware encryption activity detected"
+    sla_response_minutes: 15
+
+  HIGH:
+    score_range: [7.0, 8.9]
+    description: "Significant risk of compromise or data loss; likely targeted attack."
+    action_required: "Auto-draft incident ticket and notify on-call security engineer."
+    indicators:
+      - "Credential stuffing success rate > 5%"
+      - "SQL injection patterns against checkout API"
+      - "Lateral movement using compromised service accounts"
+      - "Multiple failed MFA attempts followed by success from new IP"
+    sla_response_minutes: 60
+
+  MEDIUM:
+    score_range: [4.0, 6.9]
+    description: "Suspicious activity requiring investigation; potential reconnaissance or policy violation."
+    action_required: "Aggregate in daily summary and monitor for escalation."
+    indicators:
+      - "Port scanning from internal subnet"
+      - "Unusual volume of API calls to product catalog"
+      - "Non-standard protocol usage on egress firewall"
+      - "Multiple account lockouts in a single department"
+    sla_response_minutes: 480
+
+  LOW:
+    score_range: [0.1, 3.9]
+    description: "Anomalous but likely benign or unsuccessful automated noise."
+    action_required: "Log for historical trend analysis; no immediate ticket."
+    indicators:
+      - "Failed logins from expired session tokens"
+      - "Known bot-crawler activity"
+      - "Insecure cipher negotiation attempts"
+      - "Isolated 404 errors on legacy endpoints"
+    sla_response_minutes: 1440
+
+metric_weights:
+  impact_weight: 0.4
+  exploitability_weight: 0.3
+  asset_criticality_weight: 0.3
+
+auto_ticket_trigger:
+  minimum_severity: "HIGH"
+  aggregation_window_minutes: 60
+  deduplication_key: "signature_id + affected_host"

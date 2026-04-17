@@ -1,0 +1,73 @@
+date,location_id,location_name,open_time,close_time,status,notes
+2023-01-01,1,Downtown,06:00,19:00,Open,New Year's Day
+2023-01-01,2,Westside,07:00,18:00,Open,New Year's Day
+2023-01-01,3,Fremont,08:00,16:00,Open,New Year's Day
+2023-01-01,4,Riverside,07:00,18:00,Open,New Year's Day
+2023-01-02,1,Downtown,06:00,20:00,Open,
+2023-01-02,2,Westside,06:30,20:00,Open,
+2023-01-02,3,Fremont,06:30,20:00,Open,
+2023-01-02,4,Riverside,06:30,20:00,Open,
+2023-01-03,1,Downtown,06:00,20:00,Open,
+2023-01-03,2,Westside,06:30,20:00,Open,
+2023-01-03,3,Fremont,06:30,20:00,Open,
+2023-01-03,4,Riverside,06:30,20:00,Open,
+2023-01-15,1,Downtown,06:00,20:00,Open,
+2023-01-15,2,Westside,00:00,00:00,Closed,Plumbing repair
+2023-01-15,3,Fremont,06:30,20:00,Open,
+2023-01-15,4,Riverside,06:30,20:00,Open,
+2023-02-14,1,Downtown,06:00,21:00,Open,Valentine's Special
+2023-02-14,2,Westside,06:30,21:00,Open,Valentine's Special
+2023-02-14,3,Fremont,06:30,21:00,Open,Valentine's Special
+2023-02-14,4,Riverside,06:30,21:00,Open,Valentine's Special
+2023-03-01,1,Downtown,06:00,20:00,Open,
+2023-03-01,2,Westside,06:30,20:00,Open,
+2023-03-01,3,Fremont,06:30,20:00,Open,
+2023-03-01,4,Riverside,06:30,20:00,Open,
+2023-04-10,1,Downtown,06:00,20:00,Open,
+2023-04-10,2,Westside,06:30,20:00,Open,
+2023-04-10,3,Fremont,06:30,14:00,Open,Staff meeting/training
+2023-04-10,4,Riverside,06:30,20:00,Open,
+2023-05-29,1,Downtown,07:00,17:00,Open,Memorial Day
+2023-05-29,2,Westside,07:00,17:00,Open,Memorial Day
+2023-05-29,3,Fremont,07:00,17:00,Open,Memorial Day
+2023-05-29,4,Riverside,07:00,17:00,Open,Memorial Day
+2023-07-04,1,Downtown,07:00,15:00,Open,Independence Day
+2023-07-04,2,Westside,07:00,15:00,Open,Independence Day
+2023-07-04,3,Fremont,07:00,15:00,Open,Independence Day
+2023-07-04,4,Riverside,07:00,15:00,Open,Independence Day
+2023-09-04,1,Downtown,07:00,17:00,Open,Labor Day
+2023-09-04,2,Westside,07:00,17:00,Open,Labor Day
+2023-09-04,3,Fremont,07:00,17:00,Open,Labor Day
+2023-09-04,4,Riverside,07:00,17:00,Open,Labor Day
+2023-09-15,3,Fremont,06:30,18:00,Open,Hours reduced - staffing shortage
+2023-09-16,3,Fremont,06:30,18:00,Open,Hours reduced - staffing shortage
+2023-10-01,1,Downtown,06:00,20:00,Open,
+2023-10-01,2,Westside,06:30,20:00,Open,
+2023-10-01,3,Fremont,06:30,20:00,Open,Full hours resumed
+2023-10-01,4,Riverside,06:30,20:00,Open,
+2023-11-23,1,Downtown,00:00,00:00,Closed,Thanksgiving
+2023-11-23,2,Westside,00:00,00:00,Closed,Thanksgiving
+2023-11-23,3,Fremont,00:00,00:00,Closed,Thanksgiving
+2023-11-23,4,Riverside,00:00,00:00,Closed,Thanksgiving
+2023-12-25,1,Downtown,00:00,00:00,Closed,Christmas
+2023-12-25,2,Westside,00:00,00:00,Closed,Christmas
+2023-12-25,3,Fremont,00:00,00:00,Closed,Christmas
+2023-12-25,4,Riverside,00:00,00:00,Closed,Christmas
+2024-01-01,1,Downtown,07:00,18:00,Open,New Year's Day
+2024-01-01,2,Westside,07:00,18:00,Open,New Year's Day
+2024-01-01,3,Fremont,07:00,18:00,Open,New Year's Day
+2024-01-01,4,Riverside,07:00,18:00,Open,New Year's Day
+2024-02-15,4,Riverside,00:00,00:00,Closed,Health Inspection Follow-up
+2024-03-12,3,Fremont,06:30,15:00,Open,Kitchen Equipment Maintenance
+2024-05-27,1,Downtown,07:00,17:00,Open,Memorial Day
+2024-05-27,2,Westside,07:00,17:00,Open,Memorial Day
+2024-05-27,3,Fremont,07:00,17:00,Open,Memorial Day
+2024-05-27,4,Riverside,07:00,17:00,Open,Memorial Day
+2024-06-15,1,Downtown,06:00,20:00,Open,
+2024-06-15,2,Westside,06:30,20:00,Open,
+2024-06-15,3,Fremont,06:30,20:00,Open,
+2024-06-15,4,Riverside,06:30,20:00,Open,
+2024-06-30,1,Downtown,06:00,20:00,Open,End of Period
+2024-06-30,2,Westside,06:30,20:00,Open,End of Period
+2024-06-30,3,Fremont,06:30,20:00,Open,End of Period
+2024-06-30,4,Riverside,06:30,20:00,Open,End of Period

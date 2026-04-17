@@ -18,6 +18,7 @@ type JsonValue =
 type RunOptions = {
   backendUrl: string;
   cwd?: string;
+  extraEnv?: Record<string, string | undefined>;
   suiteDir: string;
   workspace: E2EWorkspace;
   timeoutMs?: number;
@@ -156,18 +157,26 @@ async function assertProcessCompletes(
   }
 }
 
-function responseBodyForScenario(scenarioId: string | undefined): string {
+function responseBodyForScenario(
+  scenarioId: string | undefined,
+  toolEvents: JsonValue[],
+): string {
   const assistantText =
     (scenarioId && ASSISTANT_REPLIES[scenarioId]) ||
     "Unhandled scenario response.";
-  return [
+  const lines: string[] = [];
+  for (const event of toolEvents) {
+    lines.push(`data: ${JSON.stringify(event)}`, "");
+  }
+  lines.push(
     `data: ${JSON.stringify({ delta: assistantText })}`,
     "",
     `data: ${JSON.stringify({ delta: "", usage: { output_tokens: 24 } })}`,
     "",
     "data: [DONE]",
     "",
-  ].join("\n");
+  );
+  return lines.join("\n");
 }
 
 export class FakeAutogptBackend {
@@ -184,6 +193,7 @@ export class FakeAutogptBackend {
   readonly server: ReturnType<typeof Bun.serve>;
   maxConcurrentSends = 0;
   private activeSends = 0;
+  private readonly toolEventsByScenario = new Map<string, JsonValue[]>();
 
   private constructor(server: ReturnType<typeof Bun.serve>) {
     this.server = server;
@@ -213,6 +223,10 @@ export class FakeAutogptBackend {
 
   countByKind(kind: RequestRecord["kind"]): number {
     return this.requestLog.filter((record) => record.kind === kind).length;
+  }
+
+  registerToolEvents(scenarioId: string, events: JsonValue[]): void {
+    this.toolEventsByScenario.set(scenarioId, events);
   }
 
   enableSendBarrier(expected: number): void {
@@ -305,7 +319,10 @@ export class FakeAutogptBackend {
         endedAt: Date.now(),
       });
 
-      return new Response(responseBodyForScenario(scenarioId), {
+      const toolEvents = scenarioId
+        ? (this.toolEventsByScenario.get(scenarioId) ?? [])
+        : [];
+      return new Response(responseBodyForScenario(scenarioId, toolEvents), {
         headers: {
           "content-type": "text/event-stream",
           "cache-control": "no-cache",
@@ -369,6 +386,7 @@ export async function runAgentprobe(
     AUTOGPT_BACKEND_URL: options.backendUrl,
     AGENTPROBE_E2E_OPENAI_SCRIPT: options.workspace.openAiScriptPath,
     AGENTPROBE_E2E_OPENAI_LOG: options.workspace.openAiLogPath,
+    ...options.extraEnv,
   };
 
   const process = Bun.spawn({

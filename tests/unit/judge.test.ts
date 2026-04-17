@@ -1,9 +1,13 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { judgeResponse } from "../../src/domains/evaluation/judge.ts";
 import { parseRubricsYaml } from "../../src/domains/validation/load-suite.ts";
+import {
+  OpenAiResponsesApiError,
+  OpenAiResponsesAuthenticationError,
+} from "../../src/providers/sdk/openai-responses.ts";
 import {
   asResponsesClient,
   buildRubric,
@@ -14,6 +18,20 @@ import {
 } from "./support.ts";
 
 describe("judge", () => {
+  const originalRetryDelay = process.env.AGENTPROBE_JUDGE_RETRY_DELAY_MS;
+
+  beforeEach(() => {
+    process.env.AGENTPROBE_JUDGE_RETRY_DELAY_MS = "0";
+  });
+
+  afterEach(() => {
+    if (originalRetryDelay === undefined) {
+      delete process.env.AGENTPROBE_JUDGE_RETRY_DELAY_MS;
+    } else {
+      process.env.AGENTPROBE_JUDGE_RETRY_DELAY_MS = originalRetryDelay;
+    }
+  });
+
   test("uses structured output requests", async () => {
     const rubric = buildRubric({
       id: "support",
@@ -62,14 +80,38 @@ describe("judge", () => {
     expect(call.text.format.schema.additionalProperties).toBe(false);
     expect(call.temperature).toBe(rubric.judge.temperature);
     expect(call.maxOutputTokens).toBe(rubric.judge.maxTokens);
-    expect(call.input).toBe(
-      "Response to evaluate:\n\nReset your password from settings.",
+    expect(call.instructions).toBe(
+      "You are an expert rubric judge. Evaluate only the provided response using the supplied evaluation context.",
     );
-    expect(call.instructions).toContain("accuracy");
-    expect(call.instructions).toContain('"additionalProperties": false');
+    expect(call.input).toEqual([
+      {
+        type: "message",
+        role: "user",
+        content: [
+          expect.objectContaining({
+            type: "input_text",
+            text: expect.stringContaining("# Rubric: Support Rubric"),
+          }),
+        ],
+      },
+      {
+        type: "message",
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: "Response to evaluate:\n\nReset your password from settings.",
+          },
+        ],
+      },
+    ]);
+    expect(call.promptCacheKey).toMatch(
+      /^agentprobe:judge:support:[0-9a-f]{16}$/,
+    );
+    expect(call.cacheControl).toEqual({ type: "ephemeral" });
   });
 
-  test("rejects missing judge config, wrong provider, empty output, dimension mismatches, and empty rubrics", async () => {
+  test("rejects missing judge config, wrong provider, dimension mismatches, and empty rubrics", async () => {
     const baseClient = asResponsesClient(
       new FakeResponsesClient([buildScore({ dimensionId: "accuracy" })]),
     ) as never;
@@ -101,16 +143,12 @@ describe("judge", () => {
       judgeResponse(
         buildRubric(),
         "Test response",
-        asResponsesClient(new FakeResponsesClient([null])) as never,
-      ),
-    ).rejects.toThrow(/invalid JSON output|contained no text output/i);
-
-    await expect(
-      judgeResponse(
-        buildRubric(),
-        "Test response",
         asResponsesClient(
-          new FakeResponsesClient([buildScore({ dimensionId: "relevance" })]),
+          new FakeResponsesClient([
+            buildScore({ dimensionId: "relevance" }),
+            buildScore({ dimensionId: "relevance" }),
+            buildScore({ dimensionId: "relevance" }),
+          ]),
         ) as never,
       ),
     ).rejects.toThrow(/missing dimensions: task_completion/i);
@@ -122,6 +160,95 @@ describe("judge", () => {
         baseClient,
       ),
     ).rejects.toThrow(/no dimensions/i);
+  });
+
+  test("retries invalid JSON-style judge outputs and parses failure_mode_detected", async () => {
+    const client = new FakeResponsesClient([
+      "not valid json",
+      buildScore({
+        dimensionId: "task_completion",
+        failureModeDetected: "fabrication",
+      }),
+    ]);
+
+    const result = await judgeResponse(
+      buildRubric(),
+      "Test response",
+      asResponsesClient(client) as never,
+    );
+
+    expect(client.calls).toHaveLength(2);
+    expect(result.failureModeDetected).toBe("fabrication");
+  });
+
+  test("retries retryable API errors and eventually succeeds", async () => {
+    const successClient = new FakeResponsesClient([
+      buildScore({ dimensionId: "task_completion" }),
+    ]);
+    let attempts = 0;
+    const client = {
+      async create(request: Parameters<FakeResponsesClient["create"]>[0]) {
+        attempts += 1;
+        if (attempts < 3) {
+          throw new OpenAiResponsesApiError("rate limited", 429, "{}");
+        }
+        return await successClient.create(request);
+      },
+    };
+
+    const result = await judgeResponse(
+      buildRubric(),
+      "Test response",
+      client as never,
+    );
+
+    expect(attempts).toBe(3);
+    expect(result.passed).toBe(true);
+  });
+
+  test("does not retry authentication failures or non-429 4xx responses", async () => {
+    let authAttempts = 0;
+    const authClient = {
+      async create() {
+        authAttempts += 1;
+        throw new OpenAiResponsesAuthenticationError("unauthorized", 401, "{}");
+      },
+    };
+
+    await expect(
+      judgeResponse(buildRubric(), "Test response", authClient as never),
+    ).rejects.toThrow(/Judge authentication failed/i);
+    expect(authAttempts).toBe(1);
+
+    let badRequestAttempts = 0;
+    const badRequestClient = {
+      async create() {
+        badRequestAttempts += 1;
+        throw new OpenAiResponsesApiError("bad request", 400, "{}");
+      },
+    };
+
+    await expect(
+      judgeResponse(buildRubric(), "Test response", badRequestClient as never),
+    ).rejects.toThrow(/bad request/i);
+    expect(badRequestAttempts).toBe(1);
+  });
+
+  test("fails after exhausting retries on invalid judge output", async () => {
+    const client = new FakeResponsesClient([
+      "still not json",
+      "still not json",
+      "still not json",
+    ]);
+
+    await expect(
+      judgeResponse(
+        buildRubric(),
+        "Test response",
+        asResponsesClient(client) as never,
+      ),
+    ).rejects.toThrow();
+    expect(client.calls).toHaveLength(3);
   });
 
   test("applies top-level judge config while parsing rubric yaml", () => {
@@ -170,10 +297,21 @@ describe("judge", () => {
     const inherited = parsed.rubrics.find(
       (rubric) => rubric.id === "sales-automation",
     );
+    const rubricIds = new Set(parsed.rubrics.map((rubric) => rubric.id));
 
-    expect(parsed.rubrics).toHaveLength(15);
+    expect(parsed.rubrics).toHaveLength(21);
     expect(inherited?.metaPrompt).toContain("task-oriented scenario");
     expect(inherited?.dimensions).toHaveLength(5);
     expect(inherited?.judge?.model).toBe("anthropic/claude-opus-4.6");
+    for (const rubricId of [
+      "memory-temporal",
+      "memory-abstention",
+      "memory-crossdomain",
+      "memory-compositional",
+      "memory-introspection",
+      "memory-hygiene",
+    ]) {
+      expect(rubricIds.has(rubricId)).toBe(true);
+    }
   });
 });

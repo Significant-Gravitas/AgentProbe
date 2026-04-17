@@ -1,0 +1,21 @@
+invoice_id,vendor_name,vendor_tax_id,invoice_date,due_date,line_items,subtotal,tax,total,gl_code,confidence,needs_review_reason
+INV-2023-001,Steel & Stone Supplies,88-1234567,2023-10-12,2023-11-12,"[{""desc"": ""#4 Rebar 20ft"", ""qty"": 100, ""price"": 15.50}, {""desc"": ""Concrete Ties"", ""qty"": 50, ""price"": 2.00}]",1650.00,132.00,1782.00,5100-Materials,0.98,
+2023-9981,Apex Plumbing & HVAC,27-9900112,2023-10-14,2023-10-29,"[{""desc"": ""Rough-in labor Phase 2"", ""qty"": 1, ""price"": 4500.00}]",4500.00,0.00,4500.00,5200-Subcontractors,0.96,
+99281,City Electric Wholesale,45-0099223,2023-10-15,2023-11-15,"[{""desc"": ""EMT Conduit 1/2in"", ""qty"": 200, ""price"": 1.10}, {""desc"": ""Wire Nut Box"", ""qty"": 5, ""price"": 12.00}]",280.00,22.40,302.40,5100-Materials,0.99,
+IMG_0442_SCAN,River Valley Sand & Gravel,12-8877665,2023-10-16,2023-11-16,"[{""desc"": ""Fill Dirt"", ""qty"": 40, ""price"": 18.00}]",720.00,57.60,777.60,5100-Materials,0.62,LOW_OCR_CONFIDENCE
+2023-10-A,Mountain View Landscapes,33-4455667,2023-10-17,2023-11-01,"[{""desc"": ""Sod Installation"", ""qty"": 500, ""price"": 0.85}]",425.00,34.00,459.00,5200-Subcontractors,0.94,
+667210,Fastenal Company,41-0120120,2023-10-18,2023-11-18,"[{""desc"": ""Grade 8 Bolts"", ""qty"": 1000, ""price"": 0.12}, {""desc"": ""Washers"", ""qty"": 1000, ""price"": 0.04}]",160.00,12.80,172.80,5100-Materials,0.97,
+INV-8821,Titan Crane Rentals,77-2233445,2023-10-18,2023-10-18,"[{""desc"": ""24hr Crane Rental - 50 Ton"", ""qty"": 1, ""price"": 2200.00}]",2200.00,0.00,2200.00,5300-Equipment_Rental,0.99,
+SUB_SCN_09,Gomez Masonry LLC,54-3322110,2023-10-19,2023-11-03,"[{""desc"": ""Brickwork - Building B"", ""qty"": 1, ""price"": 8500.00}]",8500.00,0.00,8500.00,5200-Subcontractors,0.58,HANDWRITTEN_TEXT
+900122,United Rentals,13-5566778,2023-10-20,2023-11-20,"[{""desc"": ""Scissor Lift Weekly"", ""qty"": 1, ""price"": 450.00}, {""desc"": ""Delivery Fee"", ""qty"": 1, ""price"": 75.00}]",525.00,42.00,567.00,5300-Equipment_Rental,0.98,
+2023-OCT-01,Precision Glass & Mirror,99-1112223,2023-10-21,2023-11-21,"[{""desc"": ""Tempered Glass Panels"", ""qty"": 12, ""price"": 310.00}]",3720.00,297.60,4017.60,5100-Materials,0.95,
+7721,Diamond Waste Management,22-3344556,2023-10-22,2023-11-22,"[{""desc"": ""30-Yard Dumpster Rental"", ""qty"": 2, ""price"": 450.00}]",900.00,72.00,972.00,5400-Site_Services,0.99,
+BILL-443,Northside Lumber,11-2233445,2023-10-23,2023-11-23,"[{""desc"": ""2x4x8 Studs"", ""qty"": 200, ""price"": 4.50}, {""desc"": ""OSB Sheathing"", ""qty"": 50, ""price"": 22.00}]",2000.00,160.00,2160.00,5100-Materials,0.98,
+IMG_8812,Reliable Roofing,66-7788990,2023-10-24,2023-11-08,"[{""desc"": ""Roof Membrane Installation"", ""qty"": 1, ""price"": 12400.00}]",12400.00,0.00,12400.00,5200-Subcontractors,0.45,TOTAL_MISMATCH_CALCULATION
+INV-00922,Safety First Signage,44-5566778,2023-10-25,2023-11-10,"[{""desc"": ""Traffic Cones"", ""qty"": 25, ""price"": 15.00}, {""desc"": ""Caution Tape"", ""qty"": 10, ""price"": 8.00}]",455.00,36.40,491.40,5100-Materials,0.97,
+2023-011,Blue Sky Painting,12-3456789,2023-10-26,2023-11-10,"[{""desc"": ""Interior Primer"", ""qty"": 20, ""price"": 35.00}]",700.00,56.00,756.00,5200-Subcontractors,0.93,
+55210,Heavy Haul Transport,88-9900112,2023-10-27,2023-10-27,"[{""desc"": ""Excavator Transport"", ""qty"": 1, ""price"": 1200.00}]",1200.00,96.00,1296.00,5300-Equipment_Rental,0.98,
+91122,Wholesale Pipe & Valve,55-6677889,2023-10-28,2023-11-28,"[{""desc"": ""PVC Pipe 4in"", ""qty"": 100, ""price"": 6.50}]",650.00,52.00,702.00,5100-Materials,0.99,
+SCN_INV_12,Top Notch Carpentry,22-1133445,2023-10-29,2023-11-13,"[{""desc"": ""Trim Work - Floor 4"", ""qty"": 1, ""price"": 3200.00}]",3200.00,0.00,3200.00,5200-Subcontractors,0.71,BLURRY_IMAGE
+INV-2023-A7,Modern Floorings,33-9988776,2023-10-30,2023-11-30,"[{""desc"": ""Vinyl Plank - Grey"", ""qty"": 1200, ""price"": 2.50}]",3000.00,240.00,3240.00,5100-Materials,0.96,
+99001,Ironclad Security,77-6655443,2023-10-31,2023-11-15,"[{""desc"": ""Site Security - Week 44"", ""qty"": 1, ""price"": 1500.00}]",1500.00,120.00,1620.00,5400-Site_Services,0.98,

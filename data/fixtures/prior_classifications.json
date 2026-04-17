@@ -1,0 +1,128 @@
+[
+  {
+    "employee_email": "sarah.chen@pixel-arc.com",
+    "vendor": "Blue Bottle Coffee",
+    "category": "Meals & Entertainment",
+    "project_code": "PROJ-2024-NIKE-SUMMER",
+    "last_processed": "2024-05-12T09:15:22Z"
+  },
+  {
+    "employee_email": "marcus.vance@pixel-arc.com",
+    "vendor": "Uber",
+    "category": "Travel",
+    "project_code": "PROJ-2024-APPLE-RETAIL",
+    "last_processed": "2024-05-11T22:30:10Z"
+  },
+  {
+    "employee_email": "elara.smith@pixel-arc.com",
+    "vendor": "Adobe Systems",
+    "category": "Software/Subscriptions",
+    "project_code": "OVERHEAD-INTERNAL",
+    "last_processed": "2024-05-10T14:00:00Z"
+  },
+  {
+    "employee_email": "sarah.chen@pixel-arc.com",
+    "vendor": "Delta Airlines",
+    "category": "Travel",
+    "project_code": "PROJ-2024-NIKE-SUMMER",
+    "last_processed": "2024-05-08T11:20:45Z"
+  },
+  {
+    "employee_email": "james.hu@pixel-arc.com",
+    "vendor": "Staples",
+    "category": "Office Supplies",
+    "project_code": "OVERHEAD-INTERNAL",
+    "last_processed": "2024-05-05T16:45:12Z"
+  },
+  {
+    "employee_email": "marcus.vance@pixel-arc.com",
+    "vendor": "Motto Catering",
+    "category": "Meals & Entertainment",
+    "project_code": "PROJ-2024-APPLE-RETAIL",
+    "last_processed": "2024-05-02T13:10:05Z"
+  },
+  {
+    "employee_email": "elara.smith@pixel-arc.com",
+    "vendor": "Shutterstock",
+    "category": "Production Assets",
+    "project_code": "PROJ-2024-COCACOLA-REBRAND",
+    "last_processed": "2024-04-28T09:55:30Z"
+  },
+  {
+    "employee_email": "sarah.chen@pixel-arc.com",
+    "vendor": "Lyft",
+    "category": "Travel",
+    "project_code": "PROJ-2024-NIKE-SUMMER",
+    "last_processed": "2024-04-25T18:22:14Z"
+  },
+  {
+    "employee_email": "james.hu@pixel-arc.com",
+    "vendor": "Amazon Business",
+    "category": "Hardware",
+    "project_code": "PROJ-2024-TESLA-UI",
+    "last_processed": "2024-04-20T10:05:59Z"
+  },
+  {
+    "employee_email": "elara.smith@pixel-arc.com",
+    "vendor": "Envato Market",
+    "category": "Production Assets",
+    "project_code": "PROJ-2024-COCACOLA-REBRAND",
+    "last_processed": "2024-04-15T14:40:22Z"
+  },
+  {
+    "employee_email": "marcus.vance@pixel-arc.com",
+    "vendor": "Marriott Intl",
+    "category": "Travel",
+    "project_code": "PROJ-2024-APPLE-RETAIL",
+    "last_processed": "2024-04-12T08:12:01Z"
+  },
+  {
+    "employee_email": "sarah.chen@pixel-arc.com",
+    "vendor": "Whole Foods",
+    "category": "Meals & Entertainment",
+    "project_code": "PROJ-2024-NIKE-SUMMER",
+    "last_processed": "2024-04-05T17:33:40Z"
+  },
+  {
+    "employee_email": "james.hu@pixel-arc.com",
+    "vendor": "FedEx",
+    "category": "Shipping",
+    "project_code": "PROJ-2024-TESLA-UI",
+    "last_processed": "2024-03-28T11:15:00Z"
+  },
+  {
+    "employee_email": "elara.smith@pixel-arc.com",
+    "vendor": "Figma",
+    "category": "Software/Subscriptions",
+    "project_code": "OVERHEAD-INTERNAL",
+    "last_processed": "2024-03-20T09:00:15Z"
+  },
+  {
+    "employee_email": "marcus.vance@pixel-arc.com",
+    "vendor": "Sweetgreen",
+    "category": "Meals & Entertainment",
+    "project_code": "PROJ-2024-APPLE-RETAIL",
+    "last_processed": "2024-03-15T12:45:55Z"
+  },
+  {
+    "employee_email": "sarah.chen@pixel-arc.com",
+    "vendor": "Zulily Printing",
+    "category": "Production Assets",
+    "project_code": "PROJ-2024-NIKE-SUMMER",
+    "last_processed": "2024-03-10T15:20:10Z"
+  },
+  {
+    "employee_email": "james.hu@pixel-arc.com",
+    "vendor": "Apple Store",
+    "category": "Hardware",
+    "project_code": "PROJ-2024-TESLA-UI",
+    "last_processed": "2024-03-05T14:10:00Z"
+  },
+  {
+    "employee_email": "elara.smith@pixel-arc.com",
+    "vendor": "FontSpring",
+    "category": "Production Assets",
+    "project_code": "PROJ-2024-COCACOLA-REBRAND",
+    "last_processed": "2024-03-01T10:30:45Z"
+  }
+]

@@ -1,0 +1,250 @@
+{
+  "products": [
+    {
+      "product_id": "SD-101",
+      "slug": "the-horizon-sofa",
+      "name": "Horizon Velvet Sofa",
+      "price": 1499.00,
+      "currency": "USD",
+      "stock_quantity": 42,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-101-main.jpg",
+        "https://cdn.sundial.example/products/sd-101-alt1.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-102",
+      "slug": "cedar-nightstand",
+      "name": "Cedar Creek Nightstand",
+      "price": 249.00,
+      "currency": "USD",
+      "stock_quantity": 115,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-102-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-103",
+      "slug": "aurora-dining-table",
+      "name": "Aurora Oak Dining Table",
+      "price": 899.00,
+      "currency": "USD",
+      "stock_quantity": 8,
+      "status": "low_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-103-main.jpg",
+        "https://cdn.sundial.example/products/sd-103-detail.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-104",
+      "slug": "solstice-floor-lamp",
+      "name": "Solstice Brass Floor Lamp",
+      "price": 185.00,
+      "currency": "USD",
+      "stock_quantity": 0,
+      "status": "out_of_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-104-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-105",
+      "slug": "meridian-armchair",
+      "name": "Meridian Mid-Century Armchair",
+      "price": 650.00,
+      "currency": "USD",
+      "stock_quantity": 24,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-105-main.jpg",
+        "https://cdn.sundial.example/products/sd-105-swatch.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-106",
+      "slug": "zenith-rug-8x10",
+      "name": "Zenith Hand-Woven Rug (8x10)",
+      "price": 420.00,
+      "currency": "USD",
+      "stock_quantity": 55,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-106-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-107",
+      "slug": "luna-queen-bed",
+      "name": "Luna Upholstered Queen Bed",
+      "price": 1200.00,
+      "currency": "USD",
+      "stock_quantity": 12,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-107-main.jpg",
+        "https://cdn.sundial.example/products/sd-107-side.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-108",
+      "slug": "tundra-coffee-table",
+      "name": "Tundra Marble Coffee Table",
+      "price": 550.00,
+      "currency": "USD",
+      "stock_quantity": 19,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-108-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-109",
+      "slug": "ember-candle-set",
+      "name": "Ember Essential Candle Set",
+      "price": 45.00,
+      "currency": "USD",
+      "stock_quantity": 200,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-109-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-110",
+      "slug": "nimbus-pendant-light",
+      "name": "Nimbus Glass Pendant Light",
+      "price": 135.00,
+      "currency": "USD",
+      "stock_quantity": 31,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-110-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-111",
+      "slug": "atlas-office-desk",
+      "name": "Atlas Smart Walnut Desk",
+      "price": 799.00,
+      "currency": "USD",
+      "stock_quantity": 5,
+      "status": "low_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-111-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-112",
+      "slug": "vantage-bookshelf",
+      "name": "Vantage Modular Bookshelf",
+      "price": 340.00,
+      "currency": "USD",
+      "stock_quantity": 14,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-112-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-113",
+      "slug": "summit-bar-stool",
+      "name": "Summit Leather Bar Stool",
+      "price": 195.00,
+      "currency": "USD",
+      "stock_quantity": 60,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-113-main.jpg",
+        "https://cdn.sundial.example/products/sd-113-back.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-114",
+      "slug": "driftwood-mirror",
+      "name": "Large Driftwood Wall Mirror",
+      "price": 210.00,
+      "currency": "USD",
+      "stock_quantity": 22,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-114-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-115",
+      "slug": "canyon-throw-blanket",
+      "name": "Canyon Wool Throw Blanket",
+      "price": 85.00,
+      "currency": "USD",
+      "stock_quantity": 88,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-115-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-116",
+      "slug": "orbit-side-table",
+      "name": "Orbit Metal Side Table",
+      "price": 125.00,
+      "currency": "USD",
+      "stock_quantity": 40,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-116-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-117",
+      "slug": "weaver-dining-chair",
+      "name": "Weaver Rattan Dining Chair",
+      "price": 175.00,
+      "currency": "USD",
+      "stock_quantity": 32,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-117-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-118",
+      "slug": "halcyon-ottoman",
+      "name": "Halcyon Round Ottoman",
+      "price": 299.00,
+      "currency": "USD",
+      "stock_quantity": 17,
+      "status": "in_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-118-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-119",
+      "slug": "ridge-outdoor-bench",
+      "name": "Ridge Teak Outdoor Bench",
+      "price": 475.00,
+      "currency": "USD",
+      "stock_quantity": 9,
+      "status": "low_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-119-main.jpg"
+      ]
+    },
+    {
+      "product_id": "SD-120",
+      "slug": "aspect-media-console",
+      "name": "Aspect 70\" Media Console",
+      "price": 950.00,
+      "currency": "USD",
+      "stock_quantity": 3,
+      "status": "low_stock",
+      "image_urls": [
+        "https://cdn.sundial.example/products/sd-120-main.jpg",
+        "https://cdn.sundial.example/products/sd-120-open.jpg"
+      ]
+    }
+  ]
+}

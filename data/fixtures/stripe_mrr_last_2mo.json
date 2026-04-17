@@ -1,0 +1,61 @@
+{
+  "account_id": "acct_flowstate",
+  "report_period": "2023-10-01 to 2023-11-30",
+  "currency": "usd",
+  "metrics": [
+    {
+      "month": "2023-10",
+      "mrr_total": 412500,
+      "mrr_breakdown": {
+        "starter_plan": 45000,
+        "pro_plan": 185000,
+        "enterprise_plan": 182500
+      },
+      "new_mrr": 38000,
+      "expansion_mrr": 12000,
+      "contraction_mrr": -4500,
+      "churn_mrr": -8200,
+      "net_revenue_churn_rate": 0.019,
+      "logo_churn_rate": 0.024,
+      "active_subscriptions": 1420
+    },
+    {
+      "month": "2023-11",
+      "mrr_total": 448200,
+      "mrr_breakdown": {
+        "starter_plan": 48200,
+        "pro_plan": 198000,
+        "enterprise_plan": 202000
+      },
+      "new_mrr": 42500,
+      "expansion_mrr": 15400,
+      "contraction_mrr": -5200,
+      "churn_mrr": -17000,
+      "net_revenue_churn_rate": 0.037,
+      "logo_churn_rate": 0.041,
+      "active_subscriptions": 1485
+    }
+  ],
+  "variance": {
+    "mrr_growth_percentage": 8.65,
+    "churn_increase_bps": 180,
+    "expansion_growth_percentage": 28.3
+  },
+  "top_churn_reasons": [
+    {
+      "reason": "Budget constraints",
+      "count": 12,
+      "mrr_impact": 8400
+    },
+    {
+      "reason": "Switching to competitor",
+      "count": 5,
+      "mrr_impact": 5600
+    },
+    {
+      "reason": "Feature gap",
+      "count": 8,
+      "mrr_impact": 3000
+    }
+  ]
+}

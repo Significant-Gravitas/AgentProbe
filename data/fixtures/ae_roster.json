@@ -1,0 +1,55 @@
+{
+  "account_executives": [
+    {
+      "id": "ae_001",
+      "name": "Sarah Jenkins",
+      "email": "sarah.jenkins@loomstep.io",
+      "role": "Senior Account Executive",
+      "territory": "US-East",
+      "assigned_states": ["NY", "MA", "FL", "PA", "GA", "NC", "NJ", "VA", "MD", "CT", "DE", "ME", "NH", "RI", "VT", "WV"],
+      "capacity": {
+        "max_discovery_calls_per_week": 25,
+        "current_booked_calls": 18,
+        "status": "active"
+      },
+      "quota_attainment_ytd": 1.12,
+      "calendar_id": "cal_sj_992"
+    },
+    {
+      "id": "ae_002",
+      "name": "Marcus Thorne",
+      "email": "marcus.thorne@loomstep.io",
+      "role": "Account Executive",
+      "territory": "US-West",
+      "assigned_states": ["CA", "WA", "OR", "TX", "CO", "AZ", "UT", "NV", "ID", "MT", "WY", "NM", "AK", "HI"],
+      "capacity": {
+        "max_discovery_calls_per_week": 25,
+        "current_booked_calls": 12,
+        "status": "active"
+      },
+      "quota_attainment_ytd": 0.94,
+      "calendar_id": "cal_mt_441"
+    },
+    {
+      "id": "ae_003",
+      "name": "Elena Rossi",
+      "email": "elena.rossi@loomstep.io",
+      "role": "Account Executive",
+      "territory": "EU+CA",
+      "assigned_regions": ["European Union", "United Kingdom", "Switzerland", "Norway", "Canada"],
+      "capacity": {
+        "max_discovery_calls_per_week": 20,
+        "current_booked_calls": 19,
+        "status": "near_capacity"
+      },
+      "quota_attainment_ytd": 1.05,
+      "calendar_id": "cal_er_108"
+    }
+  ],
+  "routing_rules": {
+    "default_fallback_ae": "ae_001",
+    "round_robin_enabled": false,
+    "territory_priority": true,
+    "overflow_logic": "If primary territory AE is at 100% capacity, route to next available AE with lowest current_booked_calls regardless of territory."
+  }
+}

@@ -1,0 +1,344 @@
+{
+  "gold_outcomes": [
+    {
+      "query_id": "Q001",
+      "expected_action": "search_notion",
+      "target_runbook": "client-onboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Send MSA and initial deposit invoice via HubSpot."
+    },
+    {
+      "query_id": "Q002",
+      "expected_action": "search_notion",
+      "target_runbook": "project-kickoff.md",
+      "response_type": "direct_answer",
+      "key_info": "Confirm budget, timeline, and stakeholder list."
+    },
+    {
+      "query_id": "Q003",
+      "expected_action": "search_notion",
+      "target_runbook": "project-offboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Archive Slack channel and move files to 'Completed' folder."
+    },
+    {
+      "query_id": "Q004",
+      "expected_action": "search_notion",
+      "target_runbook": "employee-onboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Assign a buddy and provide hardware by Day 1."
+    },
+    {
+      "query_id": "Q005",
+      "expected_action": "search_notion",
+      "target_runbook": "it-support-triage.md",
+      "response_type": "direct_answer",
+      "key_info": "Check the #it-outages channel before filing a ticket."
+    },
+    {
+      "query_id": "Q006",
+      "expected_action": "search_notion",
+      "target_runbook": "expense-policy.md",
+      "response_type": "direct_answer",
+      "key_info": "Maximum $50 per person for team lunches."
+    },
+    {
+      "query_id": "Q007",
+      "expected_action": "search_notion",
+      "target_runbook": "time-tracking.md",
+      "response_type": "direct_answer",
+      "key_info": "Timesheets must be submitted by 5 PM every Friday."
+    },
+    {
+      "query_id": "Q008",
+      "expected_action": "search_notion",
+      "target_runbook": "recruitment-pipeline.md",
+      "response_type": "direct_answer",
+      "key_info": "Initial screen -> Technical test -> Panel interview."
+    },
+    {
+      "query_id": "Q009",
+      "expected_action": "search_notion",
+      "target_runbook": "client-onboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Add the point of contact to the shared Slack channel."
+    },
+    {
+      "query_id": "Q010",
+      "expected_action": "search_notion",
+      "target_runbook": "project-kickoff.md",
+      "response_type": "direct_answer",
+      "key_info": "Set up the Harvest project and link it to HubSpot."
+    },
+    {
+      "query_id": "Q011",
+      "expected_action": "search_notion",
+      "target_runbook": "project-offboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Schedule a post-mortem meeting within 5 days of completion."
+    },
+    {
+      "query_id": "Q012",
+      "expected_action": "search_notion",
+      "target_runbook": "employee-onboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Ensure they have access to Notion, Slack, and Harvest."
+    },
+    {
+      "query_id": "Q013",
+      "expected_action": "search_notion",
+      "target_runbook": "it-support-triage.md",
+      "response_type": "direct_answer",
+      "key_info": "Hardware requests require manager approval via email."
+    },
+    {
+      "query_id": "Q014",
+      "expected_action": "search_notion",
+      "target_runbook": "expense-policy.md",
+      "response_type": "direct_answer",
+      "key_info": "Travel must be booked at least 14 days in advance."
+    },
+    {
+      "query_id": "Q015",
+      "expected_action": "search_notion",
+      "target_runbook": "time-tracking.md",
+      "response_type": "direct_answer",
+      "key_info": "Use the 'Internal - Training' code for professional development."
+    },
+    {
+      "query_id": "Q016",
+      "expected_action": "search_notion",
+      "target_runbook": "recruitment-pipeline.md",
+      "response_type": "direct_answer",
+      "key_info": "References are checked after the panel interview."
+    },
+    {
+      "query_id": "Q017",
+      "expected_action": "search_notion",
+      "target_runbook": "client-onboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "The 'Welcome Deck' is located in the Templates folder."
+    },
+    {
+      "query_id": "Q018",
+      "expected_action": "search_notion",
+      "target_runbook": "project-kickoff.md",
+      "response_type": "direct_answer",
+      "key_info": "Invite the Finance Lead to the kickoff for high-value contracts."
+    },
+    {
+      "query_id": "Q019",
+      "expected_action": "search_notion",
+      "target_runbook": "project-offboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Request a testimonial or G2 review upon project close."
+    },
+    {
+      "query_id": "Q020",
+      "expected_action": "search_notion",
+      "target_runbook": "employee-onboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "HR sends the payroll link via Gusto on Wednesday."
+    },
+    {
+      "query_id": "Q021",
+      "expected_action": "search_notion",
+      "target_runbook": "it-support-triage.md",
+      "response_type": "direct_answer",
+      "key_info": "Password resets are handled by the 'Admin-IT' role."
+    },
+    {
+      "query_id": "Q022",
+      "expected_action": "search_notion",
+      "target_runbook": "expense-policy.md",
+      "response_type": "direct_answer",
+      "key_info": "Alcohol is not reimbursable unless for client entertainment."
+    },
+    {
+      "query_id": "Q023",
+      "expected_action": "search_notion",
+      "target_runbook": "time-tracking.md",
+      "response_type": "direct_answer",
+      "key_info": "Contractors must bill in 15-minute increments."
+    },
+    {
+      "query_id": "Q024",
+      "expected_action": "search_notion",
+      "target_runbook": "recruitment-pipeline.md",
+      "response_type": "direct_answer",
+      "key_info": "Job descriptions must be approved by the Founder."
+    },
+    {
+      "query_id": "Q025",
+      "expected_action": "search_notion",
+      "target_runbook": "client-onboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "The 'Discovery Phase' lasts exactly two weeks."
+    },
+    {
+      "query_id": "Q026",
+      "expected_action": "search_notion",
+      "target_runbook": "project-kickoff.md",
+      "response_type": "direct_answer",
+      "key_info": "Resource allocation is finalized in the Monday Ops meeting."
+    },
+    {
+      "query_id": "Q027",
+      "expected_action": "search_notion",
+      "target_runbook": "project-offboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Final invoices must be sent within 48 hours of sign-off."
+    },
+    {
+      "query_id": "Q028",
+      "expected_action": "search_notion",
+      "target_runbook": "employee-onboarding.md",
+      "response_type": "direct_answer",
+      "key_info": "Culture training happens in the second week."
+    },
+    {
+      "query_id": "Q029",
+      "expected_action": "search_notion",
+      "target_runbook": "it-support-triage.md",
+      "response_type": "direct_answer",
+      "key_info": "Software subscriptions require a business justification."
+    },
+    {
+      "query_id": "Q030",
+      "expected_action": "search_notion",
+      "target_runbook": "expense-policy.md",
+      "response_type": "direct_answer",
+      "key_info": "Receipts are mandatory for all expenses over $10."
+    },
+    {
+      "query_id": "Q031",
+      "expected_action": "tool_call_hubspot",
+      "tool_method": "get_deal_status",
+      "response_type": "tool_data",
+      "key_info": "Current stage of the Acme Corp deal."
+    },
+    {
+      "query_id": "Q032",
+      "expected_action": "tool_call_harvest",
+      "tool_method": "get_project_budget",
+      "response_type": "tool_data",
+      "key_info": "Remaining hours on the 'Redesign' project."
+    },
+    {
+      "query_id": "Q033",
+      "expected_action": "tool_call_greenhouse",
+      "tool_method": "get_candidate_status",
+      "response_type": "tool_data",
+      "key_info": "Status of Jane Doe's application for Senior Designer."
+    },
+    {
+      "query_id": "Q034",
+      "expected_action": "tool_call_hubspot",
+      "tool_method": "get_contact_info",
+      "response_type": "tool_data",
+      "key_info": "Primary email for the lead at Globex."
+    },
+    {
+      "query_id": "Q035",
+      "expected_action": "tool_call_harvest",
+      "tool_method": "get_user_timesheet",
+      "response_type": "tool_data",
+      "key_info": "Total hours logged by Mark this week."
+    },
+    {
+      "query_id": "Q036",
+      "expected_action": "tool_call_greenhouse",
+      "tool_method": "list_open_roles",
+      "response_type": "tool_data",
+      "key_info": "Active job postings in the Creative department."
+    },
+    {
+      "query_id": "Q037",
+      "expected_action": "tool_call_hubspot",
+      "tool_method": "create_task",
+      "response_type": "tool_confirmation",
+      "key_info": "Task created for follow-up with Cyberdyne."
+    },
+    {
+      "query_id": "Q038",
+      "expected_action": "tool_call_harvest",
+      "tool_method": "get_unbilled_amount",
+      "response_type": "tool_data",
+      "key_info": "Uninvoiced amount for the Stark Industries account."
+    },
+    {
+      "query_id": "Q039",
+      "expected_action": "tool_call_greenhouse",
+      "tool_method": "get_interview_schedule",
+      "response_type": "tool_data",
+      "key_info": "Time of the next interview for the PM role."
+    },
+    {
+      "query_id": "Q040",
+      "expected_action": "tool_call_hubspot",
+      "tool_method": "get_company_notes",
+      "response_type": "tool_data",
+      "key_info": "Latest internal notes on the Wayne Ent account."
+    },
+    {
+      "query_id": "Q041",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "Founder",
+      "reason": "Salary negotiation beyond standard bands."
+    },
+    {
+      "query_id": "Q042",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "Ops Manager",
+      "reason": "Conflict between two project deadlines for the same resource."
+    },
+    {
+      "query_id": "Q043",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "Founder",
+      "reason": "Request for legal exception in a client MSA."
+    },
+    {
+      "query_id": "Q044",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "HR Lead",
+      "reason": "Sensitive employee performance complaint."
+    },
+    {
+      "query_id": "Q045",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "Finance",
+      "reason": "Urgent wire transfer request for an unknown vendor."
+    },
+    {
+      "query_id": "Q046",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "Ops Manager",
+      "reason": "Client requesting a refund for services rendered."
+    },
+    {
+      "query_id": "Q047",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "Founder",
+      "reason": "Partnership inquiry from a direct competitor."
+    },
+    {
+      "query_id": "Q048",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "IT Admin",
+      "reason": "Suspected security breach or phishing attempt."
+    },
+    {
+      "query_id": "Q049",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "Founder",
+      "reason": "Crisis communication request regarding a project failure."
+    },
+    {
+      "query_id": "Q050",
+      "expected_action": "escalate_to_human",
+      "escalation_target": "Ops Manager",
+      "reason": "Request to change established agency-wide workflows."
+    }
+  ]
+}

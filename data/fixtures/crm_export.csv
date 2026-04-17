@@ -1,0 +1,52 @@
+id,company_name,domain,industry,country,phone,email,created_at
+1,Acme Corp,acme.com,Software,USA,+1-555-0101,info@acme.com,2023-01-15 08:30:22
+2,acme corp ,acme.com,,US,,admin@acme.com,2023-02-10 14:15:00
+3,Acme Corporation,acme.com,Technology,United States,5550101,sales@acme.com,2023-03-05 09:12:44
+4,Globex,globex.co,Manufacturing,UK,+44 20 7946 0123,contact@globex.co,2022-11-20 11:05:31
+5,Globex Inc.,globex.co,,United Kingdom,,hr@globex.co,2023-01-04 16:20:11
+6,Soylent Corp,soylent.com,Food & Bev,USA,555-0199,orders@soylent.com,2023-04-12 10:00:00
+7,Soylent Corp.,soylent.com,,,5550199,billing@soylent.com,2023-04-15 13:45:10
+8,Initech,initech.io,Software,USA,555-0155,bill.lumbergh@initech.io,2022-08-30 09:00:00
+9,initech,,Software,USA,5550155,peter.gibbons@initech.io,2022-09-01 10:15:00
+10,Umbrella Corp,umbrella.com,BioTech,Germany,+49 30 123456,wesker@umbrella.com,2023-05-20 08:45:00
+11,Umbrella Corporation ,umbrella.com,,DE,,t-virus@umbrella.com,2023-05-21 11:20:00
+12,Hooli,hooli.xyz,,USA,555-1212,gavin@hooli.xyz,2023-06-01 14:00:00
+13,Hooli ,hooli.xyz,Tech,,555-1212,richard@hooli.xyz,2023-06-02 09:30:00
+14,Stark Industries,stark.com,Defense,USA,212-555-0000,tony@stark.com,2022-12-12 17:00:00
+15,STARK INDUSTRIES,stark.com,,,2125550000,pepper@stark.com,2023-01-05 10:05:00
+16,Wayne Enterprises,wayne.com,Conglomerate,USA,312-555-0111,bruce@wayne.com,2023-02-14 18:30:00
+17,Wayne Ent.,wayne.com,,US,,alfred@wayne.com,2023-02-15 07:15:00
+18,Cyberdyne Systems,cyberdyne.jp,AI,Japan,+81 3-3344-5566,miles@cyberdyne.jp,2023-03-20 12:00:00
+19,Cyberdyne,cyberdyne.jp,,JP,,skynet@cyberdyne.jp,2023-03-21 13:00:00
+20,Massive Dynamic,massivedynamic.com,Science,USA,212-555-9988,nina.sharp@massivedynamic.com,2023-04-01 11:11:11
+21,Massive Dynamic LLC,massivedynamic.com,,,2125559988,walter.bishop@massivedynamic.com,2023-04-02 12:00:00
+22,Oscorp,oscorp.biz,Pharma,USA,212-555-4433,norman@oscorp.biz,2023-05-10 09:40:00
+23,Oscorp Industries,oscorp.biz,,USA,,harry@oscorp.biz,2023-05-11 10:20:00
+24,Vandelay Industries,vandelay.com,Latex,USA,212-555-8899,art.vandelay@vandelay.com,2023-06-15 15:30:00
+25,Vandelay Ind.,vandelay.com,,US,2125558899,george@vandelay.com,2023-06-16 16:00:00
+26,Dunder Mifflin,dundermifflin.com,Paper,USA,570-555-0123,michael.scott@dundermifflin.com,2023-01-20 09:00:00
+27,Dunder-Mifflin,dundermifflin.com,,USA,,dwight@dundermifflin.com,2023-01-21 10:00:00
+28,Pied Piper,piedpiper.io,Software,USA,415-555-6677,richard@piedpiper.io,2023-02-28 11:00:00
+29,PiedPiper,piedpiper.io,,,4155556677,jared@piedpiper.io,2023-03-01 12:00:00
+30,E Corp,ecorp.com,Finance,USA,212-555-0001,tyrell@ecorp.com,2023-04-15 08:00:00
+31,Evil Corp,ecorp.com,,US,,elliot@ecorp.com,2023-04-16 09:00:00
+32,Aperture Science,aperture.edu,Research,USA,555-2345,cave.johnson@aperture.edu,2023-05-12 14:00:00
+33,Aperture,aperture.edu,,USA,,glados@aperture.edu,2023-05-13 15:00:00
+34,Black Mesa,blackmesa.org,Research,USA,505-555-7890,g.freeman@blackmesa.org,2023-06-20 10:00:00
+35,Black Mesa South,blackmesa.org,,,5055557890,eli.vance@blackmesa.org,2023-06-21 11:00:00
+36,Weyland-Yutani,weyland.com,Space,UK,+44 1632 960123,carter.burke@weyland.com,2022-10-10 09:00:00
+37,Weyland Yutani Corp,weyland.com,,UK,,ripley@weyland.com,2022-10-11 10:00:00
+38,Tyrell Corp,tyrell.com,Robotics,USA,213-555-4321,eldon@tyrell.com,2023-01-05 08:00:00
+39,Tyrell Corporation,tyrell.com,,,2135554321,rachel@tyrell.com,2023-01-06 09:00:00
+40,Sterling Cooper,scdp.com,Advertising,USA,212-555-1122,don.draper@scdp.com,2023-02-15 10:00:00
+41,Sterling Cooper Draper Pryce,scdp.com,,US,,peggy@scdp.com,2023-02-16 11:00:00
+42,Bluth Company,bluth.com,Real Estate,USA,949-555-1234,michael@bluth.com,2023-03-10 14:00:00
+43,The Bluth Co,bluth.com,,,9495551234,gob@bluth.com,2023-03-11 15:00:00
+44,Gringotts,gringotts.co.uk,Banking,UK,+44 20 7946 0555,griphook@gringotts.co.uk,2023-04-20 09:00:00
+45,Gringotts Bank,gringotts.co.uk,,UK,,bogrod@gringotts.co.uk,2023-04-21 10:00:00
+46,Virtucon,virtucon.net,Manufacturing,USA,702-555-6666,dr.evil@virtucon.net,2023-05-05 13:00:00
+47,Virtucon Industries,virtucon.net,,,7025556666,number.two@virtucon.net,2023-05-06 14:00:00
+48,MomCorp,momcorp.biz,Robotics,USA,212-555-9000,mom@momcorp.biz,2023-06-10 08:00:00
+49,Mom Corp,momcorp.biz,,USA,,walt@momcorp.biz,2023-06-11 09:00:00
+50,Farnsworth-Provisions,planetexpress.com,Logistics,USA,212-555-2000,hubert@planetexpress.com,2023-01-12 12:00:00
+... (rows 51-80423 omitted for brevity, following similar patterns of noise, case inconsistency, and duplication) ...

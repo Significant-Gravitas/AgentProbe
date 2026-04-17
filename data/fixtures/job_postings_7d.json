@@ -1,0 +1,122 @@
+[
+  {
+    "id": "job-88291",
+    "company_domain": "fintech-flow.io",
+    "posted_at": "2023-10-24T09:15:00Z",
+    "title": "Head of Data Engineering",
+    "department": "Engineering",
+    "location": "New York, NY",
+    "employment_type": "Full-time",
+    "source": "Greenhouse",
+    "description_snippet": "Looking for a leader to scale our data infrastructure. Experience with real-time streaming and AI-driven predictive modeling is a must.",
+    "keywords": ["data infrastructure", "AI", "predictive modeling", "scaling"]
+  },
+  {
+    "id": "job-90122",
+    "company_domain": "health-nexus.com",
+    "posted_at": "2023-10-25T14:20:00Z",
+    "title": "VP of Revenue Operations",
+    "department": "Sales/Ops",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "source": "LinkedIn",
+    "description_snippet": "We need a RevOps veteran to optimize our GTM motion. You will be responsible for our entire tech stack including Salesforce and outbound automation tools.",
+    "keywords": ["RevOps", "GTM", "Salesforce", "automation"]
+  },
+  {
+    "id": "job-87734",
+    "company_domain": "cyber-shield.ai",
+    "posted_at": "2023-10-23T11:00:00Z",
+    "title": "Director of Growth Marketing",
+    "department": "Marketing",
+    "location": "San Francisco, CA",
+    "employment_type": "Full-time",
+    "source": "Greenhouse",
+    "description_snippet": "Focus on high-intent lead generation and account-based marketing (ABM) strategies. Must have experience with signal-based selling.",
+    "keywords": ["Growth", "ABM", "Lead Gen", "Signal-based"]
+  },
+  {
+    "id": "job-91001",
+    "company_domain": "cloud-optics.net",
+    "posted_at": "2023-10-26T16:45:00Z",
+    "title": "Senior Machine Learning Engineer",
+    "department": "R&D",
+    "location": "Seattle, WA",
+    "employment_type": "Full-time",
+    "source": "LinkedIn",
+    "description_snippet": "Building the next generation of automated observability tools. Experience with LLMs and vector databases preferred.",
+    "keywords": ["ML", "LLM", "Observability", "R&D"]
+  },
+  {
+    "id": "job-88552",
+    "company_domain": "logistics-prime.com",
+    "posted_at": "2023-10-24T08:30:00Z",
+    "title": "Chief Technology Officer",
+    "department": "Executive",
+    "location": "Chicago, IL",
+    "employment_type": "Full-time",
+    "source": "LinkedIn",
+    "description_snippet": "Seeking a visionary CTO to lead our digital transformation. We are moving from legacy systems to a modern, AI-first architecture.",
+    "keywords": ["CTO", "Digital Transformation", "AI-first", "Modernization"]
+  },
+  {
+    "id": "job-89210",
+    "company_domain": "retail-sync.co",
+    "posted_at": "2023-10-25T10:05:00Z",
+    "title": "Sales Development Representative Manager",
+    "department": "Sales",
+    "location": "Austin, TX",
+    "employment_type": "Full-time",
+    "source": "Greenhouse",
+    "description_snippet": "Manage a growing team of 15 SDRs. Focus on improving conversion rates through better prospecting data and outreach personalization.",
+    "keywords": ["SDR", "Prospecting", "Personalization", "Sales Ops"]
+  },
+  {
+    "id": "job-90333",
+    "company_domain": "bio-gen-labs.org",
+    "posted_at": "2023-10-26T09:00:00Z",
+    "title": "Data Scientist, Commercial Operations",
+    "department": "Operations",
+    "location": "Boston, MA",
+    "employment_type": "Full-time",
+    "source": "LinkedIn",
+    "description_snippet": "Apply statistical modeling to optimize our commercial outreach and identify high-value research partnerships.",
+    "keywords": ["Data Science", "Commercial Ops", "Optimization", "Partnerships"]
+  },
+  {
+    "id": "job-91444",
+    "company_domain": "secure-vault.io",
+    "posted_at": "2023-10-27T13:12:00Z",
+    "title": "Head of Product",
+    "department": "Product",
+    "location": "London, UK",
+    "employment_type": "Full-time",
+    "source": "Greenhouse",
+    "description_snippet": "Leading the roadmap for our enterprise security platform. Integration with third-party intelligence feeds is a key Q1 priority.",
+    "keywords": ["Product", "Roadmap", "Integrations", "Intelligence"]
+  },
+  {
+    "id": "job-92111",
+    "company_domain": "green-grid.energy",
+    "posted_at": "2023-10-28T15:30:00Z",
+    "title": "Strategy & Operations Lead",
+    "department": "General Management",
+    "location": "Denver, CO",
+    "employment_type": "Full-time",
+    "source": "LinkedIn",
+    "description_snippet": "Working directly with the CEO to scale internal processes and implement new operational software across the organization.",
+    "keywords": ["Strategy", "Ops", "Scaling", "Software Implementation"]
+  },
+  {
+    "id": "job-93005",
+    "company_domain": "velocity-saas.com",
+    "posted_at": "2023-10-29T10:00:00Z",
+    "title": "Demand Generation Manager",
+    "department": "Marketing",
+    "location": "Remote",
+    "employment_type": "Full-time",
+    "source": "Greenhouse",
+    "description_snippet": "Own the pipeline. We need someone who can utilize intent data to drive targeted campaigns into our enterprise accounts.",
+    "keywords": ["Demand Gen", "Pipeline", "Intent Data", "Enterprise"]
+  }
+]

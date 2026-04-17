@@ -1,0 +1,88 @@
+[
+  {
+    "id": "podcast-001",
+    "title": "Shipping as a Habit: The Linear Method",
+    "duration": "32:00",
+    "segments": [
+      {
+        "label": "Introduction",
+        "timestamp": "00:00",
+        "summary": "The fallacy of the infinite backlog. Why most teams feel like they are running in place."
+      },
+      {
+        "label": "The Cycle Framework",
+        "timestamp": "05:00",
+        "summary": "Defining cycles vs. sprints. How a fixed cadence creates momentum and reduces decision fatigue."
+      },
+      {
+        "label": "Scoping and Precision",
+        "timestamp": "12:00",
+        "summary": "The art of saying no. How to scope features so they actually ship within a cycle."
+      },
+      {
+        "label": "The Culture of Shipping",
+        "timestamp": "20:00",
+        "summary": "Building a team that values momentum over perfection. The psychological impact of 'Done'."
+      },
+      {
+        "label": "Closing/Q&A",
+        "timestamp": "28:00",
+        "summary": "Practical steps to transition your team to the Linear Method tomorrow."
+      }
+    ],
+    "tone_notes": "Direct, authoritative, zero fluff. Focus on the 'why' behind the 'how'. Respect the listener's time.",
+    "argument_preservation": [
+      {
+        "source_section": "The Backlog Problem",
+        "adaptation": "Intro segment focusing on the 'fallacy of the infinite backlog'."
+      },
+      {
+        "source_section": "Cycles vs Sprints",
+        "adaptation": "Deep dive in segment 2 regarding fixed cadence and momentum."
+      }
+    ]
+  },
+  {
+    "id": "podcast-002",
+    "title": "Product Management Without the Overhead",
+    "duration": "28:30",
+    "segments": [
+      {
+        "label": "The Process Debt",
+        "timestamp": "00:00",
+        "summary": "Why traditional PM tools make you slower, not faster. The cost of 'Management for Management's sake'."
+      },
+      {
+        "label": "Opinionated Software",
+        "timestamp": "04:30",
+        "summary": "Why Linear doesn't try to be everything to everyone. The power of a specific workflow."
+      },
+      {
+        "label": "Automating the Routine",
+        "timestamp": "10:15",
+        "summary": "Using tool defaults to eliminate status updates and manual tracking."
+      },
+      {
+        "label": "High-Performance Teams",
+        "timestamp": "18:45",
+        "summary": "Case studies of teams that doubled velocity by simplifying their issue tracking."
+      },
+      {
+        "label": "Conclusion",
+        "timestamp": "25:00",
+        "summary": "Final thoughts on intentionality in tool selection and workflow design."
+      }
+    ],
+    "tone_notes": "Minimalist, engineer-centric, opinionated. High signal-to-noise ratio.",
+    "argument_preservation": [
+      {
+        "source_section": "Workflows not Tools",
+        "adaptation": "The 'Opinionated Software' segment discussing why specific workflows beat generic flexibility."
+      },
+      {
+        "source_section": "The Shipping Cadence",
+        "adaptation": "High-performance team case studies highlighting velocity through simplicity."
+      }
+    ]
+  }
+]

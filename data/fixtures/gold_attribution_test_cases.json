@@ -1,0 +1,290 @@
+{
+  "test_suite_metadata": {
+    "product": "Gusto Pro Affiliate Program",
+    "version": "1.0.4",
+    "currency": "USD",
+    "attribution_window_days": 90,
+    "clawback_period_days": 30
+  },
+  "test_cases": [
+    {
+      "case_id": "TC-001",
+      "description": "Standard conversion: Single device, immediate sign-up",
+      "input": {
+        "utm_source": "affiliate_123",
+        "initial_touch": "2023-11-01T10:00:00Z",
+        "conversion_time": "2023-11-01T10:15:00Z",
+        "subscription_plan": "Plus",
+        "stripe_event": "checkout.session.completed"
+      },
+      "expected_output": {
+        "commission_amount": 100.00,
+        "status": "pending",
+        "attribution_type": "first_touch",
+        "metadata": {
+          "affiliate_id": "affiliate_123",
+          "clawback_eligible_until": "2023-12-01T10:15:00Z"
+        }
+      }
+    },
+    {
+      "case_id": "TC-002",
+      "description": "Cross-device: Click on Mobile (iOS), Conversion on Desktop (Chrome)",
+      "input": {
+        "events": [
+          {
+            "type": "click",
+            "device": "iPhone",
+            "ip": "192.168.1.45",
+            "utm_source": "affiliate_456",
+            "timestamp": "2023-11-02T09:00:00Z"
+          },
+          {
+            "type": "conversion",
+            "device": "MacBook",
+            "ip": "192.168.1.45",
+            "email": "owner@taxpros.com",
+            "timestamp": "2023-11-02T14:00:00Z"
+          }
+        ]
+      },
+      "expected_output": {
+        "attribution_match": "IP_Fingerprint",
+        "affiliate_id": "affiliate_456",
+        "commission_status": "approved"
+      }
+    },
+    {
+      "case_id": "TC-003",
+      "description": "Clawback: Refund issued within 15 days",
+      "input": {
+        "original_conversion": "2023-11-05",
+        "commission_paid": 100.00,
+        "refund_date": "2023-11-20",
+        "stripe_event": "charge.refunded"
+      },
+      "expected_output": {
+        "action": "clawback",
+        "balance_adjustment": -100.00,
+        "reason": "refund_within_30_days"
+      }
+    },
+    {
+      "case_id": "TC-004",
+      "description": "Multi-touch: Affiliate click followed by Direct Traffic",
+      "input": {
+        "touchpoints": [
+          { "source": "affiliate_789", "timestamp": "2023-11-01" },
+          { "source": "direct", "timestamp": "2023-11-05" }
+        ],
+        "conversion_date": "2023-11-05"
+      },
+      "expected_output": {
+        "attributed_to": "affiliate_789",
+        "logic": "last_paid_touch"
+      }
+    },
+    {
+      "case_id": "TC-005",
+      "description": "Multi-touch: Two different affiliates. Affiliate A (Nov 1), Affiliate B (Nov 3). Conversion Nov 4.",
+      "input": {
+        "touchpoints": [
+          { "source": "affiliate_A", "timestamp": "2023-11-01" },
+          { "source": "affiliate_B", "timestamp": "2023-11-03" }
+        ]
+      },
+      "expected_output": {
+        "attributed_to": "affiliate_B",
+        "logic": "last_click_wins"
+      }
+    },
+    {
+      "case_id": "TC-006",
+      "description": "Recurring Commission: Second month payment for Premium plan",
+      "input": {
+        "original_affiliate": "affiliate_101",
+        "event": "invoice.payment_succeeded",
+        "billing_cycle": 2,
+        "plan": "Premium"
+      },
+      "expected_output": {
+        "commission_amount": 100.00,
+        "action": "credit_account"
+      }
+    },
+    {
+      "case_id": "TC-007",
+      "description": "Cookie Expiration: Conversion after 91 days",
+      "input": {
+        "click_date": "2023-01-01",
+        "conversion_date": "2023-04-05"
+      },
+      "expected_output": {
+        "attributed_to": "none",
+        "reason": "cookie_expired"
+      }
+    },
+    {
+      "case_id": "TC-008",
+      "description": "Refund after 31 days (No Clawback)",
+      "input": {
+        "conversion_date": "2023-10-01",
+        "refund_date": "2023-11-02"
+      },
+      "expected_output": {
+        "action": "none",
+        "reason": "outside_clawback_window"
+      }
+    },
+    {
+      "case_id": "TC-009",
+      "description": "Cross-device: Email Link (Mobile) to App Store (Desktop)",
+      "input": {
+        "affiliate_link_id": "aff_99",
+        "user_id_mapped": "user_hash_8821",
+        "mobile_click_ts": "2023-11-10T12:00:00Z",
+        "desktop_reg_ts": "2023-11-10T12:05:00Z"
+      },
+      "expected_output": {
+        "attribution": "success",
+        "match_method": "deterministic_identity"
+      }
+    },
+    {
+      "case_id": "TC-010",
+      "description": "Plan Downgrade: Plus to Simple",
+      "input": {
+        "original_plan": "Plus",
+        "new_plan": "Simple",
+        "event": "customer.subscription.updated"
+      },
+      "expected_output": {
+        "commission_adjustment": "follow_product_rules",
+        "status": "eligible_for_standard_tier"
+      }
+    },
+    {
+      "case_id": "TC-011",
+      "description": "Stripe Metadata Verification",
+      "input": {
+        "stripe_customer_id": "cus_N721",
+        "affiliate_id": "aff_alpha"
+      },
+      "expected_output": {
+        "metadata_check": {
+          "affiliate_id": "aff_alpha",
+          "program_name": "Gusto_Pro_Affiliate"
+        }
+      }
+    },
+    {
+      "case_id": "TC-012",
+      "description": "Self-Referral Detection",
+      "input": {
+        "affiliate_email": "partner@firm.com",
+        "customer_email": "partner@firm.com"
+      },
+      "expected_output": {
+        "status": "rejected",
+        "reason": "self_referral_prohibited"
+      }
+    },
+    {
+      "case_id": "TC-013",
+      "description": "Partial Refund Handling",
+      "input": {
+        "total_paid": 150.00,
+        "refund_amount": 50.00,
+        "commission_base": 100.00
+      },
+      "expected_output": {
+        "commission_status": "unchanged",
+        "logic": "flat_fee_per_referral_not_percentage"
+      }
+    },
+    {
+      "case_id": "TC-014",
+      "description": "Attribution: Organic Search wins over expired Affiliate",
+      "input": {
+        "affiliate_click": "2023-05-01",
+        "organic_click": "2023-11-01",
+        "conversion": "2023-11-02"
+      },
+      "expected_output": {
+        "attributed_to": "organic"
+      }
+    },
+    {
+      "case_id": "TC-015",
+      "description": "Cross-device: Shared IP with different User Agents",
+      "input": {
+        "click": { "ip": "24.55.12.1", "ua": "Mozilla/5.0 (iPhone)" },
+        "conv": { "ip": "24.55.12.1", "ua": "Mozilla/5.0 (Windows)" }
+      },
+      "expected_output": {
+        "attribution": "success",
+        "confidence_score": 0.85
+      }
+    },
+    {
+      "case_id": "TC-016",
+      "description": "Referral Link Bypass Attempt (Direct URL to Checkout)",
+      "input": {
+        "url": "gusto.com/checkout",
+        "referrer": "none",
+        "cookies": {}
+      },
+      "expected_output": {
+        "commission": 0.00
+      }
+    },
+    {
+      "case_id": "TC-017",
+      "description": "High-Volume Spikes (Fraud Check)",
+      "input": {
+        "affiliate_id": "aff_bot",
+        "conversions_per_minute": 45
+      },
+      "expected_output": {
+        "status": "flagged",
+        "action": "manual_review"
+      }
+    },
+    {
+      "case_id": "TC-018",
+      "description": "UTM parameter precedence over Cookie",
+      "input": {
+        "existing_cookie": "aff_old",
+        "current_url_utm": "aff_new"
+      },
+      "expected_output": {
+        "attributed_to": "aff_new",
+        "cookie_updated": true
+      }
+    },
+    {
+      "case_id": "TC-019",
+      "description": "Trial Period Conversion",
+      "input": {
+        "trial_start": "2023-11-01",
+        "trial_end": "2023-11-30",
+        "first_payment": "2023-12-01"
+      },
+      "expected_output": {
+        "commission_trigger_date": "2023-12-01"
+      }
+    },
+    {
+      "case_id": "TC-020",
+      "description": "Currency Conversion (Non-USD Referral)",
+      "input": {
+        "payment_currency": "CAD",
+        "payment_amount": 200.00
+      },
+      "expected_output": {
+        "commission_amount_usd": 100.00,
+        "logic": "fixed_usd_reward"
+      }
+    }
+  ]
+}

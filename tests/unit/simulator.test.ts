@@ -131,7 +131,14 @@ describe("simulator", () => {
       status: "continue",
       message: "Yes, order 1234. Can you fix this?",
     });
-    expect(client.calls[0]?.input.toLowerCase()).not.toContain("checkpoint");
+    const input = client.calls[0]?.input;
+    const inputText =
+      typeof input === "string"
+        ? input
+        : (input
+            ?.flatMap((message) => message.content.map((part) => part.text))
+            .join("\n\n") ?? "");
+    expect(inputText.toLowerCase()).not.toContain("checkpoint");
   });
 
   test("supports stop statuses", async () => {

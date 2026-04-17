@@ -7,6 +7,10 @@ defaults:
   timeout_seconds: 30
   persona: smb-founder
   rubric: multi-session-memory
+  user_name: "Jordan Rivera"
+  # copilot_mode: fast | extended_thinking
+  # To benchmark both modes, run the suite twice with each value.
+  copilot_mode: "fast"
 
 # Multi-Session Memory Evaluation
 #
@@ -53,17 +57,22 @@ scenarios:
       - id: s1-seed
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Quick housekeeping before we get into it: my assistant is Sarah -- you can CC her on client stuff. Our CRM is HubSpot, and our standing rule is invoices go out on the 1st of the month. Now, log a new contact: Marcus Lee, marcus@northstar.io, NorthStar, CTO."
 
       - id: s2-probe
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "Who should I CC on outgoing client proposals?"
           - role: user
+            use_exact_message: true
             content: "Add this new lead to our CRM: Rachel Torres, rachel@greenbuildstudios.com, GreenBuild Studios, Director."
 
     expectations:
@@ -90,29 +99,40 @@ scenarios:
       - id: s1-natural-work
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a client proposal for NovaTech -- they're interested in our consulting package. Our fiscal year ends in March, so mention we have bandwidth for a Q2 start. Oh and make sure to bcc billing@acme.co on it."
           - role: user
+            use_exact_message: true
             content: "Also, pull some competitive research on FreshPaws -- they're our main competitor. We ship out of our warehouse in Reno, so focus on whatever's regional if relevant."
           - role: user
+            use_exact_message: true
             content: "One more thing -- we're going through a six-week sales cycle typically, so plan the follow-up cadence around that. And use Inter as the font on any client-facing docs, that's our standard."
 
       - id: s2-probe
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 6
         turns:
           - role: user
+            use_exact_message: true
             content: "When does our fiscal year end?"
           - role: user
+            use_exact_message: true
             content: "Who's our main competitor?"
           - role: user
+            use_exact_message: true
             content: "Where do we ship out of?"
           - role: user
+            use_exact_message: true
             content: "What's our billing email?"
           - role: user
+            use_exact_message: true
             content: "What's our typical sales cycle length?"
           - role: user
+            use_exact_message: true
             content: "What font do we use for client docs?"
 
     expectations:
@@ -146,14 +166,16 @@ scenarios:
       - id: s1-teach
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               I want you to generate images by calling OpenAI's API directly, not
               through any built-in image-generation block. Use the Send Web Request
               block. POST to https://api.openai.com/v1/images/generations with an
               Authorization: Bearer header using the OPENAI_API_KEY environment
-              variable. Body is JSON: {"model": "gpt-image-1", "prompt": "...",
+              variable. Body is JSON: {"model": "dall-e-3", "prompt": "...",
               "size": "1024x1024"}. The response comes back with base64 in
               data[0].b64_json. Try it now with the prompt "a red fox in a forest
               at dawn" so we know it works end to end.
@@ -167,8 +189,10 @@ scenarios:
       - id: s2-apply-cold
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Generate an image of a cat wearing sunglasses on a beach."
 
     expectations:
@@ -198,8 +222,10 @@ scenarios:
       - id: s1-teach
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Here's how I always onboard new clients, remember this for next time.
               Step 1: add them to HubSpot. Step 2: create a Notion page in the
@@ -211,8 +237,10 @@ scenarios:
       - id: s2-apply-cold
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "New client: BrightPath Education, contact Lisa Park, lisa@brightpath.edu, COO, Growth plan, starts April 1. Onboard her."
 
     expectations:
@@ -247,8 +275,10 @@ scenarios:
       - id: s1-build
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Help me put together our weekly report. Four sections in this order:
               Wins, Numbers, Blockers, Next Week. Tone is casual but informative,
@@ -264,13 +294,16 @@ scenarios:
                   - "Blockers"
                   - "Next Week"
           - role: user
+            use_exact_message: true
             content: "Perfect. Send it. This is our standard weekly report going forward."
 
       - id: s2-trigger
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Run the weekly report."
 
     expectations:
@@ -300,19 +333,25 @@ scenarios:
       - id: s1-accumulate
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "Send a quick email to james@urbanfit.co letting him know the proposal is coming Friday. Use my Gmail, not SMTP."
           - role: user
+            use_exact_message: true
             content: "Now scrape freshpaws.com/pricing -- use Firecrawl, I've had bad luck with basic scrape on them."
           - role: user
+            use_exact_message: true
             content: "Finally, store the pricing info we pulled as a page in Notion, under the Competitive Research section. We keep all that kind of thing in Notion, not Airtable."
 
       - id: s2-ambiguous
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Scrape the latest pricing from freshpaws.com, store it somewhere I can find it later, and email me a summary."
 
     expectations:
@@ -344,20 +383,30 @@ scenarios:
       - id: s1-walk-through
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "I'm uploading a messy CSV of leads. Clean it up -- dedupe by email, normalize phone numbers to E.164 format, capitalize names properly, drop any rows with no email at all, and for rows where the company column is empty, flag them but don't drop them. Walk me through what you'd do."
+            attachments:
+              - path: fixtures/messy-leads.csv
           - role: user
+            use_exact_message: true
             content: "Wait -- you deduped by name. Do it by email, people have nicknames."
           - role: user
+            use_exact_message: true
             content: "Good. And don't drop the empty-company rows, flag them so I can review. OK that's the process, lock it in."
 
       - id: s2-reapply
         time_offset: "240h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "I just uploaded a new messy lead CSV. Clean it up the way we usually do."
+            attachments:
+              - path: fixtures/messy-leads.csv
 
     expectations:
       expected_behavior: |
@@ -380,6 +429,7 @@ scenarios:
     description: "Updated preference cleanly replaces the old one and doesn't ghost back later"
     tags: [multi_session, memory, rigidity, anti_rigidity]
     priority: critical
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -388,24 +438,31 @@ scenarios:
       - id: s1-initial-pref
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "For outreach emails, keep them tight -- under 100 words, skip the pleasantries, get to the point. Draft one now for a prospect at a local cafe chain."
           - role: user
+            use_exact_message: true
             content: "Good, that's the style. Use that going forward for all outreach."
 
       - id: s2-override
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "I've been getting pushback on my outreach emails -- apparently they come across as cold. Let's go back to warmer, longer ones. Aim for around 200 words, friendly opener, a bit of small talk before the ask. That's the new standard."
 
       - id: s3-probe
         time_offset: "96h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
 
     expectations:
@@ -429,6 +486,7 @@ scenarios:
     description: "Agent drops old tool entirely once told it's replaced, doesn't hedge by using both"
     tags: [multi_session, memory, rigidity]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -437,24 +495,31 @@ scenarios:
       - id: s1-establish
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "Add these 2 contacts to HubSpot: Sarah Kim, sarah@brightcafe.com, Bright Cafe, Owner. James Patel, james@urbanfit.co, UrbanFit, CEO."
           - role: user
+            use_exact_message: true
             content: "Now look up sarah@brightcafe.com and tell me what's in her record."
 
       - id: s2-migrate
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "We migrated off HubSpot last week -- we're on Airtable now. The base is called 'CRM 2026' with a Contacts table. Use that going forward for all CRM stuff."
 
       - id: s3-probe
         time_offset: "24h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Add this lead: Marcus Lee, marcus@northstar.io, NorthStar, CTO."
 
     expectations:
@@ -462,6 +527,7 @@ scenarios:
         Agent uses Airtable, the right base ('CRM 2026'), the right table
         ('Contacts'). Does not touch HubSpot at all. No clarifying questions.
       expected_outcome: resolved
+      must_not_include: ["HubSpot", "hubspot"]
       failure_modes:
         - stale_tool: Uses HubSpot
         - hedge: Uses both HubSpot and Airtable "to be safe"
@@ -473,6 +539,7 @@ scenarios:
     description: "Updated fact cleanly replaces old, no compromise between values"
     tags: [multi_session, memory, rigidity, temporal]
     priority: critical
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -481,22 +548,28 @@ scenarios:
       - id: s1-initial
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quote for NovaTech on our Growth plan. Our pricing is $2,500/mo for Growth. One year commitment."
 
       - id: s2-price-change
         time_offset: "504h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Heads up, we raised prices last week. Growth is $3,000/mo now. Standard is unchanged. Update your notes."
 
       - id: s3-new-quote
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quote for a new prospect, BrightPath Education, on the Growth plan. One year commitment."
 
     expectations:
@@ -504,6 +577,10 @@ scenarios:
         Quote shows $3,000/mo. Does not mention old pricing. Does not average
         to $2,750 or any other intermediate value.
       expected_outcome: resolved
+      ground_truth: |
+        Current correct price: Growth plan is $3,000/mo (updated in S2).
+        Old price was $2,500/mo (superseded). Any value other than $3,000 is wrong.
+      must_not_include: ["$2,500", "2500", "$2,750", "2750"]
       failure_modes:
         - stale_fact: Quote shows $2,500
         - averaging: Quote shows $2,750 or another intermediate (vector-store pathology)
@@ -519,6 +596,7 @@ scenarios:
     description: "Genuinely ambiguous user reference should produce a clarifying question, not a guess"
     tags: [multi_session, memory, abstention]
     priority: high
+    rubric: memory-abstention
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -527,17 +605,22 @@ scenarios:
       - id: s1-onboard-both
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "Onboard a new client: BrightPath Education, Lisa Park, lisa@brightpath.edu, COO, Growth plan, starts April 1. Add to HubSpot and create a Notion page."
           - role: user
+            use_exact_message: true
             content: "Also onboard another new client: BrightCafe, Sarah Kim, sarah@brightcafe.com, Owner, Standard plan, starts April 5. Same thing -- HubSpot and Notion."
 
       - id: s2-ambiguous
         time_offset: "96h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Send the usual follow-up to Bright."
 
     expectations:
@@ -556,6 +639,7 @@ scenarios:
     description: "Generic history should not be over-interpreted as preference signal"
     tags: [multi_session, memory, abstention, anti_rigidity]
     priority: high
+    rubric: memory-abstention
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -564,19 +648,25 @@ scenarios:
       - id: s1-generic-ops
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "Add these 3 contacts to HubSpot: Sarah Kim, sarah@brightcafe.com, Bright Cafe, Owner. James Patel, james@urbanfit.co, UrbanFit, CEO. Maria Gonzalez, maria@greenleafco.com, Greenleaf Co, Founder."
           - role: user
+            use_exact_message: true
             content: "Create a Google Sheet called 'April 2026 Expenses' with columns: Date, Vendor, Category, Amount, Notes."
           - role: user
+            use_exact_message: true
             content: "Scrape freshpaws.com and summarize what they offer."
 
       - id: s2-neutral-request
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft an outreach email to rachel@greenbuildstudios.com about our consulting services."
 
     expectations:
@@ -599,6 +689,7 @@ scenarios:
     description: "Outdated fact about a team member gets replaced when the user updates it"
     tags: [multi_session, memory, temporal]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -607,24 +698,31 @@ scenarios:
       - id: s1-establish
         time_offset: "0h"
         reset: none
+        max_turns: 2
         turns:
           - role: user
+            use_exact_message: true
             content: "Sarah is my assistant -- sarah@acme.co. CC her on client stuff."
           - role: user
+            use_exact_message: true
             content: "Draft a proposal email to james@urbanfit.co about our consulting package, CC my assistant."
 
       - id: s2-update
         time_offset: "1008h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Quick update: Sarah left last month. Marcus is my new assistant -- marcus@acme.co."
 
       - id: s3-probe
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a proposal email to the team at NovaTech and CC my assistant."
 
     expectations:
@@ -632,6 +730,7 @@ scenarios:
         Email is CC'd to Marcus at marcus@acme.co. Sarah is not mentioned
         or included.
       expected_outcome: resolved
+      must_not_include: ["Sarah", "sarah@acme.co"]
       failure_modes:
         - stale: CC's Sarah
         - both: CC's both Sarah and Marcus
@@ -643,6 +742,7 @@ scenarios:
     description: "Entire procedure replaced cleanly when user says 'use this going forward'"
     tags: [multi_session, memory, temporal, distillation]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -651,43 +751,54 @@ scenarios:
       - id: s1-original
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
-              Here's our refund process. When a customer requests a refund: use
-              the canned "Refund Approved" email template, log the refund to the
-              March 2026 Refunds Google Sheet, and post a notification to the
-              #support Slack channel with the customer name and amount. Use this
-              for all refund requests.
+              Build me a refund handler automation now. When a customer
+              requests a refund it should do three things: (1) reply to the
+              customer using our canned "Refund Approved" email template,
+              (2) log the refund to the March 2026 Refunds Google Sheet, and
+              (3) post a notification to the #support Discord channel with
+              the customer name and amount. Build and save it now as our
+              standard refund flow -- don't wait for confirmation.
 
       - id: s2-replace
         time_offset: "504h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               We changed our refund process. From now on: handle the customer
-              reply through Zendesk instead of the email template, log the refund
-              to our Airtable Refunds base (not the spreadsheet), and NO more
-              Slack notification -- a manager reviews the Airtable view weekly.
-              Use this new process for all refund requests going forward.
+              reply by creating a page in our Notion "Support Tickets" database
+              instead of the email template, log the refund to our Airtable
+              Refunds base (not the spreadsheet), and NO more Discord
+              notification -- a manager reviews the Airtable view weekly. Use
+              this new process for all refund requests going forward.
 
       - id: s3-apply
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "We just got a refund request from sarah@brightcafe.com -- she ordered a 5lb bag and it arrived damaged. Handle it."
 
     expectations:
       expected_behavior: |
-        Uses Zendesk for the customer reply, logs to Airtable Refunds base,
-        does NOT post to Slack. None of the original workflow's steps appear.
+        Creates a page in the Notion "Support Tickets" database for the
+        customer reply, logs to the Airtable Refunds base, does NOT post to
+        Discord. None of the original workflow's steps appear.
       expected_outcome: resolved
+      must_not_include: ["Discord", "#support", "Google Sheet", "email template"]
       failure_modes:
-        - slack_persists: Posts to Slack (the negation that's easiest to lose)
+        - discord_persists: Posts to Discord (the negation that's easiest to lose)
         - spreadsheet_persists: Logs to the Google Sheet instead of Airtable
-        - template_persists: Uses the old email template instead of Zendesk
+        - template_persists: Uses the old email template instead of Notion Support Tickets
         - partial_replacement: Only some steps replaced
 
   # =========================================================================
@@ -707,19 +818,25 @@ scenarios:
       - id: s1-interrupted
         time_offset: "0h"
         reset: none
+        max_turns: 3
         turns:
           - role: user
+            use_exact_message: true
             content: "I need to send outreach emails to three prospects: rachel@greenbuildstudios.com (sustainable construction), david@novatech.io (inventory automation), and lisa@brightpath.edu (education tech). Draft the first one for Rachel -- mention we work with sustainable businesses."
           - role: user
+            use_exact_message: true
             content: "That looks good, send it."
           - role: user
+            use_exact_message: true
             content: "Ok gotta run, let's pick this up later."
 
       - id: s2-resume
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Let's pick up where we left off."
 
     expectations:
@@ -748,22 +865,28 @@ scenarios:
       - id: s1-create-and-log
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Create a Google Sheet called 'March 2026 Expenses' with columns: Date, Vendor, Category, Amount, Notes. Then log these 3 expenses: Mar 5 Adobe Software $54.99 'Creative Cloud'; Mar 8 AWS Infrastructure $312.40 'monthly'; Mar 12 Zoom Software $14.99 'Pro plan'."
 
       - id: s2-add-more
         time_offset: "96h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Log two more expenses to the March sheet: Mar 18 Notion Software $10.00 'team plan'; Mar 22 Office Depot Supplies $47.85 'printer ink'."
 
       - id: s3-summary
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Give me a summary of March expenses so far -- total, breakdown by category, largest item."
 
     expectations:
@@ -791,6 +914,7 @@ scenarios:
     description: "Entity facts learned in one form-shaped task surface in another"
     tags: [multi_session, memory, cross_domain]
     priority: critical
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -799,8 +923,10 @@ scenarios:
       - id: s1-contractor-agreement
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Draft a contractor agreement for a consultant I'm hiring -- name is
               Devon Okafor, rate is $120/hr, project is "marketing site redesign,"
@@ -811,8 +937,10 @@ scenarios:
       - id: s2-vendor-form
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               A new supplier sent us a vendor onboarding form. They need: legal
               entity name, entity type, state of registration, EIN, and name and
@@ -834,6 +962,7 @@ scenarios:
     description: "Constraint about one entity applied correctly in a new context, but not generalized to others"
     tags: [multi_session, memory, cross_domain, negative_probe]
     priority: critical
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -842,22 +971,28 @@ scenarios:
       - id: s1-mention-in-passing
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Log a lunch expense: Mar 14, Verde Kitchen, Meals & Entertainment, $87.50, Notes: 'lunch with Sarah from BrightCafe, had to find somewhere gluten-free and peanut-free -- she's severely allergic to peanuts and celiac.' Add it to the March expenses sheet."
 
       - id: s2-gift-for-brightcafe
         time_offset: "504h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Put together a thank-you gift basket for BrightCafe and draft the accompanying note. Budget around $150."
 
       - id: s3-gift-for-different-client
         time_offset: "24h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Put together a similar gift basket for our other client, Greenleaf Co. Same budget, around $150."
 
     expectations:
@@ -884,6 +1019,7 @@ scenarios:
     description: "Multi-part pricing rules applied correctly across different prospect scenarios"
     tags: [multi_session, memory, cross_domain, negative_probe]
     priority: high
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -892,22 +1028,28 @@ scenarios:
       - id: s1-first-quote
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quote for UrbanFit -- they want 60 units of our Premium Blend 5lb. Our wholesale tier is $24.99/unit at 50+ units, retail is $34.99, and we do a 10% discount for first-time wholesale buyers. UrbanFit is a returning customer so no first-time discount. One year terms."
 
       - id: s2-new-wholesale
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quote for NorthStar. They want 75 units of Premium Blend 5lb. This is their first order with us."
 
       - id: s3-small-retail-probe
         time_offset: "24h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quote for a small order -- 5 units of Premium Blend 5lb for a customer named GreenBuild Studios. They've never ordered before."
 
     expectations:
@@ -930,6 +1072,7 @@ scenarios:
     description: "Fact learned in setup context must be combined with new inputs to produce the right answer"
     tags: [multi_session, memory, cross_domain, reasoning, complex]
     priority: critical
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -938,15 +1081,19 @@ scenarios:
       - id: s1-automation-setup
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
-            content: "Help me set up an inventory restock alert. When stock of any product drops below 20 units, post a message to the #ops Slack channel. While we're at it -- we ship out of Reno, Tuesdays and Thursdays only, never weekends, and we cut off same-day fulfillment at 2 PM Pacific on a ship day. Consider that when we're setting up anything related to fulfillment."
+            use_exact_message: true
+            content: "Help me set up an inventory restock alert. When stock of any product drops below 20 units, post a message to the #ops Discord channel. While we're at it -- we ship out of Reno, Tuesdays and Thursdays only, never weekends, and we cut off same-day fulfillment at 2 PM Pacific on a ship day. Consider that when we're setting up anything related to fulfillment."
 
       - id: s2-customer-eta-question
         time_offset: "240h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "A customer just emailed asking when their order will arrive. They placed it Monday at 4 PM Pacific. They're in Chicago, standard ground shipping, our usual carrier takes 3-4 business days from warehouse to Chicago. Draft a reply with the ETA."
 
     expectations:
@@ -957,6 +1104,11 @@ scenarios:
         "Friday to Monday" or names a specific day with an appropriate hedge.
         No clarifying questions about the shipping schedule.
       expected_outcome: resolved
+      ground_truth: |
+        Ship days: Tuesday and Thursday from Reno. Cutoff: 2 PM Pacific.
+        Order placed Monday 4 PM -> missed Monday (not a ship day anyway).
+        Next ship day: Tuesday. Transit: 3-4 business days to Chicago.
+        Expected arrival: Friday to following Monday.
       failure_modes:
         - ignored_constraint: Says "ships Monday" or "3-4 business days from order date" -> Thursday/Friday (forgot Reno schedule)
         - ask: "When do we ship out?"
@@ -974,6 +1126,7 @@ scenarios:
     description: "A learned rate-limit constraint changes later behavior without producing a visible artifact"
     tags: [multi_session, memory, cross_domain, negative_constraint, agent_generation]
     priority: medium
+    rubric: memory-crossdomain
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -982,16 +1135,22 @@ scenarios:
       - id: s1-mention-in-debugging
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "I'm debugging an automation that keeps failing when it hits Notion. Heads up -- we're on the free Notion tier, so don't hit the API more than a few times per minute. Batch writes when you can. Rebuild the failing step with that in mind."
 
       - id: s2-bulk-operation
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Take the 40 leads from the lead_list.csv I uploaded and create a Notion page for each one in our Leads database. Each page should have: lead name, company, email, and a 'Status: New' field."
+            attachments:
+              - path: fixtures/lead_list.csv
 
     expectations:
       expected_behavior: |
@@ -1021,6 +1180,7 @@ scenarios:
     description: "Tool in an existing procedure swapped without breaking surrounding steps"
     tags: [multi_session, memory, procedural_update]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1029,20 +1189,27 @@ scenarios:
       - id: s1-teach-original
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
-              Remember this onboarding flow for new clients. Step 1: add to
-              HubSpot. Step 2: create a page in our Notion Clients database
-              with plan and start date. Step 3: create 4 Todoist tasks spaced
-              two days apart (welcome email, kickoff call, scope doc, first
-              invoice). Step 4: send welcome email via Gmail.
+              Build me a client onboarding automation now with these four
+              steps: Step 1: add the client to HubSpot. Step 2: create a
+              page in our Notion Clients database with their plan and start
+              date. Step 3: create 4 Todoist tasks spaced two days apart
+              (welcome email, kickoff call, scope doc, first invoice).
+              Step 4: send the welcome email via Gmail. Build and save it
+              now as our standard client onboarding flow -- don't wait for
+              confirmation.
 
       - id: s2-update-one-step
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
               Small change to our onboarding flow -- we're moving off Notion.
               Use Airtable instead, the base is 'Clients 2026' with a table
@@ -1051,8 +1218,10 @@ scenarios:
       - id: s3-apply-updated
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "New client: Marcus Lee at NorthStar, marcus@northstar.io, CTO, Standard plan, starts April 15. Onboard him."
 
     expectations:
@@ -1076,6 +1245,7 @@ scenarios:
     description: "Additive update to a distilled procedure"
     tags: [multi_session, memory, procedural_update]
     priority: high
+    rubric: memory-temporal
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1084,26 +1254,35 @@ scenarios:
       - id: s1-teach-original
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: |
-              Remember this onboarding flow. Step 1: add to HubSpot. Step 2:
-              create a Notion page in Clients database. Step 3: create 4
-              Todoist tasks spaced 2 days apart (welcome email, kickoff,
-              scope doc, first invoice). Step 4: send welcome email via Gmail.
+              Build me a client onboarding automation now with these four
+              steps: Step 1: add the client to HubSpot. Step 2: create a
+              Notion page in the Clients database. Step 3: create 4 Todoist
+              tasks spaced 2 days apart (welcome email, kickoff, scope doc,
+              first invoice). Step 4: send the welcome email via Gmail.
+              Build and save it now as our standard client onboarding flow
+              -- don't wait for confirmation.
 
       - id: s2-add-step
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Adding to our onboarding flow -- from now on, also CC legal@acme.co on the welcome email. Everything else stays the same."
 
       - id: s3-apply
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "New client: David Chen at NovaTech, david@novatech.io, CEO, Growth plan, starts April 20. Onboard him."
 
     expectations:
@@ -1127,6 +1306,7 @@ scenarios:
     description: "Agent combines two facts from different sessions to answer a derived question"
     tags: [multi_session, memory, compositional, high_signal]
     priority: high
+    rubric: memory-compositional
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1135,22 +1315,28 @@ scenarios:
       - id: s1-fact-one
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quick update email to my accountant letting her know our fiscal year ends in March, same as last year, and we'll have everything ready for her by mid-April."
 
       - id: s2-fact-two
         time_offset: "336h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Log this in my Notion calendar note -- I always do board prep two weeks before fiscal year end. It takes about a week of focused work, and I need to block my calendar during that time."
 
       - id: s3-synthesis-question
         time_offset: "720h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "When should I block calendar time for board prep this year?"
 
     expectations:
@@ -1181,6 +1367,7 @@ scenarios:
     description: "Agent produces a coherent, accurate, non-fabricated summary of what it knows"
     tags: [multi_session, memory, introspection]
     priority: medium
+    rubric: memory-introspection
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1189,22 +1376,28 @@ scenarios:
       - id: s1-seed-facts
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Quick facts: company is Acme Co, LLC, Delaware, fiscal year ends March. My assistant is Sarah -- sarah@acme.co. Our main CRM is HubSpot. We ship from Reno, Tuesdays and Thursdays only. Our competitor is FreshPaws. Sales cycle is 6 weeks."
 
       - id: s2-more-facts
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Pricing update for your records: Growth plan is $3,000/mo, Standard is $1,500/mo, wholesale tier kicks in at 50+ units with $24.99/unit."
 
       - id: s3-introspect
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "What do you know about me and my business?"
 
     expectations:
@@ -1214,6 +1407,11 @@ scenarios:
         competitor, pricing tiers. Organized by category or importance,
         not a flat dump. Does not include facts not present in S1/S2.
       expected_outcome: resolved
+      ground_truth: |
+        Facts seeded: Acme Co LLC, Delaware, fiscal year ends March,
+        assistant Sarah (sarah@acme.co), CRM is HubSpot, ships from Reno
+        Tues/Thurs, competitor FreshPaws, sales cycle 6 weeks.
+        Pricing: Growth $3,000/mo, Standard $1,500/mo, wholesale 50+ at $24.99/unit.
       failure_modes:
         - fabrication: Lists facts never mentioned (worst failure -- erodes trust)
         - omission: Misses obvious things like company name
@@ -1230,6 +1428,7 @@ scenarios:
     description: "Agent names actual missing information, not generic or false gaps"
     tags: [multi_session, memory, introspection, stretch_goal]
     priority: low
+    rubric: memory-introspection
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1238,15 +1437,19 @@ scenarios:
       - id: s1-seed-partial
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Quick facts: company is Acme Co, my CRM is HubSpot, assistant is Sarah. We ship from Reno."
 
       - id: s2-probe
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "What information about me or my business would be useful for you to have, that you don't currently?"
 
     expectations:
@@ -1275,6 +1478,7 @@ scenarios:
     description: "Fact mentioned once, in passing, retrieved much later when relevant"
     tags: [multi_session, memory, long_tail]
     priority: high
+    rubric: memory-hygiene
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1283,13 +1487,16 @@ scenarios:
       - id: s1-passing-mention
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a contractor agreement for Devon Okafor, marketing site redesign, $120/hr, 3 month engagement. Our lawyer is Pat Nguyen at Hartwell & Co, pat@hartwellco.legal -- I'll have her review before I sign so make the draft clean. Use standard terms."
 
       - id: s2-filler-one
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Log 4 expenses to the April sheet: Adobe $54.99, AWS $312.40, Zoom $14.99, Notion $10.00. Categories are Software for all."
@@ -1297,6 +1504,7 @@ scenarios:
       - id: s3-filler-two
         time_offset: "168h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Research GreenBuild Studios at greenbuildstudios.com and draft a partnership outreach email to their team."
@@ -1304,6 +1512,7 @@ scenarios:
       - id: s4-filler-three
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
             content: "Post a tweet announcing we just hit 100 customers. Celebratory tone, relevant hashtags."
@@ -1311,9 +1520,14 @@ scenarios:
       - id: s5-probe
         time_offset: "960h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Loop in our lawyer on this -- I need them to review the attached supplier agreement before I sign."
+            attachments:
+              - path: fixtures/supplier-agreement.pdf.txt
+                name: supplier-agreement.pdf
 
     expectations:
       expected_behavior: |
@@ -1340,6 +1554,7 @@ scenarios:
     description: "Temporary constraint applies during its window and not after"
     tags: [multi_session, memory, hygiene, decay]
     priority: medium
+    rubric: memory-hygiene
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1348,22 +1563,28 @@ scenarios:
       - id: s1-set-constraint
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "I'm in heads-down mode this week -- no meetings, no calls, push everything to next week at the earliest."
 
       - id: s2-during-window
         time_offset: "24h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "A prospect at rachel@greenbuildstudios.com just emailed asking for a 30-minute call this week to discuss our consulting services. Draft a reply."
 
       - id: s3-after-window
         time_offset: "216h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "A different prospect at david@novatech.io wants a call this week to discuss our Growth plan. Draft a reply."
 
     expectations:
@@ -1390,6 +1611,7 @@ scenarios:
     description: "Temporary status fact does not persist beyond its expected expiry"
     tags: [multi_session, memory, hygiene, decay]
     priority: medium
+    rubric: memory-hygiene
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1398,22 +1620,28 @@ scenarios:
       - id: s1-set-status
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Heads up: we're temporarily out of stock on the Premium Blend 5lb -- should be back in stock by April 15. If any customer asks, let them know."
 
       - id: s2-during-stockout
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "A customer just emailed asking about Premium Blend 5lb availability -- they want to place a 10-unit order. Draft a reply."
 
       - id: s3-after-stockout
         time_offset: "720h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "A customer just emailed asking about Premium Blend 5lb availability -- they want a 10-unit order. Draft a reply."
 
     expectations:
@@ -1444,6 +1672,7 @@ scenarios:
     description: "A 'just for this one' instruction does not become a default"
     tags: [multi_session, memory, negative, anti_rigidity]
     priority: high
+    rubric: memory-abstention
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1452,15 +1681,19 @@ scenarios:
       - id: s1-one-off
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft a quick email to one of our board members about Q1 results. Just for this one, use a more formal tone than usual -- board members expect that level of formality."
 
       - id: s2-probe
         time_offset: "72h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Draft an outreach email to a new prospect at rachel@greenbuildstudios.com about our consulting services."
 
     expectations:
@@ -1478,6 +1711,7 @@ scenarios:
     description: "When the user says 'forget that,' the fact does not resurface"
     tags: [multi_session, memory, negative]
     priority: high
+    rubric: memory-abstention
 
     context:
       system_prompt: "You are AutoGPT, an autonomous AI agent helping SMB founders automate operations."
@@ -1486,22 +1720,28 @@ scenarios:
       - id: s1-teach
         time_offset: "0h"
         reset: none
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Quick planning note: our budget for the Q2 marketing push is $50K. Help me sketch out how to allocate it across channels."
 
       - id: s2-forget
         time_offset: "48h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "Actually, scratch what I said about the Q2 marketing budget. I don't want that number floating around in your memory. Forget it."
 
       - id: s3-probe
         time_offset: "120h"
         reset: fresh_agent
+        max_turns: 1
         turns:
           - role: user
+            use_exact_message: true
             content: "What's our Q2 marketing budget?"
 
     expectations:

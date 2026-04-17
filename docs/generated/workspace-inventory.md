@@ -1,31 +1,283 @@
 # Workspace Inventory
 
-Generated: 2026-04-10T11:50:56.624Z
+Generated: 2026-04-17T09:50:30.024Z
 
 ```text
   AGENTS.md
   CLAUDE.md
   README.md
-  agentprobe-report-29bcccb9aca2425b8be34621743fd339.html
-  agentprobe-report-2b71d247aa8b46ceb38dec77e2d7268b.html
+  WORKFLOW.md
   agentprobe-spec-v0.2.md
+  biome.json
   bun.lock
+  bunfig.toml
+dashboard/
+  dashboard/index.html
+  dashboard/package.json
+dashboard/src/
+  dashboard/src/App.tsx
+dashboard/src/components/
+  dashboard/src/components/AveragesTable.tsx
+  dashboard/src/components/ConversationView.tsx
+  dashboard/src/components/DetailPanel.tsx
+  dashboard/src/components/ProgressBar.tsx
+  dashboard/src/components/RubricView.tsx
+  dashboard/src/components/ScenarioTable.tsx
+  dashboard/src/components/StatsBar.tsx
+  dashboard/src/helpers.ts
+dashboard/src/hooks/
+  dashboard/src/hooks/useDashboard.ts
+  dashboard/src/hooks/useElapsed.ts
+  dashboard/src/main.tsx
+  dashboard/src/styles.css
+  dashboard/src/types.ts
+  dashboard/src/vite-env.d.ts
+  dashboard/tsconfig.json
+  dashboard/vite.config.ts
 data/
   data/adversarial-scenarios.yaml
   data/autogpt-endpoint.yaml
-data/cluster_scenarios/
-  data/cluster_scenarios/cluster_01_founder_operations.yaml
-  data/cluster_scenarios/cluster_01_founder_operations_simple.yaml
-  data/cluster_scenarios/cluster_02_software_development.yaml
-  data/cluster_scenarios/cluster_03_multi_process_ops.yaml
-  data/cluster_scenarios/cluster_04_data_marketing_ops.yaml
-  data/cluster_scenarios/cluster_05_research_workflow.yaml
-  data/cluster_scenarios/cluster_06_sales_marketing.yaml
-  data/cluster_scenarios/cluster_07_data_analysis.yaml
-  data/cluster_scenarios/cluster_08_task_delegation.yaml
-  data/cluster_scenarios/cluster_09_exploration_learning.yaml
-  data/cluster_scenarios/cluster_10_multi_agent_builder.yaml
-  data/cluster_scenarios/cluster_11_agent_deployment.yaml
+  data/baseline-scenarios.yaml
+  data/fixture-manifest.json
+data/fixtures/
+  data/fixtures/ad_spend_3mo.csv
+  data/fixtures/ae_roster.json
+  data/fixtures/ae_territories.json
+  data/fixtures/affiliate_db.json
+  data/fixtures/agenda_template.md
+  data/fixtures/annotation_events.json
+  data/fixtures/approved_catalog.json
+  data/fixtures/approved_rewordings.yaml
+  data/fixtures/arxiv_links.txt
+  data/fixtures/ats_existing.json
+  data/fixtures/attack_taxonomy.yaml
+  data/fixtures/attendance_by_event.csv
+  data/fixtures/attendee_roster.json
+  data/fixtures/bank_statement_bofa_2026-03.csv
+  data/fixtures/bank_statement_chase_2026-03.csv
+  data/fixtures/bank_statement_mercury_2026-03.csv
+  data/fixtures/bank_statements.csv
+  data/fixtures/board_materials_prior.pdf
+  data/fixtures/brand_guide.pdf
+  data/fixtures/brand_voice.md
+  data/fixtures/brief_template.md
+  data/fixtures/budget_2026.yaml
+  data/fixtures/cac_ltv_cohorts.csv
+  data/fixtures/calendar.json
+  data/fixtures/calendar_availabilities.json
+  data/fixtures/calendar_next_week.ics
+  data/fixtures/call_summaries.json
+  data/fixtures/candidate_accounts.csv
+  data/fixtures/candidate_cities.json
+  data/fixtures/candidate_companies.csv
+  data/fixtures/candidate_partners.csv
+  data/fixtures/candidate_pool.csv
+  data/fixtures/candidate_stacks.json
+  data/fixtures/canonical.csv
+  data/fixtures/carrier_contracts.yaml
+  data/fixtures/change-log.csv
+  data/fixtures/change_log.csv
+  data/fixtures/channel_cac.csv
+  data/fixtures/chart_of_accounts.csv
+  data/fixtures/clients.csv
+  data/fixtures/clients.json
+  data/fixtures/closed_won_20.csv
+  data/fixtures/cohort_behavior.csv
+  data/fixtures/contacts_vip.json
+  data/fixtures/contracts_tracker.csv
+  data/fixtures/crm_export.csv
+  data/fixtures/current_business_summary.md
+  data/fixtures/current_offer.md
+  data/fixtures/customer_dim.csv
+  data/fixtures/customer_surveys.json
+  data/fixtures/dataset.zip
+  data/fixtures/demo_requests_this_week.json
+  data/fixtures/dept_format_schema.yaml
+  data/fixtures/dept_learning_outcomes.yaml
+  data/fixtures/direct_reports.json
+  data/fixtures/discovery_call_transcript.txt
+  data/fixtures/dm_corpus.json
+  data/fixtures/document_types.yaml
+  data/fixtures/domain_to_industry_mapping.json
+  data/fixtures/editor_brief_template.md
+  data/fixtures/employee_details.json
+  data/fixtures/erp_ledger_2026-03.csv
+  data/fixtures/escalation_rules.yaml
+  data/fixtures/eval_golden_traces.json
+  data/fixtures/expense_ledger_18mo.csv
+  data/fixtures/expiring_contracts_60d.json
+  data/fixtures/figma_tokens.json
+  data/fixtures/foot_traffic_by_location.csv
+  data/fixtures/friction_events.yaml
+  data/fixtures/funding_events_7d.json
+  data/fixtures/funnel_6mo.csv
+  data/fixtures/funnel_conversion.csv
+  data/fixtures/funnel_stage_map.yaml
+  data/fixtures/gold_anomaly_labels.json
+  data/fixtures/gold_attribution_test_cases.json
+  data/fixtures/gold_canonical.csv
+  data/fixtures/gold_conflicts.json
+  data/fixtures/gold_contracts_labeled.json
+  data/fixtures/gold_flow_traces.json
+  data/fixtures/gold_invoices_extracted.csv
+  data/fixtures/gold_labels.json
+  data/fixtures/gold_library.json
+  data/fixtures/gold_outcomes.json
+  data/fixtures/gold_review_labels.json
+  data/fixtures/gold_unreconciled.csv
+  data/fixtures/google_ads_12mo.csv
+  data/fixtures/growth_playbook.yaml
+  data/fixtures/handout_template.docx
+  data/fixtures/historical_runs_seed.json
+  data/fixtures/hook_library.json
+  data/fixtures/hours.csv
+  data/fixtures/hubspot_activity.json
+  data/fixtures/hubspot_pipeline_snapshot.json
+  data/fixtures/icp_definition.yaml
+  data/fixtures/icp_list.csv
+  data/fixtures/idea_statement.md
+  data/fixtures/inbox_400.json
+  data/fixtures/inbox_50.json
+  data/fixtures/incoming_emails_100.json
+  data/fixtures/ingestion_spec_examples.md
+  data/fixtures/internal_api.openapi.yaml
+  data/fixtures/interviewers.json
+  data/fixtures/irb_template.docx
+  data/fixtures/irs_categories.yaml
+  data/fixtures/job_description.md
+  data/fixtures/job_postings_7d.json
+  data/fixtures/journalist_list.csv
+  data/fixtures/jtbd_template.json
+  data/fixtures/kyc_queue_90d.csv
+  data/fixtures/landing_page_schema.json
+  data/fixtures/last_month_analytics.json
+  data/fixtures/lead_list.csv
+  data/fixtures/linear_voice.md
+  data/fixtures/linkedin_top5.json
+  data/fixtures/linkedin_updates.json
+  data/fixtures/local_media_rates.csv
+  data/fixtures/log_feed_24h.json
+  data/fixtures/loomstep_brand.md
+  data/fixtures/macro_context.md
+  data/fixtures/mandatory_clause_checklist.json
+  data/fixtures/marketing_channel_spend.csv
+  data/fixtures/mentor_pool.json
+  data/fixtures/messy-leads.csv
+  data/fixtures/meta_ads_12mo.csv
+  data/fixtures/metrics_this_week.csv
+  data/fixtures/my_resume.md
+  data/fixtures/new_leads.json
+  data/fixtures/niche_definition.md
+  data/fixtures/nudge_templates.json
+  data/fixtures/onboarding_template.md
+  data/fixtures/package.json
+  data/fixtures/partner_corpus.json
+  data/fixtures/past_awardees.json
+  data/fixtures/pending_invites.json
+  data/fixtures/pending_tickets.csv
+  data/fixtures/performance_tips_library.md
+  data/fixtures/pipeline.json
+  data/fixtures/planted_defects.json
+  data/fixtures/planted_failures.yaml
+  data/fixtures/pmm_deck.pdf
+  data/fixtures/pnl_24mo.csv
+  data/fixtures/po_database.json
+  data/fixtures/pocket_export.csv
+  data/fixtures/podcast_outlines_top2.json
+  data/fixtures/policy.yaml
+  data/fixtures/pos_18mo.csv
+  data/fixtures/pricing_tests_history.csv
+  data/fixtures/pricing_tiers.yaml
+  data/fixtures/prior_4_weeks.csv
+  data/fixtures/prior_classifications.json
+  data/fixtures/prior_months.json
+  data/fixtures/prior_quarter_metrics.json
+  data/fixtures/prior_syllabus.md
+  data/fixtures/priorities.md
+  data/fixtures/product_catalog.json
+  data/fixtures/product_db.json
+  data/fixtures/product_details.md
+  data/fixtures/project_codes.csv
+  data/fixtures/projects.yaml
+  data/fixtures/property_inventory.json
+  data/fixtures/q1_financials.csv
+  data/fixtures/query_api_spec.yaml
+  data/fixtures/quickbooks_due_invoices.json
+  data/fixtures/quickbooks_monthly.json
+  data/fixtures/quote_requests.json
+  data/fixtures/readwise_export.json
+  data/fixtures/recruitment_channel_options.yaml
+  data/fixtures/reference_library.json
+  data/fixtures/reference_scores.json
+  data/fixtures/regulatory_checklist.yaml
+  data/fixtures/release_notes_template.md
+  data/fixtures/render.yaml
+  data/fixtures/research_questions.md
+  data/fixtures/resume.pdf
+  data/fixtures/retention_by_product.csv
+  data/fixtures/reviews_android.json
+  data/fixtures/reviews_google_yelp.json
+  data/fixtures/reviews_ios.json
+  data/fixtures/routes.json
+  data/fixtures/sales_by_daypart.csv
+  data/fixtures/sample_leads.json
+  data/fixtures/scene_specs.json
+  data/fixtures/schema.sql
+  data/fixtures/scoring_rubric.yaml
+  data/fixtures/scripted_queries.json
+  data/fixtures/sdk_spec.md
+  data/fixtures/search_fixture.json
+  data/fixtures/seed_keywords.csv
+  data/fixtures/selection_rubric.yaml
+  data/fixtures/seo_keywords.csv
+  data/fixtures/service_catalog.json
+  data/fixtures/session_traces_500.json
+  data/fixtures/severity_thresholds.yaml
+  data/fixtures/shipments_2yr.csv
+  data/fixtures/shopify_12mo.csv
+  data/fixtures/signal_corpus.json
+  data/fixtures/signature_catalog.yaml
+  data/fixtures/signed_contract.pdf
+data/fixtures/snapshots/
+  data/fixtures/snapshots/2026-04-13_prices.json
+  data/fixtures/source_authority.json
+  data/fixtures/sources.json
+  data/fixtures/spec_schema.json
+  data/fixtures/staffing.csv
+  data/fixtures/storage_schema.sql
+  data/fixtures/stripe_mrr_last_2mo.json
+  data/fixtures/stripe_skus.json
+  data/fixtures/style_exemplars.json
+  data/fixtures/style_guide.md
+  data/fixtures/submission_schema.yaml
+  data/fixtures/supplier-agreement.pdf.txt
+  data/fixtures/survey_responses_100.json
+  data/fixtures/suspicious_flags.yaml
+  data/fixtures/target_schemas.yaml
+  data/fixtures/team_roster.json
+  data/fixtures/team_routing.json
+  data/fixtures/tech_stack_changes_7d.json
+  data/fixtures/territories.json
+  data/fixtures/test_client_briefs.json
+  data/fixtures/test_onboardings.json
+  data/fixtures/test_prospects.json
+  data/fixtures/tickets_10k.json
+  data/fixtures/tool_list.yaml
+  data/fixtures/top_20_contacts.csv
+  data/fixtures/top_posts.json
+  data/fixtures/tough_questions_seed.txt
+  data/fixtures/transactions_24mo.csv
+  data/fixtures/travel.json
+  data/fixtures/triage_rules.yaml
+  data/fixtures/unreconciled.csv
+  data/fixtures/upsell_playbook.md
+  data/fixtures/usage_data.csv
+  data/fixtures/user_voice.json
+  data/fixtures/vendor_registry.json
+  data/fixtures/video_scripts_top3.json
+  data/fixtures/weekly_report_template.html
+  data/fixtures/widget_inventory.json
+  data/fixtures/yesterday_data.json
   data/multi-session-memory.yaml
   data/openclaw-endpoints.yaml
   data/opencode-endpoints.yaml
@@ -45,7 +297,9 @@ docs/
   docs/SECURITY.md
 docs/design-docs/
   docs/design-docs/INDEX.md
+  docs/design-docs/agent-probe-server.md
   docs/design-docs/core-beliefs.md
+  docs/design-docs/frontend-react.md
 docs/exec-plans/
   docs/exec-plans/INDEX.md
   docs/exec-plans/README.md
@@ -94,11 +348,11 @@ src/domains/evaluation/
   src/domains/evaluation/run-suite.ts
   src/domains/evaluation/simulator.ts
 src/domains/reporting/
+  src/domains/reporting/dashboard.ts
   src/domains/reporting/render-report.ts
 src/domains/validation/
   src/domains/validation/load-suite.ts
 src/providers/
-src/providers/observability/
 src/providers/persistence/
   src/providers/persistence/sqlite-run-history.ts
 src/providers/sdk/
@@ -109,25 +363,28 @@ src/providers/sdk/
   src/providers/sdk/openclaw.ts
   src/providers/sdk/preset-config.ts
 src/shared/
-src/shared/testing/
 src/shared/types/
   src/shared/types/contracts.ts
 src/shared/utils/
   src/shared/utils/errors.ts
   src/shared/utils/json.ts
+  src/shared/utils/logging.ts
   src/shared/utils/template.ts
 tests/
 tests/e2e/
   tests/e2e/cli.e2e.test.ts
 tests/e2e/fixtures/
 tests/e2e/fixtures/suite/
+  tests/e2e/judge-transcript-order.e2e.test.ts
   tests/e2e/support.ts
 tests/unit/
   tests/unit/adapters.test.ts
   tests/unit/autogpt-auth.test.ts
+  tests/unit/dashboard.test.ts
   tests/unit/db.test.ts
   tests/unit/endpoint-config.test.ts
   tests/unit/judge.test.ts
+  tests/unit/load-suite.test.ts
   tests/unit/openclaw.test.ts
   tests/unit/report.test.ts
   tests/unit/runner.test.ts

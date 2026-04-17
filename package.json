@@ -2,6 +2,9 @@
   "name": "agentprobe",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "dashboard"
+  ],
   "scripts": {
     "agentprobe": "bun run ./src/cli/main.ts",
     "docs:index": "bun scripts/generate-index-docs.ts",
@@ -12,8 +15,11 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "test": "bun test --timeout 30000",
+    "test:coverage": "bun test --timeout 30000 --coverage",
     "test:e2e": "bun test --timeout 30000 tests/e2e",
-    "typecheck": "bunx tsc --noEmit",
+    "typecheck": "bunx tsc --noEmit && bun run --cwd dashboard typecheck",
+    "dashboard:dev": "bun run --cwd dashboard dev",
+    "dashboard:build": "bun run --cwd dashboard build",
     "validate:setup": "./scripts/validate-setup.sh"
   },
   "dependencies": {

@@ -1,0 +1,96 @@
+version: 1.2
+last_updated: 2023-10-27
+global_settings:
+  strict_mode: true
+  fallback_team: general_support
+  default_priority: P3
+
+policies:
+  password_reset:
+    auto_approve_conditions:
+      - condition: "sender_email_domain == customer_org_domain"
+      - condition: "mfa_status == 'verified'"
+    routing:
+      on_success: null
+      on_failure: security_team
+    required_fields:
+      - user_id
+      - organization_id
+      - reset_reason
+
+  data_export_request:
+    auto_approve_conditions:
+      - condition: "total_rows <= 1000000"
+      - condition: "data_sensitivity != 'PII'"
+    routing:
+      on_success: automated_export_service
+      on_failure: dpo_compliance_team
+    special_logic:
+      if_rows_gt_1M: "Requires DPO manual sign-off"
+    required_fields:
+      - dataset_id
+      - export_format
+      - row_count_estimate
+
+  bug_report:
+    auto_approve_conditions: []
+    routing:
+      on_success: engineering_triage
+      on_failure: engineering_triage
+    priority_mapping:
+      critical: P0
+      high: P1
+      medium: P2
+      low: P3
+    required_fields:
+      - product_area
+      - steps_to_reproduce
+      - observed_behavior
+      - expected_behavior
+
+  billing_inquiry:
+    auto_approve_conditions:
+      - condition: "inquiry_type == 'invoice_copy'"
+      - condition: "account_status == 'active'"
+    routing:
+      on_success: billing_automation
+      on_failure: finance_team
+    required_fields:
+      - invoice_number
+      - billing_cycle
+
+  integration_help:
+    auto_approve_conditions: []
+    routing:
+      on_success: solutions_architecture
+      on_failure: solutions_architecture
+    required_fields:
+      - integration_partner
+      - api_endpoint
+      - error_code
+
+validation_rules:
+  email_format: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+  max_attachment_size_mb: 25
+  allowed_file_extensions:
+    - .pdf
+    - .docx
+    - .json
+    - .csv
+
+team_definitions:
+  security_team:
+    alias: security-ops@lumen-analytics.com
+    escalation_threshold: immediate
+  engineering_triage:
+    alias: eng-support@lumen-analytics.com
+    escalation_threshold: 4h
+  dpo_compliance_team:
+    alias: dpo@lumen-analytics.com
+    escalation_threshold: 24h
+  finance_team:
+    alias: accounts-receivable@lumen-analytics.com
+    escalation_threshold: 48h
+  solutions_architecture:
+    alias: sa-team@lumen-analytics.com
+    escalation_threshold: 12h

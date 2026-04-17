@@ -1,0 +1,258 @@
+[
+  {
+    "message_id": "msg-001",
+    "from": "sarah.chen@cloudscale-tech.com",
+    "subject": "URGENT: API Authentication failing for North America region",
+    "body": "Hey, we've been seeing 503 errors on the /v2/auth endpoint for the last 20 minutes. My dev team is blocked. Can we get an ETA on a fix? This is affecting our production environment.",
+    "received_at": "2023-10-24T08:02:15Z"
+  },
+  {
+    "message_id": "msg-002",
+    "from": "billing@aws.amazon.com",
+    "subject": "Your AWS Invoice for September 2023 is available",
+    "body": "Your invoice for the billing period September 1 - September 30 is now available in the Billing and Cost Management console. Total amount due: $14,282.44.",
+    "received_at": "2023-10-24T08:05:00Z"
+  },
+  {
+    "message_id": "msg-003",
+    "from": "marcus@velocity-ventures.io",
+    "subject": "Follow up: Series B timing?",
+    "body": "Great seeing you at the mixer last week. Wanted to check in on when you're planning to open the next round. We'd love to lead the conversation if you're ready.",
+    "received_at": "2023-10-24T08:12:30Z"
+  },
+  {
+    "message_id": "msg-004",
+    "from": "newsletter@saasweekly.com",
+    "subject": "Top 10 Growth Hacks for Q4",
+    "body": "In this week's issue: Why PLG is dead, and how to leverage AI-driven outbound for 10x pipeline growth.",
+    "received_at": "2023-10-24T08:15:22Z"
+  },
+  {
+    "message_id": "msg-005",
+    "from": "david.wu@fintech-solutions.co",
+    "subject": "Security Questionnaire - Fintech Solutions",
+    "body": "Hi, we are in the final stages of vendor review. Could you please have your DPO fill out the attached security questionnaire by EOD Thursday?",
+    "received_at": "2023-10-24T08:20:11Z"
+  },
+  {
+    "message_id": "msg-006",
+    "from": "jessica.m@growth-ops.com",
+    "subject": "Quick question about your scaling strategy",
+    "body": "Hi there, I saw your recent post on LinkedIn about scaling. I help founders like you automate their lead gen. Do you have 15 mins tomorrow?",
+    "received_at": "2023-10-24T08:22:45Z"
+  },
+  {
+    "message_id": "msg-007",
+    "from": "mike.peterson@customer-success.com",
+    "subject": "Account Review: BlueChip Corp",
+    "body": "BlueChip's usage dropped 40% this month. I think they might be looking at competitors. Can we discuss a retention strategy for their renewal in December?",
+    "received_at": "2023-10-24T08:30:10Z"
+  },
+  {
+    "message_id": "msg-008",
+    "from": "accounts@slack.com",
+    "subject": "Your receipt for Team Plan",
+    "body": "Thank you for your payment of $840.00. Your receipt is attached below.",
+    "received_at": "2023-10-24T08:35:00Z"
+  },
+  {
+    "message_id": "msg-009",
+    "from": "alex.reed@internal-dev.io",
+    "subject": "Internal: Update on DB Migration",
+    "body": "The migration to the new cluster is 80% complete. We hit a small snag with the legacy schema but should be done by noon.",
+    "received_at": "2023-10-24T08:40:15Z"
+  },
+  {
+    "message_id": "msg-010",
+    "from": "noreply@github.com",
+    "subject": "[GitHub] Security Alert: Vulnerability found in npm package",
+    "body": "A known vulnerability was found in one of your dependencies. Please review and merge the PR.",
+    "received_at": "2023-10-24T08:45:22Z"
+  },
+  {
+    "message_id": "msg-011",
+    "from": "tom.h@enterprise-data.com",
+    "subject": "Re: Demo Request - Enterprise Data",
+    "body": "Thanks for the demo yesterday. We've discussed internally and want to move forward with a 3-month POC. What are the next steps for contracting?",
+    "received_at": "2023-10-24T08:50:11Z"
+  },
+  {
+    "message_id": "msg-012",
+    "from": "promotions@delta.com",
+    "subject": "Earn double miles on your next flight to SF",
+    "body": "Book your travel by Friday to take advantage of this exclusive offer.",
+    "received_at": "2023-10-24T08:55:00Z"
+  },
+  {
+    "message_id": "msg-013",
+    "from": "linda.g@global-logistics.com",
+    "subject": "Issue with dashboard loading",
+    "body": "The analytics dashboard is showing a spinner for over 2 minutes. I've cleared my cache but no luck. Is there a system outage?",
+    "received_at": "2023-10-24T09:00:15Z"
+  },
+  {
+    "message_id": "msg-014",
+    "from": "kevin@cofounder-notes.io",
+    "subject": "Hiring: Product Designer candidate",
+    "body": "I just interviewed Chloe. Her portfolio is incredible. We need to move fast. Can you do a 30-min culture fit call this afternoon?",
+    "received_at": "2023-10-24T09:05:30Z"
+  },
+  {
+    "message_id": "msg-015",
+    "from": "sales@hubspot.com",
+    "subject": "Optimizing your CRM workflows",
+    "body": "Are you getting the most out of your CRM? Our new AI features can save you 10 hours a week.",
+    "received_at": "2023-10-24T09:10:00Z"
+  },
+  {
+    "message_id": "msg-016",
+    "from": "support@stripe.com",
+    "subject": "Action Required: Verify your business details",
+    "body": "To comply with new regulations, please upload a copy of your business license to the dashboard.",
+    "received_at": "2023-10-24T09:12:45Z"
+  },
+  {
+    "message_id": "msg-017",
+    "from": "robert.v@it-consulting.biz",
+    "subject": "Increase your engineering velocity",
+    "body": "I have a team of 5 senior React devs ready to start immediately. No recruitment fees.",
+    "received_at": "2023-10-24T09:15:20Z"
+  },
+  {
+    "message_id": "msg-018",
+    "from": "jenny.l@retail-giant.com",
+    "subject": "Custom feature request: SSO/SAML",
+    "body": "Our IT department requires SAML for all vendors. Is this on your roadmap for this quarter? If not, we may have to pause our rollout.",
+    "received_at": "2023-10-24T09:18:11Z"
+  },
+  {
+    "message_id": "msg-019",
+    "from": "hr@saas-startup.io",
+    "subject": "Internal: Employee handbook updates",
+    "body": "Please review the proposed changes to the PTO policy before the all-hands meeting tomorrow.",
+    "received_at": "2023-10-24T09:20:00Z"
+  },
+  {
+    "message_id": "msg-020",
+    "from": "marketing@techcrunch.com",
+    "subject": "Early bird tickets for Disrupt",
+    "body": "Don't miss out on the biggest startup event of the year. Prices increase at midnight.",
+    "received_at": "2023-10-24T09:22:15Z"
+  },
+  {
+    "message_id": "msg-021",
+    "from": "sam.altman@openai-fakes.com",
+    "subject": "Investment Opportunity",
+    "body": "I'm launching a new fund and want you to be part of the initial LP group.",
+    "received_at": "2023-10-24T09:25:00Z"
+  },
+  {
+    "message_id": "msg-022",
+    "from": "chris.p@banking-app.io",
+    "subject": "Bug report: Duplicate transactions in export",
+    "body": "When I export my monthly report to CSV, every transaction appears twice. It's making reconciliation impossible.",
+    "received_at": "2023-10-24T09:28:40Z"
+  },
+  {
+    "message_id": "msg-023",
+    "from": "office-manager@coworking-space.com",
+    "subject": "Invoice for October Rent",
+    "body": "Your invoice for the private office is due. Please pay by the 30th to avoid late fees.",
+    "received_at": "2023-10-24T09:30:15Z"
+  },
+  {
+    "message_id": "msg-024",
+    "from": "ryan.k@prospect-leads.com",
+    "subject": "Following up on our call",
+    "body": "Hi, you mentioned last week that you were looking for a better way to track churn. I'd love to show you our new dashboard.",
+    "received_at": "2023-10-24T09:32:10Z"
+  },
+  {
+    "message_id": "msg-025",
+    "from": "emily.s@internal-ops.io",
+    "subject": "Internal: Q4 Budget Draft",
+    "body": "I've attached the draft budget for Q4. We need to finalize the marketing spend by Thursday morning.",
+    "received_at": "2023-10-24T09:35:55Z"
+  },
+  {
+    "message_id": "msg-026",
+    "from": "support@google.com",
+    "subject": "Google Workspace: Storage limit approaching",
+    "body": "Your organization has used 90% of its available storage. Upgrade now to avoid service interruption.",
+    "received_at": "2023-10-24T09:38:20Z"
+  },
+  {
+    "message_id": "msg-027",
+    "from": "pete.d@heavy-industry.com",
+    "subject": "Question about API rate limits",
+    "body": "We are planning a massive data sync this weekend. Can we temporarily lift our rate limits for 48 hours?",
+    "received_at": "2023-10-24T09:40:11Z"
+  },
+  {
+    "message_id": "msg-028",
+    "from": "no-reply@medium.com",
+    "subject": "Stories for you: How to build a unicorn in 2024",
+    "body": "Based on your interests, we thought you might like these articles.",
+    "received_at": "2023-10-24T09:42:00Z"
+  },
+  {
+    "message_id": "msg-029",
+    "from": "legal@saas-startup.io",
+    "subject": "Internal: NDA for potential partner",
+    "body": "The NDA for the partnership with DataFlow is ready for your signature in DocuSign.",
+    "received_at": "2023-10-24T09:45:15Z"
+  },
+  {
+    "message_id": "msg-030",
+    "from": "brian.t@midmarket-saas.com",
+    "subject": "Pricing for 500+ seats?",
+    "body": "We're looking to roll your tool out to our entire sales org. What's the best price you can give us for a multi-year contract?",
+    "received_at": "2023-10-24T09:48:30Z"
+  },
+  {
+    "message_id": "msg-031",
+    "from": "alert@uptime-robot.com",
+    "subject": "Monitor DOWN: Landing Page",
+    "body": "Your monitor 'Landing Page' is currently DOWN (Connection Timeout).",
+    "received_at": "2023-10-24T09:50:05Z"
+  },
+  {
+    "message_id": "msg-032",
+    "from": "newsletter@firstround.com",
+    "subject": "The Review: 10 ways to improve 1-on-1s",
+    "body": "Managing people is hard. Here is a guide on how to make it easier.",
+    "received_at": "2023-10-24T09:52:45Z"
+  },
+  {
+    "message_id": "msg-033",
+    "from": "amy.j@health-tech.co",
+    "subject": "Login issues - Urgent",
+    "body": "None of our users can log in this morning. We are getting a 'Database Connection Error'. Please help!",
+    "received_at": "2023-10-24T09:55:12Z"
+  },
+  {
+    "message_id": "msg-034",
+    "from": "jason@internal-sales.io",
+    "subject": "Internal: Weekly Sales Pipeline Update",
+    "body": "We are currently at 85% of our monthly quota with 6 days to go. Several big deals are in the 'Commit' stage.",
+    "received_at": "2023-10-24T09:58:00Z"
+  },
+  {
+    "message_id": "msg-035",
+    "from": "billing@heroku.com",
+    "subject": "Payment Failed",
+    "body": "We were unable to process your payment for the current billing cycle. Please update your credit card information.",
+    "received_at": "2023-10-24T10:00:22Z"
+  },
+  {
+    "message_id": "msg-036",
+    "from": "steve.m@big-bank.com",
+    "subject": "Re: Partnership sync",
+    "body": "Thanks for the intro. I've looped in our innovation team to discuss how we can integrate your API into our mobile app.",
+    "received_at": "2023-10-24T10:02:45Z"
+  },
+  {
+    "message_id": "msg-037",
+    "from": "marketing@appsumo.com",
+    "subject": "Last Chance: Lifetime deal on SEO tools",
+    "body": "Get 90% off the best SEO tools on the market. Offer expires in

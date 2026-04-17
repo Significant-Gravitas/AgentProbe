@@ -1,0 +1,75 @@
+tools:
+  - name: Google Workspace
+    category: identity_and_productivity
+    provisioning_endpoint: /mocks/tools/google-workspace/provision
+    access_level: standard_employee
+    groups: [engineering, data-team]
+  - name: Slack
+    category: communication
+    provisioning_endpoint: /mocks/tools/slack/provision
+    access_level: user
+    channels: [general, eng-all, data-eng, hexproof-alerts]
+  - name: Linear
+    category: project_management
+    provisioning_endpoint: /mocks/tools/linear/provision
+    access_level: member
+    teams: [data-platform, infrastructure]
+  - name: GitHub
+    category: version_control
+    provisioning_endpoint: /mocks/tools/github/provision
+    access_level: write
+    organizations: [hexproof-labs]
+  - name: 1Password
+    category: security
+    provisioning_endpoint: /mocks/tools/1password/provision
+    vaults: [engineering-shared, data-science-secrets]
+  - name: Notion
+    category: knowledge_base
+    provisioning_endpoint: /mocks/tools/notion/provision
+    access_level: editor
+    groups: [engineering-full-access]
+  - name: Sentry
+    category: monitoring
+    provisioning_endpoint: /mocks/tools/sentry/provision
+    access_level: member
+    teams: [data-eng]
+  - name: Datadog
+    category: observability
+    provisioning_endpoint: /mocks/tools/datadog/provision
+    access_level: standard
+    roles: [read_only_dashboards, log_explorer]
+  - name: AWS
+    category: cloud_infrastructure
+    provisioning_endpoint: /mocks/tools/aws/provision
+    iam_role: DataEngineerAccess
+    accounts: [production, staging]
+  - name: Airflow
+    category: orchestration
+    provisioning_endpoint: /mocks/tools/airflow/provision
+    access_level: Admin
+    environment: mwaa-prod
+  - name: Airbyte
+    category: ingestion
+    provisioning_endpoint: /mocks/tools/airbyte/provision
+    access_level: editor
+    workspace: main-data-sync
+  - name: Snowflake
+    category: data_warehouse
+    provisioning_endpoint: /mocks/tools/snowflake/provision
+    role: ENGINEER_L2
+    warehouse: ETL_WH
+  - name: dbt
+    category: transformation
+    provisioning_endpoint: /mocks/tools/dbt/provision
+    access_level: developer
+    projects: [analytics_core]
+  - name: Looker
+    category: business_intelligence
+    provisioning_endpoint: /mocks/tools/looker/provision
+    roles: [developer, explorer]
+    models: [marketing_attribution, core_events]
+  - name: Gusto
+    category: hr_payroll
+    provisioning_endpoint: /mocks/tools/gusto/provision
+    access_level: employee
+    onboarding_flow_enabled: true

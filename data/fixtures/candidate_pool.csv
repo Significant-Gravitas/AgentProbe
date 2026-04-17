@@ -1,0 +1,62 @@
+company_id,company_name,domain,industry,employee_count,hq_location,tech_stack,last_funding_round,funding_total_usd,hiring_data_roles,last_engagement_date
+C-0001,Zentrix Labs,zentrix.io,B2B SaaS,245,San Francisco,Snowflake;Looker;Fivetran;dbt,Series B,45000000,3,2024-03-12
+C-0002,Vortex Analytics,vortex.ai,Data Platforms,112,Austin,BigQuery;Tableau;Airbyte,Series A,12000000,1,2024-01-05
+C-0003,CloudScale Systems,cloudscale.com,Cloud Infrastructure,890,Seattle,Redshift;Mode;Matillion,Series D,210000000,5,2024-03-25
+C-0004,Lumina Health,luminahealth.co,HealthTech,410,Boston,Snowflake;Metabase;dbt,Series C,85000000,2,2023-11-15
+C-0005,FinFlow,finflow.io,FinTech,155,New York,Databricks;PowerBI;Fivetran,Series B,32000000,4,2024-02-28
+C-0006,Peak Performance,peak.io,E-commerce,620,Denver,BigQuery;Looker;Stitch,Series C,75000000,0,2024-03-10
+C-0007,Nexus Security,nexus-sec.com,Cybersecurity,290,Palo Alto,Snowflake;Sigma;dbt,Series B,55000000,6,2024-03-29
+C-0008,GreenGrid,greengrid.energy,Renewables,180,Chicago,Redshift;Quicksight;Glue,Series A,18000000,1,2024-02-14
+C-0009,Velocity Media,velocity.com,AdTech,530,Los Angeles,BigQuery;Tableau;Airflow,Private,0,3,2023-12-20
+C-0010,EduPulse,edupulse.edu,EdTech,95,Austin,Postgres;Metabase;dbt,Seed,4000000,1,2024-03-22
+C-0011,ShipLogic,shiplogic.com,Logistics,340,Atlanta,Snowflake;Looker;Fivetran,Series B,42000000,4,2024-03-27
+C-0012,InnovaCare,innovacare.io,HealthTech,710,Nashville,Databricks;PowerBI;Azure Data Factory,Series D,150000000,2,2024-01-30
+C-0013,BrightStream,brightstream.tv,Media,480,New York,BigQuery;Looker;dbt,Series C,90000000,5,2024-03-15
+C-0014,Quantum Retail,quantumretail.com,Retail,1200,Minneapolis,Redshift;Microstrategy;Informatica,Public,0,8,2024-02-10
+C-0015,SecureNode,securenode.io,Cybersecurity,215,San Jose,Snowflake;Sigma;Fivetran,Series B,38000000,3,2024-03-28
+C-0016,TalentGraph,talentgraph.com,HR Tech,145,San Francisco,BigQuery;Mode;Stitch,Series A,15000000,1,2024-03-05
+C-0017,Propel Finance,propelfinance.com,FinTech,320,London,Snowflake;Looker;dbt,Series B,60000000,4,2024-03-21
+C-0018,AutoPath,autopath.ai,Logistics,275,Detroit,Databricks;Tableau;Airflow,Series B,48000000,2,2024-01-12
+C-0019,SkyLink,skylink.com,Aerospace,560,Denver,Redshift;PowerBI;Matillion,Series C,110000000,3,2024-03-18
+C-0020,MarketMind,marketmind.io,MarTech,190,San Francisco,Snowflake;Metabase;Fivetran,Series A,22000000,2,2024-03-26
+C-0021,BioData,biodata.org,Life Sciences,430,Cambridge,BigQuery;Looker;dbt,Series C,95000000,5,2024-02-05
+C-0022,FlexWork,flexwork.com,HR Tech,260,Remote,Snowflake;Sigma;dbt,Series B,40000000,2,2024-03-24
+C-0023,CoreLogic,corelogic.io,Real Estate,850,Irvine,Redshift;Tableau;Fivetran,Public,0,6,2024-03-01
+C-0024,ZenPay,zenpay.co,FinTech,125,Phoenix,BigQuery;Mode;Airbyte,Series A,14000000,1,2024-01-18
+C-0025,SwiftDelivery,swiftdelivery.app,Logistics,380,Chicago,Snowflake;Looker;dbt,Series B,52000000,4,2024-03-29
+C-0026,DeepInsight,deepinsight.ai,Data Platforms,105,Toronto,Databricks;Metabase;dbt,Series A,11000000,3,2024-03-14
+C-0027,EverGreen,evergreen.io,SaaS,510,Portland,BigQuery;Looker;Fivetran,Series C,88000000,2,2024-02-22
+C-0028,SafeGuard,safeguard.tech,Cybersecurity,640,Washington DC,Snowflake;PowerBI;Matillion,Series D,130000000,7,2024-03-20
+C-0029,PulseMedia,pulsemedia.com,AdTech,220,New York,Redshift;Sigma;Stitch,Series B,35000000,1,2024-01-08
+C-0030,UrbanFlow,urbanflow.io,Smart City,165,Berlin,BigQuery;Tableau;dbt,Series A,20000000,2,2024-03-23
+C-0031,WealthWiz,wealthwiz.com,FinTech,450,San Francisco,Snowflake;Looker;Fivetran,Series C,105000000,5,2024-03-28
+C-0032,HealthSpan,healthspan.io,HealthTech,310,Seattle,BigQuery;Metabase;dbt,Series B,45000000,3,2024-03-11
+C-0033,RetailRadar,retailradar.ai,E-commerce,195,Austin,Snowflake;Sigma;Fivetran,Series A,25000000,2,2024-02-15
+C-0034,DataForge,dataforge.io,DevTools,140,San Francisco,Databricks;Mode;Airbyte,Series A,18000000,4,2024-03-27
+C-0035,ClearSky,clearsky.com,SaaS,720,Salt Lake City,Redshift;Looker;dbt,Series D,160000000,6,2024-03-05
+C-0036,OptiMove,optimove.net,Logistics,285,Dallas,BigQuery;PowerBI;Matillion,Series B,42000000,2,2024-01-25
+C-0037,SecureStream,securestream.io,Cybersecurity,415,Boston,Snowflake;Looker;Fivetran,Series C,92000000,5,2024-03-22
+C-0038,GrowthEngine,growthengine.com,MarTech,230,London,BigQuery;Tableau;dbt,Series B,38000000,3,2024-03-19
+C-0039,WorkSync,worksync.app,HR Tech,175,Remote,Snowflake;Sigma;Fivetran,Series A,21000000,1,2024-02-28
+C-0040,CloudGuard,cloudguard.ai,Cloud Infrastructure,880,San Jose,Databricks;Looker;dbt,Series D,200000000,8,2024-03-29
+C-0041,EcoLogix,ecologix.org,Renewables,205,Boulder,Redshift;Metabase;Stitch,Series B,30000000,2,2024-01-14
+C-0042,AdNexus,adnexus.com,AdTech,540,New York,BigQuery;Looker;dbt,Series C,115000000,6,2024-03-26
+C-0043,FinCore,fincore.io,FinTech,360,Charlotte,Snowflake;PowerBI;Fivetran,Series B,65000000,4,2024-03-12
+C-0044,SmartWare,smartware.co,SaaS,150,Austin,BigQuery;Sigma;dbt,Series A,19000000,2,2024-03-08
+C-0045,BioMetric,biometric.io,HealthTech,470,San Diego,Snowflake;Tableau;dbt,Series C,102000000,5,2024-03-24
+C-0046,NetShield,netshield.tech,Cybersecurity,325,Palo Alto,Redshift;Looker;Fivetran,Series B,58000000,3,2024-02-20
+C-0047,LogiTech,logitech.io,Logistics,610,Memphis,BigQuery;PowerBI;Matillion,Series C,125000000,4,2024-03-17
+C-0048,EduStream,edustream.tv,EdTech,115,Boston,Snowflake;Metabase;Fivetran,Series A,13000000,1,2023-12-05
+C-0049,MarketFlow,marketflow.ai,MarTech,270,San Francisco,Databricks;Looker;dbt,Series B,46000000,3,2024-03-29
+C-0050,DataLoop,dataloop.io,Data Platforms,195,Tel Aviv,BigQuery;Sigma;Airbyte,Series B,34000000,5,2024-03-15
+... [entries C-0051 to C-2990 omitted for brevity in mock generation]
+C-2991,VividApps,vividapps.com,SaaS,185,Miami,Snowflake;Looker;Fivetran,Series A,22000000,2,2024-02-18
+C-2992,CloudPioneer,cloudpioneer.io,Cloud Infrastructure,750,Seattle,Redshift;Tableau;dbt,Series D,180000000,6,2024-03-27
+C-2993,FinLogic,finlogic.ai,FinTech,420,New York,Snowflake;Sigma;Fivetran,Series C,95000000,4,2024-03-29
+C-2994,HealthSync,healthsync.co,HealthTech,295,Chicago,BigQuery;Metabase;dbt,Series B,48000000,3,2024-03-21
+C-2995,SecurePath,securepath.tech,Cybersecurity,510,Austin,Databricks;Looker;Fivetran,Series C,110000000,5,2024-03-25
+C-2996,RetailGenius,retailgenius.com,E-commerce,140,San Francisco,Snowflake;PowerBI;Stitch,Series A,17000000,1,2024-01-10
+C-2997,LogiPro,logipro.io,Logistics,680,Atlanta,BigQuery;Looker;dbt,Series D,145000000,7,2024-03-28
+C-2998,AdScale,adscale.ai,AdTech,235,Los Angeles,Redshift;Sigma;Fivetran,Series B,39000000,2,2024-03-14
+C-2999,TalentFlow,talentflow.io,HR Tech,110,Remote,Snowflake;Metabase;dbt,Series A,12000000,1,2024-02-05
+C-3000,DataSpark,dataspark.io,Data Platforms,320,San Francisco,BigQuery;Looker;Fivetran,Series B,60000000,4,2024-03-29

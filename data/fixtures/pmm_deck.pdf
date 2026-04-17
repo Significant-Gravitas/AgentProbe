@@ -1,0 +1,316 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 9 0 R >> >> /MediaBox [0 0 612 792] /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2651 >>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+15 TL
+(pmm_deck.pdf) Tj
+T*
+() Tj
+T*
+(SLIDE 1: Rivet - The Unified Data Fabric for Modern Enterprise. Scaling your data) Tj
+T*
+(connectivity without scaling your engineering headcount.) Tj
+T*
+() Tj
+T*
+(SLIDE 2: Current State of Data Integration. Most companies are drowning in custom) Tj
+T*
+(scripts. 70% of engineering time is spent on maintenance, not innovation. The) Tj
+T*
+("Integration Debt" is stifling growth.) Tj
+T*
+() Tj
+T*
+(SLIDE 3: The Rivet Vision. We believe data should move as fast as your business logic.) Tj
+T*
+(Our mission is to democratize complex data pipelines through a resilient, low-code) Tj
+T*
+(infrastructure.) Tj
+T*
+() Tj
+T*
+(SLIDE 4: Executive Summary. Rivet provides a B2B data integration platform that bridges) Tj
+T*
+(the gap between SaaS silos, legacy databases, and real-time streaming services.) Tj
+T*
+() Tj
+T*
+(SLIDE 5: Our Ideal Customer Profile \(ICP\). Primary: Series B+ Tech Companies. Secondary:) Tj
+T*
+(Mid-market Financial Services. Tertiary: E-commerce platforms with multi-channel) Tj
+T*
+(distribution.) Tj
+T*
+() Tj
+T*
+(SLIDE 6: The Buyer Personas. The Data Engineer \(The Builder\), The CTO \(The Visionary\),) Tj
+T*
+(The Product Manager \(The Beneficiary\).) Tj
+T*
+() Tj
+T*
+(SLIDE 7: Pain Point 1: Data Silos. Marketing has the leads, Sales has the CRM, but) Tj
+T*
+(Finance has the truth. None of them talk to each other in real-time.) Tj
+T*
+() Tj
+T*
+(SLIDE 8: Pain Point 2: Fragile Pipelines. API changes break custom code. When a source) Tj
+T*
+(schema updates, downstream analytics fail, leading to bad business decisions.) Tj
+T*
+() Tj
+T*
+(SLIDE 9: Pain Point 3: Talent Scarcity. You can't hire enough data engineers to keep up) Tj
+T*
+(with the backlog of integration requests.) Tj
+T*
+() Tj
+T*
+(SLIDE 10: Introducing Rivet. The first "Schema-Aware" integration engine that self-heals) Tj
+T*
+(when data structures change.) Tj
+T*
+() Tj
+T*
+(SLIDE 11: Core Pillar 1: Resilience. Our proprietary "Shadow Schema" technology predicts) Tj
+T*
+(upstream changes and alerts users before the pipeline breaks.) Tj
+T*
+() Tj
+T*
+(SLIDE 12: Core Pillar 2: Velocity. Deploy a production-ready connector in minutes, not) Tj
+T*
+(weeks. Pre-built templates for 200+ enterprise applications.) Tj
+T*
+() Tj
+T*
+(SLIDE 13: Core Pillar 3: Governance. Full lineage tracking. Know exactly where every) Tj
+T*
+(byte of data came from and who touched it. SOC2 Type II and GDPR compliant out of the) Tj
+T*
+(box.) Tj
+T*
+() Tj
+T*
+(SLIDE 14: Messaging Framework - The "Engine" Metaphor. If data is the fuel, Rivet is the) Tj
+T*
+(high-performance engine that ensures zero waste and maximum horsepower.) Tj
+T*
+() Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 9 0 R >> >> /MediaBox [0 0 612 792] /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2787 >>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+15 TL
+(SLIDE 15: Value Proposition: For Data Engineers. "Stop writing boilerplate. Start) Tj
+T*
+(building architecture." Move from being a "plumber" to being an "architect.") Tj
+T*
+() Tj
+T*
+(SLIDE 16: Value Proposition: For CTOs. "Predictable costs, zero technical debt." Reduce) Tj
+T*
+(the TCO \(Total Cost of Ownership\) of your data stack by 40%.) Tj
+T*
+() Tj
+T*
+(SLIDE 17: Competitive Landscape. Rivet vs. Legacy ETL \(Informatica/Talend\) - We are) Tj
+T*
+(faster and cheaper. Rivet vs. Point-to-Point \(Zapier/Make\) - We are more robust and) Tj
+T*
+(enterprise-grade.) Tj
+T*
+() Tj
+T*
+(SLIDE 18: The Rivet Differentiator: Bidirectional Sync. Most tools only push data. We) Tj
+T*
+(sync it, ensuring "Source of Truth" consistency across all platforms.) Tj
+T*
+() Tj
+T*
+(SLIDE 19: Feature Deep Dive: The Logic Builder. A drag-and-drop interface for complex) Tj
+T*
+(transformations \(joins, filters, lookups\) without writing SQL.) Tj
+T*
+() Tj
+T*
+(SLIDE 20: Feature Deep Dive: Real-time Webhooks. Sub-second latency for mission-critical) Tj
+T*
+(operations like inventory updates or fraud detection.) Tj
+T*
+() Tj
+T*
+(SLIDE 21: Feature Deep Dive: Custom Connector SDK. For those 5% of cases where you need) Tj
+T*
+(something unique, use our Python/TypeScript SDK to build it once and reuse it forever.) Tj
+T*
+() Tj
+T*
+(SLIDE 22: Proof Point: FinTech Success. "GlobalPay reduced their reconciliation time) Tj
+T*
+(from 4 days to 4 minutes using Rivet's automated ledger sync.") Tj
+T*
+() Tj
+T*
+(SLIDE 23: Proof Point: E-commerce Scale. "TrendBox handled 10x traffic during Black) Tj
+T*
+(Friday without a single pipeline failure using Rivets auto-scaling infrastructure.") Tj
+T*
+() Tj
+T*
+(SLIDE 24: Proof Point: SaaS Efficiency. "SaaSCo saved $450k in annual engineering) Tj
+T*
+(salaries by migrating 50 custom integrations to Rivet.") Tj
+T*
+() Tj
+T*
+(SLIDE 25: Implementation Roadmap. Week 1: Audit & Discovery. Week 2: Initial Pilot. Week) Tj
+T*
+(3: Production Rollout. Week 4: Optimization & Training.) Tj
+T*
+() Tj
+T*
+(SLIDE 26: The "Integration Maturity Model." Level 1: Manual/Ad-hoc. Level 2: Scripted.) Tj
+T*
+(Level 3: Managed \(Rivet\). Level 4: Optimized/Autonomous.) Tj
+T*
+() Tj
+T*
+(SLIDE 27: Pricing Philosophy. Transparent, volume-based pricing. No hidden "connector) Tj
+T*
+(fees." We grow as your data grows.) Tj
+T*
+() Tj
+T*
+(SLIDE 28: Security Architecture. End-to-end encryption. No PII storage on Rivet servers.) Tj
+T*
+(Role-based access control \(RBAC\).) Tj
+T*
+() Tj
+T*
+(SLIDE 29: Ecosystem Partners. We work seamlessly with Snowflake, BigQuery, Databricks,) Tj
+T*
+(Salesforce, and AWS.) Tj
+T*
+() Tj
+T*
+(SLIDE 30: The Future of Rivet. AI-assisted mapping. Using LLMs to automatically map) Tj
+T*
+(source fields to target schemas with 99% accuracy.) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 9 0 R >> >> /MediaBox [0 0 612 792] /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 1501 >>
+stream
+BT
+/F1 12 Tf
+50 750 Td
+15 TL
+() Tj
+T*
+(SLIDE 31: Case Study: Legacy Transformation. How a 50-year-old manufacturing firm moved) Tj
+T*
+(their ERP data to the cloud in under 3 months.) Tj
+T*
+() Tj
+T*
+(SLIDE 32: ROI Calculator. Input your engineering hourly rate and number of integrations) Tj
+T*
+(to see how much Rivet saves you per year.) Tj
+T*
+() Tj
+T*
+(SLIDE 33: Objection Handling: "We can build this ourselves." Response: "Building is) Tj
+T*
+(easy; maintaining is the nightmare. Do you want your best devs fixing APIs or building) Tj
+T*
+(features?") Tj
+T*
+() Tj
+T*
+(SLIDE 34: Objection Handling: "Security/Compliance." Response: "We are built for the) Tj
+T*
+(most regulated industries. Here is our trust center link.") Tj
+T*
+() Tj
+T*
+(SLIDE 35: Sales Enablement: The Discovery Call. Key questions to ask to uncover the) Tj
+T*
+("Integration Debt" pain.) Tj
+T*
+() Tj
+T*
+(SLIDE 36: Marketing Strategy: Content Pillars. Resilience, Velocity, Governance, and The) Tj
+T*
+(Future of Data.) Tj
+T*
+() Tj
+T*
+(SLIDE 37: Community and Support. 24/7 Slack support, dedicated Success Manager, and a) Tj
+T*
+(thriving developer forum.) Tj
+T*
+() Tj
+T*
+(SLIDE 38: Customer Testimonials. "Rivet is the 'set it and forget it' layer we've been) Tj
+T*
+(looking for for a decade." - CTO, Neobank.) Tj
+T*
+() Tj
+T*
+(SLIDE 39: Call to Action. Book a technical deep dive or start a 14-day proof of concept) Tj
+T*
+(today.) Tj
+T*
+() Tj
+T*
+(SLIDE 40: Rivet. Connecting the world's data. One pipeline at a time. Thank you.) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000133 00000 n 
+0000000259 00000 n 
+0000002962 00000 n 
+0000003088 00000 n 
+0000005927 00000 n 
+0000006053 00000 n 
+0000007606 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+7676
+%%EOF

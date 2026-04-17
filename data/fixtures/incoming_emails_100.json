@@ -1,0 +1,409 @@
+[
+  {
+    "id": "EM-001",
+    "sender": "sarah.j@acme-corp.com",
+    "subject": "Urgent: Password Reset for Admin Account",
+    "body": "Hi Support, I've been locked out of my Lumen dashboard. Please reset my password. Attached is the formal request form.",
+    "attachments": [
+      {
+        "filename": "reset_request.pdf",
+        "content": "Form Type: password_reset; User: sarah.j@acme-corp.com; Org: acme-corp.com; Security Code: 8821"
+      }
+    ],
+    "gold_label": {
+      "form_type": "password_reset",
+      "extracted_fields": {
+        "user": "sarah.j@acme-corp.com",
+        "org_domain": "acme-corp.com"
+      },
+      "auto_approved": true,
+      "assigned_team": "automated",
+      "reasoning": "Sender domain matches customer_org domain."
+    }
+  },
+  {
+    "id": "EM-002",
+    "sender": "mike.t@globex.io",
+    "subject": "Full Data Export - Q3 Audit",
+    "body": "We need to export our entire usage history for the annual audit. See the attached request form.",
+    "attachments": [
+      {
+        "filename": "export_form.pdf",
+        "content": "Form Type: data_export_request; Rows: 2,500,000; Format: CSV; Requester: Mike T."
+      }
+    ],
+    "gold_label": {
+      "form_type": "data_export_request",
+      "extracted_fields": {
+        "row_count": 2500000,
+        "format": "CSV"
+      },
+      "auto_approved": false,
+      "assigned_team": "legal_dpo",
+      "reasoning": "Row count exceeds 1,000,000 threshold; requires DPO sign-off."
+    }
+  },
+  {
+    "id": "EM-003",
+    "sender": "dev-lead@startup.net",
+    "subject": "Dashboard Rendering Bug",
+    "body": "The charts are failing to load on Safari 15. See attached report.",
+    "attachments": [
+      {
+        "filename": "bug_report.json",
+        "content": "{ \"type\": \"bug_report\", \"browser\": \"Safari 15\", \"priority\": \"high\", \"component\": \"visualization_engine\" }"
+      }
+    ],
+    "gold_label": {
+      "form_type": "bug_report",
+      "extracted_fields": {
+        "component": "visualization_engine",
+        "priority": "high"
+      },
+      "auto_approved": false,
+      "assigned_team": "engineering",
+      "reasoning": "All bug reports are routed to engineering per policy."
+    }
+  },
+  {
+    "id": "EM-004",
+    "sender": "billing@retail-chain.com",
+    "subject": "Update Credit Card",
+    "body": "Our corporate card has expired. Please see the billing inquiry form attached.",
+    "attachments": [
+      {
+        "filename": "billing_update.pdf",
+        "content": "Form Type: billing_inquiry; Action: Update Payment Method; Account: RT-9921"
+      }
+    ],
+    "gold_label": {
+      "form_type": "billing_inquiry",
+      "extracted_fields": {
+        "action": "Update Payment Method",
+        "account_id": "RT-9921"
+      },
+      "auto_approved": false,
+      "assigned_team": "finance",
+      "reasoning": "Billing inquiries require manual finance review for security."
+    }
+  },
+  {
+    "id": "EM-005",
+    "sender": "it-admin@external-consulting.com",
+    "subject": "Password Reset for client Acme",
+    "body": "I am a consultant for Acme. Please reset the admin password for admin@acme-corp.com.",
+    "attachments": [
+      {
+        "filename": "reset.pdf",
+        "content": "Form Type: password_reset; User: admin@acme-corp.com; Org: acme-corp.com"
+      }
+    ],
+    "gold_label": {
+      "form_type": "password_reset",
+      "extracted_fields": {
+        "user": "admin@acme-corp.com",
+        "org_domain": "acme-corp.com"
+      },
+      "auto_approved": false,
+      "assigned_team": "support_tier_1",
+      "reasoning": "Sender domain (external-consulting.com) does not match customer_org (acme-corp.com)."
+    }
+  },
+  {
+    "id": "EM-006",
+    "sender": "ops@logistics-plus.com",
+    "subject": "Tableau Integration Help",
+    "body": "We are struggling to connect the API to Tableau. Form attached.",
+    "attachments": [
+      {
+        "filename": "integration.pdf",
+        "content": "Form Type: integration_help; Tool: Tableau; Error: 403 Forbidden"
+      }
+    ],
+    "gold_label": {
+      "form_type": "integration_help",
+      "extracted_fields": {
+        "tool": "Tableau",
+        "error_code": "403"
+      },
+      "auto_approved": false,
+      "assigned_team": "solutions_architecture",
+      "reasoning": "Technical integration requests route to Solutions Architecture."
+    }
+  },
+  {
+    "id": "EM-007",
+    "sender": "analyst@data-viz.org",
+    "subject": "Small Data Export",
+    "body": "Need a CSV of our last month's logs.",
+    "attachments": [
+      {
+        "filename": "export.pdf",
+        "content": "Form Type: data_export_request; Rows: 50,000; Format: CSV"
+      }
+    ],
+    "gold_label": {
+      "form_type": "data_export_request",
+      "extracted_fields": {
+        "row_count": 50000,
+        "format": "CSV"
+      },
+      "auto_approved": true,
+      "assigned_team": "automated",
+      "reasoning": "Row count (50,000) is below the 1,000,000 DPO threshold."
+    }
+  },
+  {
+    "id": "EM-008",
+    "sender": "cto@fintech-alpha.com",
+    "subject": "Security Bug - SQL Injection Vulnerability",
+    "body": "We found a potential vulnerability in the filter component. See attached.",
+    "attachments": [
+      {
+        "filename": "security_report.json",
+        "content": "{ \"type\": \"bug_report\", \"priority\": \"critical\", \"category\": \"security\" }"
+      }
+    ],
+    "gold_label": {
+      "form_type": "bug_report",
+      "extracted_fields": {
+        "priority": "critical",
+        "category": "security"
+      },
+      "auto_approved": false,
+      "assigned_team": "security_eng",
+      "reasoning": "Critical security bugs route to Security Engineering instead of General Eng."
+    }
+  },
+  {
+    "id": "EM-009",
+    "sender": "hr@global-talent.com",
+    "subject": "Billing Question - Invoice #9982",
+    "body": "Why were we charged for 50 seats when we only used 40?",
+    "attachments": [
+      {
+        "filename": "billing_form.pdf",
+        "content": "Form Type: billing_inquiry; Invoice: 9982; Disputed_Amount: 500.00"
+      }
+    ],
+    "gold_label": {
+      "form_type": "billing_inquiry",
+      "extracted_fields": {
+        "invoice_number": "9982",
+        "disputed_amount": 500.00
+      },
+      "auto_approved": false,
+      "assigned_team": "finance",
+      "reasoning": "Disputed invoices require manual review by finance."
+    }
+  },
+  {
+    "id": "EM-010",
+    "sender": "intern@marketing-pro.com",
+    "subject": "Forgot password",
+    "body": "Please help!",
+    "attachments": [
+      {
+        "filename": "form.txt",
+        "content": "Form Type: password_reset; User: intern@marketing-pro.com; Org: marketing-pro.com"
+      }
+    ],
+    "gold_label": {
+      "form_type": "password_reset",
+      "extracted_fields": {
+        "user": "intern@marketing-pro.com",
+        "org_domain": "marketing-pro.com"
+      },
+      "auto_approved": true,
+      "assigned_team": "automated",
+      "reasoning": "Domain matches; auto-approved."
+    }
+  },
+  {
+    "id": "EM-011",
+    "sender": "legal@bank-of-west.com",
+    "subject": "Compliance Data Export",
+    "body": "Required for regulatory filing.",
+    "attachments": [
+      {
+        "filename": "export.pdf",
+        "content": "Form Type: data_export_request; Rows: 15,000,000; Format: Parquet"
+      }
+    ],
+    "gold_label": {
+      "form_type": "data_export_request",
+      "extracted_fields": {
+        "row_count": 15000000,
+        "format": "Parquet"
+      },
+      "auto_approved": false,
+      "assigned_team": "legal_dpo",
+      "reasoning": "Large export (>1M rows) requires DPO approval."
+    }
+  },
+  {
+    "id": "EM-012",
+    "sender": "dev@indie-game-studio.com",
+    "subject": "API Integration - Webhooks",
+    "body": "Webhooks aren't firing for 'delete' events.",
+    "attachments": [
+      {
+        "filename": "integ_form.pdf",
+        "content": "Form Type: integration_help; Component: Webhooks; Event: delete"
+      }
+    ],
+    "gold_label": {
+      "form_type": "integration_help",
+      "extracted_fields": {
+        "component": "Webhooks",
+        "event": "delete"
+      },
+      "auto_approved": false,
+      "assigned_team": "solutions_architecture",
+      "reasoning": "Integration issues route to Solutions Architecture."
+    }
+  },
+  {
+    "id": "EM-013",
+    "sender": "user@gmail.com",
+    "subject": "Password Reset",
+    "body": "I use Lumen for my personal blog. Reset please.",
+    "attachments": [
+      {
+        "filename": "reset.pdf",
+        "content": "Form Type: password_reset; User: user@gmail.com; Org: personal"
+      }
+    ],
+    "gold_label": {
+      "form_type": "password_reset",
+      "extracted_fields": {
+        "user": "user@gmail.com",
+        "org_domain": "personal"
+      },
+      "auto_approved": false,
+      "assigned_team": "support_tier_1",
+      "reasoning": "Public email domains (gmail.com) never auto-approve for security."
+    }
+  },
+  {
+    "id": "EM-014",
+    "sender": "qa@ecommerce-giant.com",
+    "subject": "UI Lag on Mobile",
+    "body": "The dropdown takes 3 seconds to appear on iOS.",
+    "attachments": [
+      {
+        "filename": "bug.json",
+        "content": "{ \"type\": \"bug_report\", \"platform\": \"iOS\", \"severity\": \"low\" }"
+      }
+    ],
+    "gold_label": {
+      "form_type": "bug_report",
+      "extracted_fields": {
+        "platform": "iOS",
+        "severity": "low"
+      },
+      "auto_approved": false,
+      "assigned_team": "engineering",
+      "reasoning": "Bug report routed to engineering."
+    }
+  },
+  {
+    "id": "EM-015",
+    "sender": "accounting@fast-food.com",
+    "subject": "Tax Exempt Status",
+    "body": "Please apply our tax exempt certificate to the account.",
+    "attachments": [
+      {
+        "filename": "tax_cert.pdf",
+        "content": "Form Type: billing_inquiry; Action: Tax Exemption; ID: TX-1100"
+      }
+    ],
+    "gold_label": {
+      "form_type": "billing_inquiry",
+      "extracted_fields": {
+        "action": "Tax Exemption",
+        "certificate_id": "TX-1100"
+      },
+      "auto_approved": false,
+      "assigned_team": "finance",
+      "reasoning": "Tax/Billing updates require manual verification."
+    }
+  },
+  {
+    "id": "EM-016",
+    "sender": "help@partner-agency.com",
+    "subject": "Integration: Snowflake Connector",
+    "body": "Customer is seeing auth errors.",
+    "attachments": [
+      {
+        "filename": "form.pdf",
+        "content": "Form Type: integration_help; Tool: Snowflake; Error: OAuth_Mismatch"
+      }
+    ],
+    "gold_label": {
+      "form_type": "integration_help",
+      "extracted_fields": {
+        "tool": "Snowflake",
+        "error": "OAuth_Mismatch"
+      },
+      "auto_approved": false,
+      "assigned_team": "solutions_architecture",
+      "reasoning": "Integration support request."
+    }
+  },
+  {
+    "id": "EM-017",
+    "sender": "alice.w@tech-corp.org",
+    "subject": "Reset my password",
+    "body": "Forgot it again.",
+    "attachments": [
+      {
+        "filename": "request.pdf",
+        "content": "Form Type: password_reset; User: alice.w@tech-corp.org; Org: tech-corp.org"
+      }
+    ],
+    "gold_label": {
+      "form_type": "password_reset",
+      "extracted_fields": {
+        "user": "alice.w@tech-corp.org",
+        "org_domain": "tech-corp.org"
+      },
+      "auto_approved": true,
+      "assigned_team": "automated",
+      "reasoning": "Domain matches."
+    }
+  },
+  {
+    "id": "EM-018",
+    "sender": "data-scientist@research-lab.edu",
+    "subject": "Dataset Export Request",
+    "body": "Need the raw data for the climate study.",
+    "attachments": [
+      {
+        "filename": "export.pdf",
+        "content": "Form Type: data_export_request; Rows: 900,000; Format: HDF5"
+      }
+    ],
+    "gold_label": {
+      "form_type": "data_export_request",
+      "extracted_fields": {
+        "row_count": 900000,
+        "format": "HDF5"
+      },
+      "auto_approved": true,
+      "assigned_team": "automated",
+      "reasoning": "Row count under 1M."
+    }
+  },
+  {
+    "id": "EM-019",
+    "sender": "manager@store-front.com",
+    "subject": "Refund Request",
+    "body": "We were charged twice for July.",
+    "attachments": [
+      {
+        "filename": "billing.pdf",
+        "content": "Form Type: billing_inquiry; Action: Refund; Amount: 199.00"
+      }
+    ],
+    "gold

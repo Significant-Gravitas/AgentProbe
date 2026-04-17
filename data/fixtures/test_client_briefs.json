@@ -1,0 +1,98 @@
+[
+  {
+    "id": "CB-001",
+    "client": "Aura Fintech",
+    "project_name": "Q3 Brand Refresh",
+    "raw_content": "We need a total overhaul of our visual identity. The current look is outdated and frankly, a bit dull. We want to be seen as the 'Uber of Banking'. Our goal is to disrupt the market with a synergy of technology and human-centric design. We need new logos, social templates, and a style guide. Target audience is Gen Z. Budget is around £50k. Needs to be done by September. Please ensure the tone is ultra-modern, sleek, and innovative.",
+    "status": "Incomplete",
+    "notes": "Violates 'no-cliché' rule ('Uber of...', 'disrupt', 'synergy'). Missing success metrics and risks."
+  },
+  {
+    "id": "CB-002",
+    "client": "Harbor & Oak",
+    "project_name": "Autumn Lookbook",
+    "raw_content": "Objective: Launch the 2024 Autumn collection. Audience: High-net-worth individuals, ages 35-55, UK based. Deliverables: 40-page digital lookbook, 15 Instagram assets, 5 email headers. Tone: Sophisticated, understated, heritage. References: Aesop, Toast, Margaret Howell. Constraints: Must use sustainable paper textures in digital mockups. Budget: £12,000. Timeline: Launch Oct 1st. Approvers: Sarah Jenkins (CMO). Success Metrics: 15% CTR on email campaign. Out-of-scope: Print production. Risks: Tight turnaround on photography. KPIs: Sales conversion. Handoff: Assets via Dropbox.",
+    "status": "Complete",
+    "notes": "Follows UK English. Compliant with style rules."
+  },
+  {
+    "id": "CB-003",
+    "client": "Velox Logistics",
+    "project_name": "Fleet Rebranding",
+    "raw_content": "We are looking to rebrand our delivery vans. We want a bold, fast-looking design. We need the final files in vector format. We're a very reliable, fast, and efficient company. We're the best in the business and we want our vans to show that. We need it ASAP.",
+    "status": "Critically Incomplete",
+    "notes": "Missing 10+ template sections. Violates 'no-cliché' and 'confident' rules (sounds boastful rather than confident)."
+  },
+  {
+    "id": "CB-004",
+    "client": "GreenStep Footwear",
+    "project_name": "Sustainable Sneaker Launch",
+    "raw_content": "Objective: Create a launch campaign for 'The Origin' sneaker. Audience: Eco-conscious urbanites. Deliverables: Video ad (30s), 5 static posters. Tone: Energetic, honest, raw. References: Allbirds, Patagonia. Constraints: No plastic imagery. Budget: £25k. Timeline: 8 weeks. Approvers: Mark Thorne. Success-metrics: 1m impressions. Out-of-scope: Influencer sourcing. Risks: Supply chain delays for samples. KPIs: Pre-order volume. Handoff: Slack channel.",
+    "status": "Complete",
+    "notes": "Well structured. Good detail."
+  },
+  {
+    "id": "CB-005",
+    "client": "Nexa Software",
+    "project_name": "Website UI Update",
+    "raw_content": "Our website needs to be more user-friendly. We want a clean, minimalist aesthetic. It should be easy to navigate. We need a homepage, features page, and pricing page. Our developers are ready to go. Please provide the designs in Figma. We like the color blue.",
+    "status": "Incomplete",
+    "notes": "Missing audience, budget, timeline, and success metrics. Uses Oxford comma (violates style rules)."
+  },
+  {
+    "id": "CB-006",
+    "client": "The Tea House",
+    "project_name": "Packaging Design",
+    "raw_content": "Objective: Design packaging for three new herbal blends. Audience: Health-conscious millennials. Deliverables: 3x Box designs (Chamomile, Mint, Ginger). Tone: Calming, organic, premium. References: Pukka, T2. Constraints: Recyclable materials only. Budget: £8,000. Timeline: Print-ready by Nov 15. Approvers: Elena Rossi. Success-metrics: Retailer pickup in 5 new stores. Out-of-scope: Logo design. Risks: Ink bleeding on uncoated card. KPIs: Unit sales. Handoff: PDF/X-4.",
+    "status": "Complete",
+    "notes": "Excellent detail, adheres to UK English."
+  },
+  {
+    "id": "CB-007",
+    "client": "Summit Peak",
+    "project_name": "App Iconography",
+    "raw_content": "We're building a hiking app and need 50 custom icons. They need to be simple and clear. We want them to be revolutionary and game-changing. We need a quick win here. Let's touch base and circle back on the budget once we see some concepts. Our team is very passionate about the outdoors.",
+    "status": "Incomplete",
+    "notes": "Heavy cliché usage ('revolutionary', 'game-changing', 'quick win', 'touch base'). Missing budget and timeline."
+  },
+  {
+    "id": "CB-008",
+    "client": "Urban Cycle",
+    "project_name": "E-bike Campaign",
+    "raw_content": "Objective: Promote the 'Volt' e-bike. Audience: City commuters. Deliverables: 3x OOH billboards, 5x Social ads. Tone: Bold, punchy, direct. References: VanMoof, Cowboy. Constraints: Must use brand orange (#FF4500). Budget: £15,000. Timeline: Dec 1st. Approvers: Tom H. Success-metrics: Site traffic increase. Out-of-scope: Web dev. Risks: Weather for photoshoot. KPIs: Lead gen. Handoff: Google Drive.",
+    "status": "Complete",
+    "notes": "Concise and direct."
+  },
+  {
+    "id": "CB-009",
+    "client": "Lumina Skincare",
+    "project_name": "New Product Line",
+    "raw_content": "We are launching a new serum. We need a concept that is light-years ahead of the competition. We want to empower our customers to be their best selves. The deliverables are a social media toolkit and a landing page design. We need this to go viral. Budget is tbc.",
+    "status": "Incomplete",
+    "notes": "Violates 'no-cliché' rule. Missing budget, timeline, and audience specifics."
+  },
+  {
+    "id": "CB-010",
+    "client": "Koda Coffee",
+    "project_name": "Subscription Box",
+    "raw_content": "Objective: Design a monthly coffee subscription box. Audience: Coffee enthusiasts, 25-40. Deliverables: Outer box, inner tissue, info card. Tone: Industrial, tactile, premium. References: Workshop Coffee, Monmouth. Constraints: Fits through standard letterbox. Budget: £6,500. Timeline: Jan 10 launch. Approvers: Kieran Day. Success-metrics: 500 subscribers in month 1. Out-of-scope: Sourcing coffee. Risks: Shipping damage. KPIs: Retention rate. Handoff: Die-line files.",
+    "status": "Complete",
+    "notes": "Solid brief, follows UK English."
+  },
+  {
+    "id": "CB-011",
+    "client": "Stellar Events",
+    "project_name": "Conference Identity",
+    "raw_content": "We need branding for our 2025 tech summit. It needs to be world-class. We want to leverage our existing network to create a paradigm shift in how people network. We need a logo, lanyard design, and keynote slides. We want to move the needle on ticket sales. No Oxford commas please.",
+    "status": "Incomplete",
+    "notes": "Heavy cliché usage ('world-class', 'leverage', 'paradigm shift', 'move the needle'). Missing budget and audience."
+  },
+  {
+    "id": "CB-012",
+    "client": "Finch & Co",
+    "project_name": "Boutique Hotel Branding",
+    "raw_content": "Objective: Create a full brand identity for a new 12-room hotel in the Cotswolds. Audience: Luxury travellers, weekenders. Deliverables: Logo, signage, stationery, menu templates. Tone: Welcoming, refined, local. References: The Pig, Soho Farmhouse. Constraints: Must incorporate the local stone colour. Budget: £30,000. Timeline: April opening. Approvers: James Finch. Success-metrics: Full booking for opening month. Out-of-scope: Website build. Risks: Planning permission for signage. KPIs: Average daily rate. Handoff: Brand book PDF.",
+    "status": "Complete",
+    "notes": "Compliant with all rules. Uses UK spelling (travellers, colour)."
+  }
+]

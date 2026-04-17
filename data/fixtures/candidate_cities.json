@@ -1,0 +1,94 @@
+{
+  "cities": [
+    {
+      "city": "Denver",
+      "population": 711463,
+      "median_age": 34.7,
+      "median_income": 78126,
+      "competitor_event_count": 12,
+      "venue_cost_index": 1.15,
+      "labor_cost_index": 1.08
+    },
+    {
+      "city": "Atlanta",
+      "population": 498715,
+      "median_age": 33.3,
+      "median_income": 69164,
+      "competitor_event_count": 28,
+      "venue_cost_index": 1.25,
+      "labor_cost_index": 1.12
+    },
+    {
+      "city": "Portland",
+      "population": 652503,
+      "median_age": 37.1,
+      "median_income": 76231,
+      "competitor_event_count": 19,
+      "venue_cost_index": 1.10,
+      "labor_cost_index": 1.22
+    },
+    {
+      "city": "Raleigh",
+      "population": 467665,
+      "median_age": 33.9,
+      "median_income": 72996,
+      "competitor_event_count": 6,
+      "venue_cost_index": 0.88,
+      "labor_cost_index": 0.92
+    },
+    {
+      "city": "Phoenix",
+      "population": 1608139,
+      "median_age": 33.9,
+      "median_income": 64927,
+      "competitor_event_count": 34,
+      "venue_cost_index": 1.05,
+      "labor_cost_index": 1.02
+    },
+    {
+      "city": "Columbus",
+      "population": 905748,
+      "median_age": 32.5,
+      "median_income": 60430,
+      "competitor_event_count": 9,
+      "venue_cost_index": 0.82,
+      "labor_cost_index": 0.89
+    },
+    {
+      "city": "Tampa",
+      "population": 384959,
+      "median_age": 35.8,
+      "median_income": 59631,
+      "competitor_event_count": 15,
+      "venue_cost_index": 0.95,
+      "labor_cost_index": 0.94
+    },
+    {
+      "city": "Kansas City",
+      "population": 508090,
+      "median_age": 35.4,
+      "median_income": 60042,
+      "competitor_event_count": 11,
+      "venue_cost_index": 0.85,
+      "labor_cost_index": 0.90
+    },
+    {
+      "city": "Salt Lake City",
+      "population": 199723,
+      "median_age": 32.2,
+      "median_income": 65880,
+      "competitor_event_count": 8,
+      "venue_cost_index": 0.98,
+      "labor_cost_index": 1.01
+    },
+    {
+      "city": "Minneapolis",
+      "population": 429954,
+      "median_age": 32.4,
+      "median_income": 70317,
+      "competitor_event_count": 22,
+      "venue_cost_index": 1.12,
+      "labor_cost_index": 1.18
+    }
+  ]
+}

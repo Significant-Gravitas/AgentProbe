@@ -1,0 +1,132 @@
+[
+  {
+    "id": "PROS-001",
+    "company": "FinTech Flow",
+    "industry": "Financial Services",
+    "contact_role": "VP of Engineering",
+    "pain_points": [
+      "Current chatbot hallucinating interest rates",
+      "No measurable way to track model regression after updates",
+      "Compliance team rejects AI deployments due to lack of audit trails"
+    ],
+    "target_offering": "LLM Evaluation Setup",
+    "expected_budget_fit": "$25k-$60k"
+  },
+  {
+    "id": "PROS-002",
+    "company": "Nexus Legal",
+    "industry": "Legal Tech",
+    "contact_role": "Founder",
+    "pain_points": [
+      "Searching through 50,000+ case files manually",
+      "Existing keyword search misses semantic context",
+      "Need a way to query internal PDF repository using natural language"
+    ],
+    "target_offering": "RAG Pipeline Build",
+    "expected_budget_fit": "$40k-$120k"
+  },
+  {
+    "id": "PROS-003",
+    "company": "BioGen Research",
+    "industry": "Biotechnology",
+    "contact_role": "Chief Data Scientist",
+    "pain_points": [
+      "General purpose LLMs don't understand specific protein folding terminology",
+      "Need a model that mimics the specific writing style of our internal lab reports",
+      "Performance on niche domain tasks is currently below 60% accuracy"
+    ],
+    "target_offering": "Fine-Tuning Engagement",
+    "expected_budget_fit": "$80k-$200k"
+  },
+  {
+    "id": "PROS-004",
+    "company": "EduStream",
+    "industry": "EdTech",
+    "contact_role": "Product Manager",
+    "pain_points": [
+      "Students getting incorrect answers to math problems from the AI tutor",
+      "We are afraid to launch because we can't quantify the 'safety' of the model",
+      "Need a benchmarking suite against our specific curriculum"
+    ],
+    "target_offering": "LLM Evaluation Setup",
+    "expected_budget_fit": "$25k-$60k"
+  },
+  {
+    "id": "PROS-005",
+    "company": "RetailSync",
+    "industry": "E-commerce",
+    "contact_role": "Head of Support",
+    "pain_points": [
+      "Customer support agents spend 4 hours a day looking up return policies",
+      "Policies change weekly and the static FAQ is always outdated",
+      "Want an automated assistant that bridges the gap between our Notion docs and the customer"
+    ],
+    "target_offering": "RAG Pipeline Build",
+    "expected_budget_fit": "$40k-$120k"
+  },
+  {
+    "id": "PROS-006",
+    "company": "CodeGuard",
+    "industry": "Cybersecurity",
+    "contact_role": "CTO",
+    "pain_points": [
+      "Need to detect highly specific zero-day vulnerability patterns in proprietary C++ code",
+      "Off-the-shelf models are too verbose and miss the subtle logic flaws",
+      "Want to train a smaller, faster model on our 10 years of vulnerability data"
+    ],
+    "target_offering": "Fine-Tuning Engagement",
+    "expected_budget_fit": "$80k-$200k"
+  },
+  {
+    "id": "PROS-007",
+    "company": "HealthBridge",
+    "industry": "Healthcare",
+    "contact_role": "Operations Director",
+    "pain_points": [
+      "Doctors are spending too much time summarizing patient histories",
+      "We have thousands of electronic health records (EHR) that are underutilized",
+      "Need a system that pulls relevant patient history during a live consultation"
+    ],
+    "target_offering": "RAG Pipeline Build",
+    "expected_budget_fit": "$40k-$120k"
+  },
+  {
+    "id": "PROS-008",
+    "company": "MarketingMind",
+    "industry": "Advertising",
+    "contact_role": "Creative Director",
+    "pain_points": [
+      "AI-generated copy sounds too generic and 'robotic'",
+      "We need the AI to capture our specific brand voice and 'edgy' tone",
+      "Standard prompting isn't enough to maintain consistency across 1,000 ads"
+    ],
+    "target_offering": "Fine-Tuning Engagement",
+    "expected_budget_fit": "$80k-$200k"
+  },
+  {
+    "id": "PROS-009",
+    "company": "LogiTrack",
+    "industry": "Logistics",
+    "contact_role": "Innovation Lead",
+    "pain_points": [
+      "We have 5 different LLM providers and don't know which is best for routing tasks",
+      "Costs are spiraling because we use GPT-4 for everything",
+      "Need a framework to compare model performance vs. cost for our specific use case"
+    ],
+    "target_offering": "LLM Evaluation Setup",
+    "expected_budget_fit": "$25k-$60k"
+  },
+  {
+    "id": "PROS-010",
+    "company": "SafeTravel",
+    "industry": "Travel & Hospitality",
+    "contact_role": "CEO",
+    "pain_points": [
+      "Travel agents are overwhelmed by changing visa regulations in 190 countries",
+      "We need a 'single source of truth' bot that reads the latest government PDF updates",
+      "The info must be cited directly from the source document to ensure accuracy"
+    ],
+    "target_offering": "RAG Pipeline Build",
+    "expected_budget_fit": "$40k-$120k"
+  }
+]

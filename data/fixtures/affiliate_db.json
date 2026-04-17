@@ -1,0 +1,385 @@
+[
+  {
+    "id": "aff-001",
+    "name": "Sarah Jenkins",
+    "tier": "Platinum",
+    "ytd_volume_usd": 45200,
+    "weekly_volume_trend": -0.28,
+    "top_performing_landing_page": "/features/automation",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-002",
+    "name": "Arjun Mehta",
+    "tier": "Gold",
+    "ytd_volume_usd": 12400,
+    "weekly_volume_trend": 0.05,
+    "top_performing_landing_page": "/pricing/teams",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-003",
+    "name": "Chloe Zhao",
+    "tier": "Silver",
+    "ytd_volume_usd": 5100,
+    "weekly_volume_trend": -0.32,
+    "top_performing_landing_page": "/compare/notion",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-004",
+    "name": "Marcus Thorne",
+    "tier": "Platinum",
+    "ytd_volume_usd": 89000,
+    "weekly_volume_trend": 0.12,
+    "top_performing_landing_page": "/templates/project-management",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-005",
+    "name": "Elena Rodriguez",
+    "tier": "Gold",
+    "ytd_volume_usd": 15600,
+    "weekly_volume_trend": -0.26,
+    "top_performing_landing_page": "/integrations/slack",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-006",
+    "name": "David Chen",
+    "tier": "Bronze",
+    "ytd_volume_usd": 1200,
+    "weekly_volume_trend": 0.45,
+    "top_performing_landing_page": "/blog/productivity-hacks",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-007",
+    "name": "Sophie Al-Fayed",
+    "tier": "Silver",
+    "ytd_volume_usd": 4300,
+    "weekly_volume_trend": -0.41,
+    "top_performing_landing_page": "/features/security",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-008",
+    "name": "Kevin Park",
+    "tier": "Gold",
+    "ytd_volume_usd": 22100,
+    "weekly_volume_trend": -0.02,
+    "top_performing_landing_page": "/pricing/individual",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-009",
+    "name": "Liam O'Connor",
+    "tier": "Platinum",
+    "ytd_volume_usd": 67800,
+    "weekly_volume_trend": -0.30,
+    "top_performing_landing_page": "/features/automation",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-010",
+    "name": "Isabella Rossi",
+    "tier": "Silver",
+    "ytd_volume_usd": 3800,
+    "weekly_volume_trend": 0.18,
+    "top_performing_landing_page": "/templates/marketing",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-011",
+    "name": "Jackson Reed",
+    "tier": "Gold",
+    "ytd_volume_usd": 18900,
+    "weekly_volume_trend": -0.29,
+    "top_performing_landing_page": "/integrations/google-drive",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-012",
+    "name": "Amina Okafor",
+    "tier": "Bronze",
+    "ytd_volume_usd": 950,
+    "weekly_volume_trend": 0.08,
+    "top_performing_landing_page": "/features/mobile-app",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-013",
+    "name": "Tomás Garcia",
+    "tier": "Silver",
+    "ytd_volume_usd": 6200,
+    "weekly_volume_trend": -0.35,
+    "top_performing_landing_page": "/compare/asana",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-014",
+    "name": "Yuki Tanaka",
+    "tier": "Platinum",
+    "ytd_volume_usd": 102000,
+    "weekly_volume_trend": 0.04,
+    "top_performing_landing_page": "/features/automation",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-015",
+    "name": "Oliver Schmidt",
+    "tier": "Gold",
+    "ytd_volume_usd": 14300,
+    "weekly_volume_trend": -0.27,
+    "top_performing_landing_page": "/pricing/teams",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-016",
+    "name": "Maya Patel",
+    "tier": "Silver",
+    "ytd_volume_usd": 5400,
+    "weekly_volume_trend": 0.11,
+    "top_performing_landing_page": "/templates/sales-crm",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-017",
+    "name": "Lucas Dubois",
+    "tier": "Bronze",
+    "ytd_volume_usd": 2100,
+    "weekly_volume_trend": -0.05,
+    "top_performing_landing_page": "/features/calendar",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-018",
+    "name": "Emma Wilson",
+    "tier": "Gold",
+    "ytd_volume_usd": 28900,
+    "weekly_volume_trend": -0.33,
+    "top_performing_landing_page": "/integrations/slack",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-019",
+    "name": "Noah Kim",
+    "tier": "Platinum",
+    "ytd_volume_usd": 55000,
+    "weekly_volume_trend": 0.09,
+    "top_performing_landing_page": "/features/automation",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-020",
+    "name": "Zoe Thompson",
+    "tier": "Silver",
+    "ytd_volume_usd": 4700,
+    "weekly_volume_trend": -0.40,
+    "top_performing_landing_page": "/compare/monday",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-021",
+    "name": "Leo Wright",
+    "tier": "Gold",
+    "ytd_volume_usd": 19500,
+    "weekly_volume_trend": 0.02,
+    "top_performing_landing_page": "/pricing/teams",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-022",
+    "name": "Ava Martinez",
+    "tier": "Bronze",
+    "ytd_volume_usd": 800,
+    "weekly_volume_trend": 0.15,
+    "top_performing_landing_page": "/blog/remote-work",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-023",
+    "name": "Ethan Hunt",
+    "tier": "Silver",
+    "ytd_volume_usd": 3200,
+    "weekly_volume_trend": -0.08,
+    "top_performing_landing_page": "/templates/personal",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-024",
+    "name": "Mia Wong",
+    "tier": "Platinum",
+    "ytd_volume_usd": 115000,
+    "weekly_volume_trend": 0.06,
+    "top_performing_landing_page": "/features/automation",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-025",
+    "name": "Sven Nielsen",
+    "tier": "Gold",
+    "ytd_volume_usd": 16700,
+    "weekly_volume_trend": -0.12,
+    "top_performing_landing_page": "/integrations/zapier",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-026",
+    "name": "Harper Lee",
+    "tier": "Silver",
+    "ytd_volume_usd": 5900,
+    "weekly_volume_trend": 0.03,
+    "top_performing_landing_page": "/compare/trello",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-027",
+    "name": "Julian Castro",
+    "tier": "Bronze",
+    "ytd_volume_usd": 1500,
+    "weekly_volume_trend": -0.10,
+    "top_performing_landing_page": "/features/docs",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-028",
+    "name": "Freya Jensen",
+    "tier": "Gold",
+    "ytd_volume_usd": 24000,
+    "weekly_volume_trend": 0.14,
+    "top_performing_landing_page": "/pricing/teams",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-029",
+    "name": "Oscar Wilde",
+    "tier": "Silver",
+    "ytd_volume_usd": 4100,
+    "weekly_volume_trend": -0.02,
+    "top_performing_landing_page": "/templates/hr",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-030",
+    "name": "Luna Lovegood",
+    "tier": "Platinum",
+    "ytd_volume_usd": 72000,
+    "weekly_volume_trend": -0.05,
+    "top_performing_landing_page": "/features/automation",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-031",
+    "name": "Gabriel Santos",
+    "tier": "Gold",
+    "ytd_volume_usd": 13200,
+    "weekly_volume_trend": 0.07,
+    "top_performing_landing_page": "/integrations/jira",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-032",
+    "name": "Nora Ephron",
+    "tier": "Silver",
+    "ytd_volume_usd": 6800,
+    "weekly_volume_trend": 0.22,
+    "top_performing_landing_page": "/compare/clickup",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-033",
+    "name": "Xavier Miller",
+    "tier": "Bronze",
+    "ytd_volume_usd": 600,
+    "weekly_volume_trend": -0.15,
+    "top_performing_landing_page": "/features/notes",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-034",
+    "name": "Riley Cooper",
+    "tier": "Gold",
+    "ytd_volume_usd": 27500,
+    "weekly_volume_trend": 0.01,
+    "top_performing_landing_page": "/pricing/teams",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-035",
+    "name": "Clara Barton",
+    "tier": "Silver",
+    "ytd_volume_usd": 3900,
+    "weekly_volume_trend": 0.04,
+    "top_performing_landing_page": "/templates/education",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-036",
+    "name": "Sebastian Vane",
+    "tier": "Platinum",
+    "ytd_volume_usd": 94000,
+    "weekly_volume_trend": 0.10,
+    "top_performing_landing_page": "/features/automation",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-037",
+    "name": "Jade Nguyen",
+    "tier": "Gold",
+    "ytd_volume_usd": 11800,
+    "weekly_volume_trend": -0.03,
+    "top_performing_landing_page": "/integrations/github",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-038",
+    "name": "Miles Davis",
+    "tier": "Silver",
+    "ytd_volume_usd": 5200,
+    "weekly_volume_trend": -0.06,
+    "top_performing_landing_page": "/compare/basecamp",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-039",
+    "name": "Aria Stark",
+    "tier": "Bronze",
+    "ytd_volume_usd": 1800,
+    "weekly_volume_trend": 0.30,
+    "top_performing_landing_page": "/features/offline-mode",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-040",
+    "name": "Felix Unger",
+    "tier": "Gold",
+    "ytd_volume_usd": 20100,
+    "weekly_volume_trend": 0.05,
+    "top_performing_landing_page": "/pricing/teams",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-041",
+    "name": "Penelope Cruz",
+    "tier": "Silver",
+    "ytd_volume_usd": 4600,
+    "weekly_volume_trend": 0.09,
+    "top_performing_landing_page": "/templates/design",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-042",
+    "name": "Arthur Dent",
+    "tier": "Platinum",
+    "ytd_volume_usd": 81000,
+    "weekly_volume_trend": -0.01,
+    "top_performing_landing_page": "/features/automation",
+    "contact_preference": "email"
+  },
+  {
+    "id": "aff-043",
+    "name": "Layla Ali",
+    "tier": "Gold",
+    "ytd_volume_usd": 14900,
+    "weekly_volume_trend": 0

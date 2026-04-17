@@ -1,0 +1,222 @@
+[
+  {
+    "onboarding_id": "OB-001",
+    "practitioner_name": "Dr. Sarah Jenkins",
+    "email": "s.jenkins@metromedical.org",
+    "role": "MD",
+    "start_date": "2024-05-15",
+    "status": "in_progress",
+    "missing_items": ["NPI_Verification", "State_License_Copy"],
+    "completed_modules": [],
+    "assigned_clinic": "Northside General"
+  },
+  {
+    "onboarding_id": "OB-002",
+    "practitioner_name": "Marcus Thorne",
+    "email": "m.thorne@healthfirst.com",
+    "role": "RN",
+    "start_date": "2024-05-12",
+    "status": "pending_documents",
+    "missing_items": ["Immunization_Records"],
+    "completed_modules": ["HIPAA_Basics"],
+    "assigned_clinic": "Eastside Urgent Care"
+  },
+  {
+    "onboarding_id": "OB-003",
+    "practitioner_name": "Elena Rodriguez",
+    "email": "e.rodriguez@curo-client.com",
+    "role": "PA",
+    "start_date": "2024-05-20",
+    "status": "scheduled",
+    "missing_items": ["DEA_Registration"],
+    "completed_modules": ["Platform_Intro"],
+    "assigned_clinic": "Downtown Wellness"
+  },
+  {
+    "onboarding_id": "OB-004",
+    "practitioner_name": "James Wilson",
+    "email": "j.wilson@st-jude-clinic.net",
+    "role": "NP",
+    "start_date": "2024-05-10",
+    "status": "in_progress",
+    "missing_items": ["Malpractice_Insurance_COI", "Background_Check_Consent"],
+    "completed_modules": [],
+    "assigned_clinic": "St. Jude Family Practice"
+  },
+  {
+    "onboarding_id": "OB-005",
+    "practitioner_name": "Linda Chen",
+    "email": "l.chen@cityhealth.gov",
+    "role": "admin_support",
+    "start_date": "2024-05-01",
+    "status": "stalled",
+    "missing_items": ["Signed_NDA", "ID_Verification"],
+    "completed_modules": ["Data_Privacy_2024"],
+    "assigned_clinic": "Central Records Office"
+  },
+  {
+    "onboarding_id": "OB-006",
+    "practitioner_name": "Dr. Robert Halloway",
+    "email": "rhalloway@privatepractice.com",
+    "role": "MD",
+    "start_date": "2024-06-01",
+    "status": "not_started",
+    "missing_items": ["Board_Certification", "CV_Updated", "NPI_Verification"],
+    "completed_modules": [],
+    "assigned_clinic": "Halloway Cardiology"
+  },
+  {
+    "onboarding_id": "OB-007",
+    "practitioner_name": "Samantha Reed",
+    "email": "sreed@nursing-solutions.io",
+    "role": "RN",
+    "start_date": "2024-05-18",
+    "status": "pending_documents",
+    "missing_items": ["BLS_Certification"],
+    "completed_modules": ["Patient_Safety_Protocol"],
+    "assigned_clinic": "Northside General"
+  },
+  {
+    "onboarding_id": "OB-008",
+    "practitioner_name": "Kevin Park",
+    "email": "kpark@ortho-specialists.com",
+    "role": "PA",
+    "start_date": "2024-05-22",
+    "status": "in_progress",
+    "missing_items": ["State_License_Copy"],
+    "completed_modules": [],
+    "assigned_clinic": "Ortho Specialists LLC"
+  },
+  {
+    "onboarding_id": "OB-009",
+    "practitioner_name": "Anita Desai",
+    "email": "adesai@community-health.org",
+    "role": "NP",
+    "start_date": "2024-05-14",
+    "status": "scheduled",
+    "missing_items": ["Prescriptive_Authority_Form"],
+    "completed_modules": ["Electronic_Prescribing_Guide"],
+    "assigned_clinic": "Community Health Hub"
+  },
+  {
+    "onboarding_id": "OB-010",
+    "practitioner_name": "Gary Vought",
+    "email": "gvought@medical-admin.com",
+    "role": "admin_support",
+    "start_date": "2024-05-05",
+    "status": "pending_documents",
+    "missing_items": ["I-9_Form", "Direct_Deposit_Setup"],
+    "completed_modules": ["Billing_Workflow_A"],
+    "assigned_clinic": "Eastside Urgent Care"
+  },
+  {
+    "onboarding_id": "OB-011",
+    "practitioner_name": "Dr. Emily Blunt",
+    "email": "eblunt@surgery-center.com",
+    "role": "MD",
+    "start_date": "2024-06-10",
+    "status": "not_started",
+    "missing_items": ["Peer_References", "Hospital_Privileges_Letter"],
+    "completed_modules": [],
+    "assigned_clinic": "Westside Surgery Center"
+  },
+  {
+    "onboarding_id": "OB-012",
+    "practitioner_name": "Michael Angelo",
+    "email": "mangelo@nursing-pool.net",
+    "role": "RN",
+    "start_date": "2024-05-30",
+    "status": "in_progress",
+    "missing_items": ["Background_Check_Consent"],
+    "completed_modules": ["HIPAA_Basics"],
+    "assigned_clinic": "Northside General"
+  },
+  {
+    "onboarding_id": "OB-013",
+    "practitioner_name": "Sarah Connor",
+    "email": "sconnor@rehab-services.com",
+    "role": "PA",
+    "start_date": "2024-05-25",
+    "status": "scheduled",
+    "missing_items": ["CME_Credits_Log"],
+    "completed_modules": ["Rehab_SOP_v2"],
+    "assigned_clinic": "Sunrise Rehabilitation"
+  },
+  {
+    "onboarding_id": "OB-014",
+    "practitioner_name": "David Bowie",
+    "email": "dbowie@clinic-group.com",
+    "role": "NP",
+    "start_date": "2024-05-12",
+    "status": "stalled",
+    "missing_items": ["DEA_Registration", "State_License_Copy"],
+    "completed_modules": ["Clinical_Documentation_Standards"],
+    "assigned_clinic": "Downtown Wellness"
+  },
+  {
+    "onboarding_id": "OB-015",
+    "practitioner_name": "Rachel Green",
+    "email": "rgreen@admin-pros.com",
+    "role": "admin_support",
+    "start_date": "2024-05-15",
+    "status": "in_progress",
+    "missing_items": ["Emergency_Contact_Form"],
+    "completed_modules": ["System_Access_Training"],
+    "assigned_clinic": "St. Jude Family Practice"
+  },
+  {
+    "onboarding_id": "OB-016",
+    "practitioner_name": "Dr. Gregory House",
+    "email": "ghouse@diagnostics.edu",
+    "role": "MD",
+    "start_date": "2024-06-15",
+    "status": "not_started",
+    "missing_items": ["Medical_School_Diploma", "Residency_Verification"],
+    "completed_modules": [],
+    "assigned_clinic": "University Hospital"
+  },
+  {
+    "onboarding_id": "OB-017",
+    "practitioner_name": "Clara Oswald",
+    "email": "coswald@travel-nurse.org",
+    "role": "RN",
+    "start_date": "2024-05-28",
+    "status": "pending_documents",
+    "missing_items": ["ACLS_Certification", "PALS_Certification"],
+    "completed_modules": ["Standard_Precautions"],
+    "assigned_clinic": "Eastside Urgent Care"
+  },
+  {
+    "onboarding_id": "OB-018",
+    "practitioner_name": "Steven Strange",
+    "email": "sstrange@neuro-inst.com",
+    "role": "PA",
+    "start_date": "2024-06-05",
+    "status": "in_progress",
+    "missing_items": ["Supervising_Physician_Agreement"],
+    "completed_modules": [],
+    "assigned_clinic": "Neuro Institute"
+  },
+  {
+    "onboarding_id": "OB-019",
+    "practitioner_name": "Wanda Maximoff",
+    "email": "wmaximoff@behavioral-health.com",
+    "role": "NP",
+    "start_date": "2024-05-20",
+    "status": "scheduled",
+    "missing_items": ["Psychiatric_Certification"],
+    "completed_modules": ["Telehealth_Conduct"],
+    "assigned_clinic": "Visionary Behavioral Health"
+  },
+  {
+    "onboarding_id": "OB-020",
+    "practitioner_name": "Peter Parker",
+    "email": "pparker@frontdesk-solutions.com",
+    "role": "admin_support",
+    "start_date": "2024-05-10",
+    "status": "in_progress",
+    "missing_items": ["Signed_Employee_Handbook"],
+    "completed_modules": ["Front_Desk_Scheduling"],
+    "assigned_clinic": "Northside General"
+  }
+]

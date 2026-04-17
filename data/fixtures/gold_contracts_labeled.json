@@ -1,0 +1,102 @@
+[
+  {
+    "contract_id": "CONT-2023-001",
+    "filename": "MSA_Vertex_Health_Solutions_2023.pdf",
+    "contract_type": "MSA",
+    "parties": ["Vertex Health Solutions Inc.", "Global MedTech Corp"],
+    "effective_date": "2023-01-15",
+    "renewal_terms": "Automatic 12-month renewal unless notice given 90 days prior to term end.",
+    "governing_law": "Delaware",
+    "missing_clauses": []
+  },
+  {
+    "contract_id": "CONT-2023-002",
+    "filename": "BAA_St_Jude_Medical_Center.pdf",
+    "contract_type": "BAA",
+    "parties": ["St. Jude Medical Center", "Global MedTech Corp"],
+    "effective_date": "2023-02-10",
+    "renewal_terms": "Co-terminous with underlying Master Service Agreement.",
+    "governing_law": "California",
+    "missing_clauses": ["Data Breach Notification Timeline"]
+  },
+  {
+    "contract_id": "CONT-2023-003",
+    "filename": "DPA_CloudData_Systems_v2.pdf",
+    "contract_type": "DPA",
+    "parties": ["CloudData Systems LLC", "Global MedTech Corp"],
+    "effective_date": "2023-03-01",
+    "renewal_terms": "Perpetual during term of service engagement.",
+    "governing_law": "New York",
+    "missing_clauses": ["Standard Contractual Clauses (SCCs)", "Sub-processor Audit Rights"]
+  },
+  {
+    "contract_id": "CONT-2023-004",
+    "filename": "MSA_Beacon_Diagnostics_Final.pdf",
+    "contract_type": "MSA",
+    "parties": ["Beacon Diagnostics Group", "Global MedTech Corp"],
+    "effective_date": "2023-04-12",
+    "renewal_terms": "Manual renewal via written amendment only.",
+    "governing_law": "Texas",
+    "missing_clauses": ["Limitation of Liability"]
+  },
+  {
+    "contract_id": "CONT-2023-005",
+    "filename": "BAA_Quest_Bio_Labs.pdf",
+    "contract_type": "BAA",
+    "parties": ["Quest Bio Labs", "Global MedTech Corp"],
+    "effective_date": "2023-05-20",
+    "renewal_terms": "Annual automatic renewal.",
+    "governing_law": "Delaware",
+    "missing_clauses": []
+  },
+  {
+    "contract_id": "CONT-2023-006",
+    "filename": "MSA_Zenthor_Pharma.pdf",
+    "contract_type": "MSA",
+    "parties": ["Zenthor Pharma Ltd", "Global MedTech Corp"],
+    "effective_date": "2023-06-15",
+    "renewal_terms": "3-year initial term; 2-year renewal options.",
+    "governing_law": "New York",
+    "missing_clauses": ["Indemnification", "Termination for Convenience"]
+  },
+  {
+    "contract_id": "CONT-2023-007",
+    "filename": "DPA_European_Health_Data_Bridge.pdf",
+    "contract_type": "DPA",
+    "parties": ["European Health Data Bridge", "Global MedTech Corp"],
+    "effective_date": "2023-07-01",
+    "renewal_terms": "Expires upon deletion of all personal data.",
+    "governing_law": "Ireland",
+    "missing_clauses": []
+  },
+  {
+    "contract_id": "CONT-2023-008",
+    "filename": "MSA_Northstar_Genomics.pdf",
+    "contract_type": "MSA",
+    "parties": ["Northstar Genomics Inc.", "Global MedTech Corp"],
+    "effective_date": "2023-08-14",
+    "renewal_terms": "Automatic renewal for successive 1-year periods.",
+    "governing_law": "Massachusetts",
+    "missing_clauses": ["Assignment"]
+  },
+  {
+    "contract_id": "CONT-2023-009",
+    "filename": "BAA_Riverside_Clinic_Network.pdf",
+    "contract_type": "BAA",
+    "parties": ["Riverside Clinic Network", "Global MedTech Corp"],
+    "effective_date": "2023-09-05",
+    "renewal_terms": "Indefinite until termination.",
+    "governing_law": "Illinois",
+    "missing_clauses": ["Return or Destruction of PHI"]
+  },
+  {
+    "contract_id": "CONT-2023-010",
+    "filename": "MSA_Apex_Software_Services.pdf",
+    "contract_type": "MSA",
+    "parties": ["Apex Software Services", "Global MedTech Corp"],
+    "effective_date": "2023-10-22",
+    "renewal_terms": "No automatic renewal.",
+    "governing_law": "Washington",
+    "missing_clauses": ["Notices", "Governing Law"]
+  }
+]

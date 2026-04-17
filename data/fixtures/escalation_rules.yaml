@@ -1,0 +1,72 @@
+version: 1.2
+last_updated: 2023-11-15
+brokerage: Westbridge Insurance Brokerage
+department: Automated Lead Response System
+
+escalation_logic:
+  mode: strict
+  default_action: process_automated
+  escalation_target: senior_broker_queue
+
+rules:
+  - rule_id: premium_threshold
+    description: High-value premium detection
+    condition:
+      field: estimated_annual_premium
+      operator: greater_than
+      value: 15000
+    action: escalate
+    reason_code: HIGH_PREMIUM_VALUE
+
+  - rule_id: property_valuation
+    description: Non-standard property valuation check
+    condition:
+      field: property_value
+      operator: greater_than
+      value: 2000000
+    action: escalate
+    reason_code: LUXURY_PROPERTY_UNDERWRITING
+
+  - rule_id: claims_history
+    description: Recent claims activity within 24 months
+    condition:
+      field: claims_history_count
+      lookback_period_months: 24
+      operator: greater_than_or_equal
+      value: 1
+    action: escalate
+    reason_code: RECENT_CLAIMS_ACTIVITY
+
+  - rule_id: applicant_age_lower
+    description: High-risk young driver/applicant
+    condition:
+      field: applicant_age
+      operator: less_than
+      value: 21
+    action: escalate
+    reason_code: AGE_RISK_LOW
+
+  - rule_id: applicant_age_upper
+    description: Senior applicant underwriting review
+    condition:
+      field: applicant_age
+      operator: greater_than
+      value: 70
+    action: escalate
+    reason_code: AGE_RISK_HIGH
+
+escalation_handoff_requirements:
+  include_fields:
+    - carrier_quotes_comparison
+    - risk_score_summary
+    - applicant_contact_info
+    - trigger_reason_code
+  brief_format: "Broker Prep Brief: [REASON_CODE] - [APPLICANT_NAME]"
+
+automation_bypass:
+  - product_line: umbrella
+    requires_human_review: true
+    threshold: always
+  - product_line: life
+    requires_human_review: true
+    threshold: always

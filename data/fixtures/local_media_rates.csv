@@ -1,0 +1,11 @@
+Channel,Medium,Format,Unit_Cost,CPM,Availability,Minimum_Spend,Notes
+Instagram_Ads,Social,Stories/Reels_Video,0.85,14.50,Immediate,100,Targeted to 1-mile radius zip codes
+Facebook_Ads,Social,Carousel/Post,0.65,11.20,Immediate,100,Targeted to ages 24-55 in Seattle
+Local_Neighborhood_Blog,Display,Sidebar_Banner_Weekly,250.00,18.00,Limited,250,Capitol Hill / Central District focus
+Direct_Mail_Postcard,Physical,Standard_4x6,0.48,480.00,Weekly,500,Includes printing and postage (EDDM)
+Neighborhood_Flyer_Distribution,Physical,Door_Hanger,0.35,350.00,On-Demand,200,Street team distribution
+Local_Podcast_Sponsorship,Audio,30s_Mid-roll,150.00,22.00,Bi-weekly,300,Seattle Foodie Podcast
+Nextdoor_Sponsored_Post,Social,Newsfeed,1.20,15.50,Immediate,50,Hyper-local neighborhood targeting
+Community_Center_Newsletter,Print,Quarter_Page,100.00,12.50,Monthly,100,High trust among local residents
+Street_Poster_Wildposting,Physical,24x36_Poster,4.00,120.00,Weekly,400,High visibility near transit hubs
+Email_Newsletter_Sponsorship,Digital,Dedicated_Blast,0.15,25.00,Weekly,150,Local 'Best of Seattle' subscriber list

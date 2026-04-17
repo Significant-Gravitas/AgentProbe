@@ -37,6 +37,7 @@ function buildRun(): RunRecord {
       scenarioTotal: 1,
       scenarioPassedCount: 1,
       scenarioFailedCount: 0,
+      scenarioHarnessFailedCount: 0,
       scenarioErroredCount: 0,
     },
     scenarios: [
@@ -47,6 +48,7 @@ function buildRun(): RunRecord {
         scenarioName: "Basic refund policy question",
         personaId: "frustrated-customer",
         rubricId: "customer-support",
+        userId: "user-123",
         tags: ["smoke", "support"],
         status: "completed",
         passed: true,
@@ -90,6 +92,15 @@ function buildRun(): RunRecord {
           },
           {
             turn_index: 1,
+            role: "system",
+            source: "session_boundary",
+            content:
+              "--- Session boundary: session_id: followup reset_policy: fresh_agent time_offset: 48h user_id: user-123 ---",
+            created_at: "2026-03-24T15:00:03+00:00",
+            usage: null,
+          },
+          {
+            turn_index: 2,
             role: "assistant",
             source: "assistant",
             content:
@@ -100,7 +111,7 @@ function buildRun(): RunRecord {
         ],
         toolCalls: [
           {
-            turn_index: 1,
+            turn_index: 2,
             call_order: 1,
             name: "lookup_order",
             args: { order_id: "123" },
@@ -110,7 +121,7 @@ function buildRun(): RunRecord {
         checkpoints: [
           {
             checkpoint_index: 0,
-            preceding_turn_index: 1,
+            preceding_turn_index: 2,
             passed: true,
             failures: [],
             assertions: [{ response_mentions: "30-day return policy" }],
@@ -118,7 +129,7 @@ function buildRun(): RunRecord {
         ],
         targetEvents: [
           {
-            turn_index: 1,
+            turn_index: 2,
             exchange_index: 0,
             raw_exchange: {
               request: {
@@ -171,6 +182,9 @@ describe("reporting", () => {
     expect(html).toContain("&quot;transport&quot;: &quot;http&quot;");
     expect(html).toContain('data-open-tab="rubric"');
     expect(html).toContain("Task Completion");
+    expect(html).toContain("user-123");
+    expect(html).toContain("Session Boundary");
+    expect(html).toContain("followup");
     expect(html).toContain(
       "The assistant addressed the refund request directly.",
     );

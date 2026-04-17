@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import type {
   AdapterReply,
   AutogptAuthResult,
@@ -7,9 +9,11 @@ import type {
   JsonValue,
   SessionLifecycleRequest,
   ToolCallRecord,
+  UploadedFile,
 } from "../../shared/types/contracts.ts";
 import {
   AgentProbeConfigError,
+  AgentProbeHarnessError,
   AgentProbeRuntimeError,
 } from "../../shared/utils/errors.ts";
 import {
@@ -461,8 +465,24 @@ export class HttpEndpointAdapter {
           extractTextByJsonPath(event, responseConfig.contentPath),
         )
         .filter(Boolean)
-        .join("\n")
+        .join(" ")
+        .replace(/ {2,}/g, " ")
         .trim();
+      if (!assistantText) {
+        const errorTexts = events
+          .filter(
+            (e) =>
+              e &&
+              typeof e === "object" &&
+              !Array.isArray(e) &&
+              (e as Record<string, unknown>).type === "error",
+          )
+          .map((e) => (e as Record<string, unknown>).errorText)
+          .filter((t) => typeof t === "string" && t.trim());
+        if (errorTexts.length > 0) {
+          assistantText = `[Backend error: ${errorTexts.join("; ")}]`;
+        }
+      }
       rawBody = events;
       usage = events.length > 0 ? extractUsage(events.at(-1)) : {};
       toolCalls = extractConfiguredToolCalls(events, this.endpoint);
@@ -503,6 +523,58 @@ export class HttpEndpointAdapter {
       },
       latencyMs: performance.now() - startedAt,
       usage,
+    };
+  }
+
+  async uploadFile(filePath: string, fileName: string): Promise<UploadedFile> {
+    const connection = this.endpoint.connection;
+    if (!connection || !("baseUrl" in connection)) {
+      throw new AgentProbeConfigError(
+        "File upload requires an HTTP connection with base_url.",
+      );
+    }
+    const baseUrl = connection.baseUrl.replace(/\/$/, "");
+    const authHeaders = await this.resolveAuthHeaders();
+    let fileBytes: Buffer;
+    try {
+      fileBytes = await readFile(filePath);
+    } catch (error) {
+      throw new AgentProbeHarnessError(
+        `File upload failed for ${fileName}: cannot read ${filePath} (${error instanceof Error ? error.message : String(error)}).`,
+      );
+    }
+    const blob = new Blob([fileBytes]);
+    const form = new FormData();
+    form.append("file", blob, fileName);
+    let response: Response;
+    try {
+      response = await this.fetchImpl(
+        `${baseUrl}/api/workspace/files/upload?overwrite=true`,
+        {
+          method: "POST",
+          headers: authHeaders,
+          body: form,
+        },
+      );
+    } catch (error) {
+      throw new AgentProbeHarnessError(
+        `File upload failed for ${fileName}: transport error (${error instanceof Error ? error.message : String(error)}).`,
+      );
+    }
+    if (!response.ok) {
+      let detail = "";
+      try {
+        detail = (await response.text()).slice(0, 400);
+      } catch {}
+      throw new AgentProbeHarnessError(
+        `File upload rejected for ${fileName}: ${response.status} ${response.statusText}${detail ? ` — ${detail}` : ""}.`,
+      );
+    }
+    const body = (await response.json()) as Record<string, unknown>;
+    return {
+      fileId: String(body.file_id ?? body.id ?? ""),
+      name: String(body.name ?? fileName),
+      mimeType: typeof body.mime_type === "string" ? body.mime_type : undefined,
     };
   }
 

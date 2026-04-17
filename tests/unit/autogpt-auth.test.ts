@@ -96,8 +96,9 @@ describe("autogpt auth", () => {
       const [, payload] = result.token.split(".");
       const decoded = JSON.parse(
         Buffer.from(payload ?? "", "base64url").toString("utf8"),
-      ) as { sub?: string };
+      ) as { sub?: string; user_metadata?: { name?: string } };
       expect(decoded.sub).toBe(userId);
+      expect(decoded.user_metadata?.name).toBe("AgentProbe User");
     } finally {
       globalThis.fetch = originalFetch;
       if (originalAuthMode === undefined) {

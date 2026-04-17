@@ -1,0 +1,75 @@
+{
+  "territories": [
+    {
+      "ae_id": "AE_001",
+      "ae_name": "Sarah Jenkins",
+      "ae_email": "s.jenkins@pilgrim-fintech.com",
+      "segment": "Enterprise",
+      "criteria": {
+        "employee_count_min": 1000,
+        "employee_count_max": null,
+        "region": ["North America", "EMEA"],
+        "industries": ["Banking", "Insurance", "Fintech", "E-commerce"]
+      },
+      "slack_handle": "@sarah_sales"
+    },
+    {
+      "ae_id": "AE_002",
+      "ae_name": "Marcus Chen",
+      "ae_email": "m.chen@pilgrim-fintech.com",
+      "segment": "Mid-Market North America",
+      "criteria": {
+        "employee_count_min": 251,
+        "employee_count_max": 999,
+        "region": ["North America"],
+        "industries": ["SaaS", "Real Estate", "Professional Services", "Healthcare"]
+      },
+      "slack_handle": "@marcus_c"
+    },
+    {
+      "ae_id": "AE_003",
+      "ae_name": "Elena Rodriguez",
+      "ae_email": "e.rodriguez@pilgrim-fintech.com",
+      "segment": "Mid-Market International",
+      "criteria": {
+        "employee_count_min": 251,
+        "employee_count_max": 999,
+        "region": ["EMEA", "APAC", "LATAM"],
+        "industries": ["SaaS", "Logistics", "Retail", "Manufacturing"]
+      },
+      "slack_handle": "@elena_intl"
+    },
+    {
+      "ae_id": "AE_004",
+      "ae_name": "David Miller",
+      "ae_email": "d.miller@pilgrim-fintech.com",
+      "segment": "SMB High-Growth",
+      "criteria": {
+        "employee_count_min": 51,
+        "employee_count_max": 250,
+        "region": ["Global"],
+        "industries": ["Fintech", "Web3", "SaaS"],
+        "min_funding_stage": "Series A"
+      },
+      "slack_handle": "@dmiller_sales"
+    },
+    {
+      "ae_id": "AE_005",
+      "ae_name": "Jessica Wu",
+      "ae_email": "j.wu@pilgrim-fintech.com",
+      "segment": "SMB General",
+      "criteria": {
+        "employee_count_min": 1,
+        "employee_count_max": 50,
+        "region": ["Global"],
+        "industries": ["Any"]
+      },
+      "slack_handle": "@jwu_smb"
+    }
+  ],
+  "routing_rules": {
+    "default_ae": "AE_005",
+    "assignment_logic": "Most specific match based on employee count then region",
+    "overflow_policy": "Round-robin if primary AE is at capacity"
+  }
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "invite_id": "INV-8821",
+    "sender": "Liam O'Donnell",
+    "sender_role": "Head of Growth",
+    "subject": "Growth Strategy Sync",
+    "proposed_time": "2023-10-23T14:30:00Z",
+    "duration_minutes": 45,
+    "description": "Maya, I need your sign-off on the Q4 ad spend allocation before we push it live on Tuesday. This is a quick walkthrough of the budget shifts.",
+    "priority": "High",
+    "status": "pending"
+  },
+  {
+    "invite_id": "INV-9045",
+    "sender": "Sarah Jenkins",
+    "sender_role": "Venture Partner, Sequoia-Alpha",
+    "subject": "Portfolio Update / Coffee",
+    "proposed_time": "2023-10-24T10:00:00Z",
+    "duration_minutes": 60,
+    "description": "Hey Maya, I'm in town on Tuesday and would love to catch up on your recent traction. Let me know if this slot works or if we should find another time.",
+    "priority": "Medium",
+    "status": "pending"
+  },
+  {
+    "invite_id": "INV-7732",
+    "sender": "Jordan Miller",
+    "sender_role": "Product Designer",
+    "subject": "UI/UX Review: Mobile V2",
+    "proposed_time": "2023-10-25T11:00:00Z",
+    "duration_minutes": 90,
+    "description": "Final review of the onboarding flows. If we don't finalize these by Wednesday, the dev team will be blocked for the sprint.",
+    "priority": "High",
+    "status": "pending"
+  }
+]

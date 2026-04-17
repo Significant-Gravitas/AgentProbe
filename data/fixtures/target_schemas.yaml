@@ -1,0 +1,111 @@
+schemas:
+  - table_name: raw_web_events
+    database: ANALYTICS_DB
+    schema: RAW_STAGING
+    description: Clickstream data captured from the primary web application.
+    columns:
+      - name: event_id
+        type: VARCHAR(64)
+        primary_key: true
+      - name: user_id
+        type: VARCHAR(64)
+        nullable: false
+      - name: event_type
+        type: VARCHAR(32)
+        description: "page_view, click, form_submit"
+      - name: page_url
+        type: VARCHAR(2048)
+      - name: user_agent
+        type: TEXT
+      - name: client_ip
+        type: VARCHAR(45)
+      - name: received_at
+        type: TIMESTAMP_NTZ
+        default: "CURRENT_TIMESTAMP()"
+
+  - table_name: fct_subscription_billing
+    database: ANALYTICS_DB
+    schema: CORE_FINANCE
+    description: Fact table containing normalized subscription billing records.
+    columns:
+      - name: invoice_id
+        type: VARCHAR(128)
+        primary_key: true
+      - name: customer_id
+        type: VARCHAR(64)
+        nullable: false
+      - name: subscription_plan
+        type: VARCHAR(32)
+      - name: amount_usd
+        type: NUMBER(12, 2)
+      - name: billing_period_start
+        type: DATE
+      - name: billing_period_end
+        type: DATE
+      - name: status
+        type: VARCHAR(16)
+        description: "PAID, PENDING, OVERDUE, VOID"
+
+  - table_name: dim_inventory_snapshot
+    database: ANALYTICS_DB
+    schema: CORE_SUPPLY_CHAIN
+    description: Daily snapshot of warehouse inventory levels.
+    columns:
+      - name: snapshot_date
+        type: DATE
+        primary_key: true
+      - name: sku_id
+        type: VARCHAR(64)
+        primary_key: true
+      - name: warehouse_location
+        type: VARCHAR(12)
+      - name: units_on_hand
+        type: INTEGER
+      - name: units_allocated
+        type: INTEGER
+      - name: restock_threshold
+        type: INTEGER
+      - name: unit_cost_basis
+        type: NUMBER(10, 4)
+
+  - table_name: stg_crm_leads
+    database: ANALYTICS_DB
+    schema: RAW_MARKETING
+    description: Staging table for daily leads ingested from Salesforce.
+    columns:
+      - name: lead_id
+        type: VARCHAR(64)
+        primary_key: true
+      - name: email_hash
+        type: VARCHAR(128)
+      - name: lead_source
+        type: VARCHAR(255)
+      - name: lead_status
+        type: VARCHAR(50)
+      - name: created_date
+        type: TIMESTAMP_NTZ
+      - name: converted_flag
+        type: BOOLEAN
+      - name: industry_segment
+        type: VARCHAR(100)
+
+  - table_name: agg_daily_active_users
+    database: ANALYTICS_DB
+    schema: REPORTING_PRODUCT
+    description: Daily aggregated metrics for user engagement.
+    columns:
+      - name: activity_date
+        type: DATE
+        primary_key: true
+      - name: platform
+        type: VARCHAR(16)
+        primary_key: true
+        description: "IOS, ANDROID, WEB"
+      - name: dau_count
+        type: INTEGER
+      - name: new_registrations
+        type: INTEGER
+      - name: avg_session_duration_sec
+        type: NUMBER(10, 2)
+      - name: retention_cohort_tag
+        type: VARCHAR(64)

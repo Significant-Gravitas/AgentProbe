@@ -1,0 +1,382 @@
+[
+  {
+    "id": "P-0001",
+    "name": "The AI Engineering Podcast",
+    "type": "podcast",
+    "audience_size": 45000,
+    "audience_metadata": {
+      "primary_role": "Software Engineer",
+      "secondary_role": "ML Engineer",
+      "industry": "Technology",
+      "seniority": "Mid-Senior"
+    },
+    "last_6mo_cross_promo_count": 4,
+    "contact_email": "producers@ai-eng-pod.io",
+    "recent_content": "Episode 142: Evaluating LLM Outputs with RAG-specific Metrics"
+  },
+  {
+    "id": "N-0002",
+    "name": "MLOps Weekly",
+    "type": "newsletter",
+    "audience_size": 22000,
+    "audience_metadata": {
+      "primary_role": "MLOps Engineer",
+      "secondary_role": "Data Scientist",
+      "industry": "Enterprise Software",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 1,
+    "contact_email": "editor@mlopsweekly.com",
+    "recent_content": "Issue #89: The Hidden Costs of Model Drift in Production"
+  },
+  {
+    "id": "P-0003",
+    "name": "Data Science Leaders",
+    "type": "podcast",
+    "audience_size": 12000,
+    "audience_metadata": {
+      "primary_role": "Data Science Manager",
+      "secondary_role": "VP Engineering",
+      "industry": "Healthcare",
+      "seniority": "Executive"
+    },
+    "last_6mo_cross_promo_count": 0,
+    "contact_email": "host@dsl-podcast.com",
+    "recent_content": "Episode 201: Building a Culture of Experimentation"
+  },
+  {
+    "id": "N-0004",
+    "name": "The Prompt Engineer",
+    "type": "newsletter",
+    "audience_size": 68000,
+    "audience_metadata": {
+      "primary_role": "Product Manager",
+      "secondary_role": "AI Researcher",
+      "industry": "Consumer Tech",
+      "seniority": "Mid-level"
+    },
+    "last_6mo_cross_promo_count": 8,
+    "contact_email": "hello@promptengineer.xyz",
+    "recent_content": "Issue #112: Why Your System Prompts are Failing in Production"
+  },
+  {
+    "id": "P-0005",
+    "name": "Latent Space",
+    "type": "podcast",
+    "audience_size": 55000,
+    "audience_metadata": {
+      "primary_role": "AI Engineer",
+      "secondary_role": "Founder",
+      "industry": "Venture Capital / Startups",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 3,
+    "contact_email": "swyx@latentspace.fm",
+    "recent_content": "Episode: The Rise of the AI Engineer and the Death of the Data Scientist"
+  },
+  {
+    "id": "N-0006",
+    "name": "Import AI",
+    "type": "newsletter",
+    "audience_size": 35000,
+    "audience_metadata": {
+      "primary_role": "AI Researcher",
+      "secondary_role": "Policy Maker",
+      "industry": "Academic/Research",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 0,
+    "contact_email": "jack@importai.com",
+    "recent_content": "Issue 345: Benchmark Saturation and the Need for Better Evals"
+  },
+  {
+    "id": "P-0007",
+    "name": "Software Engineering Daily",
+    "type": "podcast",
+    "audience_size": 150000,
+    "audience_metadata": {
+      "primary_role": "Software Engineer",
+      "secondary_role": "DevOps",
+      "industry": "Technology",
+      "seniority": "All"
+    },
+    "last_6mo_cross_promo_count": 12,
+    "contact_email": "sponsorships@sedaily.com",
+    "recent_content": "Episode: Testing Distributed Systems in the Age of AI"
+  },
+  {
+    "id": "N-0008",
+    "name": "Developer First",
+    "type": "newsletter",
+    "audience_size": 15000,
+    "audience_metadata": {
+      "primary_role": "Developer Advocate",
+      "secondary_role": "CTO",
+      "industry": "SaaS",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 2,
+    "contact_email": "team@devfirst.io",
+    "recent_content": "Issue: Why Developer Experience is the New Marketing"
+  },
+  {
+    "id": "P-0009",
+    "name": "The Practical AI Podcast",
+    "type": "podcast",
+    "audience_size": 28000,
+    "audience_metadata": {
+      "primary_role": "Software Engineer",
+      "secondary_role": "Product Manager",
+      "industry": "General Business",
+      "seniority": "Mid-level"
+    },
+    "last_6mo_cross_promo_count": 2,
+    "contact_email": "editors@changelog.com",
+    "recent_content": "Episode 240: Making LLMs Actually Useful in Your App"
+  },
+  {
+    "id": "N-0010",
+    "name": "AI Tidbits",
+    "type": "newsletter",
+    "audience_size": 42000,
+    "audience_metadata": {
+      "primary_role": "AI Engineer",
+      "secondary_role": "ML Researcher",
+      "industry": "Technology",
+      "seniority": "Mid-Senior"
+    },
+    "last_6mo_cross_promo_count": 5,
+    "contact_email": "sah@aitidbits.com",
+    "recent_content": "Issue: Open Source vs Closed Source Evals - Who Wins?"
+  },
+  {
+    "id": "P-0011",
+    "name": "The Gradient Podcast",
+    "type": "podcast",
+    "audience_size": 18000,
+    "audience_metadata": {
+      "primary_role": "ML Researcher",
+      "secondary_role": "Graduate Student",
+      "industry": "Academia",
+      "seniority": "Junior-Mid"
+    },
+    "last_6mo_cross_promo_count": 0,
+    "contact_email": "contact@thegradient.pub",
+    "recent_content": "Episode: Scaling Laws and the Future of Large Models"
+  },
+  {
+    "id": "N-0013",
+    "name": "Last Week in AI",
+    "type": "newsletter",
+    "audience_size": 31000,
+    "audience_metadata": {
+      "primary_role": "Data Scientist",
+      "secondary_role": "Engineer",
+      "industry": "General Tech",
+      "seniority": "Mid-level"
+    },
+    "last_6mo_cross_promo_count": 4,
+    "contact_email": "news@lastweekinai.com",
+    "recent_content": "Issue: The Explosion of Specialized LLM Tooling"
+  },
+  {
+    "id": "P-0014",
+    "name": "Hard Fork",
+    "type": "podcast",
+    "audience_size": 500000,
+    "audience_metadata": {
+      "primary_role": "Knowledge Worker",
+      "secondary_role": "General Public",
+      "industry": "Various",
+      "seniority": "All"
+    },
+    "last_6mo_cross_promo_count": 1,
+    "contact_email": "hardfork@nytimes.com",
+    "recent_content": "Episode: The AI Safety Debate Hits the Mainstream"
+  },
+  {
+    "id": "N-0015",
+    "name": "The Sequence",
+    "type": "newsletter",
+    "audience_size": 160000,
+    "audience_metadata": {
+      "primary_role": "Machine Learning Engineer",
+      "secondary_role": "Data Scientist",
+      "industry": "Enterprise IT",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 6,
+    "contact_email": "editorial@thesequence.ai",
+    "recent_content": "Issue: Edge Cases in Production Grade LLM Applications"
+  },
+  {
+    "id": "P-0016",
+    "name": "Eye on AI",
+    "type": "podcast",
+    "audience_size": 38000,
+    "audience_metadata": {
+      "primary_role": "Executive",
+      "secondary_role": "AI Researcher",
+      "industry": "Global Business",
+      "seniority": "Executive"
+    },
+    "last_6mo_cross_promo_count": 1,
+    "contact_email": "craig@eye-on.ai",
+    "recent_content": "Episode 185: Deploying Generative AI in the Fortune 500"
+  },
+  {
+    "id": "N-0017",
+    "name": "TLDR AI",
+    "type": "newsletter",
+    "audience_size": 450000,
+    "audience_metadata": {
+      "primary_role": "Software Engineer",
+      "secondary_role": "Founder",
+      "industry": "Technology",
+      "seniority": "All"
+    },
+    "last_6mo_cross_promo_count": 15,
+    "contact_email": "dan@tldr.tech",
+    "recent_content": "Issue: New Benchmarks for GPT-4o and Claude 3.5"
+  },
+  {
+    "id": "P-0018",
+    "name": "The Robot Brains Podcast",
+    "type": "podcast",
+    "audience_size": 25000,
+    "audience_metadata": {
+      "primary_role": "Robotics Engineer",
+      "secondary_role": "AI Researcher",
+      "industry": "Hardware/Robotics",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 0,
+    "contact_email": "info@therobotbrains.ai",
+    "recent_content": "Episode: Perception vs Reality in AI Systems"
+  },
+  {
+    "id": "N-0019",
+    "name": "Unsupervised Learning",
+    "type": "newsletter",
+    "audience_size": 52000,
+    "audience_metadata": {
+      "primary_role": "Security Researcher",
+      "secondary_role": "Engineer",
+      "industry": "Cybersecurity",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 3,
+    "contact_email": "daniel@danielmiessler.com",
+    "recent_content": "Issue: The Security Risks of Unmonitored LLM Agents"
+  },
+  {
+    "id": "P-0020",
+    "name": "No Priors",
+    "type": "podcast",
+    "audience_size": 40000,
+    "audience_metadata": {
+      "primary_role": "Founder",
+      "secondary_role": "Investor",
+      "industry": "Venture Capital",
+      "seniority": "Executive"
+    },
+    "last_6mo_cross_promo_count": 2,
+    "contact_email": "nopriors@conviction.com",
+    "recent_content": "Episode: Investing in the AI Infrastructure Layer"
+  },
+  {
+    "id": "N-0021",
+    "name": "Ben's Bites",
+    "type": "newsletter",
+    "audience_size": 110000,
+    "audience_metadata": {
+      "primary_role": "Product Manager",
+      "secondary_role": "Hobbyist",
+      "industry": "Consumer",
+      "seniority": "Mid-level"
+    },
+    "last_6mo_cross_promo_count": 10,
+    "contact_email": "ben@bensbites.co",
+    "recent_content": "Issue: 10 Tools to Speed Up Your AI Workflow"
+  },
+  {
+    "id": "P-0022",
+    "name": "MLOps.community Podcast",
+    "type": "podcast",
+    "audience_size": 33000,
+    "audience_metadata": {
+      "primary_role": "MLOps Engineer",
+      "secondary_role": "Data Engineer",
+      "industry": "Enterprise IT",
+      "seniority": "Mid-Senior"
+    },
+    "last_6mo_cross_promo_count": 6,
+    "contact_email": "demetrios@mlops.community",
+    "recent_content": "Episode: Why Quality Assurance is the Hardest Part of AI"
+  },
+  {
+    "id": "N-0023",
+    "name": "The Batch",
+    "type": "newsletter",
+    "audience_size": 200000,
+    "audience_metadata": {
+      "primary_role": "Data Scientist",
+      "secondary_role": "AI Student",
+      "industry": "Education",
+      "seniority": "Entry-Mid"
+    },
+    "last_6mo_cross_promo_count": 2,
+    "contact_email": "thebatch@deeplearning.ai",
+    "recent_content": "Issue: Fine-tuning Small Language Models for Specific Tasks"
+  },
+  {
+    "id": "P-0024",
+    "name": "The TWIML AI Podcast",
+    "type": "podcast",
+    "audience_size": 48000,
+    "audience_metadata": {
+      "primary_role": "ML Engineer",
+      "secondary_role": "Data Scientist",
+      "industry": "Tech",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 4,
+    "contact_email": "sam@twimlai.com",
+    "recent_content": "Episode 642: Evaluation Frameworks for Generative AI"
+  },
+  {
+    "id": "N-0025",
+    "name": "Synthedia",
+    "type": "newsletter",
+    "audience_size": 18000,
+    "audience_metadata": {
+      "primary_role": "Analyst",
+      "secondary_role": "Product Strategy",
+      "industry": "Media/Marketing",
+      "seniority": "Senior"
+    },
+    "last_6mo_cross_promo_count": 1,
+    "contact_email": "bret@synthedia.com",
+    "recent_content": "Issue: The State of Conversational AI in 2024"
+  },
+  {
+    "id": "P-0026",
+    "name": "The AI Breakdown",
+    "type": "podcast",
+    "audience_size": 120000,
+    "audience_metadata": {
+      "primary_role": "General Tech Interest",
+      "secondary_role": "Entrepreneur",
+      "industry": "Various",
+      "seniority": "Mid-level"
+    },
+    "last_6mo_cross_promo_count": 9,
+    "contact_email": "nlw@breakdown.network",
+    "recent_content": "Episode: How Companies are Actually Using AI Today"
+  },
+  {
+    "id": "N-0027",
+    "name": "Prompt Engineering Daily",
+    "type": "newsletter",
+    "audience_size": 95000,
+    "audience_

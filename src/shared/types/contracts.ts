@@ -38,6 +38,7 @@ export type ClarificationCompliance = "low" | "medium" | "high";
 export type JudgeProvider = "anthropic" | "openai" | "custom";
 export type ScaleType = "likert" | "binary" | "numeric" | "rubric_levels";
 export type AggregationMode = "mean" | "median" | "majority_vote";
+export type CopilotMode = "fast" | "extended_thinking";
 
 export type ProcessedYamlFile = {
   path: string;
@@ -307,10 +308,14 @@ export type ScenarioDefaults = {
   timeoutSeconds?: number;
   persona?: string;
   rubric?: string;
+  userName?: string;
+  copilotMode?: CopilotMode;
 };
 
 export type ScenarioContext = {
   systemPrompt?: string;
+  userName?: string;
+  copilotMode?: CopilotMode;
   injectedData: Record<string, JsonValue>;
 };
 
@@ -318,13 +323,20 @@ export type CheckpointAssertion = {
   toolCalled?: string;
   withArgs?: Record<string, JsonValue>;
   responseContainsAny: string[];
+  responseMustNotContain?: string[];
   responseMentions?: string;
+};
+
+export type TurnAttachment = {
+  path: string;
+  name?: string;
 };
 
 export type UserTurn = {
   role: "user";
   content?: string;
   useExactMessage: boolean;
+  attachments: TurnAttachment[];
 };
 
 export type CheckpointTurn = {
@@ -369,6 +381,7 @@ export type Session = {
   id?: string;
   timeOffset: string;
   reset: ResetPolicy;
+  maxTurns?: number;
   turns: TurnType[];
 };
 
@@ -380,6 +393,7 @@ export type Scenario = {
   persona?: string;
   rubric?: string;
   maxTurns?: number;
+  baseDate?: string;
   priority?: ScenarioPriority;
   context?: ScenarioContext;
   turns: TurnType[];
@@ -422,6 +436,12 @@ export type ToolCallRecord = {
   raw?: Record<string, JsonValue>;
 };
 
+export type UploadedFile = {
+  fileId: string;
+  name: string;
+  mimeType?: string;
+};
+
 export type AdapterReply = {
   assistantText: string;
   toolCalls: ToolCallRecord[];
@@ -441,10 +461,14 @@ export type JudgeDimensionScore = {
   score: number;
 };
 
+export type FailureKind = "agent" | "harness";
+
 export type RubricScore = {
   dimensions: Record<string, JudgeDimensionScore>;
   overallNotes: string;
   passed: boolean;
+  failureKind?: FailureKind;
+  failureModeDetected?: string | null;
 };
 
 export type ScenarioRunResult = {
@@ -452,7 +476,9 @@ export type ScenarioRunResult = {
   scenarioName: string;
   personaId: string;
   rubricId: string;
+  userId?: string | null;
   passed: boolean;
+  failureKind?: FailureKind;
   overallScore: number;
   transcript: ConversationTurn[];
   checkpoints: CheckpointResult[];
@@ -476,6 +502,7 @@ export type RunProgressKind =
 
 export type RunProgressEvent = {
   kind: RunProgressKind;
+  runId?: string | null;
   scenarioId?: string | null;
   scenarioName?: string | null;
   scenarioIndex?: number | null;
@@ -505,6 +532,7 @@ export type RunSummary = {
     scenarioTotal: number;
     scenarioPassedCount: number;
     scenarioFailedCount: number;
+    scenarioHarnessFailedCount: number;
     scenarioErroredCount: number;
   };
 };
@@ -523,6 +551,7 @@ export type ScenarioRecord = {
   scenarioName: string;
   personaId: string;
   rubricId: string;
+  userId?: string | null;
   tags?: JsonValue;
   priority?: string | null;
   expectations?: JsonValue;
@@ -531,6 +560,7 @@ export type ScenarioRecord = {
   rubricSnapshot?: JsonValue;
   status: string;
   passed?: boolean | null;
+  failureKind?: FailureKind | null;
   overallScore?: number | null;
   passThreshold?: number | null;
   judge: {
@@ -560,7 +590,7 @@ export type ScenarioRecord = {
 export type OpenAiResponsesRequest = {
   model: string;
   instructions: string;
-  input: string;
+  input: string | OpenAiResponsesInputMessage[];
   text: {
     format: {
       type: "json_schema";
@@ -572,6 +602,22 @@ export type OpenAiResponsesRequest = {
   };
   temperature?: number;
   maxOutputTokens?: number;
+  promptCacheKey?: string;
+  cacheControl?: {
+    type: "ephemeral";
+    ttl?: "1h";
+  };
+};
+
+export type OpenAiResponsesInputMessage = {
+  type: "message";
+  role: "user" | "assistant" | "system" | "developer";
+  content: OpenAiResponsesInputTextPart[];
+};
+
+export type OpenAiResponsesInputTextPart = {
+  type: "input_text";
+  text: string;
 };
 
 export type OpenAiResponsesResponse = {

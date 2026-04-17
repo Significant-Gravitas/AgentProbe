@@ -1,7 +1,11 @@
+import { existsSync, statSync } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
+
 import {
   buildEndpointAdapter,
   type EndpointAdapter,
 } from "../../providers/sdk/adapters.ts";
+import { resolveAuth } from "../../providers/sdk/autogpt-auth.ts";
 import type { OpenAiResponsesClient } from "../../providers/sdk/openai-responses.ts";
 import type {
   AdapterReply,
@@ -20,17 +24,21 @@ import type {
   ScenarioTermination,
   Session,
   ToolCallRecord,
+  UploadedFile,
 } from "../../shared/types/contracts.ts";
 import {
   AgentProbeConfigError,
+  AgentProbeHarnessError,
   AgentProbeRuntimeError,
 } from "../../shared/utils/errors.ts";
+import { logDebug, logInfo, logWarn } from "../../shared/utils/logging.ts";
 import { renderTemplate } from "../../shared/utils/template.ts";
 import {
   parseEndpointsYaml,
   parsePersonaYaml,
   parseRubricsYaml,
   parseScenariosInput,
+  parseTimeOffset,
 } from "../validation/load-suite.ts";
 import { judgeResponse } from "./judge.ts";
 import { generatePersonaStep, resolvePersonaModel } from "./simulator.ts";
@@ -62,6 +70,7 @@ export type RunRecorder = {
     persona: Persona;
     rubric: Rubric;
     ordinal?: number;
+    userId?: string;
   }) => number;
   recordScenarioFinished?: (
     scenarioRunId: number,
@@ -171,6 +180,48 @@ function incrementUserTurnCount(
   return next;
 }
 
+function isMaxTurnsExceededError(
+  error: unknown,
+): error is AgentProbeRuntimeError {
+  return (
+    error instanceof AgentProbeRuntimeError &&
+    /exceeded max_turns=/.test(error.message)
+  );
+}
+
+function parseBaseDate(baseDate?: string): Date {
+  if (!baseDate) {
+    return new Date();
+  }
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(baseDate.trim());
+  if (!match) {
+    logWarn(
+      `Invalid base_date '${baseDate}' — expected YYYY-MM-DD format. Falling back to current time.`,
+    );
+    return new Date();
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  if (Number.isNaN(parsed.getTime())) {
+    logWarn(
+      `Invalid base_date '${baseDate}' — expected YYYY-MM-DD format. Falling back to current time.`,
+    );
+    return new Date();
+  }
+  return parsed;
+}
+
+function formatCurrentDate(value: Date): string {
+  const year = value.getUTCFullYear();
+  const month = String(value.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(value.getUTCDate()).padStart(2, "0");
+  const hour = String(value.getUTCHours()).padStart(2, "0");
+  const minute = String(value.getUTCMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day} ${hour}:${minute}`;
+}
+
 function evaluateCheckpointTurn(
   assertions: CheckpointAssertion[],
   lastReply?: AdapterReply,
@@ -222,6 +273,16 @@ function evaluateCheckpointTurn(
         "Assistant response did not contain any required checkpoint text.",
       );
     }
+
+    for (const forbidden of assertion.responseMustNotContain ?? []) {
+      if (
+        lastReply.assistantText.toLowerCase().includes(forbidden.toLowerCase())
+      ) {
+        failures.push(
+          `Response contains forbidden string: ${JSON.stringify(forbidden)}`,
+        );
+      }
+    }
   }
 
   return { passed: failures.length === 0, failures };
@@ -253,13 +314,13 @@ function formatTranscriptForJudge(
 
   transcript.forEach((turn, index) => {
     const content = (turn.content ?? "").trim();
-    if (!content) {
-      return;
-    }
-    lines.push(`${displayTurnRole(turn.role)}: ${content}`);
     const toolCalls = toolCallsByTurn[index] ?? [];
-    if (toolCalls.length > 0) {
-      lines.push("Tool Calls:");
+    const role = turn.role.trim().toLowerCase();
+
+    if (role === "assistant" && toolCalls.length > 0) {
+      lines.push(
+        "Assistant Tool Calls (executed before the assistant's reply):",
+      );
       for (const toolCall of toolCalls) {
         lines.push(`- ${toolCall.name}: ${JSON.stringify(toolCall.args)}`);
         const output =
@@ -274,6 +335,11 @@ function formatTranscriptForJudge(
         }
       }
     }
+
+    if (!content) {
+      return;
+    }
+    lines.push(`${displayTurnRole(turn.role)}: ${content}`);
   });
 
   return lines.join("\n").trim();
@@ -284,12 +350,30 @@ function overallScore(rubric: Rubric, score: RubricScore): number {
     rubric.dimensions.reduce((sum, dimension) => sum + dimension.weight, 0) ||
     1;
   let weightedTotal = 0;
+  const dimensionScores = new Map<string, number>();
   for (const dimension of rubric.dimensions) {
     const rawScore = score.dimensions[dimension.id]?.score ?? 0;
     const normalized = rawScore / (dimension.scale.points ?? 1);
     weightedTotal += normalized * dimension.weight;
+    dimensionScores.set(dimension.id, rawScore);
   }
-  return weightedTotal / totalWeight;
+  const computedScore = weightedTotal / totalWeight;
+  if (computedScore < rubric.passThreshold) {
+    score.passed = false;
+  }
+  for (const condition of rubric.scoringOverrides?.autoFailConditions ?? []) {
+    const dimensionScore = dimensionScores.get(condition.dimension);
+    if (dimensionScore === undefined) {
+      continue;
+    }
+    if (condition.below !== undefined && dimensionScore < condition.below) {
+      score.passed = false;
+    }
+    if (condition.above !== undefined && dimensionScore > condition.above) {
+      score.passed = false;
+    }
+  }
+  return computedScore;
 }
 
 function resolveMaxTurns(
@@ -328,6 +412,8 @@ export async function runScenario(
     scenarioOrdinal?: number;
     dryRun?: boolean;
     adapterFactory?: () => EndpointAdapter;
+    userId?: string;
+    scenariosPath?: string;
   },
 ): Promise<ScenarioRunResult> {
   if (options.dryRun) {
@@ -336,6 +422,7 @@ export async function runScenario(
       scenarioName: scenario.name,
       personaId: persona.id,
       rubricId: rubric.id,
+      userId: options.userId,
       passed: true,
       overallScore: 0,
       transcript: [],
@@ -351,6 +438,7 @@ export async function runScenario(
   const toolCallsByTurn: Record<number, ToolCallRecord[]> = {};
   const renderedTurns: Array<Record<string, unknown>> = [];
   let termination: ScenarioTermination | undefined;
+  let harnessError: AgentProbeHarnessError | undefined;
   let lastMessage: ConversationTurn | undefined;
   let lastReply: AdapterReply | undefined;
   let sessionState: Record<string, unknown> = {};
@@ -358,6 +446,7 @@ export async function runScenario(
   let currentAdapter = adapter;
   const maxTurns = resolveMaxTurns(scenario, options.defaults);
   const personaModel = resolvePersonaModel(persona);
+  const baseDate = parseBaseDate(scenario.baseDate);
   const baseContext: Record<string, unknown> = {
     ...(scenario.context?.injectedData ?? {}),
     scenario,
@@ -366,6 +455,12 @@ export async function runScenario(
     expectations: scenario.expectations,
     context: scenario.context,
     defaults: options.defaults,
+    user_name: scenario.context?.userName,
+    userName: scenario.context?.userName,
+    user_id: options.userId,
+    userId: options.userId,
+    copilot_mode: scenario.context?.copilotMode,
+    copilotMode: scenario.context?.copilotMode,
   };
 
   const scenarioRunId = options.recorder?.recordScenarioStarted?.({
@@ -373,16 +468,28 @@ export async function runScenario(
     persona,
     rubric,
     ordinal: options.scenarioOrdinal,
+    userId: options.userId,
   });
 
   const submitUserTurn = async (
     userText: string,
-    optionsForTurn: { source: string; generatorModel?: string },
+    optionsForTurn: {
+      source: string;
+      generatorModel?: string;
+      maxTurns?: number;
+      currentUserTurnCount: number;
+      setUserTurnCount: (value: number) => void;
+      fileIds?: string[];
+    },
   ): Promise<void> => {
-    userTurnCount = incrementUserTurnCount(userTurnCount, {
-      scenarioId: scenario.id,
-      maxTurns,
-    });
+    const nextUserTurnCount = incrementUserTurnCount(
+      optionsForTurn.currentUserTurnCount,
+      {
+        scenarioId: scenario.id,
+        maxTurns: optionsForTurn.maxTurns,
+      },
+    );
+    optionsForTurn.setUserTurnCount(nextUserTurnCount);
     const userTurn: ConversationTurn = { role: "user", content: userText };
     lastMessage = userTurn;
     sessionTranscript.push(userTurn);
@@ -404,6 +511,10 @@ export async function runScenario(
       lastMessage,
       lastReply,
     });
+    if (optionsForTurn.fileIds && optionsForTurn.fileIds.length > 0) {
+      replyContext.file_ids = optionsForTurn.fileIds;
+      replyContext.fileIds = optionsForTurn.fileIds;
+    }
     const reply = await currentAdapter.sendUserTurn(replyContext);
     lastReply = reply;
 
@@ -431,9 +542,6 @@ export async function runScenario(
   };
 
   const sessions = effectiveSessions(scenario);
-  const systemPrompt = scenario.context?.systemPrompt
-    ? renderTemplate(scenario.context.systemPrompt, baseContext)
-    : undefined;
 
   try {
     for (
@@ -443,6 +551,7 @@ export async function runScenario(
     ) {
       const session = sessions[sessionIndex];
       const isFirst = sessionIndex === 0;
+      let sessionUserTurnCount = 0;
       if (!isFirst && resetsRequiringReinit.has(session.reset)) {
         await currentAdapter.closeScenario(
           buildRunContext({
@@ -454,18 +563,28 @@ export async function runScenario(
           }),
         );
         if (session.reset === "fresh_agent" && options.adapterFactory) {
+          logDebug(
+            `Resetting adapter for fresh_agent session ${session.id ?? sessionIndex + 1}`,
+          );
           currentAdapter = options.adapterFactory();
+        } else if (session.reset === "fresh_agent" && !options.adapterFactory) {
+          logWarn(
+            "fresh_agent reset requested but no adapter_factory provided — degrading to 'new' behavior. Results may be invalid.",
+          );
         }
         lastMessage = undefined;
         lastReply = undefined;
+        userTurnCount = 0;
         sessionState = {};
         sessionTranscript = [];
       }
 
       if (!isFirst) {
+        const sessionLabel = session.id ?? `session-${sessionIndex + 1}`;
+        const userIdPart = options.userId ? ` user_id: ${options.userId}` : "";
         const boundaryTurn: ConversationTurn = {
           role: "system",
-          content: `--- Session boundary: ${session.id ?? `session-${sessionIndex + 1}`} (reset=${session.reset}, time_offset=${session.timeOffset}) ---`,
+          content: `--- Session boundary: session_id: ${sessionLabel} reset_policy: ${session.reset} time_offset: ${session.timeOffset}${userIdPart} ---`,
         };
         fullTranscript.push(boundaryTurn);
         if (scenarioRunId !== undefined) {
@@ -477,9 +596,18 @@ export async function runScenario(
         }
       }
 
+      const sessionDate = new Date(
+        baseDate.getTime() + parseTimeOffset(session.timeOffset),
+      );
+      baseContext.current_date = formatCurrentDate(sessionDate);
+      baseContext.currentDate = formatCurrentDate(sessionDate);
+
       if (isFirst || resetsRequiringReinit.has(session.reset)) {
         await currentAdapter.healthCheck(baseContext);
         sessionState = await currentAdapter.openScenario(baseContext);
+        const systemPrompt = scenario.context?.systemPrompt
+          ? renderTemplate(scenario.context.systemPrompt, baseContext)
+          : undefined;
         if (systemPrompt) {
           const systemTurn: ConversationTurn = {
             role: "system",
@@ -497,139 +625,201 @@ export async function runScenario(
         }
       }
 
-      let scriptedUserTurnSeen = false;
-      for (const turn of session.turns) {
-        const renderContext = buildRunContext({
-          baseContext,
-          sessionState,
-          transcript: sessionTranscript,
-          lastMessage,
-          lastReply,
-        });
-
-        if (turn.role === "checkpoint") {
-          renderedTurns.push({
-            role: "checkpoint",
-            assert: turn.assertions,
-          });
-          const checkpointResult = evaluateCheckpointTurn(
-            turn.assertions,
+      const effectiveMaxTurns = session.maxTurns ?? maxTurns;
+      try {
+        let scriptedUserTurnSeen = false;
+        for (const turn of session.turns) {
+          const renderContext = buildRunContext({
+            baseContext,
+            sessionState,
+            transcript: sessionTranscript,
+            lastMessage,
             lastReply,
-          );
-          checkpoints.push(checkpointResult);
-          if (scenarioRunId !== undefined) {
-            options.recorder?.recordCheckpoint?.(scenarioRunId, {
-              checkpointIndex: checkpoints.length - 1,
-              precedingTurnIndex:
-                fullTranscript.length > 0
-                  ? fullTranscript.length - 1
-                  : undefined,
-              assertions: turn.assertions,
-              result: checkpointResult,
-            });
-          }
-          continue;
-        }
-
-        if (turn.role === "inject") {
-          const rendered = renderTurnText(turn.content, renderContext);
-          renderedTurns.push({
-            role: "inject",
-            content: rendered,
           });
-          if (rendered) {
-            const injectTurn: ConversationTurn = {
-              role: "system",
-              content: rendered,
-            };
-            sessionTranscript.push(injectTurn);
-            fullTranscript.push(injectTurn);
+
+          if (turn.role === "checkpoint") {
+            renderedTurns.push({
+              role: "checkpoint",
+              assert: turn.assertions,
+            });
+            const checkpointResult = evaluateCheckpointTurn(
+              turn.assertions,
+              lastReply,
+            );
+            checkpoints.push(checkpointResult);
             if (scenarioRunId !== undefined) {
-              options.recorder?.recordTurn?.(scenarioRunId, {
-                turnIndex: fullTranscript.length - 1,
-                turn: injectTurn,
-                source: "inject",
+              options.recorder?.recordCheckpoint?.(scenarioRunId, {
+                checkpointIndex: checkpoints.length - 1,
+                precedingTurnIndex:
+                  fullTranscript.length > 0
+                    ? fullTranscript.length - 1
+                    : undefined,
+                assertions: turn.assertions,
+                result: checkpointResult,
               });
             }
+            continue;
           }
-          continue;
-        }
 
-        scriptedUserTurnSeen = true;
-        const renderedGuidance = renderTurnText(turn.content, renderContext);
-        let messageText: string;
-        let source: string;
-        let generatorModel: string | undefined;
-        if (turn.useExactMessage) {
-          messageText = renderedGuidance ?? "";
-          source = "user_exact";
-        } else {
-          const step = await generatePersonaStep(
-            persona,
-            sessionTranscript,
-            options.client,
-            {
-              guidance: renderedGuidance,
-              requireResponse: true,
-            },
-          );
-          if (!step.message) {
-            throw new AgentProbeRuntimeError(
-              "Persona simulator did not return a message for a required user turn.",
+          if (turn.role === "inject") {
+            const rendered = renderTurnText(turn.content, renderContext);
+            renderedTurns.push({
+              role: "inject",
+              content: rendered,
+            });
+            if (rendered) {
+              const injectTurn: ConversationTurn = {
+                role: "system",
+                content: rendered,
+              };
+              sessionTranscript.push(injectTurn);
+              fullTranscript.push(injectTurn);
+              if (scenarioRunId !== undefined) {
+                options.recorder?.recordTurn?.(scenarioRunId, {
+                  turnIndex: fullTranscript.length - 1,
+                  turn: injectTurn,
+                  source: "inject",
+                });
+              }
+            }
+            continue;
+          }
+
+          scriptedUserTurnSeen = true;
+          const renderedGuidance = renderTurnText(turn.content, renderContext);
+          let messageText: string;
+          let source: string;
+          let generatorModel: string | undefined;
+          if (turn.useExactMessage) {
+            messageText = renderedGuidance ?? "";
+            source = "user_exact";
+          } else {
+            const step = await generatePersonaStep(
+              persona,
+              sessionTranscript,
+              options.client,
+              {
+                guidance: renderedGuidance,
+                requireResponse: true,
+              },
             );
+            if (!step.message) {
+              throw new AgentProbeRuntimeError(
+                "Persona simulator did not return a message for a required user turn.",
+              );
+            }
+            messageText = step.message;
+            source = "user_guided";
+            generatorModel = personaModel;
           }
-          messageText = step.message;
-          source = "user_guided";
-          generatorModel = personaModel;
-        }
 
-        renderedTurns.push({
-          role: "user",
-          content: messageText,
-        });
-        await submitUserTurn(messageText, { source, generatorModel });
-      }
+          let uploadedFileIds: string[] | undefined;
+          if (
+            turn.role === "user" &&
+            turn.attachments.length > 0 &&
+            currentAdapter.uploadFile
+          ) {
+            const scenarioSourcePath = resolve(options.scenariosPath ?? "data");
+            const baseDir =
+              existsSync(scenarioSourcePath) &&
+              statSync(scenarioSourcePath).isDirectory()
+                ? scenarioSourcePath
+                : dirname(scenarioSourcePath);
+            const uploaded: UploadedFile[] = [];
+            for (const attachment of turn.attachments) {
+              const resolvedPath = resolve(baseDir, attachment.path);
+              const name = attachment.name ?? basename(resolvedPath);
+              logInfo(`Uploading file: ${name} (${resolvedPath})`);
+              const result = await currentAdapter.uploadFile(
+                resolvedPath,
+                name,
+              );
+              uploaded.push(result);
+            }
+            uploadedFileIds = uploaded.map((f) => f.fileId);
+          }
 
-      if (scriptedUserTurnSeen) {
-        while (true) {
-          const step = await generatePersonaStep(
-            persona,
-            sessionTranscript,
-            options.client,
-            {
-              requireResponse: false,
-            },
-          );
-          if (step.status !== "continue") {
-            break;
-          }
-          if (!step.message) {
-            throw new AgentProbeRuntimeError(
-              "Persona simulator returned `continue` without a follow-up message.",
-            );
-          }
           renderedTurns.push({
             role: "user",
-            content: step.message,
-            source: "user_generated",
+            content: messageText,
           });
-          await submitUserTurn(step.message, {
-            source: "user_generated",
-            generatorModel: personaModel,
+          await submitUserTurn(messageText, {
+            source,
+            generatorModel,
+            fileIds: uploadedFileIds,
+            maxTurns: effectiveMaxTurns,
+            currentUserTurnCount:
+              session.maxTurns !== undefined
+                ? sessionUserTurnCount
+                : userTurnCount,
+            setUserTurnCount: (value) => {
+              if (session.maxTurns !== undefined) {
+                sessionUserTurnCount = value;
+              } else {
+                userTurnCount = value;
+              }
+            },
           });
         }
+
+        if (scriptedUserTurnSeen) {
+          while (true) {
+            const step = await generatePersonaStep(
+              persona,
+              sessionTranscript,
+              options.client,
+              {
+                requireResponse: false,
+              },
+            );
+            if (step.status !== "continue") {
+              break;
+            }
+            if (!step.message) {
+              throw new AgentProbeRuntimeError(
+                "Persona simulator returned `continue` without a follow-up message.",
+              );
+            }
+            renderedTurns.push({
+              role: "user",
+              content: step.message,
+              source: "user_generated",
+            });
+            await submitUserTurn(step.message, {
+              source: "user_generated",
+              generatorModel: personaModel,
+              maxTurns: effectiveMaxTurns,
+              currentUserTurnCount:
+                session.maxTurns !== undefined
+                  ? sessionUserTurnCount
+                  : userTurnCount,
+              setUserTurnCount: (value) => {
+                if (session.maxTurns !== undefined) {
+                  sessionUserTurnCount = value;
+                } else {
+                  userTurnCount = value;
+                }
+              },
+            });
+          }
+        }
+      } catch (error) {
+        if (isMaxTurnsExceededError(error) && session.maxTurns !== undefined) {
+          continue;
+        }
+        throw error;
       }
     }
   } catch (error) {
-    if (
-      error instanceof AgentProbeRuntimeError &&
-      /exceeded max_turns=/.test(error.message)
-    ) {
+    if (isMaxTurnsExceededError(error)) {
       termination = {
         reason: "max_turns_exceeded",
         message: error.message,
         maxTurns,
       };
+    } else if (error instanceof AgentProbeHarnessError) {
+      harnessError = error;
+      logWarn(`Harness failure in ${scenario.id}: ${error.message}`);
     } else {
       if (scenarioRunId !== undefined) {
         options.recorder?.recordScenarioError?.(
@@ -649,6 +839,35 @@ export async function runScenario(
         lastReply,
       }),
     );
+  }
+
+  if (harnessError) {
+    const harnessResult: ScenarioRunResult = {
+      scenarioId: scenario.id,
+      scenarioName: scenario.name,
+      personaId: persona.id,
+      rubricId: rubric.id,
+      userId: options.userId,
+      passed: false,
+      failureKind: "harness",
+      overallScore: 0,
+      transcript: fullTranscript,
+      checkpoints,
+      toolCallsByTurn,
+      judgeScore: {
+        dimensions: {},
+        overallNotes: `Harness failure: ${harnessError.message}`,
+        passed: false,
+        failureKind: "harness",
+      },
+      renderedTurns,
+    };
+    if (scenarioRunId !== undefined) {
+      options.recorder?.recordScenarioFinished?.(scenarioRunId, {
+        result: harnessResult,
+      });
+    }
+    return harnessResult;
   }
 
   const rubricContext = buildRunContext({
@@ -685,7 +904,9 @@ export async function runScenario(
     scenarioName: scenario.name,
     personaId: persona.id,
     rubricId: rubric.id,
+    userId: options.userId,
     passed: score.passed,
+    failureKind: score.failureKind,
     overallScore: finalScore,
     transcript: fullTranscript,
     checkpoints,
@@ -706,6 +927,9 @@ type PreparedRun = {
   rubric: Rubric;
   ordinal: number;
   total: number;
+  userId: string;
+  iteration: number;
+  displayId: string;
 };
 
 export async function runSuite(options: {
@@ -720,7 +944,9 @@ export async function runSuite(options: {
   recorder?: RunRecorder;
   progressCallback?: (event: RunProgressEvent) => void;
   parallel?: boolean;
+  parallelLimit?: number;
   dryRun?: boolean;
+  repeat?: number;
 }): Promise<RunResult> {
   const runId = options.recorder?.recordRunStarted?.({
     endpoint: options.endpoint,
@@ -750,10 +976,17 @@ export async function runSuite(options: {
         .filter(Boolean),
     );
 
+    const requestedIds = new Set(
+      (options.scenarioId ?? "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    );
+
     let selectedScenarios = [...scenarioCollection.scenarios];
-    if (options.scenarioId) {
+    if (requestedIds.size > 0) {
       selectedScenarios = selectedScenarios.filter(
-        (item) => item.id === options.scenarioId,
+        (item) => requestedIds.has(item.id) || requestedIds.has(item.name),
       );
     }
     if (requestedTags.size > 0) {
@@ -762,6 +995,14 @@ export async function runSuite(options: {
       );
     }
     if (selectedScenarios.length === 0) {
+      if (options.scenarioId) {
+        const available = scenarioCollection.scenarios.map(
+          (s) => `${s.id} (${s.name})`,
+        );
+        throw new AgentProbeConfigError(
+          `No scenario matching "${options.scenarioId}" found. Available: ${available.join(", ")}`,
+        );
+      }
       throw new AgentProbeConfigError(
         "No scenarios matched the requested filters.",
       );
@@ -779,11 +1020,19 @@ export async function runSuite(options: {
 
     options.progressCallback?.({
       kind: "suite_started",
-      scenarioTotal: selectedScenarios.length,
+      runId,
+      scenarioTotal:
+        selectedScenarios.length * Math.max(1, options.repeat ?? 1),
     });
 
-    const preparedRuns: PreparedRun[] = selectedScenarios.map(
-      (scenario, ordinal) => {
+    const preparedRuns: PreparedRun[] = [];
+    const effectiveRepeat = Math.max(1, options.repeat ?? 1);
+    logInfo(
+      `Preparing ${selectedScenarios.length} scenario(s) across ${effectiveRepeat} iteration(s).`,
+    );
+    let ordinal = 0;
+    for (const scenario of selectedScenarios) {
+      for (let iteration = 1; iteration <= effectiveRepeat; iteration += 1) {
         const personaId = scenario.persona;
         if (!personaId) {
           throw new AgentProbeConfigError(
@@ -809,19 +1058,32 @@ export async function runSuite(options: {
           );
         }
 
-        return {
+        const pinnedUserId = crypto.randomUUID();
+        const pinnedUserName = scenario.context?.userName;
+        preparedRuns.push({
           scenario,
           persona,
           rubric,
           ordinal,
-          total: selectedScenarios.length,
+          total: selectedScenarios.length * effectiveRepeat,
+          userId: pinnedUserId,
+          iteration,
+          displayId:
+            iteration > 1 ? `${scenario.id}#${iteration}` : scenario.id,
           adapterFactory: () =>
             options.adapterFactory
               ? options.adapterFactory(endpointConfig)
-              : buildEndpointAdapter(endpointConfig),
-        };
-      },
-    );
+              : buildEndpointAdapter(endpointConfig, {
+                  autogptAuthResolver: () =>
+                    resolveAuth({
+                      userId: pinnedUserId,
+                      name: pinnedUserName,
+                    }),
+                }),
+        });
+        ordinal += 1;
+      }
+    }
 
     const executePrepared = async (
       prepared: PreparedRun,
@@ -838,72 +1100,82 @@ export async function runSuite(options: {
           scenarioOrdinal: prepared.ordinal,
           dryRun: options.dryRun,
           adapterFactory: prepared.adapterFactory,
+          userId: prepared.userId,
+          scenariosPath: options.scenarios,
         },
       );
     };
 
-    let results: ScenarioRunResult[] = [];
-    if (options.parallel) {
-      preparedRuns.forEach((prepared) => {
-        options.progressCallback?.({
-          kind: "scenario_started",
-          scenarioId: prepared.scenario.id,
-          scenarioName: prepared.scenario.name,
-          scenarioIndex: prepared.ordinal + 1,
-          scenarioTotal: prepared.total,
-        });
-      });
+    const erroredScenarioResult = (
+      prepared: PreparedRun,
+      error: Error,
+    ): ScenarioRunResult => {
+      const isHarness = error instanceof AgentProbeHarnessError;
+      return {
+        scenarioId: prepared.displayId,
+        scenarioName: prepared.scenario.name,
+        personaId: prepared.persona.id,
+        rubricId: prepared.rubric.id,
+        userId: prepared.userId,
+        passed: false,
+        failureKind: isHarness ? "harness" : undefined,
+        overallScore: 0,
+        transcript: [],
+        checkpoints: [],
+        judgeScore: {
+          dimensions: {},
+          overallNotes: isHarness
+            ? `Harness failure: ${error.message}`
+            : `Scenario failed to execute: ${error.message}`,
+          passed: false,
+          failureKind: isHarness ? "harness" : undefined,
+        },
+      };
+    };
 
-      const orderedResults = new Array<ScenarioRunResult>(preparedRuns.length);
-      const failures: Error[] = [];
-      await Promise.all(
-        preparedRuns.map(async (prepared) => {
-          try {
-            const result = await executePrepared(prepared);
-            orderedResults[prepared.ordinal] = result;
-            options.progressCallback?.({
-              kind: "scenario_finished",
-              scenarioId: result.scenarioId,
-              scenarioName: result.scenarioName,
-              scenarioIndex: prepared.ordinal + 1,
-              scenarioTotal: prepared.total,
-              passed: result.passed,
-              overallScore: result.overallScore,
-            });
-          } catch (error) {
-            const failure =
-              error instanceof Error ? error : new Error(String(error));
-            failures.push(failure);
-            options.progressCallback?.({
-              kind: "scenario_error",
-              scenarioId: prepared.scenario.id,
-              scenarioName: prepared.scenario.name,
-              scenarioIndex: prepared.ordinal + 1,
-              scenarioTotal: prepared.total,
-              error: failure,
-            });
-          }
-        }),
+    let results: ScenarioRunResult[] = [];
+    const parallelEnabled =
+      options.parallel || options.parallelLimit !== undefined;
+    if (options.parallelLimit !== undefined && options.parallelLimit < 1) {
+      throw new AgentProbeConfigError(
+        "--parallel must be at least 1 when a limit is provided.",
       );
-      if (failures.length > 0) {
-        throw failures[0];
-      }
-      results = orderedResults.filter(Boolean);
-    } else {
-      for (const prepared of preparedRuns) {
+    }
+
+    if (parallelEnabled) {
+      const concurrencyLimit = Math.min(
+        preparedRuns.length,
+        Math.max(1, options.parallelLimit ?? preparedRuns.length),
+      );
+      const orderedResults = new Array<ScenarioRunResult | undefined>(
+        preparedRuns.length,
+      );
+      const failures: Error[] = [];
+      let nextPreparedIndex = 0;
+
+      const runNextPrepared = async (): Promise<void> => {
+        const prepared = preparedRuns[nextPreparedIndex];
+        nextPreparedIndex += 1;
+        if (!prepared) {
+          return;
+        }
+
         options.progressCallback?.({
           kind: "scenario_started",
-          scenarioId: prepared.scenario.id,
+          runId,
+          scenarioId: prepared.displayId,
           scenarioName: prepared.scenario.name,
           scenarioIndex: prepared.ordinal + 1,
           scenarioTotal: prepared.total,
         });
+
         try {
           const result = await executePrepared(prepared);
-          results.push(result);
+          orderedResults[prepared.ordinal] = result;
           options.progressCallback?.({
             kind: "scenario_finished",
-            scenarioId: result.scenarioId,
+            runId,
+            scenarioId: prepared.displayId,
             scenarioName: result.scenarioName,
             scenarioIndex: prepared.ordinal + 1,
             scenarioTotal: prepared.total,
@@ -913,15 +1185,67 @@ export async function runSuite(options: {
         } catch (error) {
           const failure =
             error instanceof Error ? error : new Error(String(error));
+          failures.push(failure);
+          orderedResults[prepared.ordinal] = erroredScenarioResult(
+            prepared,
+            failure,
+          );
           options.progressCallback?.({
             kind: "scenario_error",
-            scenarioId: prepared.scenario.id,
+            runId,
+            scenarioId: prepared.displayId,
             scenarioName: prepared.scenario.name,
             scenarioIndex: prepared.ordinal + 1,
             scenarioTotal: prepared.total,
             error: failure,
           });
-          throw failure;
+        }
+
+        await runNextPrepared();
+      };
+
+      await Promise.all(
+        Array.from({ length: concurrencyLimit }, () => runNextPrepared()),
+      );
+      results = orderedResults.filter(
+        (item): item is ScenarioRunResult => item !== undefined,
+      );
+    } else {
+      for (const prepared of preparedRuns) {
+        options.progressCallback?.({
+          kind: "scenario_started",
+          runId,
+          scenarioId: prepared.displayId,
+          scenarioName: prepared.scenario.name,
+          scenarioIndex: prepared.ordinal + 1,
+          scenarioTotal: prepared.total,
+        });
+        try {
+          const result = await executePrepared(prepared);
+          results.push(result);
+          options.progressCallback?.({
+            kind: "scenario_finished",
+            runId,
+            scenarioId: prepared.displayId,
+            scenarioName: result.scenarioName,
+            scenarioIndex: prepared.ordinal + 1,
+            scenarioTotal: prepared.total,
+            passed: result.passed,
+            overallScore: result.overallScore,
+          });
+        } catch (error) {
+          const failure =
+            error instanceof Error ? error : new Error(String(error));
+          results.push(erroredScenarioResult(prepared, failure));
+          options.progressCallback?.({
+            kind: "scenario_error",
+            runId,
+            scenarioId: prepared.displayId,
+            scenarioName: prepared.scenario.name,
+            scenarioIndex: prepared.ordinal + 1,
+            scenarioTotal: prepared.total,
+            error: failure,
+          });
         }
       }
     }

@@ -22,6 +22,9 @@ const reportEnvironment = new nunjucks.Environment(undefined, {
   lstripBlocks: true,
 });
 
+const SESSION_BOUNDARY_RE =
+  /session_id:\s*(?<session_id>\S+)|reset_policy:\s*(?<reset_policy>\S+)|time_offset:\s*(?<time_offset>\S+)|user_id:\s*(?<user_id>\S+)/g;
+
 function invocationCwd(): string {
   return resolve(process.env.INIT_CWD ?? process.env.PWD ?? process.cwd());
 }
@@ -166,27 +169,73 @@ function isCredentialError(error: unknown): boolean {
   );
 }
 
-function statusTone(passed: unknown): "success" | "danger" | "neutral" {
+function statusTone(
+  passed: unknown,
+  failureKind?: unknown,
+): "success" | "danger" | "warning" | "neutral" {
   if (passed === true) {
     return "success";
   }
   if (passed === false) {
-    return "danger";
+    return failureKind === "harness" ? "warning" : "danger";
   }
   return "neutral";
 }
 
-function statusLabel(passed: unknown): "PASS" | "FAIL" | "PENDING" {
+function statusLabel(
+  passed: unknown,
+  failureKind?: unknown,
+): "PASS" | "AGENT FAIL" | "HARNESS FAIL" | "PENDING" {
   if (passed === true) {
     return "PASS";
   }
   if (passed === false) {
-    return "FAIL";
+    return failureKind === "harness" ? "HARNESS FAIL" : "AGENT FAIL";
   }
   return "PENDING";
 }
 
-function roleTone(role: unknown): "assistant" | "user" | "system" {
+function isSessionBoundary(role: unknown, content: unknown): boolean {
+  return (
+    String(role ?? "")
+      .trim()
+      .toLowerCase() === "system" &&
+    typeof content === "string" &&
+    content.startsWith("--- Session boundary")
+  );
+}
+
+function parseSessionBoundary(content: string): Record<string, string> {
+  const fields = {
+    session_id: "",
+    reset_policy: "",
+    time_offset: "",
+    user_id: "",
+  };
+  for (const match of content.matchAll(SESSION_BOUNDARY_RE)) {
+    if (match.groups?.session_id) {
+      fields.session_id = match.groups.session_id;
+    }
+    if (match.groups?.reset_policy) {
+      fields.reset_policy = match.groups.reset_policy;
+    }
+    if (match.groups?.time_offset) {
+      fields.time_offset = match.groups.time_offset;
+    }
+    if (match.groups?.user_id) {
+      fields.user_id = match.groups.user_id;
+    }
+  }
+  return fields;
+}
+
+function roleTone(
+  role: unknown,
+  content: unknown,
+): "assistant" | "user" | "system" | "session_boundary" {
+  if (isSessionBoundary(role, content)) {
+    return "session_boundary";
+  }
   const normalized = String(role ?? "")
     .trim()
     .toLowerCase();
@@ -199,7 +248,10 @@ function roleTone(role: unknown): "assistant" | "user" | "system" {
   return "system";
 }
 
-function roleLabel(role: unknown): string {
+function roleLabel(role: unknown, content: unknown): string {
+  if (isSessionBoundary(role, content)) {
+    return "Session Boundary";
+  }
   const normalized = String(role ?? "")
     .trim()
     .toLowerCase();
@@ -267,17 +319,24 @@ function buildTurnRows(scenario: ScenarioRecord): TemplateObject[] {
 
   const rows: TemplateObject[] = scenario.turns.map((turn) => {
     const turnIndex = numberValue(turn.turn_index) ?? -1;
-    return {
+    const row: TemplateObject = {
       ...turn,
       created_at_label: formatTimestamp(turn.created_at),
-      role_label: roleLabel(turn.role),
-      tone: roleTone(turn.role),
+      role_label: roleLabel(turn.role, turn.content),
+      tone: roleTone(turn.role, turn.content),
       turn_index_label: turnIndex >= 0 ? String(turnIndex) : "–",
       tool_calls: toolCallsByTurn.get(turnIndex) ?? [],
       target_events: targetEventsByTurn.get(turnIndex) ?? [],
       checkpoints: checkpointsByTurn.get(turnIndex) ?? [],
       usage_pretty: prettyJson(turn.usage),
     };
+    if (
+      typeof turn.content === "string" &&
+      isSessionBoundary(turn.role, turn.content)
+    ) {
+      row.session_boundary = parseSessionBoundary(turn.content);
+    }
+    return row;
   });
 
   const leading = checkpointsByTurn.get(null) ?? [];
@@ -326,8 +385,9 @@ function prepareScenarioView(
     index,
     dom_id: `scenario-${index}`,
     nav_label: `${index + 1}. ${scenario.scenarioName || scenario.scenarioId}`,
-    status_label: statusLabel(scenario.passed),
-    status_tone: statusTone(scenario.passed),
+    status_label: statusLabel(scenario.passed, scenario.failureKind),
+    status_tone: statusTone(scenario.passed, scenario.failureKind),
+    failure_kind: scenario.failureKind ?? null,
     is_credential_error: isCredentialError(scenario.error),
     tags,
     tags_csv: tags.join(","),
@@ -344,6 +404,7 @@ function prepareScenarioView(
     scenario_snapshot_pretty: prettyJson(scenario.scenarioSnapshot),
     started_at_label: formatTimestamp(scenario.startedAt),
     completed_at_label: formatTimestamp(scenario.completedAt),
+    user_id: scenario.userId ?? "",
     scenario_id: scenario.scenarioId,
     scenario_name: scenario.scenarioName,
     persona_id: scenario.personaId,
@@ -399,6 +460,8 @@ function prepareRunView(run: RunRecord): TemplateObject {
     scenario_total: run.aggregateCounts.scenarioTotal,
     scenario_passed_count: run.aggregateCounts.scenarioPassedCount,
     scenario_failed_count: run.aggregateCounts.scenarioFailedCount,
+    scenario_harness_failed_count:
+      run.aggregateCounts.scenarioHarnessFailedCount,
     scenario_errored_count: run.aggregateCounts.scenarioErroredCount,
     credential_error_count: credentialErrorCount,
     all_tags: [...allTags].sort(),
@@ -494,30 +557,28 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
               </div>
             </dl>
           </div>
-          <div class="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div class="rounded-[1.5rem] border border-emerald-950/10 bg-report-moss px-5 py-5 text-white">
               <div class="text-xs uppercase tracking-[0.24em] text-white/70">Passed</div>
               <div class="mt-3 font-display text-4xl font-bold">{{ run.scenario_passed_count }}</div>
             </div>
-            <div class="rounded-[1.5rem] border border-amber-950/10 bg-report-gold px-5 py-5 text-report-ink">
-              <div class="text-xs uppercase tracking-[0.24em] text-black/55">Failed</div>
-              <div class="mt-3 font-display text-4xl font-bold">{{ run.scenario_failed_count }}</div>
-              {% if run.credential_error_count > 0 %}
-              <div class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-black/10 px-2.5 py-1 text-xs font-semibold text-report-ember">
-                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
-                {{ run.credential_error_count }} credential
-              </div>
-              {% endif %}
-            </div>
             <div class="rounded-[1.5rem] border border-rose-950/10 bg-report-ember px-5 py-5 text-white">
-              <div class="text-xs uppercase tracking-[0.24em] text-white/70">Errored</div>
-              <div class="mt-3 font-display text-4xl font-bold">{{ run.scenario_errored_count }}</div>
+              <div class="text-xs uppercase tracking-[0.24em] text-white/70">Agent Failures</div>
+              <div class="mt-3 font-display text-4xl font-bold">{{ run.scenario_failed_count - run.scenario_harness_failed_count }}</div>
               {% if run.credential_error_count > 0 %}
               <div class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-1 text-xs font-semibold">
                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
                 {{ run.credential_error_count }} credential
               </div>
               {% endif %}
+            </div>
+            <div class="rounded-[1.5rem] border border-amber-950/10 bg-report-gold px-5 py-5 text-report-ink">
+              <div class="text-xs uppercase tracking-[0.24em] text-black/55">Harness Failures</div>
+              <div class="mt-3 font-display text-4xl font-bold">{{ run.scenario_harness_failed_count }}</div>
+            </div>
+            <div class="rounded-[1.5rem] border border-slate-950/10 bg-report-slate px-5 py-5 text-white">
+              <div class="text-xs uppercase tracking-[0.24em] text-white/70">Errored</div>
+              <div class="mt-3 font-display text-4xl font-bold">{{ run.scenario_errored_count }}</div>
             </div>
           </div>
         </div>
@@ -565,6 +626,8 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
                   <div data-tone="{{ scenario.status_tone }}" class="scenario-badge shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em]
                     {% if scenario.status_tone == "success" %}
                       bg-emerald-100 text-emerald-800
+                    {% elif scenario.status_tone == "warning" %}
+                      bg-amber-100 text-amber-800
                     {% elif scenario.status_tone == "danger" %}
                       bg-rose-100 text-rose-800
                     {% else %}
@@ -587,7 +650,7 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
                   </div>
                   <div class="mt-2 h-2 rounded-full bg-black/10">
                     <div
-                      class="h-2 rounded-full {% if scenario.status_tone == "success" %}bg-report-moss{% elif scenario.status_tone == "danger" %}bg-report-ember{% else %}bg-report-slate{% endif %}"
+                      class="h-2 rounded-full {% if scenario.status_tone == "success" %}bg-report-moss{% elif scenario.status_tone == "warning" %}bg-report-gold{% elif scenario.status_tone == "danger" %}bg-report-ember{% else %}bg-report-slate{% endif %}"
                       style="width: {{ scenario.score_percent }}%"
                     ></div>
                   </div>
@@ -627,6 +690,8 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
                 class="block w-full overflow-hidden rounded-[1.75rem] border border-black/10 bg-gradient-to-r px-5 py-5 text-left transition hover:shadow-lg
                   {% if scenario.status_tone == "success" %}
                     from-report-moss to-emerald-500 text-white
+                  {% elif scenario.status_tone == "warning" %}
+                    from-amber-600 to-report-gold text-white
                   {% elif scenario.status_tone == "danger" %}
                     from-report-ember to-orange-500 text-white
                   {% else %}
@@ -682,7 +747,7 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
               </div>
 
               <div data-tab-panel="conversation" data-tab-scenario="{{ scenario.dom_id }}" class="tab-panel space-y-4">
-                <div class="grid gap-4 md:grid-cols-3">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <div class="rounded-2xl border border-black/10 bg-black/[0.03] p-4">
                     <div class="text-xs uppercase tracking-[0.2em] text-black/50">Started</div>
                     <div class="mt-2 text-sm font-semibold">{{ scenario.started_at_label }}</div>
@@ -697,6 +762,12 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
                       {{ scenario.counts.turn_count }} turns • {{ scenario.counts.tool_call_count }} tool calls • {{ scenario.counts.checkpoint_count }} checkpoints
                     </div>
                   </div>
+                  {% if scenario.user_id %}
+                  <div class="rounded-2xl border border-black/10 bg-black/[0.03] p-4">
+                    <div class="text-xs uppercase tracking-[0.2em] text-black/50">User ID</div>
+                    <div class="mt-2 text-sm font-semibold break-all">{{ scenario.user_id }}</div>
+                  </div>
+                  {% endif %}
                 </div>
 
                 {% if scenario.expectations_pretty %}
@@ -708,6 +779,44 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
 
                 <div class="space-y-4">
                   {% for turn in scenario.turn_rows %}
+                  {% if turn.tone == "session_boundary" %}
+                  <article class="rounded-[1.5rem] border-l-4 border-indigo-400 bg-indigo-50 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <div class="flex items-center gap-3">
+                        <span class="rounded-full bg-indigo-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-indigo-800">
+                          {{ turn.role_label }}
+                        </span>
+                      </div>
+                      <div class="text-xs text-black/45">Turn {{ turn.turn_index_label }} • {{ turn.created_at_label }}</div>
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center gap-4 text-sm font-semibold text-indigo-900">
+                      {% if turn.session_boundary.session_id %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Session:</span>
+                        {{ turn.session_boundary.session_id }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.reset_policy %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Reset:</span>
+                        {{ turn.session_boundary.reset_policy }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.time_offset %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">Time:</span>
+                        {{ turn.session_boundary.time_offset }}
+                      </span>
+                      {% endif %}
+                      {% if turn.session_boundary.user_id %}
+                      <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-100 px-3 py-1">
+                        <span class="text-xs font-medium uppercase tracking-wide text-indigo-500">User:</span>
+                        <span class="break-all">{{ turn.session_boundary.user_id }}</span>
+                      </span>
+                      {% endif %}
+                    </div>
+                  </article>
+                  {% else %}
                   <article class="rounded-[1.5rem] border border-black/10 p-4
                     {% if turn.tone == "assistant" %}
                       bg-emerald-50/70
@@ -818,6 +927,7 @@ const REPORT_TEMPLATE = `<!DOCTYPE html>
                     </div>
                     {% endif %}
                   </article>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>

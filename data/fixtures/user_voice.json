@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "source_total": 200,
+    "platforms": ["r/productivity", "r/relationships", "G2", "Hacker News"],
+    "date_range": "2023-01-01 to 2024-05-20"
+  },
+  "unmet_needs_summary": [
+    {
+      "theme": "Shared Accountability Friction",
+      "frequency": 84,
+      "description": "Users find it awkward to 'nag' partners; desire for automated nudges that don't feel like policing."
+    },
+    {
+      "theme": "Asymmetric Habits",
+      "frequency": 52,
+      "description": "Couples have different schedules/stamina; apps fail to balance 'shared goal' vs 'individual contribution'."
+    },
+    {
+      "theme": "Positive Reinforcement Gap",
+      "frequency": 31,
+      "description": "Lack of 'micro-celebrations' or low-friction ways to acknowledge a partner's progress without a full text message."
+    },
+    {
+      "theme": "Privacy vs. Visibility",
+      "frequency": 22,
+      "description": "Difficulty in choosing which personal habits to keep private vs. which to share with a partner."
+    },
+    {
+      "theme": "Gamification Fatigue",
+      "frequency": 11,
+      "description": "Existing apps are too 'RPG' or 'childish'; desire for a clean, adult aesthetic for shared living."
+    }
+  ],
+  "raw_data_samples": [
+    {
+      "id": "rv-001",
+      "source": "r/productivity",
+      "comment": "I want to track gym visits with my wife, but if I miss a day and she doesn't, I feel like a failure and she feels like a nag for asking if I went. We need a way to see each other's progress without the verbal friction.",
+      "theme": "Shared Accountability Friction"
+    },
+    {
+      "id": "rv-002",
+      "source": "G2 - Habitica Review",
+      "comment": "The party system is okay, but it's too much for just a couple. I don't want to fight monsters, I just want to know if my boyfriend actually did the dishes like we agreed.",
+      "theme": "Gamification Fatigue"
+    },
+    {
+      "id": "rv-003",
+      "source": "Hacker News",
+      "comment": "Most habit trackers are single-player. The 'social' ones are too public. There's a middle ground for high-trust duos where visibility is the primary motivator.",
+      "theme": "Shared Accountability Friction"
+    },
+    {
+      "id": "rv-004",
+      "source": "r/relationships",
+      "comment": "We tried using a shared Google Sheet for our 'health month' but updating it is a chore. I wish I could just get a notification when she finishes her run so I can send a quick emoji cheer.",
+      "theme": "Positive Reinforcement Gap"
+    },
+    {
+      "id": "rv-005",
+      "source": "G2 - Streaks Review",
+      "comment": "Great app, but why can't I link my streak to my partner's? We are training for a marathon together. If she fails, our 'team streak' should feel it, but I shouldn't lose my personal progress.",
+      "theme": "Asymmetric Habits"
+    },
+    {
+      "id": "rv-006",
+      "source": "r/productivity",
+      "comment": "The hardest part of shared habits is that I work nights and he works days. We need a dashboard that accounts for our different 'days' while keeping a shared goal of 1500 calories.",
+      "theme": "Asymmetric Habits"
+    },
+    {
+      "id": "rv-007",
+      "source": "Hacker News",
+      "comment": "Shared habit apps always turn into a blame game. I want an app that focuses on the 'we'—how are we doing as a unit? If I slack, how can she pick up the slack without it being a fight?",
+      "theme": "Shared Accountability Friction"
+    },
+    {
+      "id": "rv-008",
+      "source": "r/productivity",
+      "comment": "I want to share my 'reading' habit with my partner but definitely not my 'no-porn' habit. Apps currently are all-or-nothing on sharing.",
+      "theme": "Privacy vs. Visibility"
+    },
+    {
+      "id": "rv-009",
+      "source": "G2 - Coach.me Review",
+      "comment": "The community aspect is too broad. I only care about one person's opinion. Give me a 1-on-1 habit interface.",
+      "theme": "Shared Accountability Friction"
+    },
+    {
+      "id": "rv-010",
+      "source": "r/relationships",
+      "comment": "It's the small wins. Just a 'nudge' or a 'high five' button inside the app would save us so many annoying 'did you do it?' texts.",
+      "theme": "Positive Reinforcement Gap"
+    }
+  ],
+  "frequency_distribution": {
+    "Shared Accountability Friction": 84,
+    "Asymmetric Habits": 52,
+    "Positive Reinforcement Gap": 31,
+    "Privacy vs. Visibility": 22,
+    "Gamification Fatigue": 11
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "snapshot_date": "2024-04-12",
+  "currency": "USD",
+  "total_pipeline_value": 14250000,
+  "weighted_pipeline_value": 4820000,
+  "stages": [
+    {
+      "stage": "Discovery",
+      "count": 42,
+      "value": 3150000,
+      "probability": 10
+    },
+    {
+      "stage": "Validation",
+      "count": 28,
+      "value": 4200000,
+      "probability": 25
+    },
+    {
+      "stage": "Technical Evaluation",
+      "count": 15,
+      "value": 3400000,
+      "probability": 40
+    },
+    {
+      "stage": "Negotiation",
+      "count": 8,
+      "value": 2100000,
+      "probability": 70
+    },
+    {
+      "stage": "Verbal Commitment",
+      "count": 4,
+      "value": 1400000,
+      "probability": 90
+    }
+  ],
+  "top_deals_q2_target": [
+    {
+      "account": "Global Logistics Corp",
+      "value": 850000,
+      "stage": "Negotiation",
+      "close_date": "2024-05-15",
+      "health_score": "Amber",
+      "notes": "Decision maker pushing for 15% discount due to budget freeze."
+    },
+    {
+      "account": "Apex Financial Services",
+      "value": 620000,
+      "stage": "Technical Evaluation",
+      "close_date": "2024-06-10",
+      "health_score": "Green",
+      "notes": "Technical champion secured; procurement review started early."
+    },
+    {
+      "account": "OmniMedia Group",
+      "value": 450000,
+      "stage": "Verbal Commitment",
+      "close_date": "2024-04-30",
+      "health_score": "Green",
+      "notes": "Final signature pending legal review of SLA."
+    },
+    {
+      "account": "Stellar Health",
+      "value": 1200000,
+      "stage": "Discovery",
+      "close_date": "2024-06-30",
+      "health_score": "Red",
+      "notes": "Project lead departed; re-discovery required with new VP."
+    }
+  ],
+  "conversion_trends": {
+    "lead_to_opp_ratio": "0.18",
+    "avg_sales_cycle_days": 142,
+    "win_rate_last_90_days": "0.22",
+    "slippage_rate": "0.35"
+  },
+  "pipeline_coverage_ratio": {
+    "q2_forecast": "1.8x",
+    "q3_forecast": "1.1x"
+  },
+  "risk_factors": [
+    {
+      "factor": "Decision Committee Bloat",
+      "impact": "High",
+      "description": "Average number of stakeholders increased from 5 to 9 in Q1."
+    },
+    {
+      "factor": "Competitive Pricing Pressure",
+      "impact": "Medium",
+      "description": "Incumbents offering aggressive multi-year renewals to prevent churn."
+    }
+  ]
+}

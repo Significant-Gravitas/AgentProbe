@@ -1,0 +1,164 @@
+{
+  "activity_period": "2023-10-23 to 2023-10-29",
+  "summary": {
+    "total_open_deals": 80,
+    "deals_moved_stage": 14,
+    "new_deals_created": 6,
+    "total_emails_sent": 112,
+    "total_notes_logged": 45,
+    "total_meetings_held": 19
+  },
+  "recent_activity": [
+    {
+      "deal_id": "D-9021",
+      "deal_name": "Arctic Air Solutions - Enterprise Expansion",
+      "stage": "Negotiation",
+      "amount": 45000,
+      "last_activity_date": "2023-10-27",
+      "activities": [
+        {
+          "type": "EMAIL",
+          "direction": "OUTGOING",
+          "subject": "Revised MSA - Circuit / Arctic Air",
+          "timestamp": "2023-10-27T14:20:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-8842",
+      "deal_name": "Blue Sky HVAC - 12 Seat Pilot",
+      "stage": "Proposal",
+      "amount": 18000,
+      "last_activity_date": "2023-10-12",
+      "activities": [
+        {
+          "type": "NOTE",
+          "content": "Sent proposal. Owner mentioned they need to clear budget with CFO by Friday the 13th.",
+          "timestamp": "2023-10-12T09:15:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-7731",
+      "deal_name": "Midwest Comfort Group",
+      "stage": "Demo",
+      "amount": 32000,
+      "last_activity_date": "2023-10-09",
+      "activities": [
+        {
+          "type": "MEETING",
+          "title": "Technical Deep Dive",
+          "timestamp": "2023-10-09T11:00:00Z"
+        },
+        {
+          "type": "NOTE",
+          "content": "Demo went well. They had questions about the QuickBooks integration sync frequency. Need to follow up with technical docs.",
+          "timestamp": "2023-10-09T12:30:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-9104",
+      "deal_name": "Summit Heating & Cooling",
+      "stage": "Qualified",
+      "amount": 12500,
+      "last_activity_date": "2023-10-28",
+      "activities": [
+        {
+          "type": "EMAIL",
+          "direction": "INCOMING",
+          "subject": "Re: Circuit Demo?",
+          "body": "Let's chat Tuesday morning.",
+          "timestamp": "2023-10-28T16:45:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-8552",
+      "deal_name": "Evergreen Mechanical Services",
+      "stage": "Proposal",
+      "amount": 28000,
+      "last_activity_date": "2023-10-11",
+      "activities": [
+        {
+          "type": "EMAIL",
+          "direction": "OUTGOING",
+          "subject": "Following up on Proposal - Evergreen",
+          "timestamp": "2023-10-11T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-8219",
+      "deal_name": "Desert Winds Air",
+      "stage": "Negotiation",
+      "amount": 55000,
+      "last_activity_date": "2023-10-05",
+      "activities": [
+        {
+          "type": "NOTE",
+          "content": "Verbal 'yes' on pricing. Waiting for signed contract. Mark said he'd get to it over the weekend.",
+          "timestamp": "2023-10-05T15:20:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-7992",
+      "deal_name": "Coastal HVAC Pros",
+      "stage": "Demo",
+      "amount": 21000,
+      "last_activity_date": "2023-10-10",
+      "activities": [
+        {
+          "type": "NOTE",
+          "content": "Decision maker (Sarah) was a no-show for the demo. Rescheduled but haven't heard back.",
+          "timestamp": "2023-10-10T09:00:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-9155",
+      "deal_name": "Lone Star Climate Control",
+      "stage": "Prospect",
+      "amount": 9000,
+      "last_activity_date": "2023-10-29",
+      "activities": [
+        {
+          "type": "NOTE",
+          "content": "New lead from trade show. High intent.",
+          "timestamp": "2023-10-29T18:00:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-8890",
+      "deal_name": "Empire State Ventilation",
+      "stage": "Qualified",
+      "amount": 62000,
+      "last_activity_date": "2023-10-25",
+      "activities": [
+        {
+          "type": "MEETING",
+          "title": "Discovery Call",
+          "timestamp": "2023-10-25T14:00:00Z"
+        }
+      ]
+    },
+    {
+      "deal_id": "D-8334",
+      "deal_name": "Pacific Chillers Ltd.",
+      "stage": "Proposal",
+      "amount": 34000,
+      "last_activity_date": "2023-10-26",
+      "activities": [
+        {
+          "type": "EMAIL",
+          "direction": "OUTGOING",
+          "subject": "Case Study: How Arctic Air saved 20% on dispatching",
+          "timestamp": "2023-10-26T11:12:00Z"
+        }
+      ]
+    }
+  ],
+  "stalled_threshold_days": 7
+}

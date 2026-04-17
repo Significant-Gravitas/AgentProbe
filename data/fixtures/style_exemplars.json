@@ -1,0 +1,160 @@
+{
+  "outreach_sequences": [
+    {
+      "segment": "High-Growth Boutique Studios",
+      "performance_metrics": {
+        "open_rate": "72%",
+        "reply_rate": "34%",
+        "meeting_booked_rate": "8%"
+      },
+      "sequence_steps": [
+        {
+          "step": 1,
+          "channel": "Email",
+          "subject": "Scaling the {{Company_Name}} experience",
+          "body": "Hi {{First_Name}},\n\nSaw that you just opened your {{Location_Count}}th location in {{City}}—congrats on the momentum. Usually, when boutique brands hit this stage, the 'magic' that made the first 3 locations work starts to feel the strain of manual ops.\n\nWe helped [Competitor A] automate their member lifecycle across 15 sites so their trainers could focus on the floor, not the CRM. \n\nWorth a 10-minute chat on how you're maintaining that high-touch feel while scaling?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 2,
+          "channel": "LinkedIn",
+          "action": "Connection Request",
+          "message": "Hi {{First_Name}}, loved the recent piece in Club Industry about {{Company_Name}}'s expansion plans. Would love to connect with a fellow growth lead in the boutique space."
+        },
+        {
+          "step": 3,
+          "channel": "Email",
+          "subject": "Quick question re: member retention",
+          "body": "Hi {{First_Name}}, following up on my note. \n\nOne thing we noticed with brands like yours is that churn often spikes right after the 5th location opens because the community vibe gets diluted. \n\nI put together a short teardown on how Ridgeline centralizes member data to keep that 'local' feel at scale. Want me to send it over?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 4,
+          "channel": "LinkedIn",
+          "action": "Voice Note / Message",
+          "message": "Hey {{First_Name}}, just saw you're hiring for a Head of Ops. Usually a sign things are moving fast. If you're looking to give that new hire a head start on member automation, let's talk."
+        },
+        {
+          "step": 5,
+          "channel": "Email",
+          "subject": "The 'Multi-Site' plateau",
+          "body": "Hi {{First_Name}},\n\nMost boutique founders tell us the hardest jump is 10 to 20 locations. The tech stack usually breaks first.\n\nRidgeline was built specifically to bridge that gap without the overhead of enterprise ERPs like Mindbody. \n\nAre you free Thursday at 2pm for a quick look at the platform?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 6,
+          "channel": "Email",
+          "subject": "Resource for your Ops team",
+          "body": "Hi {{First_Name}}, even if the timing isn't right for a demo, I thought you'd find this interesting: 'The Boutique Scale Playbook: Moving from 10 to 50 locations.'\n\n[Link]\n\nI'll check back in next quarter. Cheers,\n[Name]"
+        },
+        {
+          "step": 7,
+          "channel": "Email",
+          "subject": "Permission to close file?",
+          "body": "Hi {{First_Name}}, I'm moving your account to 'not currently active' so I don't clutter your inbox. \n\nIf you ever need to solve the multi-location data silo problem, you know where to find me.\n\nBest,\n[Name]"
+        }
+      ]
+    },
+    {
+      "segment": "Franchise Operators (Multi-Unit)",
+      "performance_metrics": {
+        "open_rate": "68%",
+        "reply_rate": "31%",
+        "meeting_booked_rate": "6.5%"
+      },
+      "sequence_steps": [
+        {
+          "step": 1,
+          "channel": "Email",
+          "subject": "Standardizing {{Company_Name}} unit economics",
+          "body": "Hi {{First_Name}},\n\nManaging {{Location_Count}} franchise units is a data nightmare when every owner is running their own local promos. \n\nWe helped a 30-unit group consolidate their reporting into a single dashboard, uncovering a 12% revenue leak in their membership billing. \n\nDo you have visibility into real-time unit performance across all your territories right now?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 2,
+          "channel": "LinkedIn",
+          "action": "Connection Request",
+          "message": "Hi {{First_Name}}, I work with multi-unit franchise owners in the fitness space to help streamline their tech stacks. Would love to share some benchmarks we're seeing in the {{Region}} market."
+        },
+        {
+          "step": 3,
+          "channel": "Email",
+          "subject": "The 'Ghost Member' problem",
+          "body": "Hi {{First_Name}}, following up. \n\nIn the franchise world, 'ghost members' (those paying but not attending) are your biggest churn risk. Most systems don't flag them until it's too late. \n\nRidgeline uses predictive AI to alert your GMs before the cancellation happens. \n\nWorth a 5-minute chat?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 4,
+          "channel": "LinkedIn",
+          "action": "Message",
+          "message": "Hey {{First_Name}}, saw your post about the new franchise expo. If you're looking for ways to make your franchise package more attractive to investors via better tech, I've got some ideas."
+        },
+        {
+          "step": 5,
+          "channel": "Email",
+          "subject": "Consolidated Billing for {{Company_Name}}",
+          "body": "Hi {{First_Name}},\n\nOne of the biggest pain points we hear from Franchisees is the friction of corporate reporting. \n\nRidgeline automates the roll-up so you get the data you need, and they get a system that actually helps them sell memberships. \n\nCan we hop on a call next Tuesday?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 6,
+          "channel": "Email",
+          "subject": "Franchise Tech Audit",
+          "body": "Hi {{First_Name}}, I put together a 'Franchise Tech Health' checklist for groups with 20+ locations. \n\n[Link]\n\nHope this helps as you plan for the next fiscal year.\n\nBest,\n[Name]"
+        },
+        {
+          "step": 7,
+          "channel": "Email",
+          "subject": "Checking out",
+          "body": "Hi {{First_Name}}, I haven't heard back, so I'll assume standardizing your tech stack isn't a priority for {{Company_Name}} this month. \n\nI'll reach out again in 6 months. \n\nBest,\n[Name]"
+        }
+      ]
+    },
+    {
+      "segment": "Corporate-Owned Fitness Groups",
+      "performance_metrics": {
+        "open_rate": "65%",
+        "reply_rate": "32%",
+        "meeting_booked_rate": "9%"
+      },
+      "sequence_steps": [
+        {
+          "step": 1,
+          "channel": "Email",
+          "subject": "Centralizing operations for {{Company_Name}}",
+          "body": "Hi {{First_Name}},\n\nSince {{Company_Name}} is corporate-owned, you have a unique advantage: total control over the brand experience. But often, the tech stack is still a patchwork of legacy tools.\n\nWe specialize in replacing fragmented systems with a single source of truth for corporate fitness groups. \n\nAre you currently looking at ways to reduce your per-location OpEx?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 2,
+          "channel": "LinkedIn",
+          "action": "Connection Request",
+          "message": "Hi {{First_Name}}, I've been following {{Company_Name}}'s growth in the {{Region}} market. Impressive work on the recent rebranding. Would love to keep in touch."
+        },
+        {
+          "step": 3,
+          "channel": "Email",
+          "subject": "Reducing overhead by 15%",
+          "body": "Hi {{First_Name}}, following up.\n\nWe recently helped a group of {{Location_Count}} clubs cut their software spend by 15% while increasing member LTV by 20% through better automated nurturing.\n\nI'd love to show you the ROI calculator we used for them. \n\nDo you have 15 minutes next Wednesday?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 4,
+          "channel": "LinkedIn",
+          "action": "Message",
+          "message": "Hey {{First_Name}}, saw you're expanding into the {{New_Market}} area. We have some great data on member demographics in that region from our work with other clubs. Happy to share if helpful."
+        },
+        {
+          "step": 5,
+          "channel": "Email",
+          "subject": "The 'Single View' of the member",
+          "body": "Hi {{First_Name}},\n\nMost corporate groups struggle with 'data islands'—marketing is in one tool, billing in another, and check-ins in a third. \n\nRidgeline brings it all together so your executive team has one dashboard that actually reflects reality.\n\nOpen to a quick demo on Friday?\n\nBest,\n[Name]"
+        },
+        {
+          "step": 6,
+          "channel": "Email",
+          "subject": "Case Study: Scaling to 50 locations",
+          "body": "Hi {{First_Name}}, thought you might like this case study on how [Client Name] scaled from 12 to 50 locations in 24 months without adding a single person to their HQ ops team.\n\n[Link]\n\nBest,\n[Name]"
+        },
+        {
+          "step": 7,
+          "channel": "Email",
+          "subject": "Final follow up",
+          "body": "Hi {{First_Name}}, I'll take the silence as 'not right now.' \n\nIf your team decides to overhaul the tech stack to support your expansion later this year, please keep Ridgeline in mind.\n\nBest,\n[Name]"
+        }
+      ]
+    }
+  ]
+}

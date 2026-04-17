@@ -1,0 +1,124 @@
+{
+  "report_period": "2023-10-01 to 2023-10-31",
+  "total_posts": 22,
+  "aggregate_metrics": {
+    "total_impressions": 142800,
+    "total_engagements": 4150,
+    "average_ctr": "2.1%"
+  },
+  "post_analytics": [
+    {
+      "post_id": "ha-li-1004",
+      "platform": "LinkedIn",
+      "publish_date": "2023-10-04T08:30:00Z",
+      "topic": "Inventory Bloat Data",
+      "impressions": 18400,
+      "likes": 412,
+      "comments": 54,
+      "shares": 28,
+      "clicks": 510,
+      "ctr": "2.77%",
+      "engagement_rate": "2.68%"
+    },
+    {
+      "post_id": "ha-li-1011",
+      "platform": "LinkedIn",
+      "publish_date": "2023-10-11T09:15:00Z",
+      "topic": "Hiring for Grit vs Pedigree",
+      "impressions": 12100,
+      "likes": 201,
+      "comments": 18,
+      "shares": 4,
+      "clicks": 88,
+      "ctr": "0.72%",
+      "engagement_rate": "1.84%"
+    },
+    {
+      "post_id": "ha-li-1015",
+      "platform": "LinkedIn",
+      "publish_date": "2023-10-15T14:00:00Z",
+      "topic": "Port Congestion Visualized",
+      "impressions": 22500,
+      "likes": 680,
+      "comments": 92,
+      "shares": 114,
+      "clicks": 840,
+      "ctr": "3.73%",
+      "engagement_rate": "3.93%"
+    },
+    {
+      "post_id": "ha-li-1018",
+      "platform": "LinkedIn",
+      "publish_date": "2023-10-18T08:45:00Z",
+      "topic": "The $6M ARR Milestone",
+      "impressions": 15600,
+      "likes": 530,
+      "comments": 76,
+      "shares": 12,
+      "clicks": 145,
+      "ctr": "0.92%",
+      "engagement_rate": "3.96%"
+    },
+    {
+      "post_id": "ha-li-1022",
+      "platform": "LinkedIn",
+      "publish_date": "2023-10-22T10:00:00Z",
+      "topic": "Why ERPs fail at visibility",
+      "impressions": 9800,
+      "likes": 145,
+      "comments": 31,
+      "shares": 9,
+      "clicks": 210,
+      "ctr": "2.14%",
+      "engagement_rate": "1.88%"
+    },
+    {
+      "post_id": "ha-li-1025",
+      "platform": "LinkedIn",
+      "publish_date": "2023-10-25T08:15:00Z",
+      "topic": "Supplier Diversification Math",
+      "impressions": 19200,
+      "likes": 488,
+      "comments": 42,
+      "shares": 65,
+      "clicks": 620,
+      "ctr": "3.22%",
+      "engagement_rate": "3.10%"
+    },
+    {
+      "post_id": "ha-li-1030",
+      "platform": "LinkedIn",
+      "publish_date": "2023-10-30T09:00:00Z",
+      "topic": "On-shoring vs Near-shoring Costs",
+      "impressions": 11400,
+      "likes": 215,
+      "comments": 14,
+      "shares": 21,
+      "clicks": 195,
+      "ctr": "1.71%",
+      "engagement_rate": "2.19%"
+    }
+  ],
+  "top_performing_keywords": [
+    "inventory",
+    "lead times",
+    "unit cost",
+    "visibility",
+    "freight audit"
+  ],
+  "audience_demographics": {
+    "top_job_titles": [
+      "Director of Operations",
+      "Supply Chain Manager",
+      "VP of Logistics",
+      "CEO/Founder",
+      "Procurement Lead"
+    ],
+    "top_industries": [
+      "Manufacturing",
+      "Logistics & Supply Chain",
+      "Automotive",
+      "Consumer Goods"
+    ]
+  }
+}

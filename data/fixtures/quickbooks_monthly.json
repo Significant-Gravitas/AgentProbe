@@ -1,0 +1,85 @@
+{
+  "report_period": "October 2026",
+  "currency": "USD",
+  "status": "Closed",
+  "profit_and_loss": {
+    "revenue": {
+      "subscription_revenue": 1425000,
+      "professional_services": 85000,
+      "total_revenue": 1510000
+    },
+    "cost_of_goods_sold": {
+      "hosting_infrastructure": 165000,
+      "customer_support_payroll": 112000,
+      "onboarding_costs": 32000,
+      "total_cogs": 309000
+    },
+    "gross_profit": 1201000,
+    "operating_expenses": {
+      "sales_and_marketing": {
+        "digital_advertising": 245000,
+        "events_and_travel": 62000,
+        "s_m_payroll": 415000,
+        "software_subscriptions": 28000
+      },
+      "research_and_development": {
+        "r_d_payroll": 580000,
+        "contractors": 45000,
+        "r_d_software_tools": 18500
+      },
+      "general_and_administrative": {
+        "g_a_payroll": 155000,
+        "rent_and_facilities": 42000,
+        "legal_and_professional": 78000,
+        "insurance": 12000,
+        "recruiting_fees": 95000
+      },
+      "total_operating_expenses": 1775500
+    },
+    "ebitda": -574500,
+    "depreciation_and_amortization": 14500,
+    "interest_income": 4200,
+    "net_income": -584800
+  },
+  "cash_flow": {
+    "net_income": -584800,
+    "adjustments_operating": {
+      "depreciation": 14500,
+      "accounts_receivable_change": -85000,
+      "accounts_payable_change": 22000,
+      "deferred_revenue_change": 145000,
+      "accrued_expenses_change": 18000
+    },
+    "net_cash_from_operating": -470300,
+    "net_cash_from_investing": -12000,
+    "net_cash_from_financing": 0,
+    "net_cash_change": -482300,
+    "cash_at_beginning": 6245000,
+    "cash_at_end": 5762700
+  },
+  "balance_sheet": {
+    "assets": {
+      "cash_and_equivalents": 5762700,
+      "accounts_receivable": 415000,
+      "prepaid_expenses": 88000,
+      "fixed_assets_net": 245000,
+      "total_assets": 6510700
+    },
+    "liabilities": {
+      "accounts_payable": 134000,
+      "accrued_liabilities": 210000,
+      "deferred_revenue": 2850000,
+      "total_liabilities": 3194000
+    },
+    "equity": {
+      "retained_earnings": -12450000,
+      "paid_in_capital": 15766700,
+      "total_equity": 3316700
+    },
+    "total_liabilities_and_equity": 6510700
+  },
+  "burn_metrics": {
+    "gross_burn": 2084500,
+    "net_burn": 482300
+  }
+}

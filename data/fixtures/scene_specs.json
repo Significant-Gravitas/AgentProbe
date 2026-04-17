@@ -1,0 +1,142 @@
+[
+  {
+    "id": "SCENE-001",
+    "setting": "Ancient Overgrown Temple - Entrance",
+    "mood": "Mysterious",
+    "duration_sec": 45,
+    "tags": ["ambient", "nature", "ethereal", "ruins"]
+  },
+  {
+    "id": "SCENE-002",
+    "setting": "Cyberpunk Neon Market - Night",
+    "mood": "Energetic",
+    "duration_sec": 60,
+    "tags": ["electronic", "industrial", "synthetic", "busy"]
+  },
+  {
+    "id": "SCENE-003",
+    "setting": "Desolate Arctic Tundra - Blizzard",
+    "mood": "Lonely",
+    "duration_sec": 120,
+    "tags": ["cold", "minimalist", "wind", "suspense"]
+  },
+  {
+    "id": "SCENE-004",
+    "setting": "Royal Throne Room - Coronation",
+    "mood": "Majestic",
+    "duration_sec": 90,
+    "tags": ["orchestral", "brass", "triumphant", "formal"]
+  },
+  {
+    "id": "SCENE-005",
+    "setting": "Underground Goblin Forge",
+    "mood": "Aggressive",
+    "duration_sec": 55,
+    "tags": ["percussion", "metal", "dark", "rhythmic"]
+  },
+  {
+    "id": "SCENE-006",
+    "setting": "Enchanted Forest - Fairy Glade",
+    "mood": "Whimsical",
+    "duration_sec": 75,
+    "tags": ["magical", "woodwinds", "light", "peaceful"]
+  },
+  {
+    "id": "SCENE-007",
+    "setting": "Deep Space - Nebula Drift",
+    "mood": "Serene",
+    "duration_sec": 180,
+    "tags": ["space", "drone", "calm", "cinematic"]
+  },
+  {
+    "id": "SCENE-008",
+    "setting": "Victorian Haunted Manor - Hallway",
+    "mood": "Eerie",
+    "duration_sec": 40,
+    "tags": ["horror", "strings", "tense", "vintage"]
+  },
+  {
+    "id": "SCENE-009",
+    "setting": "Desert Oasis - Caravan Rest",
+    "mood": "Relaxed",
+    "duration_sec": 110,
+    "tags": ["ethnic", "warm", "acoustic", "sand"]
+  },
+  {
+    "id": "SCENE-010",
+    "setting": "High-Speed Hovercar Chase",
+    "mood": "Intense",
+    "duration_sec": 65,
+    "tags": ["fast", "techno", "action", "driving"]
+  },
+  {
+    "id": "SCENE-011",
+    "setting": "Underwater Coral Reef",
+    "mood": "Dreamy",
+    "duration_sec": 95,
+    "tags": ["liquid", "muffled", "soothing", "organic"]
+  },
+  {
+    "id": "SCENE-012",
+    "setting": "Medieval Tavern - Brawl",
+    "mood": "Rowdy",
+    "duration_sec": 50,
+    "tags": ["folk", "upbeat", "chaos", "tavern"]
+  },
+  {
+    "id": "SCENE-013",
+    "setting": "Post-Apocalyptic Wasteland - Sunset",
+    "mood": "Melancholy",
+    "duration_sec": 130,
+    "tags": ["guitar", "lo-fi", "sad", "empty"]
+  },
+  {
+    "id": "SCENE-014",
+    "setting": "Steampunk Airship - Engine Room",
+    "mood": "Mechanical",
+    "duration_sec": 70,
+    "tags": ["clocks", "steam", "repetitive", "brass"]
+  },
+  {
+    "id": "SCENE-015",
+    "setting": "Volcanic Crater - Boss Fight",
+    "mood": "Epic",
+    "duration_sec": 150,
+    "tags": ["choir", "heavy", "dramatic", "fire"]
+  },
+  {
+    "id": "SCENE-016",
+    "setting": "Zen Garden - Meditation",
+    "mood": "Peaceful",
+    "duration_sec": 300,
+    "tags": ["flute", "water", "spiritual", "soft"]
+  },
+  {
+    "id": "SCENE-017",
+    "setting": "Retro Arcade - High Score Screen",
+    "mood": "Playful",
+    "duration_sec": 30,
+    "tags": ["8-bit", "chiptune", "nostalgic", "bright"]
+  },
+  {
+    "id": "SCENE-018",
+    "setting": "Gothic Cathedral - Funeral",
+    "mood": "Somber",
+    "duration_sec": 85,
+    "tags": ["organ", "reverberant", "sad", "sacred"]
+  },
+  {
+    "id": "SCENE-019",
+    "setting": "Pirate Ship - Stormy Seas",
+    "mood": "Adventurous",
+    "duration_sec": 105,
+    "tags": ["swashbuckling", "ocean", "bold", "cinematic"]
+  },
+  {
+    "id": "SCENE-020",
+    "setting": "Alien Hive - Queen's Chamber",
+    "mood": "Unsettling",
+    "duration_sec": 55,
+    "tags": ["alien", "visceral", "creepy", "low-end"]
+  }
+]

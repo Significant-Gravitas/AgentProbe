@@ -1,0 +1,87 @@
+date,location_id,role,hours_worked
+2023-01-01,1,Barista,28.5
+2023-01-01,1,Shift Lead,8.0
+2023-01-01,1,Kitchen/Prep,6.0
+2023-01-01,2,Barista,32.0
+2023-01-01,2,Shift Lead,8.0
+2023-01-01,2,Kitchen/Prep,8.0
+2023-01-01,3,Barista,24.0
+2023-01-01,3,Shift Lead,8.0
+2023-01-01,3,Kitchen/Prep,8.0
+2023-01-01,4,Barista,22.0
+2023-01-01,4,Shift Lead,8.0
+2023-01-02,1,Barista,34.0
+2023-01-02,1,Shift Lead,8.0
+2023-01-02,1,Kitchen/Prep,12.0
+2023-01-02,2,Barista,36.5
+2023-01-02,2,Shift Lead,9.0
+2023-01-02,2,Kitchen/Prep,14.0
+2023-01-02,3,Barista,30.0
+2023-01-02,3,Shift Lead,8.5
+2023-01-02,3,Kitchen/Prep,12.0
+2023-01-02,4,Barista,28.0
+2023-01-02,4,Shift Lead,8.0
+2023-01-02,4,Kitchen/Prep,6.0
+... [Representative data for months 1-8 for all locations shows consistent Kitchen/Prep staffing at Location 3] ...
+2023-08-30,3,Barista,32.0
+2023-08-30,3,Shift Lead,8.0
+2023-08-30,3,Kitchen/Prep,12.0
+2023-08-31,3,Barista,31.5
+2023-08-31,3,Shift Lead,8.0
+2023-08-31,3,Kitchen/Prep,12.0
+2023-09-01,3,Barista,30.0
+2023-09-01,3,Shift Lead,8.0
+2023-09-01,3,Kitchen/Prep,0.0
+2023-09-02,3,Barista,34.0
+2023-09-02,3,Shift Lead,8.0
+2023-09-02,3,Kitchen/Prep,0.0
+2023-09-03,3,Barista,33.0
+2023-09-03,3,Shift Lead,8.0
+2023-09-03,3,Kitchen/Prep,0.0
+2023-09-04,3,Barista,30.0
+2023-09-04,3,Shift Lead,8.0
+2023-09-04,3,Kitchen/Prep,0.0
+2023-09-05,3,Barista,28.0
+2023-09-05,3,Shift Lead,8.0
+2023-09-05,3,Kitchen/Prep,2.0
+2023-09-06,3,Barista,29.0
+2023-09-06,3,Shift Lead,8.0
+2023-09-06,3,Kitchen/Prep,0.0
+... [Representative data for Month 9-18 for Location 1, 2, 4 shows stable staffing] ...
+2024-03-15,1,Barista,36.0
+2024-03-15,1,Shift Lead,8.0
+2024-03-15,1,Kitchen/Prep,14.0
+2024-03-15,2,Barista,38.0
+2024-03-15,2,Shift Lead,8.0
+2024-03-15,2,Kitchen/Prep,16.0
+2024-03-15,4,Barista,30.0
+2024-03-15,4,Shift Lead,8.0
+2024-03-15,4,Kitchen/Prep,8.0
+... [Representative data for Month 9-18 for Location 3 shows Kitchen/Prep drop-off] ...
+2024-03-15,3,Barista,38.0
+2024-03-15,3,Shift Lead,8.0
+2024-03-15,3,Kitchen/Prep,0.0
+2024-03-16,3,Barista,40.0
+2024-03-16,3,Shift Lead,8.0
+2024-03-16,3,Kitchen/Prep,0.0
+2024-03-17,3,Barista,36.0
+2024-03-17,3,Shift Lead,8.0
+2024-03-17,3,Kitchen/Prep,0.0
+2024-06-28,1,Barista,35.0
+2024-06-28,1,Shift Lead,8.0
+2024-06-28,1,Kitchen/Prep,13.0
+2024-06-28,2,Barista,37.0
+2024-06-28,2,Shift Lead,8.0
+2024-06-28,2,Kitchen/Prep,15.0
+2024-06-28,3,Barista,38.0
+2024-06-28,3,Shift Lead,8.0
+2024-06-28,3,Kitchen/Prep,0.0
+2024-06-28,4,Barista,30.0
+2024-06-28,4,Shift Lead,8.0
+2024-06-28,4,Kitchen/Prep,8.0
+2024-06-29,3,Barista,42.0
+2024-06-29,3,Shift Lead,8.0
+2024-06-29,3,Kitchen/Prep,0.0
+2024-06-30,3,Barista,40.0
+2024-06-30,3,Shift Lead,8.0
+2024-06-30,3,Kitchen/Prep,0.0

@@ -1,0 +1,62 @@
+{
+  "teams": [
+    {
+      "team_id": "eng_core",
+      "display_name": "Core Engineering Team",
+      "routing_alias": "engineering-triage@lumen-analytics.io",
+      "primary_focus": [
+        "bug_report",
+        "system_performance"
+      ],
+      "escalation_level": 2
+    },
+    {
+      "team_id": "cust_ops",
+      "display_name": "Customer Operations",
+      "routing_alias": "ops-support@lumen-analytics.io",
+      "primary_focus": [
+        "password_reset",
+        "account_access"
+      ],
+      "escalation_level": 1
+    },
+    {
+      "team_id": "legal_compliance",
+      "display_name": "Legal & Compliance (DPO)",
+      "routing_alias": "dpo-review@lumen-analytics.io",
+      "primary_focus": [
+        "data_export_request",
+        "gdpr_compliance"
+      ],
+      "escalation_level": 3
+    },
+    {
+      "team_id": "billing_finance",
+      "display_name": "Billing & Finance",
+      "routing_alias": "billing-inquiries@lumen-analytics.io",
+      "primary_focus": [
+        "billing_inquiry",
+        "subscription_changes"
+      ],
+      "escalation_level": 1
+    },
+    {
+      "team_id": "solutions_arch",
+      "display_name": "Solutions Architecture",
+      "routing_alias": "integrations-help@lumen-analytics.io",
+      "primary_focus": [
+        "integration_help",
+        "api_support"
+      ],
+      "escalation_level": 2
+    }
+  ],
+  "default_fallback": "general-support@lumen-analytics.io",
+  "routing_logic": {
+    "bug_report": "eng_core",
+    "password_reset": "cust_ops",
+    "data_export_request": "legal_compliance",
+    "billing_inquiry": "billing_finance",
+    "integration_help": "solutions_arch"
+  }
+}

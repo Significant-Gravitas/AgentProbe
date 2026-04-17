@@ -1,8 +1,12 @@
 import { dirname, resolve } from "node:path";
 
 import { runSuite } from "../domains/evaluation/run-suite.ts";
+import { startDashboardServer } from "../domains/reporting/dashboard.ts";
 import { writeRunReport } from "../domains/reporting/render-report.ts";
-import { processYamlFiles } from "../domains/validation/load-suite.ts";
+import {
+  parseScenariosInput,
+  processYamlFiles,
+} from "../domains/validation/load-suite.ts";
 import {
   DEFAULT_DB_DIRNAME,
   DEFAULT_DB_FILENAME,
@@ -20,6 +24,19 @@ import {
   AgentProbeConfigError,
   AgentProbeRuntimeError,
 } from "../shared/utils/errors.ts";
+import { setLogLevel } from "../shared/utils/logging.ts";
+
+type GlobalCliOptions = {
+  args: string[];
+  dataPath?: string;
+  verbosity: 0 | 1 | 2;
+};
+
+type DashboardScenarioSeed = {
+  ordinal: number;
+  displayId: string;
+  scenarioName?: string | null;
+};
 
 function formatScore(score: number): string {
   return score.toFixed(2);
@@ -114,12 +131,172 @@ function parseFlag(args: string[], name: string): boolean {
   return args.includes(name);
 }
 
+function parseIntegerValue(name: string, value: string): number {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || String(parsed) !== value.trim()) {
+    throw new AgentProbeConfigError(`${name} requires an integer value.`);
+  }
+  return parsed;
+}
+
 function parseOption(args: string[], name: string): string | undefined {
   const index = args.indexOf(name);
   if (index === -1) {
     return undefined;
   }
   return args[index + 1];
+}
+
+function parseIntegerOption(args: string[], name: string): number | undefined {
+  const value = parseOption(args, name);
+  if (value === undefined) {
+    return undefined;
+  }
+  return parseIntegerValue(name, value);
+}
+
+function parseParallelOption(args: string[]): {
+  enabled: boolean;
+  limit?: number;
+} {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg !== "--parallel" && arg !== "--parrallel") {
+      continue;
+    }
+
+    const rawLimit = args[index + 1];
+    if (rawLimit === undefined || rawLimit.startsWith("--")) {
+      return { enabled: true };
+    }
+
+    const limit = parseIntegerValue("--parallel", rawLimit);
+    if (limit < 1) {
+      throw new AgentProbeConfigError(
+        "--parallel must be at least 1 when a limit is provided.",
+      );
+    }
+    return { enabled: true, limit };
+  }
+
+  return { enabled: false };
+}
+
+function normalizeGlobalArgs(argv: string[]): GlobalCliOptions {
+  const args: string[] = [];
+  let dataPath: string | undefined;
+  let verbosity = 0;
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === "--data-path") {
+      dataPath = argv[index + 1];
+      index += 1;
+      continue;
+    }
+    if (arg === "-vv") {
+      verbosity = Math.max(verbosity, 2);
+      continue;
+    }
+    if (arg === "-v" || arg === "--verbose") {
+      verbosity = Math.min(2, verbosity + 1);
+      continue;
+    }
+    args.push(arg);
+  }
+
+  return {
+    args,
+    dataPath,
+    verbosity: verbosity >= 2 ? 2 : verbosity === 1 ? 1 : 0,
+  };
+}
+
+function applyVerbosityLevel(verbosity: 0 | 1 | 2): void {
+  if (verbosity >= 2) {
+    setLogLevel("debug");
+    return;
+  }
+  if (verbosity === 1) {
+    setLogLevel("info");
+    return;
+  }
+  setLogLevel("warn");
+}
+
+function selectDashboardScenarios(options: {
+  scenariosPath: string;
+  scenarioId?: string;
+  tags?: string;
+  repeat?: number;
+}): DashboardScenarioSeed[] {
+  const scenarioCollection = parseScenariosInput(options.scenariosPath);
+  const requestedTags = new Set(
+    (options.tags ?? "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
+  const requestedScenarioIds = options.scenarioId
+    ? new Set(
+        options.scenarioId
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean),
+      )
+    : undefined;
+  const selectedScenarios = scenarioCollection.scenarios.filter((scenario) => {
+    if (
+      requestedScenarioIds &&
+      !requestedScenarioIds.has(scenario.id) &&
+      !requestedScenarioIds.has(scenario.name)
+    ) {
+      return false;
+    }
+    if (
+      requestedTags.size > 0 &&
+      !scenario.tags.some((tag) => requestedTags.has(tag))
+    ) {
+      return false;
+    }
+    return true;
+  });
+  const repeat = Math.max(1, options.repeat ?? 1);
+  let ordinal = 0;
+  return selectedScenarios.flatMap((scenario) =>
+    Array.from({ length: repeat }, (_unused, iterationIndex) => {
+      const iteration = iterationIndex + 1;
+      const seed = {
+        ordinal,
+        displayId: iteration > 1 ? `${scenario.id}#${iteration}` : scenario.id,
+        scenarioName: scenario.name,
+      };
+      ordinal += 1;
+      return seed;
+    }),
+  );
+}
+
+async function bestEffortOpenBrowser(url: string): Promise<void> {
+  if (Bun.env.AGENTPROBE_DISABLE_BROWSER_OPEN === "1") {
+    return;
+  }
+
+  const command =
+    process.platform === "darwin"
+      ? ["open", url]
+      : process.platform === "win32"
+        ? ["cmd", "/c", "start", "", url]
+        : ["xdg-open", url];
+  try {
+    const child = Bun.spawn({
+      cmd: command,
+      stdin: "ignore",
+      stdout: "ignore",
+      stderr: "ignore",
+    });
+    void child.exited.catch(() => {});
+  } catch {}
 }
 
 async function handleValidate(
@@ -145,26 +322,101 @@ async function handleRun(args: string[]): Promise<number> {
     );
   }
 
+  const scenarioId =
+    parseOption(args, "--scenario") ?? parseOption(args, "--scenario-id");
+
   const client = new OpenAiResponsesClient();
   client.assertConfigured();
   const recorder = new SqliteRunRecorder(
     suiteDbUrl([endpoint, scenarios, personas, rubric]),
   );
-  const result = await runSuite({
-    endpoint,
-    scenarios,
-    personas,
-    rubric,
-    scenarioId: parseOption(args, "--scenario-id"),
-    tags: parseOption(args, "--tags"),
-    client,
-    recorder,
-    progressCallback: printRunProgress,
-    parallel: parseFlag(args, "--parallel") || parseFlag(args, "--parrallel"),
-    dryRun: parseFlag(args, "--dry-run"),
+  const repeat = parseIntegerOption(args, "--repeat");
+  if (repeat !== undefined && repeat < 1) {
+    throw new AgentProbeConfigError("--repeat must be at least 1.");
+  }
+
+  const dashboardEnabled = parseFlag(args, "--dashboard");
+  const dashboard = dashboardEnabled
+    ? startDashboardServer({ dbUrl: recorder.dbUrl })
+    : undefined;
+  const parallel = parseParallelOption(args);
+
+  try {
+    if (dashboard) {
+      dashboard.state.primeScenarios(
+        selectDashboardScenarios({
+          scenariosPath: scenarios,
+          scenarioId,
+          tags: parseOption(args, "--tags"),
+          repeat,
+        }),
+      );
+      console.error(`Dashboard: ${dashboard.url}`);
+      void bestEffortOpenBrowser(dashboard.url);
+    }
+
+    const result = await runSuite({
+      endpoint,
+      scenarios,
+      personas,
+      rubric,
+      scenarioId,
+      tags: parseOption(args, "--tags"),
+      client,
+      recorder,
+      progressCallback: (event) => {
+        dashboard?.state.handleProgress(event);
+        printRunProgress(event);
+      },
+      parallel: parallel.enabled,
+      parallelLimit: parallel.limit,
+      dryRun: parseFlag(args, "--dry-run"),
+      repeat,
+    });
+    printRunSummary(result);
+    return result.exitCode;
+  } finally {
+    dashboard?.stop();
+  }
+}
+
+async function handleList(
+  args: string[],
+  globalDataPath?: string,
+): Promise<number> {
+  const scenariosPath =
+    parseOption(args, "--scenarios") ?? globalDataPath ?? "data";
+  const tags = parseOption(args, "--tags");
+  const scenarioCollection = parseScenariosInput(scenariosPath);
+
+  const requestedTags = new Set(
+    (tags ?? "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
+
+  const selectedScenarios = scenarioCollection.scenarios.filter((scenario) => {
+    if (
+      requestedTags.size > 0 &&
+      !scenario.tags.some((tag) => requestedTags.has(tag))
+    ) {
+      return false;
+    }
+    return true;
   });
-  printRunSummary(result);
-  return result.exitCode;
+
+  if (selectedScenarios.length === 0) {
+    console.error("No scenarios found.");
+    return 1;
+  }
+
+  for (const scenario of selectedScenarios) {
+    const tagSuffix =
+      scenario.tags.length > 0 ? ` [${scenario.tags.join(", ")}]` : "";
+    console.log(`${scenario.id}: ${scenario.name}${tagSuffix}`);
+  }
+  return 0;
 }
 
 async function handleReport(
@@ -240,18 +492,19 @@ async function handleOpenclaw(args: string[]): Promise<number> {
 }
 
 export async function executeCli(argv: string[]): Promise<number> {
-  let args = [...argv];
-  let globalDataPath: string | undefined;
-  if (args[0] === "--data-path") {
-    globalDataPath = args[1];
-    args = args.slice(2);
-  }
+  const normalized = normalizeGlobalArgs(argv);
+  applyVerbosityLevel(normalized.verbosity);
+  const args = normalized.args;
+  const globalDataPath = normalized.dataPath;
 
   const [command = "validate", ...rest] = args;
 
   try {
     if (command === "validate") {
       return await handleValidate(rest, globalDataPath);
+    }
+    if (command === "list") {
+      return await handleList(rest, globalDataPath);
     }
     if (command === "run") {
       return await handleRun(rest);
