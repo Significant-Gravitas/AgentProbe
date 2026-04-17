@@ -26,6 +26,7 @@ Last validated against `platform.md`: 2026-04-17
 - [x] Non-loopback exposure requires unsafe flag and token
 - [x] Read-only HTTP and UI surfaces browse persisted run history
 - [x] Live run events stream through Server-Sent Events with replay support
+- [x] Run executor failures are logged and persisted
 - [x] Run control starts validated ad-hoc or preset-backed runs
 - [x] Cancellation cooperatively stops a server-managed run
 - [x] Presets save cross-file scenario selections for one-click rerun
