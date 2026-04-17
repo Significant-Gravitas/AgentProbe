@@ -1,14 +1,29 @@
 import { timingSafeEqual } from "node:crypto";
 
-export function constantTimeEquals(left: string, right: string): boolean {
+export const TOKEN_COMPARE_BYTE_LENGTH = 128;
+
+type TimingSafeEqual = typeof timingSafeEqual;
+
+export function constantTimeEquals(
+  left: string,
+  right: string,
+  safeEqual: TimingSafeEqual = timingSafeEqual,
+): boolean {
   const leftBytes = Buffer.from(left, "utf8");
   const rightBytes = Buffer.from(right, "utf8");
-  if (leftBytes.length !== rightBytes.length) {
-    const padded = Buffer.alloc(Math.max(leftBytes.length, rightBytes.length));
-    timingSafeEqual(padded, padded);
-    return false;
-  }
-  return timingSafeEqual(leftBytes, rightBytes);
+  const leftPadded = Buffer.alloc(TOKEN_COMPARE_BYTE_LENGTH);
+  const rightPadded = Buffer.alloc(TOKEN_COMPARE_BYTE_LENGTH);
+
+  leftBytes.copy(leftPadded, 0, 0, TOKEN_COMPARE_BYTE_LENGTH);
+  rightBytes.copy(rightPadded, 0, 0, TOKEN_COMPARE_BYTE_LENGTH);
+
+  const equalBytes = safeEqual(leftPadded, rightPadded);
+  const equalLengths = leftBytes.length === rightBytes.length;
+  const withinCompareLimit =
+    leftBytes.length <= TOKEN_COMPARE_BYTE_LENGTH &&
+    rightBytes.length <= TOKEN_COMPARE_BYTE_LENGTH;
+
+  return equalBytes && equalLengths && withinCompareLimit;
 }
 
 export function extractBearerToken(request: Request): string | undefined {
