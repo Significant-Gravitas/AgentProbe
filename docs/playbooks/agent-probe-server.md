@@ -43,6 +43,7 @@ it with bearer-token protection, or running the Docker-packaged SQLite server.
    ```bash
    OPEN_ROUTER_API_KEY="$OPEN_ROUTER_API_KEY" \
    AGENTPROBE_SERVER_TOKEN="$AGENTPROBE_SERVER_TOKEN" \
+   AGENTPROBE_SERVER_CORS_ORIGINS="https://dashboard.example" \
      bun run agentprobe start-server \
        --host 0.0.0.0 \
        --port 7878 \
@@ -56,8 +57,28 @@ it with bearer-token protection, or running the Docker-packaged SQLite server.
    ```bash
    curl -fsS \
      -H "Authorization: Bearer $AGENTPROBE_SERVER_TOKEN" \
-     http://127.0.0.1:7878/api/runs
+      http://127.0.0.1:7878/api/runs
    ```
+
+## API CORS
+
+`/api/*` routes answer browser CORS preflights and attach
+`Access-Control-Allow-Origin` to allowed API responses. Loopback servers default
+to same-origin only: requests from the server's own `http://127.0.0.1:7878`,
+`http://localhost:7878`, or `[::1]` origin are allowed, while dashboard origins
+on other hosts or ports are rejected until explicitly configured.
+
+Set `AGENTPROBE_SERVER_CORS_ORIGINS` to a comma-separated list of exact
+`http://` or `https://` origins when the dashboard is served from a CDN,
+different hostname, or local dev proxy:
+
+```bash
+export AGENTPROBE_SERVER_CORS_ORIGINS="https://dashboard.example,http://localhost:5173"
+```
+
+When `--unsafe-expose` or `AGENTPROBE_SERVER_UNSAFE_EXPOSE=true` is used, the
+server refuses to boot unless `AGENTPROBE_SERVER_CORS_ORIGINS` is set. This keeps
+external binds from silently granting API access to arbitrary web origins.
 
 ## Docker With SQLite On Volume
 
@@ -65,6 +86,7 @@ it with bearer-token protection, or running the Docker-packaged SQLite server.
 
    ```bash
    export AGENTPROBE_SERVER_TOKEN="$(openssl rand -hex 24)"
+   export AGENTPROBE_SERVER_CORS_ORIGINS="http://127.0.0.1:7878"
    export OPEN_ROUTER_API_KEY="$OPEN_ROUTER_API_KEY"
    ```
 
@@ -125,6 +147,8 @@ bun run fast-feedback
   still works without it.
 - Missing token with Docker or `--unsafe-expose`: boot fails because
   non-loopback binds require `AGENTPROBE_SERVER_TOKEN`.
+- Missing CORS origins with `--unsafe-expose`: boot fails until
+  `AGENTPROBE_SERVER_CORS_ORIGINS` names the dashboard origin(s).
 - Missing dashboard bundle: run `bun run dashboard:build`, or set
   `AGENTPROBE_SERVER_DASHBOARD_DIST` to a valid built bundle.
 - SQLite lock errors: keep one server process per SQLite volume, prefer the
