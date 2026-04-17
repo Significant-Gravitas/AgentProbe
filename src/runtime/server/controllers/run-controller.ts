@@ -1,11 +1,8 @@
 import { createHash } from "node:crypto";
 
 import { runSuite } from "../../../domains/evaluation/run-suite.ts";
-import {
-  createPreset,
-  getPreset,
-} from "../../../providers/persistence/sqlite-run-history.ts";
 import type {
+  PresetWriteInput,
   RecordingRepository,
   RunRecorder,
 } from "../../../providers/persistence/types.ts";
@@ -17,7 +14,6 @@ import type {
   RunProgressEvent,
 } from "../../../shared/types/contracts.ts";
 import { AgentProbeConfigError } from "../../../shared/utils/errors.ts";
-import type { ServerConfig } from "../config.ts";
 import type { StreamHub } from "../streams/hub.ts";
 import {
   HttpInputError,
@@ -170,7 +166,6 @@ export class RunController {
 
   constructor(
     private readonly options: {
-      config: ServerConfig;
       repository: RecordingRepository;
       suiteController: SuiteController;
       streamHub: StreamHub;
@@ -219,26 +214,24 @@ export class RunController {
         );
       }
       const raw = saveAsPreset as Record<string, unknown>;
-      const preset = createPreset(
-        {
-          name: requiredString(raw, "name"),
-          description: optionalString(raw, "description") ?? null,
-          endpoint: this.options.suiteController.resolveDataFile(
-            requiredString(body, "endpoint"),
-          ).relativePath,
-          personas: this.options.suiteController.resolveDataFile(
-            requiredString(body, "personas"),
-          ).relativePath,
-          rubric: this.options.suiteController.resolveDataFile(
-            requiredString(body, "rubric"),
-          ).relativePath,
-          selection: selection.refs,
-          parallel,
-          repeat,
-          dryRun,
-        },
-        { dbUrl: this.options.config.dbUrl },
-      );
+      const presetInput: PresetWriteInput = {
+        name: requiredString(raw, "name"),
+        description: optionalString(raw, "description") ?? null,
+        endpoint: this.options.suiteController.resolveDataFile(
+          requiredString(body, "endpoint"),
+        ).relativePath,
+        personas: this.options.suiteController.resolveDataFile(
+          requiredString(body, "personas"),
+        ).relativePath,
+        rubric: this.options.suiteController.resolveDataFile(
+          requiredString(body, "rubric"),
+        ).relativePath,
+        selection: selection.refs,
+        parallel,
+        repeat,
+        dryRun,
+      };
+      const preset = await this.options.repository.createPreset(presetInput);
       presetId = preset.id;
       presetSnapshot = snapshotFromPreset(preset);
     }
@@ -258,8 +251,11 @@ export class RunController {
     };
   }
 
-  private presetSpec(presetId: string, body: Record<string, unknown>): RunSpec {
-    const preset = getPreset(presetId, { dbUrl: this.options.config.dbUrl });
+  private async presetSpec(
+    presetId: string,
+    body: Record<string, unknown>,
+  ): Promise<RunSpec> {
+    const preset = await this.options.repository.getPreset(presetId);
     if (!preset) {
       throw new HttpInputError(
         404,
@@ -299,7 +295,7 @@ export class RunController {
     const body = await readJsonObject(request);
     const presetId = optionalString(body, "preset_id");
     if (presetId) {
-      return this.presetSpec(presetId, body);
+      return await this.presetSpec(presetId, body);
     }
     return await this.explicitSpec(body);
   }
@@ -309,7 +305,7 @@ export class RunController {
     request: Request,
   ): Promise<RunSpec> {
     const body = await readOptionalJsonObject(request);
-    return this.presetSpec(presetId, body);
+    return await this.presetSpec(presetId, body);
   }
 
   start(spec: RunSpec): StartRunResult {

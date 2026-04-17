@@ -1,12 +1,12 @@
 import { existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 
-import {
-  DEFAULT_DB_DIRNAME,
-  DEFAULT_DB_FILENAME,
-} from "../../providers/persistence/sqlite-run-history.ts";
 import { POSTGRES_RUN_RECORDING_UNSUPPORTED_MESSAGE } from "../../providers/persistence/types.ts";
-import { isPostgresUrl, redactDbUrl } from "../../providers/persistence/url.ts";
+import {
+  defaultSqliteDbUrl,
+  isPostgresUrl,
+  redactDbUrl,
+} from "../../providers/persistence/url.ts";
 import { AgentProbeConfigError } from "../../shared/utils/errors.ts";
 
 export const DEFAULT_HOST = "127.0.0.1";
@@ -250,7 +250,7 @@ function normalizeDbUrl(
   if (dbFlag) {
     return `sqlite:///${resolve(dbFlag)}`;
   }
-  return `sqlite:///${resolve(DEFAULT_DB_DIRNAME, DEFAULT_DB_FILENAME)}`;
+  return defaultSqliteDbUrl();
 }
 
 function assertDirectoryExists(path: string, label: string): void {

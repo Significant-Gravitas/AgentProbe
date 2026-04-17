@@ -1,4 +1,3 @@
-import { getRun } from "../../../providers/persistence/sqlite-run-history.ts";
 import type { RunRecord } from "../../../shared/types/contracts.ts";
 import type { ServerContext } from "../app-server.ts";
 import { errorResponse } from "../http-helpers.ts";
@@ -45,16 +44,16 @@ function parseLastEventId(value: string | null): number | undefined {
   return parsed;
 }
 
-export function handleRunSse(
+export async function handleRunSse(
   request: Request,
   context: ServerContext,
   params: { runId: string },
-): Response {
+): Promise<Response> {
   const lastEventId = parseLastEventId(request.headers.get("last-event-id"));
   const { runId } = params;
 
   const historicalRun: RunRecord | undefined = context.config.dbUrl
-    ? getRun(runId, { dbUrl: context.config.dbUrl })
+    ? await context.repository.getRun(runId)
     : undefined;
 
   // Replay any buffered events (after last-event-id if provided).

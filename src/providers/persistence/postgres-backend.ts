@@ -6,7 +6,14 @@ import type {
   ScenarioRecord,
   ScenarioSelectionRef,
 } from "../../shared/types/contracts.ts";
-import { AgentProbeRuntimeError } from "../../shared/utils/errors.ts";
+import {
+  AgentProbeConfigError,
+  AgentProbeRuntimeError,
+} from "../../shared/utils/errors.ts";
+import {
+  checkSchemaVersion,
+  POSTGRES_TARGET_VERSION,
+} from "./migrations/index.ts";
 import { createPostgresClient, type SqlTag } from "./postgres-client.ts";
 import type { PersistenceRepository, PresetWriteInput } from "./types.ts";
 
@@ -403,6 +410,16 @@ export class PostgresRepository implements PersistenceRepository {
 
   constructor(dbUrl: string) {
     this.dbUrl = dbUrl;
+  }
+
+  async initialize(): Promise<void> {
+    const report = await checkSchemaVersion(this.dbUrl);
+    if (report.currentVersion < POSTGRES_TARGET_VERSION) {
+      throw new AgentProbeConfigError(
+        `Postgres schema version ${report.currentVersion} is behind expected ${POSTGRES_TARGET_VERSION} ` +
+          `for ${report.dbUrl}. Run \`agentprobe db:migrate\` before starting the server.`,
+      );
+    }
   }
 
   private async withSql<T>(fn: (sql: SqlTag) => Promise<T>): Promise<T> {

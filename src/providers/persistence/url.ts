@@ -1,5 +1,14 @@
+import { resolve } from "node:path";
+
 import { AgentProbeConfigError } from "../../shared/utils/errors.ts";
 import type { ParsedDbUrl, PersistenceBackendKind } from "./types.ts";
+
+export const DEFAULT_DB_DIRNAME = ".agentprobe";
+export const DEFAULT_DB_FILENAME = "runs.sqlite3";
+
+export function defaultSqliteDbUrl(): string {
+  return `sqlite:///${resolve(DEFAULT_DB_DIRNAME, DEFAULT_DB_FILENAME)}`;
+}
 
 const URL_SCHEME_RE = /^([A-Za-z][A-Za-z\d+.-]*:\/\/)(.*)$/;
 
