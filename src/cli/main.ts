@@ -19,6 +19,8 @@ import {
   openclawChat,
   openclawHistory,
 } from "../providers/sdk/openclaw.ts";
+import { startAgentProbeServer } from "../runtime/server/app-server.ts";
+import { buildServerConfig } from "../runtime/server/config.ts";
 import type { RunProgressEvent, RunResult } from "../shared/types/contracts.ts";
 import {
   AgentProbeConfigError,
@@ -491,6 +493,54 @@ async function handleOpenclaw(args: string[]): Promise<number> {
   );
 }
 
+async function handleStartServer(
+  args: string[],
+  globalDataPath?: string,
+): Promise<number> {
+  const effectiveArgs = [...args];
+  if (globalDataPath && !effectiveArgs.includes("--data")) {
+    effectiveArgs.push("--data", globalDataPath);
+  }
+  const config = buildServerConfig({
+    args: effectiveArgs,
+    env: process.env as Record<string, string | undefined>,
+  });
+  const server = await startAgentProbeServer(config);
+  console.error(`AgentProbe server listening on ${server.url}`);
+  console.error(`  data:      ${config.dataPath}`);
+  console.error(`  db_url:    ${config.dbUrl || "(none)"}`);
+  console.error(
+    `  token:     ${config.token ? "set" : "(none)"}${
+      config.unsafeExpose ? " (unsafe-expose)" : ""
+    }`,
+  );
+  if (config.openBrowser) {
+    void bestEffortOpenBrowser(server.url);
+  }
+
+  let shuttingDown = false;
+  const shutdown = async (signal: string): Promise<void> => {
+    if (shuttingDown) {
+      return;
+    }
+    shuttingDown = true;
+    console.error(`\nReceived ${signal}; shutting down.`);
+    await server.stop();
+    process.exit(0);
+  };
+
+  process.on("SIGINT", () => {
+    void shutdown("SIGINT");
+  });
+  process.on("SIGTERM", () => {
+    void shutdown("SIGTERM");
+  });
+
+  return await new Promise<number>(() => {
+    // Resolves only on signal-driven shutdown.
+  });
+}
+
 export async function executeCli(argv: string[]): Promise<number> {
   const normalized = normalizeGlobalArgs(argv);
   applyVerbosityLevel(normalized.verbosity);
@@ -514,6 +564,9 @@ export async function executeCli(argv: string[]): Promise<number> {
     }
     if (command === "openclaw") {
       return await handleOpenclaw(rest);
+    }
+    if (command === "start-server") {
+      return await handleStartServer(rest, globalDataPath);
     }
     throw new AgentProbeConfigError(`Unknown command: ${command}`);
   } catch (error) {
