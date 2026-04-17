@@ -3,6 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 import { AgentProbeConfigError } from "../../shared/utils/errors.ts";
+import { redactDbUrl } from "./url.ts";
 
 export const DEFAULT_DB_DIRNAME = ".agentprobe";
 export const DEFAULT_DB_FILENAME = "runs.sqlite3";
@@ -22,7 +23,9 @@ export function resolveSqlitePath(dbUrl?: string): string {
     return defaultPath;
   }
   if (!dbUrl.startsWith("sqlite:///")) {
-    throw new AgentProbeConfigError(`Unsupported sqlite db url: ${dbUrl}`);
+    throw new AgentProbeConfigError(
+      `Unsupported sqlite db url: ${redactDbUrl(dbUrl)}`,
+    );
   }
   const path = dbUrl.slice("sqlite:///".length);
   ensureDirectory(path);

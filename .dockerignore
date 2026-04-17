@@ -1,11 +1,16 @@
 .agentprobe/
+.agents/
+.claude/
 .git/
 .github/
 .tmp-agentprobe-e2e-*/
 .venv/
 coverage/
+docs/
 dashboard/node_modules/
 node_modules/
+scripts/
+tests/
 *.sqlite
 *.sqlite3
 *.db

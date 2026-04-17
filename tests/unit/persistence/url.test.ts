@@ -16,6 +16,36 @@ describe("persistence url helpers", () => {
     );
   });
 
+  test("redacts postgres passwords containing reserved or encoded characters", () => {
+    expect(redactDbUrl("postgres://user:pa@ss@host:5432/db")).toBe(
+      "postgres://user:***@host:5432/db",
+    );
+    expect(redactDbUrl("postgres://user:pa:ss@host/db")).toBe(
+      "postgres://user:***@host/db",
+    );
+    expect(redactDbUrl("postgres://user:pa/ss@host/db")).toBe(
+      "postgres://user:***@host/db",
+    );
+    expect(redactDbUrl("postgres://user:p%2Fss@host/db")).toBe(
+      "postgres://user:***@host/db",
+    );
+    expect(redactDbUrl("postgres://user:p%25ss@host/db")).toBe(
+      "postgres://user:***@host/db",
+    );
+  });
+
+  test("leaves username-only userinfo unchanged", () => {
+    expect(redactDbUrl("postgres://user@host/db")).toBe(
+      "postgres://user@host/db",
+    );
+  });
+
+  test("redacts credentials for non-postgres URL schemes", () => {
+    expect(redactDbUrl("mysql://user:pa@ss@host/db")).toBe(
+      "mysql://user:***@host/db",
+    );
+  });
+
   test("passes through sqlite URLs unchanged", () => {
     expect(redactDbUrl("sqlite:///tmp/runs.sqlite3")).toBe(
       "sqlite:///tmp/runs.sqlite3",
@@ -27,6 +57,9 @@ describe("persistence url helpers", () => {
     expect(parseDbUrl("postgres://u:p@h/db").kind).toBe("postgres");
     expect(parseDbUrl("postgresql://u:p@h/db").kind).toBe("postgres");
     expect(parseDbUrl("postgresql://u:p@h/db").displayUrl).toBe(
+      "postgresql://u:***@h/db",
+    );
+    expect(parseDbUrl("postgresql://u:pa@ss@h/db").displayUrl).toBe(
       "postgresql://u:***@h/db",
     );
   });
