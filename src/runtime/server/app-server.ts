@@ -17,6 +17,13 @@ import { PresetController } from "./controllers/preset-controller.ts";
 import { RunController } from "./controllers/run-controller.ts";
 import { SuiteController } from "./controllers/suite-controller.ts";
 import { ensureRequestId, errorResponse } from "./http-helpers.ts";
+import {
+  createObservability,
+  type Logger,
+  METRIC_NAMES,
+  type Observability,
+  summarizeServerConfig,
+} from "./observability/index.ts";
 import { handleCompareRuns } from "./routes/comparisons.ts";
 import { handleHealthz, handleReadyz, handleSession } from "./routes/health.ts";
 import {
@@ -58,6 +65,7 @@ export type ServerContext = {
   comparisonController: ComparisonController;
   repository: PersistenceRepository;
   streamHub: StreamHub;
+  observability: Observability;
   requestId: string;
   startedAt: number;
   version: string;
@@ -69,6 +77,7 @@ export type StartedServer = {
   port: number;
   streamHub: StreamHub;
   suiteController: SuiteController;
+  observability: Observability;
   stop: () => Promise<void>;
 };
 
@@ -332,37 +341,36 @@ function withCorsHeaders(
 }
 
 function logRequest(
-  config: ServerConfig,
+  logger: Logger,
   request: Request,
   response: Response,
   durationMs: number,
   requestId: string,
+  matchedRoute: string | undefined,
 ): void {
   const pathname = new URL(request.url).pathname;
-  if (config.logFormat === "json") {
-    const payload = {
-      ts: new Date().toISOString(),
-      level: "info",
-      component: "agentprobe.server",
-      method: request.method,
-      path: pathname,
-      status: response.status,
-      duration_ms: Math.round(durationMs),
-      request_id: requestId,
-    };
-    process.stderr.write(`${JSON.stringify(payload)}\n`);
-    return;
-  }
-  process.stderr.write(
-    `[server] ${request.method} ${pathname} -> ${response.status} (${durationMs.toFixed(
-      1,
-    )}ms) rid=${requestId}\n`,
-  );
+  logger.info("http.request", {
+    method: request.method,
+    path: pathname,
+    route: matchedRoute ?? null,
+    status: response.status,
+    duration_ms: Math.round(durationMs),
+    request_id: requestId,
+  });
 }
+
+export type StartAgentProbeServerOptions = {
+  observability?: Observability;
+};
 
 export async function startAgentProbeServer(
   config: ServerConfig,
+  options: StartAgentProbeServerOptions = {},
 ): Promise<StartedServer> {
+  const observability =
+    options.observability ?? createObservability({ format: config.logFormat });
+  const { logger, metrics } = observability;
+
   const repository: RecordingRepository = createRecordingRepository(
     config.dbUrl,
   );
@@ -381,10 +389,18 @@ export async function startAgentProbeServer(
     repository,
     suiteController,
     streamHub,
+    observability,
   });
   const comparisonController = createComparisonController({ repository });
   const routes = buildRoutes();
   const startedAt = Date.now();
+
+  logger.info("server.startup", {
+    version: SERVER_VERSION,
+    config: summarizeServerConfig(config),
+  });
+  metrics.setGauge(METRIC_NAMES.runsActive, 0);
+  metrics.setGauge(METRIC_NAMES.sseConnections, 0);
 
   const baseContext = {
     config,
@@ -394,6 +410,7 @@ export async function startAgentProbeServer(
     comparisonController,
     repository,
     streamHub,
+    observability,
     startedAt,
     version: SERVER_VERSION,
   };
@@ -403,13 +420,16 @@ export async function startAgentProbeServer(
     const url = new URL(request.url);
     const t0 = performance.now();
     let response: Response;
+    let routeLabel: string | undefined;
     const context: ServerContext = { ...baseContext, requestId };
     try {
       if (request.method === "OPTIONS" && isApiPath(url.pathname)) {
         response = preflightResponse(request, config);
+        routeLabel = "OPTIONS";
       } else {
         const matched = matchRoute(routes, request.method, url.pathname);
         if (matched) {
+          routeLabel = matched.route.pattern.source;
           if (matched.route.requiresAuth && config.token) {
             if (!verifyBearerToken(request, config.token)) {
               response = errorResponse({
@@ -466,7 +486,13 @@ export async function startAgentProbeServer(
       response = withCorsHeaders(request, config, response);
     }
 
-    logRequest(config, request, response, performance.now() - t0, requestId);
+    const duration = performance.now() - t0;
+    logRequest(logger, request, response, duration, requestId, routeLabel);
+    metrics.incrementCounter(METRIC_NAMES.httpRequests, 1, {
+      method: request.method,
+      route: routeLabel ?? "unmatched",
+      status: response.status,
+    });
     return response;
   };
 
@@ -491,6 +517,7 @@ export async function startAgentProbeServer(
     port,
     streamHub,
     suiteController,
+    observability,
     stop,
   };
 }

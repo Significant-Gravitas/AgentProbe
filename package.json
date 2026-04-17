@@ -20,7 +20,9 @@
     "typecheck": "bunx tsc --noEmit && bun run --cwd dashboard typecheck",
     "dashboard:dev": "bun run --cwd dashboard dev",
     "dashboard:build": "bun run --cwd dashboard build",
-    "validate:setup": "./scripts/validate-setup.sh"
+    "validate:setup": "./scripts/validate-setup.sh",
+    "soak": "bun scripts/soak.ts",
+    "latency-budget": "bun scripts/latency-budget.ts"
   },
   "dependencies": {
     "nunjucks": "^3.2.4",

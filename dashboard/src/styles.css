@@ -103,6 +103,43 @@ body {
   padding: 16px;
   color: var(--muted);
 }
+.server-filter-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 12px;
+}
+.server-filter-input {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 8px 10px;
+}
+.server-filter-input:focus {
+  outline: 2px solid var(--indigo);
+  outline-offset: 1px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+[data-keynav="row"]:focus-within,
+[data-keynav="row"]:focus,
+[data-keynav-link="true"]:focus {
+  outline: 2px solid var(--indigo);
+  outline-offset: -2px;
+}
 .server-error {
   color: var(--amber);
   border-color: rgba(245, 158, 11, 0.35);
