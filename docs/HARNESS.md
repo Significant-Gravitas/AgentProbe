@@ -10,6 +10,15 @@
 | To refresh workspace docs  | `bun run docs:workspace`   |
 | To refresh quality score   | `bun run docs:quality`     |
 
+## Test timeouts
+
+`bun run test` and `bun run test:e2e` set `--timeout 30000` (30s per test). The
+e2e suite spawns the CLI subprocess per case, which routinely takes 1–4s on a
+warm box and can exceed Bun's 5s default under coverage instrumentation or a
+loaded CI worker. Subprocess teardown still surfaces normally — a hung child
+will fail the test at the 30s mark rather than the 5s default, but it will
+still fail. Do not raise this further without a justification recorded here.
+
 ## PR requirements
 
 Every PR must:
