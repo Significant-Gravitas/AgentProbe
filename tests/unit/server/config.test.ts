@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
+import { startAgentProbeServer } from "../../../src/runtime/server/app-server.ts";
 import { buildServerConfig } from "../../../src/runtime/server/config.ts";
 import { AgentProbeConfigError } from "../../../src/shared/utils/errors.ts";
 import { makeTempDir } from "../support.ts";
@@ -63,7 +64,7 @@ describe("server config", () => {
     expect(config.token).toBe("secret");
   });
 
-  test("allows loopback ranges and accepts postgres URLs in Phase 3", () => {
+  test("allows loopback ranges and rejects postgres URLs for write-enabled server mode", () => {
     const data = makeDataDir();
 
     expect(
@@ -73,22 +74,21 @@ describe("server config", () => {
       }).host,
     ).toBe("127.9.8.7");
 
-    const pg = buildServerConfig({
-      args: ["--data", data, "--db", "postgres://u:p@localhost/agentprobe"],
-      env: {},
-    });
-    expect(pg.dbUrl).toBe("postgres://u:p@localhost/agentprobe");
+    expect(() =>
+      buildServerConfig({
+        args: ["--data", data, "--db", "postgres://u:p@localhost/agentprobe"],
+        env: {},
+      }),
+    ).toThrow(/Postgres is read-only for run recording/);
 
-    const pgql = buildServerConfig({
-      args: [
-        "--data",
-        data,
-        "--db",
-        "postgresql://u:p@localhost:5432/agentprobe",
-      ],
-      env: {},
-    });
-    expect(pgql.dbUrl).toBe("postgresql://u:p@localhost:5432/agentprobe");
+    expect(() =>
+      buildServerConfig({
+        args: ["--data", data],
+        env: {
+          AGENTPROBE_DB_URL: "postgresql://u:p@localhost:5432/agentprobe",
+        },
+      }),
+    ).toThrow(/POST \/api\/runs/);
   });
 
   test("uses env fallbacks when CLI flags are absent", () => {
@@ -132,5 +132,21 @@ describe("server config", () => {
       expect(message).not.toContain("pa@ss");
       expect(message).not.toContain("ss@host");
     }
+  });
+
+  test("server startup refuses postgres before schema probing when config is prebuilt", async () => {
+    const data = makeDataDir();
+
+    await expect(
+      startAgentProbeServer({
+        host: "127.0.0.1",
+        port: 0,
+        dataPath: data,
+        dbUrl: "postgres://u:p@localhost/agentprobe",
+        unsafeExpose: false,
+        openBrowser: false,
+        logFormat: "text",
+      }),
+    ).rejects.toThrow(/Postgres is read-only for run recording/);
   });
 });
