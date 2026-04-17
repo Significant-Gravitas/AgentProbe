@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
@@ -25,40 +25,20 @@ import {
   AgentProbeRuntimeError,
   errorPayload,
 } from "../../shared/utils/errors.ts";
+import {
+  filtersPayload,
+  hashValue,
+  normalizedDimensionScore,
+  redactValue,
+  runStatusForExitCode,
+  scenarioStatusForError,
+  sourcePathsPayload,
+  utcNow,
+} from "./recorder-common.ts";
 
 export const DEFAULT_DB_DIRNAME = ".agentprobe";
 export const DEFAULT_DB_FILENAME = "runs.sqlite3";
 export const SCHEMA_VERSION = 4;
-const REDACTED_VALUE = "[REDACTED]";
-const sensitiveExactKeys = new Set([
-  "access_token",
-  "api_key",
-  "api-key",
-  "authorization",
-  "client_secret",
-  "cookie",
-  "header_value",
-  "id_token",
-  "password",
-  "refresh_token",
-  "secret",
-  "session_token",
-  "set-cookie",
-  "token",
-  "x-api-key",
-]);
-const sensitiveSuffixes = [
-  "_token",
-  "_secret",
-  "_password",
-  "_cookie",
-  "_apikey",
-  "_api_key",
-];
-
-function utcNow(): string {
-  return new Date().toISOString();
-}
 
 function ensureDirectory(path: string): void {
   mkdirSync(dirname(path), { recursive: true });
@@ -77,107 +57,6 @@ function decodeJson<T>(value: unknown): T | undefined {
   } catch {
     return undefined;
   }
-}
-
-function normalizeValue(value: unknown): JsonValue {
-  if (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-  ) {
-    return value;
-  }
-  if (value === undefined) {
-    return null;
-  }
-  if (Array.isArray(value)) {
-    return value.map((item) => normalizeValue(item));
-  }
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value)
-        .filter(([_key, item]) => item !== undefined)
-        .map(([key, item]) => [key, normalizeValue(item)]),
-    );
-  }
-  return String(value);
-}
-
-function hashValue(value: unknown): string {
-  return createHash("sha256")
-    .update(JSON.stringify(normalizeValue(value)))
-    .digest("hex");
-}
-
-function shouldRedactKey(key: string): boolean {
-  const lowered = key.toLowerCase();
-  return (
-    sensitiveExactKeys.has(lowered) ||
-    sensitiveSuffixes.some((suffix) => lowered.endsWith(suffix))
-  );
-}
-
-function redactValue(value: unknown, parentKey?: string): JsonValue {
-  if (parentKey && shouldRedactKey(parentKey)) {
-    return REDACTED_VALUE;
-  }
-  if (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean"
-  ) {
-    return value as JsonValue;
-  }
-  if (value === undefined) {
-    return null;
-  }
-  if (Array.isArray(value)) {
-    return value.map((item) => redactValue(item, parentKey));
-  }
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value)
-        .filter(([_key, item]) => item !== undefined)
-        .map(([key, item]) => [key, redactValue(item, key)]),
-    );
-  }
-  return String(value);
-}
-
-function filtersPayload(options: {
-  scenarioFilter?: string;
-  tags?: string;
-}): Record<string, JsonValue> {
-  return {
-    scenario_id: options.scenarioFilter ?? null,
-    tags: options.tags ?? null,
-  };
-}
-
-function sourcePathsPayload(options: {
-  endpoint: string;
-  scenarios: string;
-  personas: string;
-  rubric: string;
-}): Record<string, string> {
-  return {
-    endpoint: resolve(options.endpoint),
-    scenarios: resolve(options.scenarios),
-    personas: resolve(options.personas),
-    rubric: resolve(options.rubric),
-  };
-}
-
-function runStatusForExitCode(exitCode: number): string {
-  if (exitCode === 2) {
-    return "config_error";
-  }
-  if (exitCode === 3) {
-    return "runtime_error";
-  }
-  return "error";
 }
 
 function resolveDbPath(dbUrl?: string): string {
@@ -529,20 +408,6 @@ function refreshRunCounts(database: Database, runId: string): void {
       utcNow(),
       runId,
     );
-}
-
-function scenarioStatusForError(error: Error): string {
-  return error.name === "AgentProbeRuntimeError" ? "runtime_error" : "error";
-}
-
-function normalizedDimensionScore(
-  rubric: Rubric,
-  dimensionId: string,
-  rawScore: number,
-): number {
-  const dimension = rubric.dimensions.find((item) => item.id === dimensionId);
-  const scalePoints = dimension?.scale.points ?? 1;
-  return rawScore / scalePoints;
 }
 
 export class SqliteRunRecorder {

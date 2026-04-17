@@ -31,8 +31,11 @@ describe("createRepository factory", () => {
     );
   });
 
-  test("PostgresRepository.createRecorder refuses until the async recorder lands", () => {
+  test("PostgresRepository.createRecorder returns a buffered recorder", async () => {
     const repo = createRepository("postgres://localhost/agentprobe");
-    expect(() => repo.createRecorder()).toThrow(/not enabled in this release/);
+    const recorder = repo.createRecorder();
+    expect(typeof recorder.recordRunStarted).toBe("function");
+    expect(typeof recorder.drain).toBe("function");
+    await recorder.close?.();
   });
 });

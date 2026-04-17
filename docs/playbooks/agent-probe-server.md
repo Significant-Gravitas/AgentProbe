@@ -199,8 +199,41 @@ logs and `/api/session`.
 | `Postgres backend requires Bun ≥ 1.2` | Runtime is too old; upgrade Bun. |
 | `Failed to open Postgres connection: ECONNREFUSED` | Postgres not running or the URL host/port is wrong. |
 | `Postgres schema version N is behind expected M` | Run `agentprobe db:migrate` before `start-server`. |
-| `Recording runs against Postgres is not enabled in this release` | Intentional Phase 3 scope: run recording stays on SQLite while Postgres read/compare/preset CRUD ships first. |
+| `Postgres recorder failed to flush buffered events: …` | The buffered recorder exhausted its retry budget while writing to Postgres. Check database connectivity and Postgres logs; the run is marked errored and the queued events for that flush attempt were dropped. |
 | `Unsupported database URL scheme` | Provide one of `sqlite:///…`, `postgres://…`, `postgresql://…`. |
+
+### Postgres recorder flush and crash semantics
+
+- **Buffered flush (Phase 3.1).** The recorder keeps a synchronous surface for
+  the suite runner but queues each `record*` event and flushes batches through
+  a single `Bun.SQL.begin` transaction. One in-flight transaction per recorder
+  keeps event ordering deterministic.
+- **Client-assigned IDs.** Both `runId` (UUID text) and `scenarioRunId`
+  (52-bit composite: 24-bit random prefix + 28-bit monotonic counter) are
+  allocated on the client so the caller can reuse them immediately without
+  waiting for the flush. The counter exhausts after 2^28 scenarios per run
+  (more than enough for any realistic suite); exceeding it raises an
+  `AgentProbeRuntimeError`.
+- **Drain on run end.** `runSuite` callers `await recorder.drain()` after the
+  run completes. Drain waits for the queue to fully empty and re-throws the
+  last persistent flush error as `AgentProbeRuntimeError`, which fails the
+  run instead of silently dropping events.
+- **SIGTERM / graceful shutdown.** The server's cancel-all path awaits
+  in-flight recorder promises before flipping the run status to cancelled,
+  which gives the flush worker a chance to land the remaining writes. A clean
+  shutdown after cancellation emits one final `updated_at` bump through the
+  repository's `markRunCancelled` and is safe to replay.
+- **SIGKILL / abrupt termination.** Buffered events that never flushed are
+  lost on `SIGKILL`; the next boot logs a structured `WARN` via the flush
+  retry path when the reconnect succeeds but finds no trailing row for the
+  last known run. Operators should treat `status = 'running'` with no recent
+  `updated_at` activity as "crash-interrupted" and either mark it cancelled or
+  rerun the suite.
+- **Backpressure.** The queue is unbounded but each op is a small SQL tuple;
+  in practice the flush loop keeps up with evaluation latency. If the queue
+  length grows unboundedly, the recorder logs `postgres recorder flush
+  failed` each retry cycle — that is the signal to increase DB capacity or
+  fall back to SQLite for the affected run.
 
 Credentials are never logged: `/readyz`, `/api/session`, and server boot logs
 go through the same redactor (`user:***@host`).

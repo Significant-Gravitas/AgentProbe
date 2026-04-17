@@ -114,6 +114,16 @@ export interface RunRecorder {
     options: { result: ScenarioRunResult },
   ): void;
   recordScenarioError(scenarioRunId: number, error: Error): void;
+
+  /**
+   * Optional async drain hook. Buffered backends (Postgres) use this to flush
+   * queued writes and surface any persistent flush error back to the run
+   * invoker. Synchronous backends (SQLite) can omit it.
+   */
+  drain?(): Promise<void>;
+
+  /** Optional async close hook to release resources (connections, handles). */
+  close?(): Promise<void>;
 }
 
 /**

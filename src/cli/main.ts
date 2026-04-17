@@ -7,11 +7,11 @@ import {
   parseScenariosInput,
   processYamlFiles,
 } from "../domains/validation/load-suite.ts";
+import { createRepository } from "../providers/persistence/factory.ts";
 import { runMigrations } from "../providers/persistence/migrations/index.ts";
 import {
   DEFAULT_DB_DIRNAME,
   DEFAULT_DB_FILENAME,
-  SqliteRunRecorder,
 } from "../providers/persistence/sqlite-run-history.ts";
 import { parseDbUrl } from "../providers/persistence/url.ts";
 import { OpenAiResponsesClient } from "../providers/sdk/openai-responses.ts";
@@ -331,9 +331,9 @@ async function handleRun(args: string[]): Promise<number> {
 
   const client = new OpenAiResponsesClient();
   client.assertConfigured();
-  const recorder = new SqliteRunRecorder(
-    suiteDbUrl([endpoint, scenarios, personas, rubric]),
-  );
+  const dbUrl = suiteDbUrl([endpoint, scenarios, personas, rubric]);
+  const repository = createRepository(dbUrl);
+  const recorder = repository.createRecorder();
   const repeat = parseIntegerOption(args, "--repeat");
   if (repeat !== undefined && repeat < 1) {
     throw new AgentProbeConfigError("--repeat must be at least 1.");
@@ -341,7 +341,7 @@ async function handleRun(args: string[]): Promise<number> {
 
   const dashboardEnabled = parseFlag(args, "--dashboard");
   const dashboard = dashboardEnabled
-    ? startDashboardServer({ dbUrl: recorder.dbUrl })
+    ? startDashboardServer({ dbUrl })
     : undefined;
   const parallel = parseParallelOption(args);
 
@@ -377,9 +377,11 @@ async function handleRun(args: string[]): Promise<number> {
       dryRun: parseFlag(args, "--dry-run"),
       repeat,
     });
+    await recorder.drain?.();
     printRunSummary(result);
     return result.exitCode;
   } finally {
+    await recorder.close?.();
     dashboard?.stop();
   }
 }

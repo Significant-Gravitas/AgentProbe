@@ -269,6 +269,7 @@ export async function startAgentProbeServer(
   const presetController = new PresetController({ config, suiteController });
   const runController = new RunController({
     config,
+    repository,
     suiteController,
     streamHub,
   });
