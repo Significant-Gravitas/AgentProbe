@@ -34,6 +34,14 @@ import {
   type PerfTracker,
   responseBudget,
 } from "./middleware/response-budget.ts";
+import {
+  createObservability,
+  type Logger,
+  METRIC_NAMES,
+  type MetricsRegistry,
+  type Observability,
+  summarizeServerConfig,
+} from "./observability/index.ts";
 import { handleCompareRuns } from "./routes/comparisons.ts";
 import {
   handleDeleteEndpointOverride,
@@ -93,6 +101,7 @@ export type ServerContext = {
   endpointOverridesController: EndpointOverridesController;
   repository: PersistenceRepository;
   streamHub: StreamHub;
+  observability: Observability;
   requestId: string;
   startedAt: number;
   version: string;
@@ -104,6 +113,7 @@ export type StartedServer = {
   port: number;
   streamHub: StreamHub;
   suiteController: SuiteController;
+  observability: Observability;
   stop: () => Promise<void>;
 };
 
@@ -172,32 +182,22 @@ async function maybeGzip(
 }
 
 function logRequest(
-  config: ServerConfig,
+  logger: Logger,
   request: Request,
   response: Response,
   durationMs: number,
   requestId: string,
+  matchedRoute: string | undefined,
 ): void {
   const pathname = new URL(request.url).pathname;
-  if (config.logFormat === "json") {
-    const payload = {
-      ts: new Date().toISOString(),
-      level: "info",
-      component: "agentprobe.server",
-      method: request.method,
-      path: pathname,
-      status: response.status,
-      duration_ms: Math.round(durationMs),
-      request_id: requestId,
-    };
-    process.stderr.write(`${JSON.stringify(payload)}\n`);
-    return;
-  }
-  process.stderr.write(
-    `[server] ${request.method} ${pathname} -> ${response.status} (${durationMs.toFixed(
-      1,
-    )}ms) rid=${requestId}\n`,
-  );
+  logger.info("http.request", {
+    method: request.method,
+    path: pathname,
+    route: matchedRoute ?? null,
+    status: response.status,
+    duration_ms: Math.round(durationMs),
+    request_id: requestId,
+  });
 }
 
 function serverErrorResponse(error: unknown, requestId: string): Response {
@@ -228,7 +228,10 @@ function serverErrorResponse(error: unknown, requestId: string): Response {
 function createServerApp(
   config: ServerConfig,
   baseContext: ServerContextBase,
+  observability: Observability,
 ): Hono<ServerHonoEnv> {
+  const logger: Logger = observability.logger.child("agentprobe.server", {});
+  const metrics: MetricsRegistry = observability.metrics;
   const app = new Hono<ServerHonoEnv>();
 
   app.use("*", async (c, next) => {
@@ -237,13 +240,21 @@ function createServerApp(
     c.set("serverContext", { ...baseContext, requestId });
     await next();
     const finalResponse = await maybeGzip(c.req.raw, c.res);
+    const durationMs = performance.now() - c.get("requestStartedAt");
+    const routeLabel = c.req.routePath;
     logRequest(
-      config,
+      logger,
       c.req.raw,
       finalResponse,
-      performance.now() - c.get("requestStartedAt"),
+      durationMs,
       requestId,
+      routeLabel,
     );
+    metrics.incrementCounter(METRIC_NAMES.httpRequests, 1, {
+      method: c.req.method,
+      route: routeLabel ?? "unmatched",
+      status: finalResponse.status,
+    });
     c.res = finalResponse;
   });
 
@@ -393,9 +404,18 @@ function createServerApp(
   return app;
 }
 
+export type StartAgentProbeServerOptions = {
+  observability?: Observability;
+};
+
 export async function startAgentProbeServer(
   config: ServerConfig,
+  options: StartAgentProbeServerOptions = {},
 ): Promise<StartedServer> {
+  const observability =
+    options.observability ?? createObservability({ format: config.logFormat });
+  const { logger, metrics } = observability;
+
   const repository: RecordingRepository = createRecordingRepository(
     config.dbUrl,
   );
@@ -434,6 +454,7 @@ export async function startAgentProbeServer(
     streamHub,
     settingsController,
     endpointOverridesController,
+    observability,
   });
   const comparisonController = createComparisonController({
     repository,
@@ -455,6 +476,13 @@ export async function startAgentProbeServer(
   });
   const startedAt = Date.now();
 
+  logger.info("server.startup", {
+    version: SERVER_VERSION,
+    config: summarizeServerConfig(config),
+  });
+  metrics.setGauge(METRIC_NAMES.runsActive, 0);
+  metrics.setGauge(METRIC_NAMES.sseConnections, 0);
+
   const baseContext: ServerContextBase = {
     config,
     presetController,
@@ -465,10 +493,11 @@ export async function startAgentProbeServer(
     endpointOverridesController,
     repository,
     streamHub,
+    observability,
     startedAt,
     version: SERVER_VERSION,
   };
-  const app = createServerApp(config, baseContext);
+  const app = createServerApp(config, baseContext, observability);
 
   const server = Bun.serve({
     hostname: config.host,
@@ -492,6 +521,7 @@ export async function startAgentProbeServer(
     port,
     streamHub,
     suiteController,
+    observability,
     stop,
   };
 }

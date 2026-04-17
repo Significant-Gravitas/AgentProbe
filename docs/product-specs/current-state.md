@@ -38,6 +38,11 @@ Last validated against `platform.md`: 2026-05-15
 - [x] Human scoring drains an unscored backlog one chat at a time
 - [x] Ranking-scored scenarios grade retrieval relevance against a curated golden set
 - [x] Dream-system scenarios validate demotion, procedure, and dedup behavior
+- [x] Server observability adapters emit counters, gauges, and spans without an external collector
+- [x] Startup and per-request logs redact secrets and preserve request IDs
+- [x] SSE streams emit heartbeats, retry hints, and exactly-once terminal events
+- [x] Latency budget checks run deterministically against seeded local data
+- [x] Soak harness produces CI and manual evidence with the required summary
 
 ## Notes
 
