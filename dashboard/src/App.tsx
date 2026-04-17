@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { AveragesTable } from "./components/AveragesTable.tsx";
@@ -694,7 +695,7 @@ function RunsView({ request }: { request: ServerRequest }) {
   );
 }
 
-function RunDetailView({
+export function RunDetailView({
   runId,
   request,
   token,
@@ -707,32 +708,50 @@ function RunDetailView({
   const [error, setError] = useState<string | null>(null);
   const [selectedOrdinal, setSelectedOrdinal] = useState<number | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const requestRef = useRef(request);
+  const activeRunIdRef = useRef(runId);
+  const mountedRef = useRef(true);
 
-  const loadRun = useCallback(() => {
-    return request<RunResponse>(`/api/runs/${encodeURIComponent(runId)}`)
-      .then((data) => {
-        setRun(data.run);
-        setError(null);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : String(err));
-      });
-  }, [request, runId]);
+  requestRef.current = request;
+  activeRunIdRef.current = runId;
 
   useEffect(() => {
-    let cancelled = false;
-    loadRun().then(() => {
-      if (cancelled) return;
-    });
+    mountedRef.current = true;
     return () => {
-      cancelled = true;
+      mountedRef.current = false;
     };
+  }, []);
+
+  const loadRun = useCallback(async () => {
+    const expectedRunId = runId;
+    try {
+      const data = await requestRef.current<RunResponse>(
+        `/api/runs/${encodeURIComponent(expectedRunId)}`,
+      );
+      if (!mountedRef.current || activeRunIdRef.current !== expectedRunId) {
+        return;
+      }
+      setRun(data.run);
+      setError(null);
+    } catch (err) {
+      if (!mountedRef.current || activeRunIdRef.current !== expectedRunId) {
+        return;
+      }
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, [runId]);
+
+  const loadRunRef = useRef(loadRun);
+  loadRunRef.current = loadRun;
+
+  useEffect(() => {
+    setRun(null);
+    setError(null);
+    setSelectedOrdinal(null);
+    void loadRun();
   }, [loadRun]);
 
   useEffect(() => {
-    if (!run || run.status !== "running") {
-      return;
-    }
     const tokenQuery = token
       ? `?access_token=${encodeURIComponent(token)}`
       : "";
@@ -740,17 +759,22 @@ function RunDetailView({
       `/api/runs/${encodeURIComponent(runId)}/events${tokenQuery}`,
     );
     const refetch = () => {
-      void loadRun();
+      void loadRunRef.current();
     };
+    const refetchAndClose = () => {
+      refetch();
+      events.close();
+    };
+    events.addEventListener("snapshot", refetch);
     events.addEventListener("suite_started", refetch);
     events.addEventListener("scenario_started", refetch);
     events.addEventListener("scenario_finished", refetch);
     events.addEventListener("scenario_error", refetch);
-    events.addEventListener("run_finished", refetch);
-    events.addEventListener("run_cancelled", refetch);
-    events.addEventListener("run_error", refetch);
+    events.addEventListener("run_finished", refetchAndClose);
+    events.addEventListener("run_cancelled", refetchAndClose);
+    events.addEventListener("run_error", refetchAndClose);
     return () => events.close();
-  }, [loadRun, run, runId, token]);
+  }, [runId, token]);
 
   const cancelRun = async () => {
     setCancelling(true);
