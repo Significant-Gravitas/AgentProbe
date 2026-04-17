@@ -5,6 +5,7 @@ import { POSTGRES_RUN_RECORDING_UNSUPPORTED_MESSAGE } from "../../providers/pers
 import {
   defaultSqliteDbUrl,
   isPostgresUrl,
+  redactDbUrl,
 } from "../../providers/persistence/url.ts";
 import { AgentProbeConfigError } from "../../shared/utils/errors.ts";
 
@@ -243,7 +244,7 @@ function normalizeDbUrl(
       return dbUrlFlag;
     }
     throw new AgentProbeConfigError(
-      `Unsupported database URL: ${dbUrlFlag}. Expected \`sqlite://\`, \`postgres://\`, or \`postgresql://\`.`,
+      `Unsupported database URL: ${redactDbUrl(dbUrlFlag)}. Expected \`sqlite://\`, \`postgres://\`, or \`postgresql://\`.`,
     );
   }
   if (dbFlag) {

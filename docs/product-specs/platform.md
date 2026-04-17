@@ -270,3 +270,13 @@ ships. Postgres remains available for explicit migration work and historical
 read/preset repository operations, but `agentprobe start-server` requires a
 `sqlite:///` URL while `POST /api/runs` and related run write routes are
 enabled.
+
+### Database URL credentials stay redacted in operator-visible output
+
+**Given** an operator configures persistence with a database URL that contains
+userinfo credentials
+**When** AgentProbe emits logs, health payloads, readiness failures, or
+configuration errors that include the database URL
+**Then** the output redacts the password component for any URL scheme that
+contains credentials, including percent-encoded and reserved password
+characters, and never exposes the raw configured password.

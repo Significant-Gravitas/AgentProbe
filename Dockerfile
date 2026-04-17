@@ -19,7 +19,13 @@ ENV NODE_ENV=production \
     AGENTPROBE_SERVER_DASHBOARD_DIST=/app/dashboard/dist \
     AGENTPROBE_SERVER_LOG_FORMAT=json
 
-COPY --from=build /app /app
+COPY --from=build /app/package.json /app/bun.lock ./
+COPY --from=build /app/dashboard/package.json ./dashboard/package.json
+RUN bun install --production --frozen-lockfile
+
+COPY --from=build /app/src ./src
+COPY --from=build /app/data ./data
+COPY --from=build /app/dashboard/dist ./dashboard/dist
 
 EXPOSE 7878
 

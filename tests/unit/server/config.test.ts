@@ -139,6 +139,26 @@ describe("server config", () => {
     expect(config.logFormat).toBe("json");
   });
 
+  test("redacts unsupported database URL credentials in config errors", () => {
+    const data = makeDataDir();
+
+    try {
+      buildServerConfig({
+        args: ["--data", data],
+        env: {
+          AGENTPROBE_DB_URL: "mysql://user:pa@ss@host/db",
+        },
+      });
+      throw new Error("Expected buildServerConfig to reject mysql URLs.");
+    } catch (error) {
+      expect(error).toBeInstanceOf(AgentProbeConfigError);
+      const message = String((error as Error).message);
+      expect(message).toContain("mysql://user:***@host/db");
+      expect(message).not.toContain("pa@ss");
+      expect(message).not.toContain("ss@host");
+    }
+  });
+
   test("rejects invalid CORS origins", () => {
     const data = makeDataDir();
 
