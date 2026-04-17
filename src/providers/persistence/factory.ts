@@ -1,7 +1,11 @@
 import { AgentProbeConfigError } from "../../shared/utils/errors.ts";
 import { PostgresRepository } from "./postgres-backend.ts";
 import { SqliteRepository } from "./sqlite-backend.ts";
-import type { PersistenceRepository } from "./types.ts";
+import {
+  type PersistenceRepository,
+  POSTGRES_RUN_RECORDING_UNSUPPORTED_MESSAGE,
+  type RecordingRepository,
+} from "./types.ts";
 import { parseDbUrl } from "./url.ts";
 
 /**
@@ -21,6 +25,15 @@ export function createRepository(dbUrl: string): PersistenceRepository {
   throw new AgentProbeConfigError(
     `Unsupported backend for URL ${parsed.displayUrl}`,
   );
+}
+
+/** Instantiate a repository that can create run recorders. */
+export function createRecordingRepository(dbUrl: string): RecordingRepository {
+  const parsed = parseDbUrl(dbUrl);
+  if (parsed.kind === "sqlite") {
+    return new SqliteRepository(parsed.rawUrl);
+  }
+  throw new AgentProbeConfigError(POSTGRES_RUN_RECORDING_UNSUPPORTED_MESSAGE);
 }
 
 export { parseDbUrl } from "./url.ts";

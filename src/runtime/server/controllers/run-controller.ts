@@ -4,9 +4,11 @@ import { runSuite } from "../../../domains/evaluation/run-suite.ts";
 import {
   createPreset,
   getPreset,
-  markRunCancelled,
-  SqliteRunRecorder,
 } from "../../../providers/persistence/sqlite-run-history.ts";
+import type {
+  RecordingRepository,
+  RunRecorder,
+} from "../../../providers/persistence/types.ts";
 import { OpenAiResponsesClient } from "../../../providers/sdk/openai-responses.ts";
 import type {
   JsonValue,
@@ -127,6 +129,7 @@ export class RunController {
   constructor(
     private readonly options: {
       config: ServerConfig;
+      repository: RecordingRepository;
       suiteController: SuiteController;
       streamHub: StreamHub;
     },
@@ -279,7 +282,7 @@ export class RunController {
     }
 
     const abortController = new AbortController();
-    const recorder = new SqliteRunRecorder(this.options.config.dbUrl);
+    const recorder = this.options.repository.createRecorder();
     const promise = this.execute(spec, {
       client,
       recorder,
@@ -327,7 +330,7 @@ export class RunController {
     spec: RunSpec,
     options: {
       client: OpenAiResponsesClient;
-      recorder: SqliteRunRecorder;
+      recorder: RunRecorder;
       abortController: AbortController;
       suiteKey: string;
     },
@@ -424,7 +427,7 @@ export class RunController {
     ]);
     for (const run of active) {
       if (this.activeByRunId.has(run.runId)) {
-        markRunCancelled(run.runId, { dbUrl: this.options.config.dbUrl });
+        await this.options.repository.markRunCancelled(run.runId);
         this.options.streamHub.publish({
           runId: run.runId,
           kind: "run_cancelled",

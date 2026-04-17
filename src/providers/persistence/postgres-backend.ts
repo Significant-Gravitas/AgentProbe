@@ -6,16 +6,9 @@ import type {
   ScenarioRecord,
   ScenarioSelectionRef,
 } from "../../shared/types/contracts.ts";
-import {
-  AgentProbeConfigError,
-  AgentProbeRuntimeError,
-} from "../../shared/utils/errors.ts";
+import { AgentProbeRuntimeError } from "../../shared/utils/errors.ts";
 import { createPostgresClient, type SqlTag } from "./postgres-client.ts";
-import type {
-  PersistenceRepository,
-  PresetWriteInput,
-  RunRecorder,
-} from "./types.ts";
+import type { PersistenceRepository, PresetWriteInput } from "./types.ts";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -283,6 +276,36 @@ async function readPresetSelection(
   }));
 }
 
+async function readPresetSelections(
+  sql: SqlTag,
+  presetIds: string[],
+): Promise<Map<string, ScenarioSelectionRef[]>> {
+  const selections = new Map<string, ScenarioSelectionRef[]>(
+    presetIds.map((id) => [id, []]),
+  );
+  if (presetIds.length === 0) {
+    return selections;
+  }
+
+  const rows = await sql<UnknownRecord>`
+    select preset_id, file, scenario_id from preset_scenarios
+    where preset_id in ${sql(presetIds)}
+    order by preset_id asc, position asc
+  `;
+  for (const row of rows) {
+    const presetId = String(row.preset_id);
+    const bucket = selections.get(presetId);
+    if (!bucket) {
+      continue;
+    }
+    bucket.push({
+      file: String(row.file),
+      id: String(row.scenario_id),
+    });
+  }
+  return selections;
+}
+
 async function latestRunForPreset(
   sql: SqlTag,
   presetId: string,
@@ -293,6 +316,30 @@ async function latestRunForPreset(
   `;
   const row = rows[0];
   return row ? mapRunSummaryRow(row) : null;
+}
+
+async function latestRunsForPresets(
+  sql: SqlTag,
+  presetIds: string[],
+): Promise<Map<string, RunSummary>> {
+  const latestRuns = new Map<string, RunSummary>();
+  if (presetIds.length === 0) {
+    return latestRuns;
+  }
+
+  const rows = await sql<UnknownRecord>`
+    select distinct on (preset_id) * from runs
+    where preset_id in ${sql(presetIds)}
+    order by preset_id asc, started_at desc
+  `;
+  for (const row of rows) {
+    const presetId = asStringOrNull(row.preset_id);
+    if (!presetId) {
+      continue;
+    }
+    latestRuns.set(presetId, mapRunSummaryRow(row));
+  }
+  return latestRuns;
 }
 
 function mapPresetRow(
@@ -346,10 +393,9 @@ async function fetchPresetById(
 }
 
 /**
- * Postgres-backed repository. Reads are fully implemented; the recorder
- * (writes) is deferred until a buffered async recorder ships in a follow-up
- * (tracked as a separate issue). Preset CRUD works because it is inherently
- * async already on Postgres.
+ * Postgres-backed repository. Reads and preset CRUD are implemented; run
+ * recording is intentionally absent from this type until a buffered async
+ * recorder ships.
  */
 export class PostgresRepository implements PersistenceRepository {
   readonly kind = "postgres" as const;
@@ -357,14 +403,6 @@ export class PostgresRepository implements PersistenceRepository {
 
   constructor(dbUrl: string) {
     this.dbUrl = dbUrl;
-  }
-
-  createRecorder(): RunRecorder {
-    throw new AgentProbeConfigError(
-      "Recording runs against Postgres is not enabled in this release. " +
-        "Use a `sqlite:///` URL for run recording; Postgres currently supports " +
-        "schema migrations, preset CRUD, and historical reads (comparison, listings).",
-    );
   }
 
   private async withSql<T>(fn: (sql: SqlTag) => Promise<T>): Promise<T> {
@@ -445,16 +483,19 @@ export class PostgresRepository implements PersistenceRepository {
         : await sql<UnknownRecord>`
             select * from presets where deleted_at is null order by updated_at desc
           `;
-      return Promise.all(
-        rows.map(async (row) => {
-          const presetId = String(row.id);
-          const [selection, lastRun] = await Promise.all([
-            readPresetSelection(sql, presetId),
-            latestRunForPreset(sql, presetId),
-          ]);
-          return mapPresetRow(row, selection, lastRun);
-        }),
-      );
+      const presetIds = rows.map((row) => String(row.id));
+      const [selectionsByPreset, latestRunsByPreset] = await Promise.all([
+        readPresetSelections(sql, presetIds),
+        latestRunsForPresets(sql, presetIds),
+      ]);
+      return rows.map((row) => {
+        const presetId = String(row.id);
+        return mapPresetRow(
+          row,
+          selectionsByPreset.get(presetId) ?? [],
+          latestRunsByPreset.get(presetId) ?? null,
+        );
+      });
     });
   }
 

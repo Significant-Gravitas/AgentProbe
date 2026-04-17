@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { PersistenceRepository } from "../../../src/providers/persistence/types.ts";
+import type { ReadableRepository } from "../../../src/providers/persistence/types.ts";
 import {
   buildComparisonPayload,
   chooseAlignment,
@@ -182,23 +182,12 @@ describe("comparison controller", () => {
   });
 
   test("controller enforces 2–10 run id range and dedupes", async () => {
-    const repository: PersistenceRepository = {
+    const repository: ReadableRepository = {
       kind: "sqlite",
       dbUrl: "sqlite:///mem",
-      createRecorder: () => {
-        throw new Error("not used");
-      },
-      createPreset: async () => {
-        throw new Error("not used");
-      },
-      getPreset: async () => undefined,
-      listPresets: async () => [],
-      updatePreset: async () => undefined,
-      softDeletePreset: async () => undefined,
       listRuns: async () => [],
       listRunsForPreset: async () => [],
       latestRunForSuite: async () => undefined,
-      markRunCancelled: async () => undefined,
       getRun: async (runId: string) => run({ runId }),
     };
     const controller = createComparisonController({ repository });
@@ -217,23 +206,12 @@ describe("comparison controller", () => {
   });
 
   test("controller 404s when a run id cannot be resolved", async () => {
-    const repository: PersistenceRepository = {
+    const repository: ReadableRepository = {
       kind: "sqlite",
       dbUrl: "sqlite:///mem",
-      createRecorder: () => {
-        throw new Error("not used");
-      },
-      createPreset: async () => {
-        throw new Error("not used");
-      },
-      getPreset: async () => undefined,
-      listPresets: async () => [],
-      updatePreset: async () => undefined,
-      softDeletePreset: async () => undefined,
       listRuns: async () => [],
       listRunsForPreset: async () => [],
       latestRunForSuite: async () => undefined,
-      markRunCancelled: async () => undefined,
       getRun: async () => undefined,
     };
     const controller = createComparisonController({ repository });
