@@ -234,6 +234,20 @@ const DASHBOARD_HTML = `<!doctype html>
           });
         }
 
+        function formatCount(value) {
+          return escapeHtml(value === null || value === undefined ? 0 : value);
+        }
+
+        function formatScore(value) {
+          if (value === null || value === undefined) {
+            return "-";
+          }
+          const number = Number(value);
+          return Number.isFinite(number)
+            ? escapeHtml(number.toFixed(2))
+            : escapeHtml(value);
+        }
+
         function runStatusBadge(run) {
           if (run.status === "running") {
             return '<span class="badge badge-running">running</span>';
@@ -271,16 +285,16 @@ const DASHBOARD_HTML = `<!doctype html>
             content.innerHTML =
               '<div class="grid">' +
               '<div class="stat"><div class="stat-label">Recent runs</div><div class="stat-value">' +
-              runs.total +
+              formatCount(runs.total) +
               "</div></div>" +
               '<div class="stat"><div class="stat-label">Passed</div><div class="stat-value">' +
-              totals.passed +
+              formatCount(totals.passed) +
               "</div></div>" +
               '<div class="stat"><div class="stat-label">Failed</div><div class="stat-value">' +
-              totals.failed +
+              formatCount(totals.failed) +
               "</div></div>" +
               '<div class="stat"><div class="stat-label">Suites</div><div class="stat-value">' +
-              (suites.suites || []).length +
+              formatCount((suites.suites || []).length) +
               "</div></div>" +
               "</div>" +
               '<div class="card"><h3>Latest runs</h3>' +
@@ -315,9 +329,9 @@ const DASHBOARD_HTML = `<!doctype html>
                 escapeHtml(run.startedAt) +
                 "</td>" +
                 "<td>" +
-                (counts.scenarioPassedCount || 0) +
+                formatCount(counts.scenarioPassedCount) +
                 "/" +
-                (counts.scenarioTotal || 0) +
+                formatCount(counts.scenarioTotal) +
                 "</td>" +
                 "</tr>"
               );
@@ -350,13 +364,14 @@ const DASHBOARD_HTML = `<!doctype html>
             const scenarios = run.scenarios || [];
             const rows = scenarios
               .map(function (scenario) {
+                const ordinal = escapeHtml(scenario.ordinal);
                 return (
                   "<tr><td><a href=\\"/runs/" +
                   escapeHtml(run.runId) +
                   "/scenarios/" +
-                  scenario.ordinal +
+                  ordinal +
                   '">' +
-                  scenario.ordinal +
+                  ordinal +
                   "</a></td>" +
                   "<td>" +
                   escapeHtml(scenario.scenarioId) +
@@ -372,10 +387,7 @@ const DASHBOARD_HTML = `<!doctype html>
                       : "-") +
                   "</td>" +
                   "<td>" +
-                  (scenario.overallScore === null ||
-                  scenario.overallScore === undefined
-                    ? "-"
-                    : scenario.overallScore.toFixed(2)) +
+                  formatScore(scenario.overallScore) +
                   "</td></tr>"
                 );
               })
@@ -413,7 +425,7 @@ const DASHBOARD_HTML = `<!doctype html>
               '<div class="card"><h2>' +
               escapeHtml(data.scenario.scenarioName) +
               " (ordinal " +
-              data.scenario.ordinal +
+              escapeHtml(data.scenario.ordinal) +
               ")</h2>" +
               '<p><a href="/runs/' +
               escapeHtml(data.run.runId) +
@@ -440,7 +452,7 @@ const DASHBOARD_HTML = `<!doctype html>
                   "</td><td>" +
                   escapeHtml(suite.relativePath) +
                   "</td><td>" +
-                  suite.objectCount +
+                  formatCount(suite.objectCount) +
                   "</td></tr>"
                 );
               })
