@@ -292,3 +292,86 @@ configuration errors that include the database URL
 **Then** the output redacts the password component for any URL scheme that
 contains credentials, including percent-encoded and reserved password
 characters, and never exposes the raw configured password.
+
+### Server observability adapters emit counters, gauges, and spans without an external collector
+
+**Given** an `agentprobe start-server` instance running without any external
+metrics collector configured
+**When** the server handles HTTP traffic, accepts runs, and streams SSE events
+**Then** the in-process registry emits `server.http.requests`,
+`server.runs.started_total`, and `server.runs.finished_total` counters (with
+`method`, `route`, `status`, and `preset` labels where applicable), updates the
+`server.runs.active` and `server.sse.connections` gauges as lifecycle events
+occur, records `server.run.start.validation`, `server.run.controller.execute`,
+and `server.run.suite.boot` spans, and exposes a snapshot API for tests and
+operators without requiring a collector to be installed.
+
+### Startup and per-request logs redact secrets and preserve request IDs
+
+**Given** an `agentprobe start-server` instance configured with a bearer token
+and a database URL that contains credentials
+**When** the server logs its startup configuration, an HTTP request, or a run
+controller lifecycle event
+**Then** the startup log emits a single `server.startup` line that masks
+token-like fields and redacts userinfo credentials, every request log carries
+`method`, `route`, `status`, `duration_ms`, and `request_id`, and run
+controller logs tag each event with `run_id` and `preset_id` so a single
+request or run can be traced through the pipeline by ID.
+
+### SSE streams emit heartbeats, retry hints, and exactly-once terminal events
+
+**Given** a client subscribed to `GET /api/runs/:runId/events` for an active or
+historical run
+**When** the server accepts the connection and the run proceeds to a terminal
+state
+**Then** the server emits a `retry:` directive on connect, periodic heartbeat
+comments on idle streams, replays buffered events after any `Last-Event-ID`
+supplied via the standard header or the `last_event_id` query parameter, sets
+`cache-control: no-store, no-transform`, `x-accel-buffering: no`, and
+`connection: keep-alive` on every response, and emits exactly one terminal
+event (`run_finished`, `run_cancelled`, or `run_failed`) before closing the
+stream even when replaying a historical run whose ring buffer has been
+evicted.
+
+### Dashboard keyboard shortcuts coexist with form typing
+
+**Given** an operator on any dashboard page
+**When** they press `/`, `j`, `k`, or the `g r` / `g p` / `g s` chord
+**Then** the browser focuses the runs search input, moves the keyboard focus
+between list rows, or navigates to the Runs, Presets, or Start-run routes
+respectively; shortcuts are ignored while typing in `INPUT`, `TEXTAREA`,
+`SELECT`, or a `contenteditable` element, ignored when any of `Ctrl`, `Meta`,
+or `Alt` is held, and every shortcut-backed action remains reachable through a
+visible nav link or button.
+
+### Dashboard views render empty, error, and loading states for every major surface
+
+**Given** a dashboard view loading data from the server
+**When** the view is awaiting a response, receives an empty result set,
+receives a filter that does not match any rows, or encounters an HTTP error
+**Then** the runs, presets, compare, settings, suites, and auth surfaces all
+render a dedicated empty, error, or loading affordance rather than a blank
+layout, and the runs page provides a filter input that collapses to an empty
+state explaining that the current filter term returned no rows.
+
+### Latency budget checks run deterministically against seeded local data
+
+**Given** a developer or CI job running `bun run latency-budget`
+**When** the harness boots a loopback server against a synthetic data root and
+samples `GET /`, `GET /api/runs`, `POST /api/runs`, and SSE first-event
+latencies
+**Then** the harness prints per-surface p50/p95/p99 values, compares them
+against the budgets recorded in `docs/RELIABILITY.md`, and exits non-zero when
+any p95 exceeds its budget unless `--report-only` is set.
+
+### Soak harness produces CI and manual evidence with the required summary
+
+**Given** a developer or CI job running `bun run soak`
+**When** the harness executes in default CI mode or with `--manual` for a
+longer window
+**Then** the harness repeatedly starts synthetic runs, reconnects SSE streams,
+and browses history; the CI run verifies that no active runs, no stuck
+streams, and no HTTP failures remain at shutdown; and every mode emits a
+JSON summary with run count, failures, RSS start/end samples, event lag,
+request latency p95, and open-connection counts at shutdown that can be
+attached to PR evidence.

@@ -32,3 +32,10 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | Docker image boots safely with SQLite-on-volume persistence | `Dockerfile` + `docker-compose.yml` + `docs/playbooks/agent-probe-server.md` | ✅ covered |
 | Database URL credentials stay redacted in operator-visible output | `tests/unit/persistence/url.test.ts` + `tests/unit/server/config.test.ts` | ✅ covered |
 | Docker Compose readiness waits for server readiness | `docker-compose.yml` + `docs/playbooks/agent-probe-server.md` + `docker compose config` | ✅ covered |
+| Server observability adapters emit counters, gauges, and spans without an external collector | `tests/unit/server/observability/metrics.test.ts` + `tests/unit/server/observability/spans.test.ts` + `tests/integration/server/sse-reconnect.test.ts` | ✅ covered |
+| Startup and per-request logs redact secrets and preserve request IDs | `tests/unit/server/observability/redaction.test.ts` + `tests/unit/server/observability/logger.test.ts` | ✅ covered |
+| SSE streams emit heartbeats, retry hints, and exactly-once terminal events | `tests/integration/server/sse-reconnect.test.ts` + `tests/unit/server/streams.test.ts` | ✅ covered |
+| Dashboard keyboard shortcuts coexist with form typing | `tests/unit/dashboard/keyboard-shortcuts.test.tsx` | ✅ covered |
+| Dashboard views render empty, error, and loading states for every major surface | `tests/unit/dashboard-app.test.tsx` + `tests/unit/dashboard/compare-view.test.tsx` + manual dashboard pass | ⏳ unit covered; browser pass logged on PR |
+| Latency budget checks run deterministically against seeded local data | `scripts/latency-budget.ts` + `docs/RELIABILITY.md` | ✅ covered |
+| Soak harness produces CI and manual evidence with the required summary | `scripts/soak.ts` + `docs/RELIABILITY.md` + `docs/playbooks/agent-probe-server.md` | ✅ covered |

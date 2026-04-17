@@ -35,6 +35,13 @@ Last validated against `platform.md`: 2026-04-17
 - [x] Docker image boots safely with SQLite-on-volume persistence
 - [x] Database URL credentials stay redacted in operator-visible output
 - [x] Docker Compose readiness waits for server readiness
+- [x] Server observability adapters emit counters, gauges, and spans without an external collector
+- [x] Startup and per-request logs redact secrets and preserve request IDs
+- [x] SSE streams emit heartbeats, retry hints, and exactly-once terminal events
+- [x] Dashboard keyboard shortcuts coexist with form typing
+- [x] Dashboard views render empty, error, and loading states for every major surface
+- [x] Latency budget checks run deterministically against seeded local data
+- [x] Soak harness produces CI and manual evidence with the required summary
 
 ## Notes
 

@@ -308,3 +308,120 @@ The HTTP endpoint:
 The dashboard reads `?run_ids=a,b[&only=changes]` so shared deep links survive
 refresh, and the preset detail view surfaces a "Compare last two runs" CTA
 that pre-selects the two most recent runs for the preset.
+
+## Phase 4: Observability, SSE Hardening, and Operational Polish
+
+### Tracing a request by id
+
+Every HTTP response carries an `x-request-id` header (injected from the
+incoming `x-request-id` when present, generated otherwise). Structured logs
+emit `request_id` on the same line as `method`, `path`, `route`, `status`, and
+`duration_ms`, so an operator can pipe a request id through `grep` to find the
+single lifecycle of a request.
+
+```bash
+curl -fsS \
+  -H "Authorization: Bearer $AGENTPROBE_SERVER_TOKEN" \
+  -H "x-request-id: incident-2026-04-17-01" \
+  http://127.0.0.1:7878/api/runs | cat
+grep incident-2026-04-17-01 server.log
+```
+
+Set `AGENTPROBE_SERVER_LOG_FORMAT=json` (or pass `--log-format json`) to emit
+JSON lines for stream processors. Text remains the default for interactive
+bring-up.
+
+### Metrics, spans, and startup log
+
+- `docs/RELIABILITY.md#server-metrics-spans-and-budgets-phase-4` lists every
+  counter, gauge, and span name the server emits along with the expected
+  labels. Adapters are in-process only — no external collector is required.
+- The server's first log line (`server.startup`) includes the redacted config
+  summary. Tokens and database passwords are replaced with
+  `[redacted]:<length>c`. Use it to confirm bind host, port, CORS origins, and
+  backend without leaking secrets.
+
+### Latency budgets
+
+`bun run latency-budget --samples 25` boots the server against a synthetic data
+root, samples the indexed surfaces, and prints p50/p95/p99 per surface. Use
+`--report-only` to log without failing the process when you are diagnosing
+rather than gating. Shipping budgets live in `docs/RELIABILITY.md`.
+
+### Soak harness
+
+- CI mode: `bun run soak --duration-ms 10000 --runs 50 --sse-connections 3`
+  proves that no active runs, no stuck streams, and no request failures
+  remain when the server stops.
+- Manual mode: `bun run soak --manual` targets about one hour, repeatedly
+  launches synthetic runs, reconnects SSE streams, and browses history. The
+  emitted JSON summary (runs, failures, RSS trend, event lag, request
+  latency, open connections at shutdown) is the PR evidence artifact.
+
+### SSE proxying notes
+
+AgentProbe's SSE endpoint is designed to be safe behind standard reverse
+proxies:
+
+- Every response sets `cache-control: no-store, no-transform`,
+  `x-accel-buffering: no`, and `connection: keep-alive`.
+- A `retry: 2000` directive is emitted on every reconnect so misbehaving
+  client libraries still back off.
+- Heartbeat comments flow every 15 seconds on idle streams so NAT and idle
+  timeouts do not silently sever the connection.
+
+Minimum nginx snippet for a reverse proxy that preserves the contract:
+
+```nginx
+location /api/runs/ {
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_read_timeout 1h;
+    chunked_transfer_encoding on;
+    proxy_pass http://agentprobe/api/runs/;
+}
+```
+
+`proxy_buffering off` and the request header `Connection ""` are load-bearing:
+nginx's default buffered mode will starve the browser's EventSource until the
+buffer fills.
+
+### Backup, restore, and migration recovery
+
+- SQLite: `sqlite3 .agentprobe/runs.sqlite3 ".backup backup.sqlite3"` while the
+  server runs. Restore by stopping the server, copying the backup into place,
+  and starting again.
+- Postgres: use `pg_dump -Fc` daily and store dumps off-host. Restore with
+  `pg_restore -d agentprobe backup.dump` after stopping writers.
+- Migration failure: `agentprobe db:migrate` applies schema changes. On
+  failure, capture the CLI output, roll back to the previous dump, and
+  rerun the migration after addressing the root cause. Phase 4 does not
+  change the migration surface; see the Phase 3 section above for the Postgres
+  boot gate behaviour.
+
+### Dashboard cache behaviour
+
+- `/healthz`, `/readyz`, `/api/session`, `/api/runs`, `/api/runs/:id`, and
+  SSE responses all set `cache-control: no-store` (or equivalent) so
+  reverse proxies never serve stale state to operators.
+- Static assets under the dashboard bundle (`/*.js`, `/*.css`) inherit the
+  Bun static file cache and may be cached on the CDN. Rebuild the dashboard
+  bundle (`bun run dashboard:build`) to invalidate fingerprinted asset URLs.
+- Local storage holds the bearer token under
+  `agentprobe:server-token`; clear it with the Settings view when rotating.
+
+### Dashboard keyboard shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| `/` | Focus the runs-page search input. |
+| `j` / `k` | Move focus to the next / previous list row. |
+| `g r` | Navigate to Runs. |
+| `g p` | Navigate to Presets. |
+| `g s` | Navigate to Start run. |
+
+Shortcuts are suppressed while typing in `INPUT`, `TEXTAREA`, `SELECT`, or a
+`contenteditable` element, and while any of `Ctrl`, `Meta`, or `Alt` is held.
+Every shortcut-backed action still has a visible nav link or button.
