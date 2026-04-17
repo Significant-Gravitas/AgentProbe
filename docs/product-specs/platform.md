@@ -176,6 +176,16 @@ persisted run history without starting a new evaluation and without requiring
 `OPEN_ROUTER_API_KEY`, returning JSON for `/api/*` routes and rendered HTML or
 plain text for report and health routes.
 
+### Docker Compose readiness waits for server readiness
+
+**Given** the packaged `agentprobe` Compose service is starting
+**When** Docker evaluates the service healthcheck
+**Then** the healthcheck calls `GET /readyz` from inside the container and the
+service remains unhealthy until that endpoint returns HTTP 200. Readiness
+failures such as missing suite data, locked storage, or an out-of-date Postgres
+schema keep the Compose health state unhealthy instead of being hidden by a
+started process.
+
 ### Live run events stream through Server-Sent Events with replay support
 
 **Given** a run that is executing inside an `agentprobe start-server` instance

@@ -28,3 +28,4 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | Presets save cross-file scenario selections for one-click rerun | `tests/integration/server/write-control.test.ts` + `tests/unit/server/selection.test.ts` | ✅ covered |
 | Comparison workspace diffs 2 to 10 historical runs | `tests/integration/server/comparisons.test.ts` + dashboard compare-view component tests | ⏳ planned |
 | Docker image boots safely with SQLite-on-volume persistence | `Dockerfile` + `docker-compose.yml` + `docs/playbooks/agent-probe-server.md` | ✅ covered |
+| Docker Compose readiness waits for server readiness | `docker-compose.yml` + `docs/playbooks/agent-probe-server.md` + `docker compose config` | ✅ covered |

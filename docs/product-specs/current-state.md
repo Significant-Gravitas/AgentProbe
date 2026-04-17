@@ -31,6 +31,7 @@ Last validated against `platform.md`: 2026-04-17
 - [x] Presets save cross-file scenario selections for one-click rerun
 - [ ] Comparison workspace diffs 2 to 10 historical runs
 - [x] Docker image boots safely with SQLite-on-volume persistence
+- [x] Docker Compose readiness waits for server readiness
 
 ## Notes
 
@@ -55,6 +56,8 @@ Last validated against `platform.md`: 2026-04-17
 - `agentprobe start-server` now supports token-protected write routes for
   ad-hoc dry-runs, cooperative cancellation, preset CRUD, preset launch, SSE
   replay, and Docker packaging with SQLite-on-volume persistence.
+- The packaged Compose service uses `/readyz` for its healthcheck so downstream
+  dependencies can wait on server readiness rather than only process start.
 - Reliability and latency-budget enforcement are now documented as required, but
   the repo has not fully promoted them into executable checks yet.
 - The repository contract is Bun-first even while some baseline implementation
