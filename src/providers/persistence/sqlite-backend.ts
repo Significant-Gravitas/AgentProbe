@@ -1,4 +1,5 @@
 import {
+  initDb,
   SqliteRunRecorder,
   createPreset as sqliteCreatePreset,
   getPreset as sqliteGetPreset,
@@ -24,6 +25,10 @@ export class SqliteRepository implements RecordingRepository {
 
   constructor(dbUrl: string) {
     this.dbUrl = dbUrl;
+  }
+
+  async initialize(): Promise<void> {
+    initDb(this.dbUrl);
   }
 
   createRecorder(): RunRecorder {

@@ -129,6 +129,7 @@ export interface ReadableRepository {
   readonly kind: PersistenceBackendKind;
   readonly dbUrl: string;
 
+  initialize(): Promise<void>;
   listRuns(): Promise<RunSummary[]>;
   listRunsForPreset(presetId: string): Promise<RunSummary[]>;
   getRun(runId: string): Promise<RunRecord | undefined>;

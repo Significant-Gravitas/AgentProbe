@@ -27,23 +27,27 @@ function routeError(error: unknown, requestId: string): Response {
   });
 }
 
-export function handleListPresets(
+export async function handleListPresets(
   _request: Request,
   context: ServerContext,
-): Response {
-  return jsonResponse(
-    { presets: context.presetController.list() },
-    { requestId: context.requestId },
-  );
+): Promise<Response> {
+  try {
+    return jsonResponse(
+      { presets: await context.presetController.list() },
+      { requestId: context.requestId },
+    );
+  } catch (error) {
+    return routeError(error, context.requestId);
+  }
 }
 
-export function handleGetPreset(
+export async function handleGetPreset(
   _request: Request,
   context: ServerContext,
   params: { presetId: string },
-): Response {
+): Promise<Response> {
   try {
-    const result = context.presetController.get(params.presetId);
+    const result = await context.presetController.get(params.presetId);
     if (!result) {
       return errorResponse({
         status: 404,
@@ -64,7 +68,7 @@ export async function handleCreatePreset(
 ): Promise<Response> {
   try {
     const body = await readJsonObject(request);
-    const preset = context.presetController.create(body);
+    const preset = await context.presetController.create(body);
     return jsonResponse(
       { preset },
       { status: 201, requestId: context.requestId },
@@ -81,7 +85,7 @@ export async function handleUpdatePreset(
 ): Promise<Response> {
   try {
     const body = await readJsonObject(request);
-    const preset = context.presetController.update(params.presetId, body);
+    const preset = await context.presetController.update(params.presetId, body);
     if (!preset) {
       return errorResponse({
         status: 404,
@@ -96,38 +100,46 @@ export async function handleUpdatePreset(
   }
 }
 
-export function handleDeletePreset(
+export async function handleDeletePreset(
   _request: Request,
   context: ServerContext,
   params: { presetId: string },
-): Response {
-  const preset = context.presetController.delete(params.presetId);
-  if (!preset) {
-    return errorResponse({
-      status: 404,
-      type: "not_found",
-      message: `Preset \`${params.presetId}\` was not found.`,
-      requestId: context.requestId,
-    });
+): Promise<Response> {
+  try {
+    const preset = await context.presetController.delete(params.presetId);
+    if (!preset) {
+      return errorResponse({
+        status: 404,
+        type: "not_found",
+        message: `Preset \`${params.presetId}\` was not found.`,
+        requestId: context.requestId,
+      });
+    }
+    return jsonResponse({ preset }, { requestId: context.requestId });
+  } catch (error) {
+    return routeError(error, context.requestId);
   }
-  return jsonResponse({ preset }, { requestId: context.requestId });
 }
 
-export function handlePresetRuns(
+export async function handlePresetRuns(
   _request: Request,
   context: ServerContext,
   params: { presetId: string },
-): Response {
-  const runs = context.presetController.runs(params.presetId);
-  if (!runs) {
-    return errorResponse({
-      status: 404,
-      type: "not_found",
-      message: `Preset \`${params.presetId}\` was not found.`,
-      requestId: context.requestId,
-    });
+): Promise<Response> {
+  try {
+    const runs = await context.presetController.runs(params.presetId);
+    if (!runs) {
+      return errorResponse({
+        status: 404,
+        type: "not_found",
+        message: `Preset \`${params.presetId}\` was not found.`,
+        requestId: context.requestId,
+      });
+    }
+    return jsonResponse({ runs }, { requestId: context.requestId });
+  } catch (error) {
+    return routeError(error, context.requestId);
   }
-  return jsonResponse({ runs }, { requestId: context.requestId });
 }
 
 export async function handleStartPresetRun(

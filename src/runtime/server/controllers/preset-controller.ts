@@ -1,18 +1,13 @@
-import {
-  createPreset,
-  getPreset,
-  listPresets,
-  listRunsForPreset,
-  softDeletePreset,
-  updatePreset,
-} from "../../../providers/persistence/sqlite-run-history.ts";
+import type {
+  PersistenceRepository,
+  PresetWriteInput,
+} from "../../../providers/persistence/types.ts";
 import type {
   PresetRecord,
   RunSummary,
   ScenarioSelectionRef,
 } from "../../../shared/types/contracts.ts";
 import { AgentProbeConfigError } from "../../../shared/utils/errors.ts";
-import type { ServerConfig } from "../config.ts";
 import {
   HttpInputError,
   optionalBoolean,
@@ -47,7 +42,7 @@ export type PresetPayload = {
 export class PresetController {
   constructor(
     private readonly options: {
-      config: ServerConfig;
+      repository: PersistenceRepository;
       suiteController: SuiteController;
     },
   ) {}
@@ -74,14 +69,16 @@ export class PresetController {
     };
   }
 
-  list(): PresetPayload[] {
-    return listPresets({ dbUrl: this.options.config.dbUrl }).map((preset) =>
+  async list(): Promise<PresetPayload[]> {
+    return (await this.options.repository.listPresets()).map((preset) =>
       this.toPayload(preset),
     );
   }
 
-  get(id: string): { preset: PresetPayload; warnings: unknown[] } | undefined {
-    const preset = getPreset(id, { dbUrl: this.options.config.dbUrl });
+  async get(
+    id: string,
+  ): Promise<{ preset: PresetPayload; warnings: unknown[] } | undefined> {
+    const preset = await this.options.repository.getPreset(id);
     if (!preset) {
       return undefined;
     }
@@ -95,25 +92,15 @@ export class PresetController {
     };
   }
 
-  runs(id: string): RunSummary[] | undefined {
-    const preset = getPreset(id, { dbUrl: this.options.config.dbUrl });
+  async runs(id: string): Promise<RunSummary[] | undefined> {
+    const preset = await this.options.repository.getPreset(id);
     if (!preset) {
       return undefined;
     }
-    return listRunsForPreset(id, { dbUrl: this.options.config.dbUrl });
+    return await this.options.repository.listRunsForPreset(id);
   }
 
-  private inputFromBody(body: Record<string, unknown>): {
-    name: string;
-    description?: string | null;
-    endpoint: string;
-    personas: string;
-    rubric: string;
-    selection: ScenarioSelectionRef[];
-    parallel: { enabled: boolean; limit?: number };
-    repeat: number;
-    dryRun: boolean;
-  } {
+  private inputFromBody(body: Record<string, unknown>): PresetWriteInput {
     const selection = this.options.suiteController.resolveSelection(
       requiredSelection(body),
     );
@@ -137,12 +124,10 @@ export class PresetController {
     };
   }
 
-  create(body: Record<string, unknown>): PresetPayload {
+  async create(body: Record<string, unknown>): Promise<PresetPayload> {
     try {
       return this.toPayload(
-        createPreset(this.inputFromBody(body), {
-          dbUrl: this.options.config.dbUrl,
-        }),
+        await this.options.repository.createPreset(this.inputFromBody(body)),
       );
     } catch (error) {
       if (error instanceof HttpInputError) {
@@ -162,16 +147,17 @@ export class PresetController {
     }
   }
 
-  update(id: string, body: Record<string, unknown>): PresetPayload | undefined {
-    const existing = getPreset(id, { dbUrl: this.options.config.dbUrl });
+  async update(
+    id: string,
+    body: Record<string, unknown>,
+  ): Promise<PresetPayload | undefined> {
+    const existing = await this.options.repository.getPreset(id);
     if (!existing) {
       return undefined;
     }
     const input = this.inputFromBody({ ...this.toPayload(existing), ...body });
     try {
-      const preset = updatePreset(id, input, {
-        dbUrl: this.options.config.dbUrl,
-      });
+      const preset = await this.options.repository.updatePreset(id, input);
       return preset ? this.toPayload(preset) : undefined;
     } catch (error) {
       if (error instanceof HttpInputError) {
@@ -191,8 +177,8 @@ export class PresetController {
     }
   }
 
-  delete(id: string): PresetPayload | undefined {
-    const preset = softDeletePreset(id, { dbUrl: this.options.config.dbUrl });
+  async delete(id: string): Promise<PresetPayload | undefined> {
+    const preset = await this.options.repository.softDeletePreset(id);
     return preset ? this.toPayload(preset) : undefined;
   }
 }

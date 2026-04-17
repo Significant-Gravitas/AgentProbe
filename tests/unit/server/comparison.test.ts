@@ -185,6 +185,7 @@ describe("comparison controller", () => {
     const repository: ReadableRepository = {
       kind: "sqlite",
       dbUrl: "sqlite:///mem",
+      initialize: async () => {},
       listRuns: async () => [],
       listRunsForPreset: async () => [],
       latestRunForSuite: async () => undefined,
@@ -209,6 +210,7 @@ describe("comparison controller", () => {
     const repository: ReadableRepository = {
       kind: "sqlite",
       dbUrl: "sqlite:///mem",
+      initialize: async () => {},
       listRuns: async () => [],
       listRunsForPreset: async () => [],
       latestRunForSuite: async () => undefined,

@@ -1,14 +1,8 @@
-import {
-  createRecordingRepository,
-  createRepository,
-} from "../../providers/persistence/factory.ts";
-import {
-  checkSchemaVersion,
-  POSTGRES_TARGET_VERSION,
-} from "../../providers/persistence/migrations/index.ts";
-import { initDb } from "../../providers/persistence/sqlite-run-history.ts";
-import type { PersistenceRepository } from "../../providers/persistence/types.ts";
-import { isPostgresUrl, redactDbUrl } from "../../providers/persistence/url.ts";
+import { createRecordingRepository } from "../../providers/persistence/factory.ts";
+import type {
+  PersistenceRepository,
+  RecordingRepository,
+} from "../../providers/persistence/types.ts";
 import {
   AgentProbeConfigError,
   AgentProbeRuntimeError,
@@ -369,36 +363,22 @@ function logRequest(
 export async function startAgentProbeServer(
   config: ServerConfig,
 ): Promise<StartedServer> {
-  const recordingRepository = createRecordingRepository(config.dbUrl);
-
-  if (config.dbUrl) {
-    if (isPostgresUrl(config.dbUrl)) {
-      const report = await checkSchemaVersion(config.dbUrl);
-      if (report.currentVersion < POSTGRES_TARGET_VERSION) {
-        throw new AgentProbeConfigError(
-          `Postgres schema version ${report.currentVersion} is behind expected ${POSTGRES_TARGET_VERSION} ` +
-            `for ${report.dbUrl}. Run \`agentprobe db:migrate\` before starting the server.`,
-        );
-      }
-      process.stderr.write(
-        `[server] using postgres backend at ${redactDbUrl(config.dbUrl)} (schema v${report.currentVersion})\n`,
-      );
-    } else {
-      initDb(config.dbUrl);
-    }
-  }
-
-  const repository = createRepository(config.dbUrl);
+  const repository: RecordingRepository = createRecordingRepository(
+    config.dbUrl,
+  );
+  await repository.initialize();
 
   const suiteController = new SuiteController({ dataPath: config.dataPath });
   // Warm cache and surface directory errors early.
   suiteController.inventory();
 
   const streamHub = new StreamHub();
-  const presetController = new PresetController({ config, suiteController });
+  const presetController = new PresetController({
+    repository,
+    suiteController,
+  });
   const runController = new RunController({
-    config,
-    repository: recordingRepository,
+    repository,
     suiteController,
     streamHub,
   });

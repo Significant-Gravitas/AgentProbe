@@ -1,13 +1,12 @@
 import { renderRunReport } from "../../../domains/reporting/render-report.ts";
-import { getRun } from "../../../providers/persistence/sqlite-run-history.ts";
 import type { ServerContext } from "../app-server.ts";
 import { errorResponse } from "../http-helpers.ts";
 
-export function handleRunReport(
+export async function handleRunReport(
   _request: Request,
   context: ServerContext,
   params: { runId: string },
-): Response {
+): Promise<Response> {
   if (!context.config.dbUrl) {
     return errorResponse({
       status: 404,
@@ -17,7 +16,7 @@ export function handleRunReport(
     });
   }
 
-  const run = getRun(params.runId, { dbUrl: context.config.dbUrl });
+  const run = await context.repository.getRun(params.runId);
   if (!run) {
     return errorResponse({
       status: 404,

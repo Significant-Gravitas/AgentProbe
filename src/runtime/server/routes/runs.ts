@@ -1,7 +1,3 @@
-import {
-  getRun,
-  listRuns,
-} from "../../../providers/persistence/sqlite-run-history.ts";
 import type { RunRecord, RunSummary } from "../../../shared/types/contracts.ts";
 import type { ServerContext } from "../app-server.ts";
 import {
@@ -47,10 +43,10 @@ function filterRuns(
   });
 }
 
-export function handleListRuns(
+export async function handleListRuns(
   request: Request,
   context: ServerContext,
-): Response {
+): Promise<Response> {
   if (!context.config.dbUrl) {
     return jsonResponse(
       { runs: [], total: 0, next_cursor: null },
@@ -60,7 +56,7 @@ export function handleListRuns(
 
   let allRuns: RunSummary[];
   try {
-    allRuns = listRuns({ dbUrl: context.config.dbUrl });
+    allRuns = await context.repository.listRuns();
   } catch (error) {
     return errorResponse({
       status: 500,
@@ -182,11 +178,11 @@ export function handleCancelRun(
   }
 }
 
-export function handleGetRun(
+export async function handleGetRun(
   _request: Request,
   context: ServerContext,
   params: { runId: string },
-): Response {
+): Promise<Response> {
   if (!context.config.dbUrl) {
     return errorResponse({
       status: 404,
@@ -198,7 +194,7 @@ export function handleGetRun(
 
   let run: RunRecord | undefined;
   try {
-    run = getRun(params.runId, { dbUrl: context.config.dbUrl });
+    run = await context.repository.getRun(params.runId);
   } catch (error) {
     return errorResponse({
       status: 500,
@@ -218,11 +214,11 @@ export function handleGetRun(
   return jsonResponse({ run }, { requestId: context.requestId });
 }
 
-export function handleGetScenarioRun(
+export async function handleGetScenarioRun(
   _request: Request,
   context: ServerContext,
   params: { runId: string; ordinal: string },
-): Response {
+): Promise<Response> {
   if (!context.config.dbUrl) {
     return errorResponse({
       status: 404,
@@ -244,7 +240,7 @@ export function handleGetScenarioRun(
 
   let run: RunRecord | undefined;
   try {
-    run = getRun(params.runId, { dbUrl: context.config.dbUrl });
+    run = await context.repository.getRun(params.runId);
   } catch (error) {
     return errorResponse({
       status: 500,
