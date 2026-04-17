@@ -244,3 +244,13 @@ config loader refuses to boot when `AGENTPROBE_SERVER_TOKEN` is missing, the
 server persists runs to the mounted `runs.sqlite` by default, and operators can
 switch to Postgres by setting `AGENTPROBE_DB_URL` for ephemeral-container
 deployments without changing the HTTP or UI contract.
+
+### Database URL credentials stay redacted in operator-visible output
+
+**Given** an operator configures persistence with a database URL that contains
+userinfo credentials
+**When** AgentProbe emits logs, health payloads, readiness failures, or
+configuration errors that include the database URL
+**Then** the output redacts the password component for any URL scheme that
+contains credentials, including percent-encoded and reserved password
+characters, and never exposes the raw configured password.

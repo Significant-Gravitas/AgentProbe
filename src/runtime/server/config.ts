@@ -5,6 +5,7 @@ import {
   DEFAULT_DB_DIRNAME,
   DEFAULT_DB_FILENAME,
 } from "../../providers/persistence/sqlite-run-history.ts";
+import { redactDbUrl } from "../../providers/persistence/url.ts";
 import { AgentProbeConfigError } from "../../shared/utils/errors.ts";
 
 export const DEFAULT_HOST = "127.0.0.1";
@@ -206,7 +207,7 @@ function normalizeDbUrl(
       return dbUrlFlag;
     }
     throw new AgentProbeConfigError(
-      `Unsupported database URL: ${dbUrlFlag}. Expected \`sqlite://\`, \`postgres://\`, or \`postgresql://\`.`,
+      `Unsupported database URL: ${redactDbUrl(dbUrlFlag)}. Expected \`sqlite://\`, \`postgres://\`, or \`postgresql://\`.`,
     );
   }
   if (dbFlag) {
