@@ -15,6 +15,10 @@ import { RubricView } from "./components/RubricView.tsx";
 import { ScenarioTable } from "./components/ScenarioTable.tsx";
 import { StatsBar } from "./components/StatsBar.tsx";
 import { useDashboard } from "./hooks/useDashboard.ts";
+import {
+  type KeyboardShortcut,
+  useKeyboardShortcuts,
+} from "./hooks/useKeyboardShortcuts.ts";
 import type {
   DashboardData,
   DimensionScore,
@@ -471,6 +475,31 @@ function Loading({ label = "Loading..." }: { label?: string }) {
   return <div className="server-empty">{label}</div>;
 }
 
+function moveKeynavRow(delta: number): void {
+  const rows = Array.from(
+    document.querySelectorAll<HTMLElement>('[data-keynav="row"]'),
+  );
+  if (rows.length === 0) return;
+  const activeRow = document.activeElement?.closest<HTMLElement>(
+    '[data-keynav="row"]',
+  );
+  const currentIndex = activeRow ? rows.indexOf(activeRow) : -1;
+  const nextIndex =
+    currentIndex === -1
+      ? delta > 0
+        ? 0
+        : rows.length - 1
+      : Math.max(0, Math.min(rows.length - 1, currentIndex + delta));
+  const target = rows[nextIndex];
+  if (!target) return;
+  const link = target.querySelector<HTMLElement>('[data-keynav-link="true"]');
+  const focusTarget = link ?? target;
+  focusTarget.focus?.();
+  if (typeof (focusTarget as HTMLElement).scrollIntoView === "function") {
+    focusTarget.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+}
+
 function ErrorBanner({ message }: { message: string }) {
   return <div className="server-error">{message}</div>;
 }
@@ -513,10 +542,20 @@ function RunsTable({ runs }: { runs: RunSummary[] }) {
         </tr>
       </thead>
       <tbody>
-        {runs.map((run) => (
-          <tr key={run.runId} className="clickable-row">
+        {runs.map((run, index) => (
+          <tr
+            key={run.runId}
+            className="clickable-row"
+            data-keynav="row"
+            data-keynav-index={index}
+          >
             <td className="id-cell">
-              <a href={`/runs/${encodeURIComponent(run.runId)}`}>{run.runId}</a>
+              <a
+                href={`/runs/${encodeURIComponent(run.runId)}`}
+                data-keynav-link="true"
+              >
+                {run.runId}
+              </a>
             </td>
             <td>
               <StatusPill run={run} />
@@ -666,6 +705,7 @@ function OverviewView({ request }: { request: ServerRequest }) {
 function RunsView({ request }: { request: ServerRequest }) {
   const [data, setData] = useState<RunsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -684,13 +724,55 @@ function RunsView({ request }: { request: ServerRequest }) {
     };
   }, [request]);
 
-  if (error) return <ErrorBanner message={error} />;
-  if (!data) return <Loading />;
+  const filterLower = filter.trim().toLowerCase();
+  const filteredRuns = useMemo(() => {
+    if (!data) return [] as RunSummary[];
+    if (filterLower === "") return data.runs;
+    return data.runs.filter((run) => {
+      const haystack = [
+        run.runId,
+        run.preset ?? "",
+        run.label ?? "",
+        run.status,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(filterLower);
+    });
+  }, [data, filterLower]);
 
   return (
     <>
       <div className="section-title">Runs</div>
-      <RunsTable runs={data.runs} />
+      <div className="server-filter-row">
+        <label htmlFor="runs-search" className="sr-only">
+          Filter runs
+        </label>
+        <input
+          id="runs-search"
+          className="server-filter-input"
+          type="search"
+          value={filter}
+          onChange={(event) => setFilter(event.currentTarget.value)}
+          placeholder="Filter by id, preset, label, status ( / )"
+          aria-label="Filter runs"
+        />
+      </div>
+      {error ? (
+        <ErrorBanner message={error} />
+      ) : !data ? (
+        <Loading />
+      ) : data.runs.length === 0 ? (
+        <div className="server-empty" role="status">
+          No runs recorded yet.
+        </div>
+      ) : filteredRuns.length === 0 ? (
+        <div className="server-empty" role="status">
+          No runs match "{filter}".
+        </div>
+      ) : (
+        <RunsTable runs={filteredRuns} />
+      )}
     </>
   );
 }
@@ -975,49 +1057,61 @@ function SuitesView({ request }: { request: ServerRequest }) {
         />
       )}
       <div className="section-title">Suites</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Suite</th>
-            <th>Schema</th>
-            <th>Path</th>
-            <th style={{ textAlign: "right" }}>Objects</th>
-          </tr>
-        </thead>
-        <tbody>
-          {suites.suites.map((suite) => (
-            <tr key={suite.id}>
-              <td className="id-cell">{suite.id}</td>
-              <td>{suite.schema}</td>
-              <td>{suite.relativePath}</td>
-              <td className="score-cell">{suite.objectCount}</td>
+      {suites.suites.length === 0 ? (
+        <div className="server-empty" role="status">
+          No suites discovered under this data root.
+        </div>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Suite</th>
+              <th>Schema</th>
+              <th>Path</th>
+              <th style={{ textAlign: "right" }}>Objects</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {suites.suites.map((suite) => (
+              <tr key={suite.id}>
+                <td className="id-cell">{suite.id}</td>
+                <td>{suite.schema}</td>
+                <td>{suite.relativePath}</td>
+                <td className="score-cell">{suite.objectCount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       <div className="section-title">Scenarios</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Scenario</th>
-            <th>Name</th>
-            <th>Suite</th>
-            <th>Tags</th>
-            <th>Rubric</th>
-          </tr>
-        </thead>
-        <tbody>
-          {scenarios.scenarios.map((scenario) => (
-            <tr key={`${scenario.suiteId}:${scenario.id}`}>
-              <td className="id-cell">{scenario.id}</td>
-              <td>{scenario.name}</td>
-              <td>{scenario.suiteId}</td>
-              <td>{scenario.tags.join(", ") || "-"}</td>
-              <td>{scenario.rubric ?? "-"}</td>
+      {scenarios.scenarios.length === 0 ? (
+        <div className="server-empty" role="status">
+          No scenarios discovered.
+        </div>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>Name</th>
+              <th>Suite</th>
+              <th>Tags</th>
+              <th>Rubric</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {scenarios.scenarios.map((scenario) => (
+              <tr key={`${scenario.suiteId}:${scenario.id}`}>
+                <td className="id-cell">{scenario.id}</td>
+                <td>{scenario.name}</td>
+                <td>{scenario.suiteId}</td>
+                <td>{scenario.tags.join(", ") || "-"}</td>
+                <td>{scenario.rubric ?? "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </>
   );
 }
@@ -1638,6 +1732,55 @@ function ServerDashboard() {
   );
 
   useLocalLinkInterception(navigate);
+
+  const shortcuts = useMemo<KeyboardShortcut[]>(
+    () => [
+      {
+        key: "/",
+        description: "Focus search input",
+        run: () => {
+          const search = document.querySelector<HTMLInputElement>(
+            '[data-keynav-search="true"], #runs-search',
+          );
+          if (search) {
+            search.focus();
+            search.select?.();
+          }
+        },
+      },
+      {
+        key: "j",
+        description: "Move selection down in list",
+        run: () => moveKeynavRow(1),
+      },
+      {
+        key: "k",
+        description: "Move selection up in list",
+        run: () => moveKeynavRow(-1),
+      },
+      {
+        sequence: ["g", "r"],
+        key: "r",
+        description: "Go to Runs",
+        run: () => navigate("/runs"),
+      },
+      {
+        sequence: ["g", "p"],
+        key: "p",
+        description: "Go to Presets",
+        run: () => navigate("/presets"),
+      },
+      {
+        sequence: ["g", "s"],
+        key: "s",
+        description: "Go to Start run",
+        run: () => navigate("/start"),
+      },
+    ],
+    [navigate],
+  );
+
+  useKeyboardShortcuts({ shortcuts });
 
   const onTokenChange = useCallback((nextToken: string) => {
     writeStoredToken(nextToken);

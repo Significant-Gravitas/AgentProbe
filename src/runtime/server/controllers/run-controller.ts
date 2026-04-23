@@ -14,6 +14,14 @@ import type {
   RunProgressEvent,
 } from "../../../shared/types/contracts.ts";
 import { AgentProbeConfigError } from "../../../shared/utils/errors.ts";
+import {
+  type Logger,
+  METRIC_NAMES,
+  type MetricsRegistry,
+  type Observability,
+  SPAN_NAMES,
+  type SpanRecorder,
+} from "../observability/index.ts";
 import type { StreamHub } from "../streams/hub.ts";
 import {
   HttpInputError,
@@ -163,14 +171,32 @@ function parseOverrides(
 export class RunController {
   private readonly activeByRunId = new Map<string, ActiveRun>();
   private readonly activeBySuiteKey = new Map<string, ActiveRun>();
+  private readonly logger: Logger;
+  private readonly metrics: MetricsRegistry | undefined;
+  private readonly spans: SpanRecorder | undefined;
 
   constructor(
     private readonly options: {
       repository: RecordingRepository;
       suiteController: SuiteController;
       streamHub: StreamHub;
+      observability?: Observability;
     },
-  ) {}
+  ) {
+    this.logger = options.observability
+      ? options.observability.logger.child("agentprobe.run", {})
+      : ({
+          log: () => {},
+          info: () => {},
+          warn: () => {},
+          error: () => {},
+          child() {
+            return this;
+          },
+        } as Logger);
+    this.metrics = options.observability?.metrics;
+    this.spans = options.observability?.spans;
+  }
 
   assertRunnable(): void {
     ensureOpenRouterConfigured();
@@ -309,15 +335,32 @@ export class RunController {
   }
 
   start(spec: RunSpec): StartRunResult {
-    const client = ensureOpenRouterConfigured();
+    const validationScope = this.spans?.start(SPAN_NAMES.runStartValidation, {
+      preset_id: spec.presetId ?? null,
+    });
+    let client: OpenAiResponsesClient;
+    try {
+      client = ensureOpenRouterConfigured();
+    } catch (error) {
+      validationScope?.setStatus(
+        "error",
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      validationScope?.end();
+      throw error;
+    }
     const suiteKey = this.suiteKey(spec);
     if (this.activeBySuiteKey.has(suiteKey)) {
+      validationScope?.setStatus("error", new Error("conflict"));
+      validationScope?.end();
       throw new HttpInputError(
         409,
         "conflict",
         "A run with the same resolved suite key is already active.",
       );
     }
+    validationScope?.setStatus("ok");
+    validationScope?.end();
 
     const abortController = new AbortController();
     const recorder = this.options.repository.createRecorder();
@@ -345,9 +388,28 @@ export class RunController {
     };
     this.activeByRunId.set(runId, active);
     this.activeBySuiteKey.set(suiteKey, active);
+
+    this.metrics?.incrementCounter(METRIC_NAMES.runsStartedTotal, 1, {
+      preset: spec.presetId ?? "none",
+    });
+    this.metrics?.adjustGauge(METRIC_NAMES.runsActive, 1);
+    this.logger.info("run.started", {
+      run_id: runId,
+      preset_id: spec.presetId ?? null,
+      label: spec.label ?? null,
+    });
+
     void promise.finally(() => {
       this.activeByRunId.delete(runId);
       this.activeBySuiteKey.delete(suiteKey);
+      this.metrics?.adjustGauge(METRIC_NAMES.runsActive, -1);
+      this.metrics?.incrementCounter(METRIC_NAMES.runsFinishedTotal, 1, {
+        preset: spec.presetId ?? "none",
+      });
+      this.logger.info("run.finished", {
+        run_id: runId,
+        preset_id: spec.presetId ?? null,
+      });
     });
 
     this.options.streamHub.publish({
@@ -373,6 +435,21 @@ export class RunController {
       suiteKey: string;
     },
   ): Promise<void> {
+    const executeScope = this.spans?.start(SPAN_NAMES.runControllerExecute, {
+      preset_id: spec.presetId ?? null,
+      dry_run: spec.dryRun,
+      repeat: spec.repeat,
+    });
+    const bootScope = this.spans?.start(SPAN_NAMES.runSuiteBoot, {
+      preset_id: spec.presetId ?? null,
+    });
+    let bootEnded = false;
+    const completeBoot = (): void => {
+      if (bootEnded) return;
+      bootEnded = true;
+      bootScope?.setStatus("ok");
+      bootScope?.end();
+    };
     try {
       await runSuite({
         endpoint: spec.endpoint,
@@ -390,6 +467,12 @@ export class RunController {
           const runId = event.runId ?? options.recorder.runId;
           if (!runId) {
             return;
+          }
+          if (
+            event.kind === "suite_started" ||
+            event.kind === "scenario_started"
+          ) {
+            completeBoot();
           }
           this.options.streamHub.publish({
             runId,
@@ -416,6 +499,12 @@ export class RunController {
       const runId = options.recorder.runId;
       const failure = normalizeError(error);
       writeRunExecutorErrorLog(runId, failure);
+      this.logger.error("run.error", {
+        run_id: runId ?? null,
+        preset_id: spec.presetId ?? null,
+        error_type: failure.name || "Error",
+        error_message: failure.message,
+      });
       if (runId) {
         try {
           options.recorder.recordRunError(failure, {
@@ -436,6 +525,11 @@ export class RunController {
           },
         });
       }
+      executeScope?.setStatus("error", failure);
+      bootScope?.setStatus("error", failure);
+    } finally {
+      completeBoot();
+      executeScope?.end();
     }
   }
 
