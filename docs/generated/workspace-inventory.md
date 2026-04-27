@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-04-17T09:50:30.024Z
+Generated: 2026-04-27T09:52:51.108Z
 
 ```text
   AGENTS.md
@@ -305,6 +305,11 @@ docs/exec-plans/
   docs/exec-plans/README.md
 docs/exec-plans/active/
   docs/exec-plans/active/INDEX.md
+  docs/exec-plans/active/agent-probe-server-phase-0-contract-2026-04.md
+  docs/exec-plans/active/agent-probe-server-phase-1-read-only-server-2026-04.md
+  docs/exec-plans/active/agent-probe-server-phase-2-run-control-presets-2026-04.md
+  docs/exec-plans/active/agent-probe-server-phase-3-comparison-postgres-2026-04.md
+  docs/exec-plans/active/agent-probe-server-phase-4-polish-observability-2026-04.md
 docs/exec-plans/completed/
   docs/exec-plans/completed/INDEX.md
   docs/exec-plans/tech-debt-tracker.md
