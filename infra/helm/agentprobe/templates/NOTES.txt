@@ -1,0 +1,27 @@
+AgentProbe has been deployed.
+
+1. Get the application URL by running:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
+{{- end }}
+{{- else }}
+   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "agentprobe.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 7878:7878
+{{- end }}
+
+2. Health checks:
+   GET /healthz   - liveness
+   GET /readyz    - readiness
+
+3. The runtime requires a Secret with at minimum:
+     AGENTPROBE_SERVER_TOKEN
+     OPEN_ROUTER_API_KEY
+   Configured via `secrets.existingSecretName` (current value:
+   {{ .Values.secrets.existingSecretName | default "<unset>" | quote }}).
+   Create it once per namespace, e.g.:
+
+     kubectl create secret generic agentprobe-secrets \
+         --namespace {{ .Release.Namespace }} \
+         --from-literal=AGENTPROBE_SERVER_TOKEN='...' \
+         --from-literal=OPEN_ROUTER_API_KEY='...'

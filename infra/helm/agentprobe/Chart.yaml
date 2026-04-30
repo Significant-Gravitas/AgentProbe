@@ -1,0 +1,8 @@
+apiVersion: v2
+name: agentprobe
+description: |
+  Helm chart for the AgentProbe runtime server. Ships the Bun+TypeScript
+  service that exposes evaluation APIs and serves the bundled dashboard.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

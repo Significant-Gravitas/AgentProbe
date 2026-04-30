@@ -1,0 +1,165 @@
+# Default values for AgentProbe.
+#
+# Every value here is generic; nothing in this file is tied to a specific
+# GCP project, cluster, or domain. Forks supply their own image registry,
+# hostnames, and secrets via a values override file or `helm --set`.
+#
+# Required at install time:
+#   image.repository  - full path to the pushed image (e.g.
+#                       us-east1-docker.pkg.dev/<project>/<repo>/agentprobe)
+#   secrets.tokenSecretName - name of an existing Kubernetes Secret with the
+#                       AgentProbe API token (key: AGENTPROBE_SERVER_TOKEN)
+#                       and OPEN_ROUTER_API_KEY. The chart never creates
+#                       this secret to keep credentials out of values files.
+
+replicaCount: 1
+
+image:
+  repository: ""           # REQUIRED. e.g. us-east1-docker.pkg.dev/<project>/<repo>/agentprobe
+  tag: ""                  # Defaults to .Chart.AppVersion when empty
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}          # e.g. iam.gke.io/gcp-service-account: my-sa@<project>.iam.gserviceaccount.com
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  type: ClusterIP
+  port: 7878
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  # - host: agentprobe.example.com
+  #   paths:
+  #     - path: /
+  #       pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1
+    memory: 1Gi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Persistent storage for the SQLite database backend. Disable when
+# AGENTPROBE_DB_URL points at an external Postgres.
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClassName: ""
+  accessModes: ["ReadWriteOnce"]
+  mountPath: /app/.agentprobe
+
+# Liveness / readiness use the unauthenticated /healthz and /readyz endpoints
+# served by the AgentProbe runtime.
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Plain (non-secret) environment overrides. These are mounted via a ConfigMap.
+# Anything sensitive (API tokens, DB URLs with credentials, OpenRouter keys)
+# belongs in `secrets.existingSecretName` instead.
+env:
+  AGENTPROBE_SERVER_HOST: "0.0.0.0"
+  AGENTPROBE_SERVER_PORT: "7878"
+  AGENTPROBE_SERVER_LOG_FORMAT: "json"
+  # Override per environment, e.g. "https://agentprobe.example.com"
+  AGENTPROBE_SERVER_CORS_ORIGINS: ""
+
+# Pull every key from this Secret into the container as env vars. The Secret
+# must already exist in the target namespace (managed out of band, e.g. via
+# SealedSecrets, External Secrets, or `kubectl create secret generic`).
+#
+# Expected keys (only set the ones you use):
+#   AGENTPROBE_SERVER_TOKEN     - required; bearer token for the API
+#   OPEN_ROUTER_API_KEY         - required for evaluation traffic
+#   AGENTPROBE_DB_URL           - optional; postgres://... to bypass SQLite
+#   AGENTPROBE_ENCRYPTION_KEY   - required when AGENTPROBE_DB_URL is set
+#   AGENTPROBE_PERSONA_MODEL    - optional override
+secrets:
+  existingSecretName: ""
+
+# Optional: mount additional plain env from extra ConfigMaps / Secrets.
+extraEnvFrom: []
+# - configMapRef:
+#     name: agentprobe-extra-config
+# - secretRef:
+#     name: agentprobe-extra-secrets
+
+# Optional: explicit env entries (e.g. valueFrom). Useful for projecting a
+# single key from another secret without pulling the whole thing in.
+extraEnv: []
+# - name: AGENTPROBE_DB_URL
+#   valueFrom:
+#     secretKeyRef:
+#       name: my-postgres-credentials
+#       key: url
+
+# Optional Cloud SQL Proxy sidecar (GKE). Enable when AGENTPROBE_DB_URL points
+# at 127.0.0.1:5432 and the database lives in Cloud SQL.
+cloudSqlProxy:
+  enabled: false
+  instanceConnectionName: ""   # e.g. my-project:us-central1:my-instance
+  image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.15.2
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi

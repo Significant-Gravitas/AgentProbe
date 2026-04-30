@@ -19,6 +19,7 @@ AgentProbe/
 ├── data/              # Sample endpoints, scenarios, personas, and rubrics
 ├── docs/              # Source-of-truth knowledge base — start with docs/README.md
 ├── scripts/           # Validation, doc generation, and repo automation
+├── infra/             # Container + Helm chart for self-hosted GKE deploys (opt-in)
 ├── .github/           # CI, PR template, and automation workflows
 └── package.json       # Bun entrypoints for repo workflows
 ```
