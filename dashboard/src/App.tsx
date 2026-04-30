@@ -720,9 +720,7 @@ export function RunDetailView({
   const openPresetModal = () => {
     setPresetError(null);
     const fallback =
-      run?.label ??
-      run?.preset ??
-      `Run ${run?.runId.slice(0, 8) ?? ""}`.trim();
+      run?.label ?? run?.preset ?? `Run ${run?.runId.slice(0, 8) ?? ""}`.trim();
     setPresetName(fallback);
     setPresetDescription("");
     setPresetModalOpen(true);

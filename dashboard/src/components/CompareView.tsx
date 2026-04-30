@@ -493,10 +493,7 @@ export function CompareView({ token, apiBase = "" }: CompareViewProps) {
                             ? "target"
                             : null;
                       return (
-                        <TableHead
-                          key={run.run_id}
-                          className="min-w-[140px]"
-                        >
+                        <TableHead key={run.run_id} className="min-w-[140px]">
                           {role ? (
                             <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 font-semibold mb-0.5">
                               {role}

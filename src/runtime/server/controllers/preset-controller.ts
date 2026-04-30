@@ -246,9 +246,8 @@ export class PresetController {
     const personasOutcome = tryRebase(run.sourcePaths.personas, "personas");
     const rubricOutcome = tryRebase(run.sourcePaths.rubric, "rubric");
     const failures = [endpointOutcome, personasOutcome, rubricOutcome].filter(
-      (
-        outcome,
-      ): outcome is { ok: false; message: string } => outcome.ok === false,
+      (outcome): outcome is { ok: false; message: string } =>
+        outcome.ok === false,
     );
     if (failures.length > 0) {
       throw new HttpInputError(
@@ -259,14 +258,11 @@ export class PresetController {
           .join("; ")}`,
       );
     }
-    const resolvedEndpoint = (
-      endpointOutcome as { ok: true; value: string }
-    ).value;
-    const resolvedPersonas = (
-      personasOutcome as { ok: true; value: string }
-    ).value;
-    const resolvedRubric = (rubricOutcome as { ok: true; value: string })
+    const resolvedEndpoint = (endpointOutcome as { ok: true; value: string })
       .value;
+    const resolvedPersonas = (personasOutcome as { ok: true; value: string })
+      .value;
+    const resolvedRubric = (rubricOutcome as { ok: true; value: string }).value;
 
     const inventoryById = new Map<string, string>();
     for (const summary of this.options.suiteController.scenarios()) {
