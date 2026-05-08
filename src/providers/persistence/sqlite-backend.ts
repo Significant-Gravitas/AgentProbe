@@ -1,3 +1,7 @@
+import type {
+  RunRecord,
+  ScenarioRecord,
+} from "../../shared/types/contracts.ts";
 import {
   initDb,
   SqliteRunRecorder,
@@ -6,17 +10,20 @@ import {
   deleteEndpointOverride as sqliteDeleteEndpointOverride,
   deleteStoredSecret as sqliteDeleteStoredSecret,
   getEndpointOverride as sqliteGetEndpointOverride,
+  getNextUnscoredScenario as sqliteGetNextUnscoredScenario,
   getPreset as sqliteGetPreset,
   getRun as sqliteGetRun,
   getStoredSecret as sqliteGetStoredSecret,
   latestRunForSuite as sqliteLatestRunForSuite,
   listEndpointOverrides as sqliteListEndpointOverrides,
+  listHumanScoringRubrics as sqliteListHumanScoringRubrics,
   listPresets as sqliteListPresets,
   listRuns as sqliteListRuns,
   listRunsForPreset as sqliteListRunsForPreset,
   markRunCancelled as sqliteMarkRunCancelled,
   putEndpointOverride as sqlitePutEndpointOverride,
   putStoredSecret as sqlitePutStoredSecret,
+  recordHumanScore as sqliteRecordHumanScore,
   softDeletePreset as sqliteSoftDeletePreset,
   updatePreset as sqliteUpdatePreset,
   updateRunMetadata as sqliteUpdateRunMetadata,
@@ -24,6 +31,9 @@ import {
 } from "./sqlite-run-history.ts";
 import type {
   GetRunOptions,
+  HumanScoreInput,
+  HumanScoringQueueItem,
+  HumanScoringRubricSummary,
   ListRunsOptions,
   PresetWriteInput,
   RecordingRepository,
@@ -32,10 +42,6 @@ import type {
   StoredEndpointOverride,
   StoredSecretEnvelope,
 } from "./types.ts";
-import type {
-  RunRecord,
-  ScenarioRecord,
-} from "../../shared/types/contracts.ts";
 
 /** SQLite-backed repository; wraps the existing synchronous free-function API. */
 export class SqliteRepository implements RecordingRepository {
@@ -169,6 +175,23 @@ export class SqliteRepository implements RecordingRepository {
   async deleteEndpointOverride(endpointPath: string): Promise<boolean> {
     return sqliteDeleteEndpointOverride(endpointPath, { dbUrl: this.dbUrl });
   }
+
+  async listHumanScoringRubrics(): Promise<HumanScoringRubricSummary[]> {
+    return sqliteListHumanScoringRubrics({ dbUrl: this.dbUrl });
+  }
+
+  async getNextUnscoredScenario(
+    rubricId: string,
+    dimensionId: string,
+  ): Promise<HumanScoringQueueItem | null> {
+    return sqliteGetNextUnscoredScenario(rubricId, dimensionId, {
+      dbUrl: this.dbUrl,
+    });
+  }
+
+  async recordHumanScore(input: HumanScoreInput): Promise<void> {
+    sqliteRecordHumanScore(input, { dbUrl: this.dbUrl });
+  }
 }
 
 function projectRunRecord(
@@ -187,17 +210,18 @@ function projectRunRecord(
     ordinalFilter === undefined
       ? record.scenarios
       : record.scenarios.filter((s) => s.ordinal === ordinalFilter)
-  ).map((scenario): ScenarioRecord =>
-    trimChildren
-      ? {
-          ...scenario,
-          turns: [],
-          targetEvents: [],
-          toolCalls: [],
-          checkpoints: [],
-          judgeDimensionScores: [],
-        }
-      : scenario,
+  ).map(
+    (scenario): ScenarioRecord =>
+      trimChildren
+        ? {
+            ...scenario,
+            turns: [],
+            targetEvents: [],
+            toolCalls: [],
+            checkpoints: [],
+            judgeDimensionScores: [],
+          }
+        : scenario,
   );
   return { ...record, scenarios };
 }

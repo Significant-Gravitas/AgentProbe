@@ -59,16 +59,8 @@ function composeSignals(
   return { signal: AbortSignal.any(signals), timeout };
 }
 
-export async function api<T>(
-  path: string,
-  init: ApiOptions = {},
-): Promise<T> {
-  const {
-    budgetMs = DEFAULT_BUDGET_MS,
-    timeoutMs,
-    signal,
-    ...rest
-  } = init;
+export async function api<T>(path: string, init: ApiOptions = {}): Promise<T> {
+  const { budgetMs = DEFAULT_BUDGET_MS, timeoutMs, signal, ...rest } = init;
   const headers: Record<string, string> = { accept: "application/json" };
   const incomingHeaders = new Headers(rest.headers);
   for (const [key, value] of incomingHeaders.entries()) {
@@ -88,11 +80,7 @@ export async function api<T>(
   }
 
   const elapsed = performance.now() - start;
-  if (
-    import.meta.env.DEV &&
-    Number.isFinite(budgetMs) &&
-    elapsed > budgetMs
-  ) {
+  if (import.meta.env.DEV && Number.isFinite(budgetMs) && elapsed > budgetMs) {
     const serverTiming = response.headers.get("server-timing");
     console.warn(
       `[budget] ${path} took ${elapsed.toFixed(0)}ms (budget ${budgetMs}ms)` +
@@ -127,10 +115,7 @@ export function jsonBody(method: string, body?: unknown): RequestInit {
 }
 
 export function useServerRequest(): ServerRequest {
-  return useCallback(
-    async <T>(path: string, init?: ApiOptions): Promise<T> => {
-      return await api<T>(path, init);
-    },
-    [],
-  );
+  return useCallback(async <T>(path: string, init?: ApiOptions): Promise<T> => {
+    return await api<T>(path, init);
+  }, []);
 }

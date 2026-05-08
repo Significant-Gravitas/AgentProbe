@@ -48,6 +48,18 @@ export AGENTPROBE_POSTGRES_TEST_URL=postgres://postgres:postgres@localhost:5432/
 bun run test tests/unit/persistence/
 ```
 
+## Human scoring track
+
+Human-authored scores live in a separate table, `human_dimension_scores`, that
+mirrors `judge_dimension_scores` so the two tracks are easy to compare side by
+side. Each row is keyed by a unique `(scenario_run_id, dimension_id)` so the
+queue served by `/api/human-scoring/next` can skip already-scored chats with a
+single LEFT JOIN. Dimension metadata for the scoring UI is read out of each
+scenario's frozen `rubric_snapshot_json`, so the UI does not depend on the
+rubric YAML staying on disk after a run completes. The repository surface is
+exposed via `HumanScoreRepository` in
+`src/providers/persistence/types.ts`.
+
 ## Deploy Notes
 
 For production, set `AGENTPROBE_DB_URL` and `AGENTPROBE_ENCRYPTION_KEY`

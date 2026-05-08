@@ -75,6 +75,7 @@ import {
   ScenarioDetailsModal,
   type ScenarioDetailsTarget,
 } from "./views/ScenarioDetailsModal.tsx";
+import { ScoreIndexView, ScoreSessionView } from "./views/ScoreView.tsx";
 
 type AppMode = "detecting" | "live" | "server";
 
@@ -2109,6 +2110,20 @@ function ServerDashboard() {
     if (pathname === "/compare") {
       return <CompareView />;
     }
+    if (pathname === "/score") {
+      return <ScoreIndexView request={request} navigate={navigate} />;
+    }
+    const scoreSessionMatch = pathname.match(/^\/score\/([^/]+)\/([^/]+)$/);
+    if (scoreSessionMatch) {
+      return (
+        <ScoreSessionView
+          rubricId={decodeURIComponent(scoreSessionMatch[1] ?? "")}
+          dimensionId={decodeURIComponent(scoreSessionMatch[2] ?? "")}
+          request={request}
+          navigate={navigate}
+        />
+      );
+    }
     const scenarioMatch = pathname.match(
       /^\/runs\/([^/]+)\/scenarios\/([0-9]+)$/,
     );
@@ -2170,6 +2185,11 @@ function ServerDashboard() {
       href: "/runs",
       label: "Runs",
       isActive: (p) => p === "/runs" || p.startsWith("/runs/"),
+    },
+    {
+      href: "/score",
+      label: "Score",
+      isActive: (p) => p === "/score" || p.startsWith("/score/"),
     },
     {
       href: "/presets",

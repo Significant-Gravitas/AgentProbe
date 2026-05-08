@@ -2,7 +2,7 @@ import { createPostgresClient, type SqlTag } from "../postgres-client.ts";
 import type { MigrationRunner } from "./types.ts";
 
 /** Target schema version for Postgres. Bumps whenever a new migration is added. */
-export const POSTGRES_TARGET_VERSION = 3;
+export const POSTGRES_TARGET_VERSION = 4;
 
 const POSTGRES_BASELINE_DDL = `
   create table if not exists meta (
@@ -141,6 +141,18 @@ const POSTGRES_BASELINE_DDL = `
     created_at timestamptz not null
   );
 
+  create table if not exists human_dimension_scores (
+    id bigserial primary key,
+    scenario_run_id bigint not null references scenario_runs(id) on delete cascade,
+    dimension_id text not null,
+    dimension_name text not null,
+    scale_type text not null,
+    scale_points double precision,
+    raw_score double precision not null,
+    normalized_score double precision not null,
+    created_at timestamptz not null
+  );
+
   create table if not exists presets (
     id text primary key,
     name text not null unique,
@@ -185,6 +197,10 @@ const POSTGRES_BASELINE_DDL = `
     on checkpoints(scenario_run_id, checkpoint_index);
   create index if not exists idx_judge_scores_scenario_run
     on judge_dimension_scores(scenario_run_id);
+  create unique index if not exists idx_human_dim_scores_unique
+    on human_dimension_scores(scenario_run_id, dimension_id);
+  create index if not exists idx_human_dim_scores_scenario_run
+    on human_dimension_scores(scenario_run_id);
 `;
 
 async function readPostgresVersion(sql: SqlTag): Promise<number> {
@@ -261,6 +277,33 @@ export function createPostgresMigrationRunner(
             await tx`update meta set schema_version = 3 where id = 1`;
           });
           applied.push(3);
+        }
+        if (from < 4) {
+          await sql.begin(async (tx) => {
+            await tx`
+              create table if not exists human_dimension_scores (
+                id bigserial primary key,
+                scenario_run_id bigint not null references scenario_runs(id) on delete cascade,
+                dimension_id text not null,
+                dimension_name text not null,
+                scale_type text not null,
+                scale_points double precision,
+                raw_score double precision not null,
+                normalized_score double precision not null,
+                created_at timestamptz not null
+              )
+            `;
+            await tx`
+              create unique index if not exists idx_human_dim_scores_unique
+                on human_dimension_scores(scenario_run_id, dimension_id)
+            `;
+            await tx`
+              create index if not exists idx_human_dim_scores_scenario_run
+                on human_dimension_scores(scenario_run_id)
+            `;
+            await tx`update meta set schema_version = 4 where id = 1`;
+          });
+          applied.push(4);
         }
         return applied;
       } finally {

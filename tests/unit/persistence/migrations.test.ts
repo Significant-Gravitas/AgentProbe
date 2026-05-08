@@ -76,7 +76,7 @@ describe("migration dispatcher", () => {
     const url = `sqlite:///${path}`;
     const report = await runMigrations(url);
     expect(report.currentVersion).toBe(1);
-    expect(report.applied).toEqual([2, 3, 4, 5, 6, 7]);
+    expect(report.applied).toEqual([2, 3, 4, 5, 6, 7, 8]);
     expect(report.targetVersion).toBe(SQLITE_TARGET_VERSION);
   });
 
@@ -94,7 +94,7 @@ describe("migration dispatcher", () => {
 
       const report = await runMigrations(url);
       expect(report.currentVersion).toBe(2);
-      expect(report.applied).toEqual([3]);
+      expect(report.applied).toEqual([3, 4]);
       expect(report.targetVersion).toBe(POSTGRES_TARGET_VERSION);
 
       const check = await checkSchemaVersion(url);

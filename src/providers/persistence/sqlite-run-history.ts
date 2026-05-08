@@ -29,7 +29,7 @@ import { redactDbUrl } from "./url.ts";
 
 export const DEFAULT_DB_DIRNAME = ".agentprobe";
 export const DEFAULT_DB_FILENAME = "runs.sqlite3";
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 const REDACTED_VALUE = "[REDACTED]";
 const sensitiveExactKeys = new Set([
   "access_token",
@@ -280,6 +280,11 @@ function migrateDatabase(database: Database, currentVersion: number): void {
     database.query("update meta set schema_version = ? where id = 1").run(7);
     version = 7;
   }
+  if (version < 8) {
+    ensureHumanDimensionScoresTable(database);
+    database.query("update meta set schema_version = ? where id = 1").run(8);
+    version = 8;
+  }
 
   if (version !== SCHEMA_VERSION) {
     throw new AgentProbeRuntimeError(
@@ -307,6 +312,26 @@ function ensureEndpointOverridesTable(database: Database): void {
       overrides_json text not null,
       updated_at text not null
     );
+  `);
+}
+
+function ensureHumanDimensionScoresTable(database: Database): void {
+  database.exec(`
+    create table if not exists human_dimension_scores (
+      id integer primary key autoincrement,
+      scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+      dimension_id text not null,
+      dimension_name text not null,
+      scale_type text not null,
+      scale_points real,
+      raw_score real not null,
+      normalized_score real not null,
+      created_at text not null
+    );
+    create unique index if not exists idx_human_dim_scores_unique
+      on human_dimension_scores(scenario_run_id, dimension_id);
+    create index if not exists idx_human_dim_scores_scenario_run
+      on human_dimension_scores(scenario_run_id);
   `);
 }
 
@@ -501,6 +526,7 @@ export function initDb(dbUrl?: string): void {
     ensurePhase2Schema(database);
     ensureAppSettingsTable(database);
     ensureEndpointOverridesTable(database);
+    ensureHumanDimensionScoresTable(database);
 
     const meta = database
       .query("select schema_version from meta where id = 1")
@@ -2080,6 +2106,435 @@ export function latestRunForSuite(
       return undefined;
     }
     return getRun(row.id, options);
+  } finally {
+    database.close();
+  }
+}
+
+type RubricSnapshotShape = {
+  id?: string;
+  name?: string;
+  passThreshold?: number;
+  dimensions?: Array<{
+    id: string;
+    name: string;
+    weight: number;
+    scale: { type: string; points?: number; labels: Record<string, string> };
+  }>;
+};
+
+function extractScenarioDescription(raw: unknown): string | null {
+  const decoded = decodeJson<Record<string, JsonValue>>(raw);
+  if (!decoded || typeof decoded !== "object") return null;
+  const description = decoded.description;
+  return typeof description === "string" && description.trim()
+    ? description.trim()
+    : null;
+}
+
+function decodeRubricSnapshot(raw: unknown): RubricSnapshotShape | null {
+  const decoded = decodeJson<RubricSnapshotShape>(raw);
+  if (
+    decoded &&
+    typeof decoded === "object" &&
+    Array.isArray(decoded.dimensions)
+  ) {
+    return decoded;
+  }
+  return null;
+}
+
+function normalizeHumanScore(
+  rawScore: number,
+  scaleType: string,
+  scalePoints?: number | null,
+): number {
+  if (scaleType === "binary") {
+    return rawScore >= 1 ? 1 : 0;
+  }
+  const points =
+    typeof scalePoints === "number" && scalePoints > 0 ? scalePoints : 1;
+  return rawScore / points;
+}
+
+/**
+ * Pearson correlation between two equal-length numeric series.
+ * Returns null when either sequence has zero variance or fewer than two pairs.
+ */
+function pearsonCorrelation(
+  xs: number[],
+  ys: number[],
+): { value: number | null; n: number } {
+  const n = Math.min(xs.length, ys.length);
+  if (n < 2) {
+    return { value: null, n };
+  }
+  let sumX = 0;
+  let sumY = 0;
+  for (let i = 0; i < n; i += 1) {
+    sumX += xs[i] ?? 0;
+    sumY += ys[i] ?? 0;
+  }
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  let cov = 0;
+  let varX = 0;
+  let varY = 0;
+  for (let i = 0; i < n; i += 1) {
+    const dx = (xs[i] ?? 0) - meanX;
+    const dy = (ys[i] ?? 0) - meanY;
+    cov += dx * dy;
+    varX += dx * dx;
+    varY += dy * dy;
+  }
+  if (varX === 0 || varY === 0) {
+    return { value: null, n };
+  }
+  return { value: cov / Math.sqrt(varX * varY), n };
+}
+
+export function listHumanScoringRubrics(
+  options: { dbUrl?: string } = {},
+): import("./types.ts").HumanScoringRubricSummary[] {
+  const database = openDatabase(options.dbUrl);
+  try {
+    const scenarioRows = database
+      .query(
+        `
+          select rubric_id, rubric_snapshot_json, started_at
+          from scenario_runs
+          where status = 'completed'
+          order by started_at desc
+        `,
+      )
+      .all() as Array<{
+      rubric_id: string;
+      rubric_snapshot_json: string | null;
+      started_at: string;
+    }>;
+
+    const totals = new Map<string, number>();
+    const snapshots = new Map<string, RubricSnapshotShape>();
+    for (const row of scenarioRows) {
+      totals.set(row.rubric_id, (totals.get(row.rubric_id) ?? 0) + 1);
+      if (!snapshots.has(row.rubric_id)) {
+        const snap = decodeRubricSnapshot(row.rubric_snapshot_json);
+        if (snap) {
+          snapshots.set(row.rubric_id, snap);
+        }
+      }
+    }
+
+    const scoredRows = database
+      .query(
+        `
+          select sr.rubric_id, hds.dimension_id, count(*) as scored
+          from human_dimension_scores hds
+          join scenario_runs sr on sr.id = hds.scenario_run_id
+          where sr.status = 'completed'
+          group by sr.rubric_id, hds.dimension_id
+        `,
+      )
+      .all() as Array<{
+      rubric_id: string;
+      dimension_id: string;
+      scored: number | bigint;
+    }>;
+    const scoredCounts = new Map<string, number>();
+    for (const row of scoredRows) {
+      scoredCounts.set(
+        `${row.rubric_id}::${row.dimension_id}`,
+        Number(row.scored),
+      );
+    }
+
+    const pairedRows = database
+      .query(
+        `
+          select sr.rubric_id, hds.dimension_id,
+                 hds.normalized_score as human_norm,
+                 jds.normalized_score as judge_norm
+          from human_dimension_scores hds
+          join scenario_runs sr on sr.id = hds.scenario_run_id
+          join judge_dimension_scores jds
+            on jds.scenario_run_id = hds.scenario_run_id
+            and jds.dimension_id = hds.dimension_id
+          where sr.status = 'completed'
+        `,
+      )
+      .all() as Array<{
+      rubric_id: string;
+      dimension_id: string;
+      human_norm: number;
+      judge_norm: number;
+    }>;
+    const paired = new Map<string, { xs: number[]; ys: number[] }>();
+    for (const row of pairedRows) {
+      const key = `${row.rubric_id}::${row.dimension_id}`;
+      let bucket = paired.get(key);
+      if (!bucket) {
+        bucket = { xs: [], ys: [] };
+        paired.set(key, bucket);
+      }
+      bucket.xs.push(Number(row.human_norm));
+      bucket.ys.push(Number(row.judge_norm));
+    }
+
+    const result: import("./types.ts").HumanScoringRubricSummary[] = [];
+    for (const [rubricId, totalScenarios] of totals) {
+      const snap = snapshots.get(rubricId);
+      if (!snap || !Array.isArray(snap.dimensions)) {
+        continue;
+      }
+      result.push({
+        rubricId,
+        rubricName: snap.name ?? rubricId,
+        totalScenarios,
+        dimensions: snap.dimensions.map((dim) => {
+          const scored = scoredCounts.get(`${rubricId}::${dim.id}`) ?? 0;
+          const bucket = paired.get(`${rubricId}::${dim.id}`);
+          const correlationResult = bucket
+            ? pearsonCorrelation(bucket.xs, bucket.ys)
+            : { value: null, n: 0 };
+          return {
+            id: dim.id,
+            name: dim.name,
+            weight: dim.weight,
+            scale:
+              dim.scale as import("../../shared/types/contracts.ts").RubricScale,
+            unscored: Math.max(0, totalScenarios - scored),
+            pairedCount: correlationResult.n,
+            correlation: correlationResult.value,
+          };
+        }),
+      });
+    }
+    result.sort((a, b) => a.rubricName.localeCompare(b.rubricName));
+    return result;
+  } finally {
+    database.close();
+  }
+}
+
+export function getNextUnscoredScenario(
+  rubricId: string,
+  dimensionId: string,
+  options: { dbUrl?: string } = {},
+): import("./types.ts").HumanScoringQueueItem | null {
+  const database = openDatabase(options.dbUrl);
+  try {
+    const remainingRow = database
+      .query(
+        `
+          select count(*) as remaining
+          from scenario_runs sr
+          left join human_dimension_scores hds
+            on hds.scenario_run_id = sr.id
+            and hds.dimension_id = ?
+          where sr.status = 'completed'
+            and sr.rubric_id = ?
+            and hds.id is null
+        `,
+      )
+      .get(dimensionId, rubricId) as { remaining: number | bigint } | undefined;
+    const remaining = Number(remainingRow?.remaining ?? 0);
+    if (remaining === 0) {
+      return null;
+    }
+
+    const row = database
+      .query(
+        `
+          select sr.id as scenario_run_id, sr.run_id, sr.ordinal,
+                 sr.scenario_id, sr.scenario_name, sr.persona_id, sr.rubric_id,
+                 sr.pass_threshold, sr.overall_score, sr.expectations_json,
+                 sr.scenario_snapshot_json
+          from scenario_runs sr
+          left join human_dimension_scores hds
+            on hds.scenario_run_id = sr.id
+            and hds.dimension_id = ?
+          where sr.status = 'completed'
+            and sr.rubric_id = ?
+            and hds.id is null
+          order by sr.started_at asc, sr.id asc
+          limit 1
+        `,
+      )
+      .get(dimensionId, rubricId) as
+      | {
+          scenario_run_id: number;
+          run_id: string;
+          ordinal: number;
+          scenario_id: string;
+          scenario_name: string;
+          persona_id: string;
+          rubric_id: string;
+          pass_threshold: number | null;
+          overall_score: number | null;
+          expectations_json: string | null;
+          scenario_snapshot_json: string | null;
+        }
+      | undefined;
+    if (!row) {
+      return null;
+    }
+
+    const turnRows = database
+      .query(
+        `
+          select turn_index, role, source, content, generator_model
+          from turns
+          where scenario_run_id = ?
+          order by turn_index asc
+        `,
+      )
+      .all(row.scenario_run_id) as Array<Record<string, unknown>>;
+    const turns = turnRows.map(
+      (turn) =>
+        ({
+          turn_index: Number(turn.turn_index),
+          role: typeof turn.role === "string" ? turn.role : null,
+          source: typeof turn.source === "string" ? turn.source : null,
+          content: typeof turn.content === "string" ? turn.content : null,
+          generator_model:
+            typeof turn.generator_model === "string"
+              ? turn.generator_model
+              : null,
+        }) satisfies Record<string, JsonValue>,
+    );
+
+    const toolCallRows = database
+      .query(
+        `
+          select turn_index, call_order, name, args_json, raw_json
+          from tool_calls
+          where scenario_run_id = ?
+          order by turn_index asc, call_order asc
+        `,
+      )
+      .all(row.scenario_run_id) as Array<Record<string, unknown>>;
+    const toolCalls = toolCallRows.map(
+      (call) =>
+        ({
+          turn_index: Number(call.turn_index),
+          call_order:
+            call.call_order === null || call.call_order === undefined
+              ? null
+              : Number(call.call_order),
+          name: typeof call.name === "string" ? call.name : null,
+          args: decodeJson<JsonValue>(call.args_json) ?? null,
+          raw: decodeJson<JsonValue>(call.raw_json) ?? null,
+        }) satisfies Record<string, JsonValue>,
+    );
+
+    const targetEventRows = database
+      .query(
+        `
+          select turn_index, exchange_index, raw_exchange_json, latency_ms, usage_json
+          from target_events
+          where scenario_run_id = ?
+          order by turn_index asc, exchange_index asc
+        `,
+      )
+      .all(row.scenario_run_id) as Array<Record<string, unknown>>;
+    const targetEvents = targetEventRows.map(
+      (event) =>
+        ({
+          turn_index: Number(event.turn_index),
+          exchange_index: Number(event.exchange_index),
+          raw_exchange: decodeJson<JsonValue>(event.raw_exchange_json) ?? null,
+          latency_ms:
+            event.latency_ms === null || event.latency_ms === undefined
+              ? null
+              : Number(event.latency_ms),
+          usage: decodeJson<JsonValue>(event.usage_json) ?? null,
+        }) satisfies Record<string, JsonValue>,
+    );
+
+    const judgeRow = database
+      .query(
+        `
+          select raw_score, normalized_score
+          from judge_dimension_scores
+          where scenario_run_id = ? and dimension_id = ?
+          limit 1
+        `,
+      )
+      .get(row.scenario_run_id, dimensionId) as
+      | { raw_score: number | null; normalized_score: number | null }
+      | undefined;
+
+    return {
+      scenarioRunId: row.scenario_run_id,
+      runId: row.run_id,
+      ordinal: row.ordinal,
+      scenarioId: row.scenario_id,
+      scenarioName: row.scenario_name,
+      personaId: row.persona_id,
+      rubricId: row.rubric_id,
+      passThreshold:
+        typeof row.pass_threshold === "number" ? row.pass_threshold : null,
+      overallScore:
+        typeof row.overall_score === "number" ? row.overall_score : null,
+      judgeDimensionScore:
+        judgeRow && typeof judgeRow.normalized_score === "number"
+          ? judgeRow.normalized_score
+          : null,
+      judgeDimensionRawScore:
+        judgeRow && typeof judgeRow.raw_score === "number"
+          ? judgeRow.raw_score
+          : null,
+      scenarioDescription: extractScenarioDescription(
+        row.scenario_snapshot_json,
+      ),
+      expectations: decodeJson<JsonValue>(row.expectations_json) ?? null,
+      turns,
+      toolCalls,
+      targetEvents,
+      remaining,
+    };
+  } finally {
+    database.close();
+  }
+}
+
+export function recordHumanScore(
+  input: import("./types.ts").HumanScoreInput,
+  options: { dbUrl?: string } = {},
+): void {
+  const database = openDatabase(options.dbUrl);
+  try {
+    const normalized = normalizeHumanScore(
+      input.rawScore,
+      input.scaleType,
+      input.scalePoints,
+    );
+    database
+      .query(
+        `
+          insert into human_dimension_scores (
+            scenario_run_id, dimension_id, dimension_name,
+            scale_type, scale_points, raw_score, normalized_score, created_at
+          ) values (?, ?, ?, ?, ?, ?, ?, ?)
+          on conflict(scenario_run_id, dimension_id) do update set
+            dimension_name = excluded.dimension_name,
+            scale_type = excluded.scale_type,
+            scale_points = excluded.scale_points,
+            raw_score = excluded.raw_score,
+            normalized_score = excluded.normalized_score,
+            created_at = excluded.created_at
+        `,
+      )
+      .run(
+        input.scenarioRunId,
+        input.dimensionId,
+        input.dimensionName,
+        input.scaleType,
+        input.scalePoints ?? null,
+        input.rawScore,
+        normalized,
+        utcNow(),
+      );
   } finally {
     database.close();
   }

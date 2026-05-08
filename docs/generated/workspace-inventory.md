@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-05T13:44:16.723Z
+Generated: 2026-05-07T14:18:04.098Z
 
 ```text
   AGENTS.md
@@ -21,6 +21,8 @@ dashboard/src/
   dashboard/src/App.tsx
 dashboard/src/api/
   dashboard/src/api/client.ts
+  dashboard/src/api/query-client.tsx
+  dashboard/src/api/query-keys.ts
   dashboard/src/api/types.ts
 dashboard/src/components/
   dashboard/src/components/AveragesTable.tsx
@@ -43,6 +45,8 @@ dashboard/src/hooks/
 dashboard/src/lib/
   dashboard/src/lib/utils.ts
   dashboard/src/main.tsx
+dashboard/src/routing/
+  dashboard/src/routing/search.ts
   dashboard/src/styles.css
   dashboard/src/types.ts
 dashboard/src/ui/
@@ -356,6 +360,8 @@ docs/references/
   docs/references/encoding.md
   docs/references/observability.md
   docs/references/quality-gates.md
+  drizzle.postgres.config.ts
+  drizzle.sqlite.config.ts
 infra/
   infra/README.md
 infra/k8s/
@@ -383,10 +389,12 @@ scripts/
   skills-lock.json
 src/
 src/cli/
+  src/cli/args.ts
   src/cli/main.ts
 src/domains/
 src/domains/evaluation/
   src/domains/evaluation/judge.ts
+  src/domains/evaluation/ports.ts
   src/domains/evaluation/run-suite.ts
   src/domains/evaluation/simulator.ts
 src/domains/reporting/
@@ -396,6 +404,7 @@ src/domains/validation/
   src/domains/validation/load-suite.ts
 src/providers/
 src/providers/persistence/
+src/providers/persistence/drizzle/
   src/providers/persistence/factory.ts
 src/providers/persistence/migrations/
   src/providers/persistence/postgres-backend.ts
@@ -413,6 +422,7 @@ src/providers/sdk/
   src/providers/sdk/openai-responses.ts
   src/providers/sdk/openclaw.ts
   src/providers/sdk/preset-config.ts
+  src/providers/sdk/run-adapter-factory.ts
 src/runtime/
 src/runtime/server/
   src/runtime/server/app-server.ts
@@ -421,10 +431,13 @@ src/runtime/server/controllers/
 src/runtime/server/dashboard/
   src/runtime/server/default-presets.ts
   src/runtime/server/http-helpers.ts
+src/runtime/server/middleware/
 src/runtime/server/routes/
 src/runtime/server/streams/
   src/runtime/server/validation.ts
 src/shared/
+src/shared/observability/
+  src/shared/observability/perf.ts
 src/shared/types/
   src/shared/types/contracts.ts
 src/shared/utils/
@@ -451,7 +464,11 @@ tests/integration/server/
   tests/integration/server/write-control.test.ts
 tests/unit/
   tests/unit/adapters.test.ts
+tests/unit/architecture/
+  tests/unit/architecture/boundaries.test.ts
   tests/unit/autogpt-auth.test.ts
+  tests/unit/cli-args.test.ts
+  tests/unit/dashboard-api.test.tsx
   tests/unit/dashboard-app.test.tsx
   tests/unit/dashboard.test.ts
 tests/unit/dashboard/
@@ -463,12 +480,14 @@ tests/unit/dashboard/
   tests/unit/load-suite.test.ts
   tests/unit/openclaw.test.ts
 tests/unit/persistence/
+  tests/unit/persistence/drizzle-schema.test.ts
   tests/unit/persistence/factory.test.ts
   tests/unit/persistence/migrations.test.ts
   tests/unit/persistence/postgres-backend.test.ts
   tests/unit/persistence/postgres-recorder.test.ts
   tests/unit/persistence/postgres-secrets.test.ts
   tests/unit/persistence/postgres-test-utils.ts
+  tests/unit/persistence/repository-contract.test.ts
   tests/unit/persistence/url.test.ts
   tests/unit/report.test.ts
   tests/unit/runner.test.ts

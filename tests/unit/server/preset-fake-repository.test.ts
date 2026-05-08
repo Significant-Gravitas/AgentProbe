@@ -143,6 +143,16 @@ class FakeRepository implements PersistenceRepository {
   async deleteEndpointOverride(): Promise<boolean> {
     return false;
   }
+
+  async listHumanScoringRubrics() {
+    return [];
+  }
+
+  async getNextUnscoredScenario() {
+    return null;
+  }
+
+  async recordHumanScore(): Promise<void> {}
 }
 
 const fakeSuiteController = {

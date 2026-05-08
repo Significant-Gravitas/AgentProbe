@@ -31,3 +31,4 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | Docker image boots safely with durable persistence | `Dockerfile` + `docker-compose.yml` + `docs/playbooks/agent-probe-server.md` | ✅ covered |
 | Database URL credentials stay redacted in operator-visible output | `tests/unit/persistence/url.test.ts` + `tests/unit/server/config.test.ts` | ✅ covered |
 | Docker Compose readiness waits for server readiness | `docker-compose.yml` + `docs/playbooks/agent-probe-server.md` + `docker compose config` | ✅ covered |
+| Human scoring drains an unscored backlog one chat at a time | `tests/integration/server/human-scoring.test.ts` + `tests/unit/persistence/human-scoring.test.ts` | ✅ covered |

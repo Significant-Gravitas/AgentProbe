@@ -1,3 +1,4 @@
+import { span } from "../../../shared/observability/perf.ts";
 import type {
   RunRecord,
   ScenarioRecord,
@@ -8,7 +9,6 @@ import {
   jsonResponse,
   parsePositiveInt,
 } from "../http-helpers.ts";
-import { span } from "../../../shared/observability/perf.ts";
 import { HttpInputError, readJsonObject } from "../validation.ts";
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -210,7 +210,9 @@ export async function handleGetRun(
       requestId: context.requestId,
     });
   }
-  const stripped = await span("stripRunSnapshots", () => stripRunSnapshots(run));
+  const stripped = await span("stripRunSnapshots", () =>
+    stripRunSnapshots(run),
+  );
   return await span("jsonResponse.serialize", () =>
     jsonResponse({ run: stripped }, { requestId: context.requestId }),
   );

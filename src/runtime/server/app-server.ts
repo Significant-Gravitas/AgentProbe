@@ -30,6 +30,10 @@ import {
   seedDefaultPresets,
 } from "./default-presets.ts";
 import { ensureRequestId, errorResponse } from "./http-helpers.ts";
+import {
+  type PerfTracker,
+  responseBudget,
+} from "./middleware/response-budget.ts";
 import { handleCompareRuns } from "./routes/comparisons.ts";
 import {
   handleDeleteEndpointOverride,
@@ -38,6 +42,11 @@ import {
   handlePutEndpointOverride,
 } from "./routes/endpoint-overrides.ts";
 import { handleHealthz, handleReadyz, handleSession } from "./routes/health.ts";
+import {
+  handleGetNextHumanScoringItem,
+  handleListHumanScoringRubrics,
+  handlePostHumanScore,
+} from "./routes/human-scoring.ts";
 import {
   handleCreatePreset,
   handleCreatePresetFromRun,
@@ -64,10 +73,6 @@ import {
 } from "./routes/settings.ts";
 import { handleRunSse } from "./routes/sse.ts";
 import { handleStatic } from "./routes/static.ts";
-import {
-  type PerfTracker,
-  responseBudget,
-} from "./middleware/response-budget.ts";
 import {
   handleListAllScenarios,
   handleListSuiteScenarios,
@@ -245,8 +250,7 @@ function createServerApp(
   app.use(
     "*",
     responseBudget({
-      skip: (path) =>
-        path.endsWith("/events") || path.endsWith("/report.html"),
+      skip: (path) => path.endsWith("/events") || path.endsWith("/report.html"),
     }),
   );
 
@@ -311,6 +315,16 @@ function createServerApp(
 
   app.get("/api/comparisons", (c) =>
     handleCompareRuns(c.req.raw, serverContext(c)),
+  );
+
+  app.get("/api/human-scoring/rubrics", (c) =>
+    handleListHumanScoringRubrics(c.req.raw, serverContext(c)),
+  );
+  app.get("/api/human-scoring/next", (c) =>
+    handleGetNextHumanScoringItem(c.req.raw, serverContext(c)),
+  );
+  app.post("/api/human-scoring/scores", (c) =>
+    handlePostHumanScore(c.req.raw, serverContext(c)),
   );
 
   app.get("/api/presets", (c) =>

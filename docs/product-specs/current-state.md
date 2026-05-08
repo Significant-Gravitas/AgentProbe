@@ -34,6 +34,7 @@ Last validated against `platform.md`: 2026-04-17
 - [x] Docker image boots safely with durable persistence
 - [x] Database URL credentials stay redacted in operator-visible output
 - [x] Docker Compose readiness waits for server readiness
+- [x] Human scoring drains an unscored backlog one chat at a time
 
 ## Notes
 

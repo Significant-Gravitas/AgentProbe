@@ -221,6 +221,26 @@ export const postgresJudgeDimensionScores = pgTable(
   (table) => [index("idx_judge_scores_scenario_run").on(table.scenarioRunId)],
 );
 
+export const postgresHumanDimensionScores = pgTable(
+  "human_dimension_scores",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    scenarioRunId: bigint("scenario_run_id", { mode: "number" })
+      .notNull()
+      .references(() => postgresScenarioRuns.id, { onDelete: "cascade" }),
+    dimensionId: text("dimension_id").notNull(),
+    dimensionName: text("dimension_name").notNull(),
+    scaleType: text("scale_type").notNull(),
+    scalePoints: doublePrecision("scale_points"),
+    rawScore: doublePrecision("raw_score").notNull(),
+    normalizedScore: doublePrecision("normalized_score").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("idx_human_dim_scores_scenario_run").on(table.scenarioRunId),
+  ],
+);
+
 export const postgresPresets = pgTable("presets", {
   id: text("id").primaryKey(),
   name: text("name").notNull().unique(),
@@ -282,6 +302,7 @@ export const postgresSchema = {
   toolCalls: postgresToolCalls,
   checkpoints: postgresCheckpoints,
   judgeDimensionScores: postgresJudgeDimensionScores,
+  humanDimensionScores: postgresHumanDimensionScores,
   presets: postgresPresets,
   presetScenarios: postgresPresetScenarios,
   appSettings: postgresAppSettings,

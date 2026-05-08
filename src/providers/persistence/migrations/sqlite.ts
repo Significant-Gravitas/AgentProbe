@@ -4,7 +4,7 @@ import { resolveSqlitePath, withSqliteDatabase } from "../sqlite-connection.ts";
 import type { MigrationReport, MigrationRunner } from "./types.ts";
 
 /** Target schema version for SQLite. Keep synced with SCHEMA_VERSION in sqlite-run-history.ts. */
-export const SQLITE_TARGET_VERSION = 7;
+export const SQLITE_TARGET_VERSION = 8;
 
 function utcNow(): string {
   return new Date().toISOString();
@@ -174,6 +174,18 @@ export function applySqliteBaseline(database: Database): void {
       created_at text not null
     );
 
+    create table if not exists human_dimension_scores (
+      id integer primary key autoincrement,
+      scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+      dimension_id text not null,
+      dimension_name text not null,
+      scale_type text not null,
+      scale_points real,
+      raw_score real not null,
+      normalized_score real not null,
+      created_at text not null
+    );
+
     create table if not exists presets (
       id text primary key,
       name text not null unique,
@@ -222,6 +234,10 @@ export function applySqliteBaseline(database: Database): void {
       on scenario_runs(run_id);
     create index if not exists idx_scenario_runs_scenario_id
       on scenario_runs(scenario_id);
+    create unique index if not exists idx_human_dim_scores_unique
+      on human_dimension_scores(scenario_run_id, dimension_id);
+    create index if not exists idx_human_dim_scores_scenario_run
+      on human_dimension_scores(scenario_run_id);
   `);
 }
 
@@ -292,6 +308,28 @@ export function applySqliteMigrations(
     database.query("update meta set schema_version = ? where id = 1").run(7);
     applied.push(7);
     version = 7;
+  }
+  if (version < 8) {
+    database.exec(`
+      create table if not exists human_dimension_scores (
+        id integer primary key autoincrement,
+        scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+        dimension_id text not null,
+        dimension_name text not null,
+        scale_type text not null,
+        scale_points real,
+        raw_score real not null,
+        normalized_score real not null,
+        created_at text not null
+      );
+      create unique index if not exists idx_human_dim_scores_unique
+        on human_dimension_scores(scenario_run_id, dimension_id);
+      create index if not exists idx_human_dim_scores_scenario_run
+        on human_dimension_scores(scenario_run_id);
+    `);
+    database.query("update meta set schema_version = ? where id = 1").run(8);
+    applied.push(8);
+    version = 8;
   }
   return applied;
 }

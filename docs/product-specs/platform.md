@@ -284,6 +284,20 @@ endpoint overrides, and history reads against Postgres when selected by URL
 scheme. Postgres deployments require `AGENTPROBE_ENCRYPTION_KEY` and a
 successful `agentprobe db:migrate` before `start-server` boots.
 
+### Human scoring drains an unscored backlog one chat at a time
+
+**Given** a populated `runs.sqlite` (or Postgres) with completed scenario_runs
+that carry frozen `rubric_snapshot_json` payloads
+**When** the operator opens `/score`, picks a rubric dimension, and clicks one
+of the dimension's score-level buttons against the rendered chat
+**Then** the server records the click in `human_dimension_scores` keyed by
+`(scenario_run_id, dimension_id)`, immediately renders the next still-unscored
+chat for the same dimension, computes `normalized_score` from the rubric scale,
+and rejects out-of-range raw scores with a structured `bad_request` envelope.
+The queue ignores scenario_runs whose status is not `completed`, and rerunning
+the click on a scenario already scored for the dimension is an upsert (no new
+row).
+
 ### Database URL credentials stay redacted in operator-visible output
 
 **Given** an operator configures persistence with a database URL that contains

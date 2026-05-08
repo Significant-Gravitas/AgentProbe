@@ -8,10 +8,12 @@ import type {
   PresetRecord,
   PresetSnapshot,
   Rubric,
+  RubricScale,
   RubricScore,
   RunRecord,
   RunResult,
   RunSummary,
+  ScaleType,
   Scenario,
   ScenarioRunResult,
   ScenarioSelectionRef,
@@ -228,6 +230,73 @@ export interface SecretRepository {
   deleteSecret(key: string): Promise<boolean>;
 }
 
+export type HumanScoreInput = {
+  scenarioRunId: number;
+  dimensionId: string;
+  dimensionName: string;
+  scaleType: ScaleType;
+  scalePoints?: number | null;
+  rawScore: number;
+};
+
+export type HumanScoringDimensionSummary = {
+  id: string;
+  name: string;
+  weight: number;
+  scale: RubricScale;
+  unscored: number;
+  /** Number of scenario_runs with both a human score and a judge score for this dimension. */
+  pairedCount: number;
+  /** Pearson correlation between human normalized_score and judge normalized_score over the paired set, or null when pairedCount < 2. */
+  correlation: number | null;
+};
+
+export type HumanScoringRubricSummary = {
+  rubricId: string;
+  rubricName: string;
+  totalScenarios: number;
+  dimensions: HumanScoringDimensionSummary[];
+};
+
+/**
+ * Each turn keeps the same snake_case keys (`turn_index`, `generator_model`,
+ * etc.) the dashboard's `renderConversationTab` already consumes from the
+ * existing run-detail payload, so the human-scoring view can reuse that
+ * helper without an adapter step.
+ */
+export type HumanScoringQueueTurn = Record<string, JsonValue>;
+
+export type HumanScoringQueueItem = {
+  scenarioRunId: number;
+  runId: string;
+  ordinal: number;
+  scenarioId: string;
+  scenarioName: string;
+  personaId: string;
+  rubricId: string;
+  passThreshold: number | null;
+  overallScore: number | null;
+  judgeDimensionScore: number | null;
+  judgeDimensionRawScore: number | null;
+  /** Frozen scenario description (one-line summary) from the scenario snapshot. */
+  scenarioDescription: string | null;
+  /** Frozen expectations from the scenario YAML (expected_behavior, expected_outcome, must_include, etc.). */
+  expectations: JsonValue | null;
+  turns: HumanScoringQueueTurn[];
+  toolCalls: Array<Record<string, JsonValue>>;
+  targetEvents: Array<Record<string, JsonValue>>;
+  remaining: number;
+};
+
+export interface HumanScoreRepository {
+  listHumanScoringRubrics(): Promise<HumanScoringRubricSummary[]>;
+  getNextUnscoredScenario(
+    rubricId: string,
+    dimensionId: string,
+  ): Promise<HumanScoringQueueItem | null>;
+  recordHumanScore(input: HumanScoreInput): Promise<void>;
+}
+
 export interface EndpointOverrideRepository {
   getEndpointOverride(
     endpointPath: string,
@@ -249,7 +318,8 @@ export type PersistenceRepository = ReadableRepository &
   PresetRepository &
   RunMutationRepository &
   SecretRepository &
-  EndpointOverrideRepository;
+  EndpointOverrideRepository &
+  HumanScoreRepository;
 
 /**
  * Repository surface required by callers that create run recorders. Postgres is

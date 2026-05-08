@@ -19,6 +19,9 @@ import { createPostgresClient, type SqlTag } from "./postgres-client.ts";
 import { PostgresRunRecorder } from "./postgres-run-recorder.ts";
 import type {
   GetRunOptions,
+  HumanScoreInput,
+  HumanScoringQueueItem,
+  HumanScoringRubricSummary,
   ListRunsOptions,
   PresetWriteInput,
   RecordingRepository,
@@ -305,13 +308,12 @@ async function loadScenarioRecords(
   }
 
   if (options.summary) {
-    return scenarioRows.map((row) =>
-      mapScenarioRow(row, [], [], [], [], []),
-    );
+    return scenarioRows.map((row) => mapScenarioRow(row, [], [], [], [], []));
   }
 
-  const [turns, events, toolCalls, checkpoints, dimensionScores] =
-    await span("pg.scenario_children", () =>
+  const [turns, events, toolCalls, checkpoints, dimensionScores] = await span(
+    "pg.scenario_children",
+    () =>
       Promise.all([
         span(
           "pg.turns",
@@ -349,7 +351,7 @@ async function loadScenarioRecords(
           `,
         ),
       ]),
-    );
+  );
 
   const groupBy = <T extends UnknownRecord>(
     rows: T[],
@@ -1028,4 +1030,331 @@ export class PostgresRepository implements RecordingRepository {
       return rows.length > 0;
     });
   }
+
+  async listHumanScoringRubrics(): Promise<HumanScoringRubricSummary[]> {
+    return this.withSql(async (sql) => {
+      const totals = await sql<UnknownRecord>`
+        select rubric_id, count(*)::int as total
+        from scenario_runs
+        where status = 'completed'
+        group by rubric_id
+      `;
+      if (totals.length === 0) {
+        return [];
+      }
+
+      const snapshots = await sql<UnknownRecord>`
+        select distinct on (rubric_id) rubric_id, rubric_snapshot_json
+        from scenario_runs
+        where status = 'completed' and rubric_snapshot_json is not null
+        order by rubric_id, started_at desc
+      `;
+      const snapshotByRubric = new Map<string, RubricSnapshotShape>();
+      for (const row of snapshots) {
+        const snap = asJson<RubricSnapshotShape>(row.rubric_snapshot_json);
+        if (snap && Array.isArray(snap.dimensions)) {
+          snapshotByRubric.set(String(row.rubric_id), snap);
+        }
+      }
+
+      const scoredRows = await sql<UnknownRecord>`
+        select sr.rubric_id, hds.dimension_id, count(*)::int as scored
+        from human_dimension_scores hds
+        join scenario_runs sr on sr.id = hds.scenario_run_id
+        where sr.status = 'completed'
+        group by sr.rubric_id, hds.dimension_id
+      `;
+      const scoredCounts = new Map<string, number>();
+      for (const row of scoredRows) {
+        scoredCounts.set(
+          `${String(row.rubric_id)}::${String(row.dimension_id)}`,
+          Number(row.scored),
+        );
+      }
+
+      const pairedRows = await sql<UnknownRecord>`
+        select sr.rubric_id, hds.dimension_id,
+               hds.normalized_score as human_norm,
+               jds.normalized_score as judge_norm
+        from human_dimension_scores hds
+        join scenario_runs sr on sr.id = hds.scenario_run_id
+        join judge_dimension_scores jds
+          on jds.scenario_run_id = hds.scenario_run_id
+          and jds.dimension_id = hds.dimension_id
+        where sr.status = 'completed'
+      `;
+      const paired = new Map<string, { xs: number[]; ys: number[] }>();
+      for (const row of pairedRows) {
+        const key = `${String(row.rubric_id)}::${String(row.dimension_id)}`;
+        let bucket = paired.get(key);
+        if (!bucket) {
+          bucket = { xs: [], ys: [] };
+          paired.set(key, bucket);
+        }
+        bucket.xs.push(Number(row.human_norm));
+        bucket.ys.push(Number(row.judge_norm));
+      }
+
+      const result: HumanScoringRubricSummary[] = [];
+      for (const row of totals) {
+        const rubricId = String(row.rubric_id);
+        const totalScenarios = Number(row.total);
+        const snap = snapshotByRubric.get(rubricId);
+        if (!snap || !Array.isArray(snap.dimensions)) {
+          continue;
+        }
+        result.push({
+          rubricId,
+          rubricName: snap.name ?? rubricId,
+          totalScenarios,
+          dimensions: snap.dimensions.map((dim) => {
+            const scored = scoredCounts.get(`${rubricId}::${dim.id}`) ?? 0;
+            const bucket = paired.get(`${rubricId}::${dim.id}`);
+            const correlationResult = bucket
+              ? pearsonCorrelation(bucket.xs, bucket.ys)
+              : { value: null, n: 0 };
+            return {
+              id: dim.id,
+              name: dim.name,
+              weight: dim.weight,
+              scale:
+                dim.scale as HumanScoringRubricSummary["dimensions"][number]["scale"],
+              unscored: Math.max(0, totalScenarios - scored),
+              pairedCount: correlationResult.n,
+              correlation: correlationResult.value,
+            };
+          }),
+        });
+      }
+      result.sort((a, b) => a.rubricName.localeCompare(b.rubricName));
+      return result;
+    });
+  }
+
+  async getNextUnscoredScenario(
+    rubricId: string,
+    dimensionId: string,
+  ): Promise<HumanScoringQueueItem | null> {
+    return this.withSql(async (sql) => {
+      const remainingRows = await sql<UnknownRecord>`
+        select count(*)::int as remaining
+        from scenario_runs sr
+        left join human_dimension_scores hds
+          on hds.scenario_run_id = sr.id
+          and hds.dimension_id = ${dimensionId}
+        where sr.status = 'completed'
+          and sr.rubric_id = ${rubricId}
+          and hds.id is null
+      `;
+      const remaining = Number(remainingRows[0]?.remaining ?? 0);
+      if (remaining === 0) {
+        return null;
+      }
+
+      const rows = await sql<UnknownRecord>`
+        select sr.id as scenario_run_id, sr.run_id, sr.ordinal,
+               sr.scenario_id, sr.scenario_name, sr.persona_id, sr.rubric_id,
+               sr.pass_threshold, sr.overall_score, sr.expectations_json,
+               sr.scenario_snapshot_json
+        from scenario_runs sr
+        left join human_dimension_scores hds
+          on hds.scenario_run_id = sr.id
+          and hds.dimension_id = ${dimensionId}
+        where sr.status = 'completed'
+          and sr.rubric_id = ${rubricId}
+          and hds.id is null
+        order by sr.started_at asc, sr.id asc
+        limit 1
+      `;
+      const row = rows[0];
+      if (!row) {
+        return null;
+      }
+      const scenarioRunId = Number(row.scenario_run_id);
+
+      const turnRows = await sql<UnknownRecord>`
+        select turn_index, role, source, content, generator_model
+        from turns
+        where scenario_run_id = ${scenarioRunId}
+        order by turn_index asc
+      `;
+      const turns = turnRows.map((turn) => ({
+        turn_index: Number(turn.turn_index),
+        role: typeof turn.role === "string" ? turn.role : null,
+        source: typeof turn.source === "string" ? turn.source : null,
+        content: typeof turn.content === "string" ? turn.content : null,
+        generator_model:
+          typeof turn.generator_model === "string"
+            ? turn.generator_model
+            : null,
+      })) satisfies Array<Record<string, JsonValue>>;
+
+      const toolCallRows = await sql<UnknownRecord>`
+        select turn_index, call_order, name, args_json, raw_json
+        from tool_calls
+        where scenario_run_id = ${scenarioRunId}
+        order by turn_index asc, call_order asc
+      `;
+      const toolCalls = toolCallRows.map((call) => ({
+        turn_index: Number(call.turn_index),
+        call_order:
+          call.call_order === null || call.call_order === undefined
+            ? null
+            : Number(call.call_order),
+        name: typeof call.name === "string" ? call.name : null,
+        args: asJson<JsonValue>(call.args_json) ?? null,
+        raw: asJson<JsonValue>(call.raw_json) ?? null,
+      })) satisfies Array<Record<string, JsonValue>>;
+
+      const targetEventRows = await sql<UnknownRecord>`
+        select turn_index, exchange_index, raw_exchange_json, latency_ms, usage_json
+        from target_events
+        where scenario_run_id = ${scenarioRunId}
+        order by turn_index asc, exchange_index asc
+      `;
+      const targetEvents = targetEventRows.map((event) => ({
+        turn_index: Number(event.turn_index),
+        exchange_index: Number(event.exchange_index),
+        raw_exchange: asJson<JsonValue>(event.raw_exchange_json) ?? null,
+        latency_ms:
+          event.latency_ms === null || event.latency_ms === undefined
+            ? null
+            : Number(event.latency_ms),
+        usage: asJson<JsonValue>(event.usage_json) ?? null,
+      })) satisfies Array<Record<string, JsonValue>>;
+
+      const judgeRows = await sql<UnknownRecord>`
+        select raw_score, normalized_score
+        from judge_dimension_scores
+        where scenario_run_id = ${scenarioRunId}
+          and dimension_id = ${dimensionId}
+        limit 1
+      `;
+      const judgeRow = judgeRows[0];
+
+      return {
+        scenarioRunId,
+        runId: String(row.run_id),
+        ordinal: Number(row.ordinal),
+        scenarioId: String(row.scenario_id),
+        scenarioName: String(row.scenario_name),
+        personaId: String(row.persona_id),
+        rubricId: String(row.rubric_id),
+        passThreshold:
+          row.pass_threshold === null || row.pass_threshold === undefined
+            ? null
+            : Number(row.pass_threshold),
+        overallScore:
+          row.overall_score === null || row.overall_score === undefined
+            ? null
+            : Number(row.overall_score),
+        judgeDimensionScore:
+          judgeRow && judgeRow.normalized_score !== null
+            ? Number(judgeRow.normalized_score)
+            : null,
+        judgeDimensionRawScore:
+          judgeRow && judgeRow.raw_score !== null
+            ? Number(judgeRow.raw_score)
+            : null,
+        scenarioDescription: (() => {
+          const snapshot = asJson<Record<string, JsonValue>>(
+            row.scenario_snapshot_json,
+          );
+          const description = snapshot?.description;
+          return typeof description === "string" && description.trim()
+            ? description.trim()
+            : null;
+        })(),
+        expectations: asJson<JsonValue>(row.expectations_json) ?? null,
+        turns,
+        toolCalls,
+        targetEvents,
+        remaining,
+      };
+    });
+  }
+
+  async recordHumanScore(input: HumanScoreInput): Promise<void> {
+    const normalized = normalizeHumanScore(
+      input.rawScore,
+      input.scaleType,
+      input.scalePoints,
+    );
+    return this.withSql(async (sql) => {
+      await sql`
+        insert into human_dimension_scores (
+          scenario_run_id, dimension_id, dimension_name,
+          scale_type, scale_points, raw_score, normalized_score, created_at
+        ) values (
+          ${input.scenarioRunId}, ${input.dimensionId}, ${input.dimensionName},
+          ${input.scaleType}, ${input.scalePoints ?? null},
+          ${input.rawScore}, ${normalized}, now()
+        )
+        on conflict (scenario_run_id, dimension_id) do update set
+          dimension_name = excluded.dimension_name,
+          scale_type = excluded.scale_type,
+          scale_points = excluded.scale_points,
+          raw_score = excluded.raw_score,
+          normalized_score = excluded.normalized_score,
+          created_at = excluded.created_at
+      `;
+    });
+  }
+}
+
+type RubricSnapshotShape = {
+  id?: string;
+  name?: string;
+  passThreshold?: number;
+  dimensions?: Array<{
+    id: string;
+    name: string;
+    weight: number;
+    scale: { type: string; points?: number; labels: Record<string, string> };
+  }>;
+};
+
+function normalizeHumanScore(
+  rawScore: number,
+  scaleType: string,
+  scalePoints?: number | null,
+): number {
+  if (scaleType === "binary") {
+    return rawScore >= 1 ? 1 : 0;
+  }
+  const points =
+    typeof scalePoints === "number" && scalePoints > 0 ? scalePoints : 1;
+  return rawScore / points;
+}
+
+function pearsonCorrelation(
+  xs: number[],
+  ys: number[],
+): { value: number | null; n: number } {
+  const n = Math.min(xs.length, ys.length);
+  if (n < 2) {
+    return { value: null, n };
+  }
+  let sumX = 0;
+  let sumY = 0;
+  for (let i = 0; i < n; i += 1) {
+    sumX += xs[i] ?? 0;
+    sumY += ys[i] ?? 0;
+  }
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  let cov = 0;
+  let varX = 0;
+  let varY = 0;
+  for (let i = 0; i < n; i += 1) {
+    const dx = (xs[i] ?? 0) - meanX;
+    const dy = (ys[i] ?? 0) - meanY;
+    cov += dx * dy;
+    varX += dx * dx;
+    varY += dy * dy;
+  }
+  if (varX === 0 || varY === 0) {
+    return { value: null, n };
+  }
+  return { value: cov / Math.sqrt(varX * varY), n };
 }

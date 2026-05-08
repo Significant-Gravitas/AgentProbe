@@ -1,5 +1,6 @@
 .DS_Store
 .agentprobe/
+.agentprobe.backup/
 node_modules/
 .tmp-agentprobe-e2e-*/
 .venv/

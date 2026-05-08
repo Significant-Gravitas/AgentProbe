@@ -63,9 +63,12 @@ direction and boundary rules are mandatory regardless of file names.
 
 AgentProbe selects the persistence backend by database URL scheme. SQLite
 (`sqlite:///...`) is the local default and stores run history, presets,
-encrypted settings, and endpoint overrides beside the developer workspace.
-Postgres (`postgres://...` or `postgresql://...`) implements the same repository
-surface for production `start-server` deploys, including run recording.
+encrypted settings, endpoint overrides, and human-authored dimension scores
+beside the developer workspace. Postgres (`postgres://...` or
+`postgresql://...`) implements the same repository surface for production
+`start-server` deploys, including run recording. Human scores live in
+`human_dimension_scores`, keyed `(scenario_run_id, dimension_id)`, and mirror
+`judge_dimension_scores` so the two scoring streams stay diffable.
 
 Postgres migrations are explicit: operators run `agentprobe db:migrate` before
 booting the server, and boot checks refuse an out-of-date schema. Because

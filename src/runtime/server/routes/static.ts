@@ -3,7 +3,6 @@ import { extname, join } from "node:path";
 
 import { safeStaticPath } from "../../../shared/utils/safe-static-path.ts";
 import type { ServerContext } from "../app-server.ts";
-import { DEFAULT_DASHBOARD_HTML, dashboardHtml } from "../dashboard/inline.ts";
 import { errorResponse } from "../http-helpers.ts";
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -35,6 +34,7 @@ function isDashboardPath(pathname: string): boolean {
     pathname.startsWith("/runs") ||
     pathname.startsWith("/suites") ||
     pathname.startsWith("/presets") ||
+    pathname.startsWith("/score") ||
     pathname === "/start" ||
     pathname === "/compare"
   ) {
@@ -44,17 +44,6 @@ function isDashboardPath(pathname: string): boolean {
     return true;
   }
   return false;
-}
-
-function serveInlineDashboard(context: ServerContext): Response {
-  return new Response(dashboardHtml(), {
-    status: 200,
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "x-request-id": context.requestId,
-      "cache-control": "no-store",
-    },
-  });
 }
 
 export async function handleStatic(
@@ -123,7 +112,13 @@ export async function handleStatic(
   }
 
   if (isDashboardPath(pathname)) {
-    return serveInlineDashboard(context);
+    return errorResponse({
+      status: 503,
+      type: "DashboardUnavailable",
+      message:
+        "Dashboard build not found. Run `bun run dashboard:build` and restart the server.",
+      requestId: context.requestId,
+    });
   }
 
   if (pathname === "/robots.txt") {
@@ -150,5 +145,3 @@ export async function handleStatic(
     requestId: context.requestId,
   });
 }
-
-export { DEFAULT_DASHBOARD_HTML };
