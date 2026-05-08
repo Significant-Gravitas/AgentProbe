@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-07T14:18:04.098Z
+Generated: 2026-05-08T14:16:42.633Z
 
 ```text
   AGENTS.md
@@ -58,6 +58,7 @@ dashboard/src/views/
   dashboard/src/views/RunLaunchModal.tsx
   dashboard/src/views/RunMetaEditor.tsx
   dashboard/src/views/ScenarioDetailsModal.tsx
+  dashboard/src/views/ScoreView.tsx
   dashboard/src/vite-env.d.ts
   dashboard/tsconfig.json
   dashboard/vite.config.ts
@@ -384,6 +385,7 @@ scripts/
   scripts/patch-scenario-attachments.ts
   scripts/refresh-quality-score.ts
   scripts/seed-preset.ts
+  scripts/seed-test-scores.ts
   scripts/validate-repo.sh
   scripts/validate-setup.sh
   skills-lock.json
@@ -428,7 +430,6 @@ src/runtime/server/
   src/runtime/server/app-server.ts
   src/runtime/server/config.ts
 src/runtime/server/controllers/
-src/runtime/server/dashboard/
   src/runtime/server/default-presets.ts
   src/runtime/server/http-helpers.ts
 src/runtime/server/middleware/
@@ -459,6 +460,7 @@ tests/e2e/fixtures/suite/
 tests/integration/
 tests/integration/server/
   tests/integration/server/comparisons.test.ts
+  tests/integration/server/human-scoring.test.ts
   tests/integration/server/read-only.test.ts
   tests/integration/server/settings.test.ts
   tests/integration/server/write-control.test.ts
@@ -482,6 +484,7 @@ tests/unit/dashboard/
 tests/unit/persistence/
   tests/unit/persistence/drizzle-schema.test.ts
   tests/unit/persistence/factory.test.ts
+  tests/unit/persistence/human-scoring.test.ts
   tests/unit/persistence/migrations.test.ts
   tests/unit/persistence/postgres-backend.test.ts
   tests/unit/persistence/postgres-recorder.test.ts
@@ -495,7 +498,6 @@ tests/unit/server/
   tests/unit/server/comparison.test.ts
   tests/unit/server/config.test.ts
   tests/unit/server/default-presets.test.ts
-  tests/unit/server/inline-dashboard.test.ts
   tests/unit/server/preset-fake-repository.test.ts
   tests/unit/server/selection.test.ts
   tests/unit/server/settings-controller.test.ts
