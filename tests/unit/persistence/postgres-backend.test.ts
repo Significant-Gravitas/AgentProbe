@@ -99,17 +99,24 @@ function makeCountingSql(presetCount: number): {
   }) as SqlTag;
   sql.begin = async (fn) => fn(sql);
   sql.unsafe = (async (text: string) => {
-    queries.push(text.replace(/\s+/g, " ").trim());
     if (text.includes("from preset_scenarios")) {
+      queries.push(text.replace(/\s+/g, " ").trim());
       return selections;
     }
     if (text.includes("from runs")) {
+      queries.push(text.replace(/\s+/g, " ").trim());
       return runs;
     }
     if (text.includes("from presets")) {
+      queries.push(text.replace(/\s+/g, " ").trim());
       return presetRows;
     }
-    throw new Error(`Unexpected query: ${text}`);
+    // `sql.unsafe(...)` is also used as a column-list fragment inside another
+    // tagged template (e.g. `sql\`select ${sql.unsafe(COLUMNS)} from runs\``).
+    // Those fragment calls happen outside any real query path; the parent
+    // tagged template above still records the resulting query, so we just
+    // return an inert empty result here instead of throwing.
+    return [];
   }) as SqlTag["unsafe"];
   sql.end = async () => {};
 
