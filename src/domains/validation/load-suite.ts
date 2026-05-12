@@ -25,6 +25,10 @@ import type {
   PersonaPersonality,
   Personas,
   ProcessedYamlFile,
+  RetrievalConfig,
+  RetrievalMatchPolicy,
+  RetrievalMetricKey,
+  RetrievalSource,
   Rubric,
   RubricDimension,
   RubricScale,
@@ -951,6 +955,119 @@ function parseScenarioExpectations(value: unknown): ScenarioExpectations {
   return result;
 }
 
+const RETRIEVAL_METRIC_KEYS: RetrievalMetricKey[] = [
+  "precision_at_k",
+  "recall_at_k",
+  "mrr",
+  "ndcg_at_k",
+];
+
+const VALID_MATCH_POLICIES: RetrievalMatchPolicy[] = [
+  "exact",
+  "substring",
+  "regex",
+];
+
+function parseRetrievalWeights(
+  value: unknown,
+): Required<RetrievalConfig["weights"]> {
+  const defaults: Required<RetrievalConfig["weights"]> = {
+    precision_at_k: 1,
+    recall_at_k: 1,
+    mrr: 1,
+    ndcg_at_k: 1,
+  };
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return defaults;
+  }
+  const raw = value as YamlObject;
+  for (const key of Object.keys(raw)) {
+    if (!RETRIEVAL_METRIC_KEYS.includes(key as RetrievalMetricKey)) {
+      throw new AgentProbeConfigError(
+        `Unknown retrieval metric key: ${key}. Allowed: ${RETRIEVAL_METRIC_KEYS.join(", ")}.`,
+      );
+    }
+  }
+  for (const key of RETRIEVAL_METRIC_KEYS) {
+    const candidate = optionalNumber(raw[key]);
+    if (candidate !== undefined) {
+      if (candidate < 0) {
+        throw new AgentProbeConfigError(
+          `retrieval.weight.${key} must be non-negative.`,
+        );
+      }
+      defaults[key] = candidate;
+    }
+  }
+  return defaults;
+}
+
+function parseRetrievalSource(value: unknown): RetrievalSource | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = ensureObject(value, "retrieval.source must be an object.");
+  const fixture = optionalString(raw.fixture);
+  const rawExchangeKey = optionalString(raw.raw_exchange_key);
+  if (!fixture && !rawExchangeKey) {
+    return undefined;
+  }
+  return {
+    fixture,
+    rawExchangeKey,
+  };
+}
+
+function parseRetrievalConfig(value: unknown): RetrievalConfig | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = ensureObject(value, "scenario.retrieval must be an object.");
+
+  const golden = stringArray(raw.golden);
+  if (golden.length === 0) {
+    throw new AgentProbeConfigError(
+      "scenario.retrieval.golden must be a non-empty list of strings.",
+    );
+  }
+
+  const forbidden = stringArray(raw.forbidden);
+
+  const k = optionalNumber(raw.k);
+  if (k !== undefined && (!Number.isFinite(k) || k <= 0)) {
+    throw new AgentProbeConfigError(
+      "scenario.retrieval.k must be a positive integer when provided.",
+    );
+  }
+
+  const matchValue = optionalString(raw.match) ?? "substring";
+  if (!VALID_MATCH_POLICIES.includes(matchValue as RetrievalMatchPolicy)) {
+    throw new AgentProbeConfigError(
+      `scenario.retrieval.match must be one of: ${VALID_MATCH_POLICIES.join(", ")}.`,
+    );
+  }
+
+  const passThreshold = optionalNumber(raw.pass_threshold);
+  if (
+    passThreshold !== undefined &&
+    (!Number.isFinite(passThreshold) || passThreshold < 0 || passThreshold > 1)
+  ) {
+    throw new AgentProbeConfigError(
+      "scenario.retrieval.pass_threshold must be between 0 and 1 when provided.",
+    );
+  }
+
+  return {
+    golden,
+    forbidden,
+    k: k !== undefined ? Math.floor(k) : undefined,
+    weights: parseRetrievalWeights(raw.weight ?? raw.weights),
+    passThreshold: passThreshold ?? 0.5,
+    match: matchValue as RetrievalMatchPolicy,
+    source: parseRetrievalSource(raw.source),
+  };
+}
+
 function parseSession(value: unknown): Session {
   const raw = ensureObject(value, "scenario session must be an object.");
   return {
@@ -1014,6 +1131,7 @@ function parseScenario(value: unknown, defaults?: ScenarioDefaults): Scenario {
       ? raw.sessions.map((item) => parseSession(item))
       : [],
     expectations: parseScenarioExpectations(raw.expectations),
+    retrieval: parseRetrievalConfig(raw.retrieval),
   };
 }
 
