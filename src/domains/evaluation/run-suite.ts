@@ -11,6 +11,7 @@ import type {
   JudgeDimensionScore,
   Persona,
   PresetSnapshot,
+  RetrievalScore,
   Rubric,
   RubricScore,
   RunProgressEvent,
@@ -39,6 +40,7 @@ import {
   parseTimeOffset,
 } from "../validation/load-suite.ts";
 import { judgeResponse } from "./judge.ts";
+import { scoreRetrieval } from "./retrieval-scorer.ts";
 import type {
   EndpointAdapter,
   EndpointAdapterFactory,
@@ -157,6 +159,13 @@ export type RunRecorder = {
       rubric: Rubric;
       score: RubricScore;
       overallScore: number;
+    },
+  ) => Promise<void>;
+  recordRetrievalResult?: (
+    scenarioRunId: number,
+    options: {
+      scenario: Scenario;
+      score: RetrievalScore;
     },
   ) => Promise<void>;
 };
@@ -1037,19 +1046,33 @@ export async function runScenario(
     });
   }
 
+  const retrievalScore = scoreRetrieval(scenario, {
+    scenariosPath: options.scenariosPath,
+    lastAdapterReply: lastReply,
+  });
+  if (retrievalScore && scenarioRunId !== undefined) {
+    await options.recorder?.recordRetrievalResult?.(scenarioRunId, {
+      scenario,
+      score: retrievalScore,
+    });
+  }
+
+  const overallPassed = score.passed && (retrievalScore?.passed ?? true);
+
   const result: ScenarioRunResult = {
     scenarioId: scenario.id,
     scenarioName: scenario.name,
     personaId: persona.id,
     rubricId: rubric.id,
     userId: options.userId,
-    passed: score.passed,
-    failureKind: score.failureKind,
+    passed: overallPassed,
+    failureKind: overallPassed ? undefined : score.failureKind ?? "agent",
     overallScore: finalScore,
     transcript: fullTranscript,
     checkpoints,
     toolCallsByTurn,
     judgeScore: score,
+    retrievalScore,
     renderedTurns,
   };
   if (scenarioRunId !== undefined) {
