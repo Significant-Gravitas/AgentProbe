@@ -221,6 +221,34 @@ export const postgresJudgeDimensionScores = pgTable(
   (table) => [index("idx_judge_scores_scenario_run").on(table.scenarioRunId)],
 );
 
+export const postgresRetrievalScores = pgTable(
+  "retrieval_scores",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    scenarioRunId: bigint("scenario_run_id", { mode: "number" })
+      .notNull()
+      .references(() => postgresScenarioRuns.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    value: doublePrecision("value").notNull(),
+    weight: doublePrecision("weight").notNull(),
+    k: integer("k").notNull(),
+    weightedScore: doublePrecision("weighted_score").notNull(),
+    passThreshold: doublePrecision("pass_threshold").notNull(),
+    passed: boolean("passed").notNull(),
+    totalRelevant: integer("total_relevant").notNull(),
+    totalReturned: integer("total_returned").notNull(),
+    hitCount: integer("hit_count").notNull(),
+    forbiddenHits: integer("forbidden_hits").notNull(),
+    source: text("source").notNull(),
+    returnedJson: jsonb("returned_json"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("idx_retrieval_scores_scenario_run").on(table.scenarioRunId),
+    index("idx_retrieval_scores_metric").on(table.metric),
+  ],
+);
+
 export const postgresHumanDimensionScores = pgTable(
   "human_dimension_scores",
   {
@@ -303,6 +331,7 @@ export const postgresSchema = {
   checkpoints: postgresCheckpoints,
   judgeDimensionScores: postgresJudgeDimensionScores,
   humanDimensionScores: postgresHumanDimensionScores,
+  retrievalScores: postgresRetrievalScores,
   presets: postgresPresets,
   presetScenarios: postgresPresetScenarios,
   appSettings: postgresAppSettings,

@@ -12,6 +12,7 @@ import type {
   Persona,
   PresetRecord,
   PresetSnapshot,
+  RetrievalScore,
   Rubric,
   RubricScore,
   RunRecord,
@@ -29,7 +30,7 @@ import { redactDbUrl } from "./url.ts";
 
 export const DEFAULT_DB_DIRNAME = ".agentprobe";
 export const DEFAULT_DB_FILENAME = "runs.sqlite3";
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 const REDACTED_VALUE = "[REDACTED]";
 const sensitiveExactKeys = new Set([
   "access_token",
@@ -285,6 +286,11 @@ function migrateDatabase(database: Database, currentVersion: number): void {
     database.query("update meta set schema_version = ? where id = 1").run(8);
     version = 8;
   }
+  if (version < 9) {
+    ensureRetrievalScoresTable(database);
+    database.query("update meta set schema_version = ? where id = 1").run(9);
+    version = 9;
+  }
 
   if (version !== SCHEMA_VERSION) {
     throw new AgentProbeRuntimeError(
@@ -332,6 +338,33 @@ function ensureHumanDimensionScoresTable(database: Database): void {
       on human_dimension_scores(scenario_run_id, dimension_id);
     create index if not exists idx_human_dim_scores_scenario_run
       on human_dimension_scores(scenario_run_id);
+  `);
+}
+
+function ensureRetrievalScoresTable(database: Database): void {
+  database.exec(`
+    create table if not exists retrieval_scores (
+      id integer primary key autoincrement,
+      scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+      metric text not null,
+      value real not null,
+      weight real not null,
+      k integer not null,
+      weighted_score real not null,
+      pass_threshold real not null,
+      passed integer not null,
+      total_relevant integer not null,
+      total_returned integer not null,
+      hit_count integer not null,
+      forbidden_hits integer not null,
+      source text not null,
+      returned_json text,
+      created_at text not null
+    );
+    create index if not exists idx_retrieval_scores_scenario_run
+      on retrieval_scores(scenario_run_id);
+    create index if not exists idx_retrieval_scores_metric
+      on retrieval_scores(metric);
   `);
 }
 
@@ -527,6 +560,7 @@ export function initDb(dbUrl?: string): void {
     ensureAppSettingsTable(database);
     ensureEndpointOverridesTable(database);
     ensureHumanDimensionScoresTable(database);
+    ensureRetrievalScoresTable(database);
 
     const meta = database
       .query("select schema_version from meta where id = 1")
@@ -1088,6 +1122,45 @@ export class SqliteRunRecorder {
         utcNow(),
         scenarioRunId,
       );
+  }
+
+  async recordRetrievalResult(
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: RetrievalScore },
+  ): Promise<void> {
+    const createdAt = utcNow();
+    const passedFlag = options.score.passed ? 1 : 0;
+    const returnedJson = encodeJson(redactValue(options.score.returned));
+    for (const metric of options.score.metrics) {
+      this.database
+        .query(
+          `
+            insert into retrieval_scores (
+              scenario_run_id, metric, value, weight, k,
+              weighted_score, pass_threshold, passed, total_relevant,
+              total_returned, hit_count, forbidden_hits, source,
+              returned_json, created_at
+            ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `,
+        )
+        .run(
+          scenarioRunId,
+          metric.metric,
+          metric.value,
+          metric.weight,
+          options.score.k,
+          options.score.weightedScore,
+          options.score.passThreshold,
+          passedFlag,
+          options.score.totalRelevant,
+          options.score.totalReturned,
+          options.score.hitCount,
+          options.score.forbiddenHits,
+          options.score.source,
+          returnedJson,
+          createdAt,
+        );
+    }
   }
 
   async recordScenarioFinished(
@@ -1921,6 +1994,11 @@ function getScenarioRecords(
         "select * from judge_dimension_scores where scenario_run_id = ? order by dimension_id asc",
       )
       .all(scenarioRunId) as Array<Record<string, unknown>>;
+    const retrievalScores = database
+      .query(
+        "select * from retrieval_scores where scenario_run_id = ? order by id asc",
+      )
+      .all(scenarioRunId) as Array<Record<string, unknown>>;
 
     return {
       scenarioRunId,
@@ -2037,6 +2115,21 @@ function getScenarioRecords(
         normalized_score: Number(score.normalized_score),
         reasoning: String(score.reasoning),
         evidence: decodeJson<JsonValue>(score.evidence_json) ?? [],
+      })),
+      retrievalScores: retrievalScores.map((score) => ({
+        metric: String(score.metric),
+        value: Number(score.value),
+        weight: Number(score.weight),
+        k: Number(score.k),
+        weighted_score: Number(score.weighted_score),
+        pass_threshold: Number(score.pass_threshold),
+        passed: Number(score.passed) === 1,
+        total_relevant: Number(score.total_relevant),
+        total_returned: Number(score.total_returned),
+        hit_count: Number(score.hit_count),
+        forbidden_hits: Number(score.forbidden_hits),
+        source: String(score.source),
+        returned: decodeJson<JsonValue>(score.returned_json) ?? [],
       })),
       error: decodeJson<Record<string, JsonValue>>(row.error_json) ?? null,
       startedAt: String(row.started_at),

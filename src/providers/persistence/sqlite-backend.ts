@@ -220,6 +220,7 @@ function projectRunRecord(
             toolCalls: [],
             checkpoints: [],
             judgeDimensionScores: [],
+            retrievalScores: [],
           }
         : scenario,
   );

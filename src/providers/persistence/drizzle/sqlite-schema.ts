@@ -178,6 +178,34 @@ export const sqliteJudgeDimensionScores = sqliteTable(
   },
 );
 
+export const sqliteRetrievalScores = sqliteTable(
+  "retrieval_scores",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    scenarioRunId: integer("scenario_run_id")
+      .notNull()
+      .references(() => sqliteScenarioRuns.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    value: real("value").notNull(),
+    weight: real("weight").notNull(),
+    k: integer("k").notNull(),
+    weightedScore: real("weighted_score").notNull(),
+    passThreshold: real("pass_threshold").notNull(),
+    passed: integer("passed").notNull(),
+    totalRelevant: integer("total_relevant").notNull(),
+    totalReturned: integer("total_returned").notNull(),
+    hitCount: integer("hit_count").notNull(),
+    forbiddenHits: integer("forbidden_hits").notNull(),
+    source: text("source").notNull(),
+    returnedJson: text("returned_json"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_retrieval_scores_scenario_run").on(table.scenarioRunId),
+    index("idx_retrieval_scores_metric").on(table.metric),
+  ],
+);
+
 export const sqliteHumanDimensionScores = sqliteTable(
   "human_dimension_scores",
   {
@@ -256,6 +284,7 @@ export const sqliteSchema = {
   checkpoints: sqliteCheckpoints,
   judgeDimensionScores: sqliteJudgeDimensionScores,
   humanDimensionScores: sqliteHumanDimensionScores,
+  retrievalScores: sqliteRetrievalScores,
   presets: sqlitePresets,
   presetScenarios: sqlitePresetScenarios,
   appSettings: sqliteAppSettings,

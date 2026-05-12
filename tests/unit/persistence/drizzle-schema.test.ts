@@ -18,6 +18,7 @@ const expectedTables = [
   "meta",
   "preset_scenarios",
   "presets",
+  "retrieval_scores",
   "runs",
   "scenario_runs",
   "target_events",
@@ -33,12 +34,12 @@ function schemaTableNames(schema: Record<string, unknown>): string[] {
 
 describe("Drizzle schema mirrors persistence schema contracts", () => {
   test("declares the complete SQLite table inventory for the current target version", () => {
-    expect(SQLITE_TARGET_VERSION).toBe(8);
+    expect(SQLITE_TARGET_VERSION).toBe(9);
     expect(schemaTableNames(sqliteSchema)).toEqual(expectedTables);
   });
 
   test("declares the complete Postgres table inventory for the current target version", () => {
-    expect(POSTGRES_TARGET_VERSION).toBe(4);
+    expect(POSTGRES_TARGET_VERSION).toBe(5);
     expect(schemaTableNames(postgresSchema)).toEqual(expectedTables);
   });
 });

@@ -7,6 +7,7 @@ import type {
   CheckpointResult,
   JsonValue,
   Persona,
+  RetrievalScore,
   Rubric,
   RubricScore,
   RunResult,
@@ -527,6 +528,32 @@ export class PostgresRunRecorder {
         updated_at = now()
       where id = ${scenarioRunId}
     `;
+  }
+
+  async recordRetrievalResult(
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: RetrievalScore },
+  ): Promise<void> {
+    const passed = options.score.passed;
+    const returnedJson = json(redactValue(options.score.returned));
+    for (const metric of options.score.metrics) {
+      await this.sql`
+        insert into retrieval_scores (
+          scenario_run_id, metric, value, weight, k,
+          weighted_score, pass_threshold, passed, total_relevant,
+          total_returned, hit_count, forbidden_hits, source,
+          returned_json, created_at
+        ) values (
+          ${scenarioRunId}, ${metric.metric}, ${metric.value},
+          ${metric.weight}, ${options.score.k},
+          ${options.score.weightedScore}, ${options.score.passThreshold},
+          ${passed}, ${options.score.totalRelevant},
+          ${options.score.totalReturned}, ${options.score.hitCount},
+          ${options.score.forbiddenHits}, ${options.score.source},
+          ${returnedJson}::jsonb, now()
+        )
+      `;
+    }
   }
 
   async recordScenarioFinished(

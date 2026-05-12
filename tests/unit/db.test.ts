@@ -214,6 +214,7 @@ describe("sqlite recorder", () => {
         "checkpoints",
         "judge_dimension_scores",
         "human_dimension_scores",
+        "retrieval_scores",
         "presets",
         "preset_scenarios",
         "app_settings",
@@ -223,7 +224,7 @@ describe("sqlite recorder", () => {
       }
       expect(
         database.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 8 });
+      ).toEqual({ schema_version: 9 });
     } finally {
       database.close();
     }
@@ -706,7 +707,7 @@ describe("sqlite recorder", () => {
       }
       expect(
         migrated.query("select schema_version from meta where id = 1").get(),
-      ).toEqual({ schema_version: 8 });
+      ).toEqual({ schema_version: 9 });
     } finally {
       migrated.close();
     }

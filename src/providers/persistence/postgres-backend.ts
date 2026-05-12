@@ -188,6 +188,7 @@ function mapScenarioRow(
   toolCalls: UnknownRecord[],
   checkpoints: UnknownRecord[],
   judgeDimensionScores: UnknownRecord[],
+  retrievalScores: UnknownRecord[] = [],
 ): ScenarioRecord {
   const failureKindRaw = asStringOrNull(row.failure_kind);
   const failureKind =
@@ -269,6 +270,21 @@ function mapScenarioRow(
       reasoning: String(score.reasoning ?? ""),
       evidence: asJson<JsonValue>(score.evidence_json) ?? [],
     })),
+    retrievalScores: retrievalScores.map((score) => ({
+      metric: String(score.metric ?? ""),
+      value: Number(score.value),
+      weight: Number(score.weight),
+      k: Number(score.k),
+      weighted_score: Number(score.weighted_score),
+      pass_threshold: Number(score.pass_threshold),
+      passed: Boolean(score.passed),
+      total_relevant: Number(score.total_relevant),
+      total_returned: Number(score.total_returned),
+      hit_count: Number(score.hit_count),
+      forbidden_hits: Number(score.forbidden_hits),
+      source: String(score.source ?? ""),
+      returned: asJson<JsonValue>(score.returned_json) ?? [],
+    })),
     error: asJson<Record<string, JsonValue>>(row.error_json) ?? null,
     startedAt: asIsoTimestamp(row.started_at),
     completedAt: asIsoTimestampOrNull(row.completed_at),
@@ -308,10 +324,17 @@ async function loadScenarioRecords(
   }
 
   if (options.summary) {
-    return scenarioRows.map((row) => mapScenarioRow(row, [], [], [], [], []));
+    return scenarioRows.map((row) => mapScenarioRow(row, [], [], [], [], [], []));
   }
 
-  const [turns, events, toolCalls, checkpoints, dimensionScores] = await span(
+  const [
+    turns,
+    events,
+    toolCalls,
+    checkpoints,
+    dimensionScores,
+    retrievalRows,
+  ] = await span(
     "pg.scenario_children",
     () =>
       Promise.all([
@@ -350,6 +373,13 @@ async function loadScenarioRecords(
             order by scenario_run_id asc, dimension_id asc
           `,
         ),
+        span(
+          "pg.retrieval_scores",
+          () => sql<UnknownRecord>`
+            select * from retrieval_scores where scenario_run_id in ${sql(ids)}
+            order by scenario_run_id asc, id asc
+          `,
+        ),
       ]),
   );
 
@@ -371,6 +401,7 @@ async function loadScenarioRecords(
   const toolsByScenario = groupBy(toolCalls, "scenario_run_id");
   const checkpointsByScenario = groupBy(checkpoints, "scenario_run_id");
   const dimensionsByScenario = groupBy(dimensionScores, "scenario_run_id");
+  const retrievalByScenario = groupBy(retrievalRows, "scenario_run_id");
 
   return scenarioRows.map((row) =>
     mapScenarioRow(
@@ -380,6 +411,7 @@ async function loadScenarioRecords(
       toolsByScenario.get(Number(row.id)) ?? [],
       checkpointsByScenario.get(Number(row.id)) ?? [],
       dimensionsByScenario.get(Number(row.id)) ?? [],
+      retrievalByScenario.get(Number(row.id)) ?? [],
     ),
   );
 }

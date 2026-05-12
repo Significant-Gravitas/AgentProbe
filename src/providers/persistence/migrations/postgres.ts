@@ -2,7 +2,7 @@ import { createPostgresClient, type SqlTag } from "../postgres-client.ts";
 import type { MigrationRunner } from "./types.ts";
 
 /** Target schema version for Postgres. Bumps whenever a new migration is added. */
-export const POSTGRES_TARGET_VERSION = 4;
+export const POSTGRES_TARGET_VERSION = 5;
 
 const POSTGRES_BASELINE_DDL = `
   create table if not exists meta (
@@ -153,6 +153,25 @@ const POSTGRES_BASELINE_DDL = `
     created_at timestamptz not null
   );
 
+  create table if not exists retrieval_scores (
+    id bigserial primary key,
+    scenario_run_id bigint not null references scenario_runs(id) on delete cascade,
+    metric text not null,
+    value double precision not null,
+    weight double precision not null,
+    k integer not null,
+    weighted_score double precision not null,
+    pass_threshold double precision not null,
+    passed boolean not null,
+    total_relevant integer not null,
+    total_returned integer not null,
+    hit_count integer not null,
+    forbidden_hits integer not null,
+    source text not null,
+    returned_json jsonb,
+    created_at timestamptz not null
+  );
+
   create table if not exists presets (
     id text primary key,
     name text not null unique,
@@ -201,6 +220,10 @@ const POSTGRES_BASELINE_DDL = `
     on human_dimension_scores(scenario_run_id, dimension_id);
   create index if not exists idx_human_dim_scores_scenario_run
     on human_dimension_scores(scenario_run_id);
+  create index if not exists idx_retrieval_scores_scenario_run
+    on retrieval_scores(scenario_run_id);
+  create index if not exists idx_retrieval_scores_metric
+    on retrieval_scores(metric);
 `;
 
 async function readPostgresVersion(sql: SqlTag): Promise<number> {
@@ -304,6 +327,40 @@ export function createPostgresMigrationRunner(
             await tx`update meta set schema_version = 4 where id = 1`;
           });
           applied.push(4);
+        }
+        if (from < 5) {
+          await sql.begin(async (tx) => {
+            await tx`
+              create table if not exists retrieval_scores (
+                id bigserial primary key,
+                scenario_run_id bigint not null references scenario_runs(id) on delete cascade,
+                metric text not null,
+                value double precision not null,
+                weight double precision not null,
+                k integer not null,
+                weighted_score double precision not null,
+                pass_threshold double precision not null,
+                passed boolean not null,
+                total_relevant integer not null,
+                total_returned integer not null,
+                hit_count integer not null,
+                forbidden_hits integer not null,
+                source text not null,
+                returned_json jsonb,
+                created_at timestamptz not null
+              )
+            `;
+            await tx`
+              create index if not exists idx_retrieval_scores_scenario_run
+                on retrieval_scores(scenario_run_id)
+            `;
+            await tx`
+              create index if not exists idx_retrieval_scores_metric
+                on retrieval_scores(metric)
+            `;
+            await tx`update meta set schema_version = 5 where id = 1`;
+          });
+          applied.push(5);
         }
         return applied;
       } finally {
