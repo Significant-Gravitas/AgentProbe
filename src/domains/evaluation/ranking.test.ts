@@ -96,17 +96,25 @@ describe("buildRelevanceVector", () => {
 
   test("exact policy requires full normalized equality", () => {
     expect(
-      buildRelevanceVector(["Atlas Project Status"], ["atlas project status"], "exact"),
+      buildRelevanceVector(
+        ["Atlas Project Status"],
+        ["atlas project status"],
+        "exact",
+      ),
     ).toEqual([1]);
     expect(
-      buildRelevanceVector(["Atlas Project"], ["Atlas Project Status"], "exact"),
+      buildRelevanceVector(
+        ["Atlas Project"],
+        ["Atlas Project Status"],
+        "exact",
+      ),
     ).toEqual([0]);
   });
 
   test("regex policy interprets the golden item as a pattern", () => {
-    expect(
-      buildRelevanceVector(["budget: $50K"], ["\\$50k"], "regex"),
-    ).toEqual([1]);
+    expect(buildRelevanceVector(["budget: $50K"], ["\\$50k"], "regex")).toEqual(
+      [1],
+    );
   });
 
   test("returns 0 for empty golden item to avoid false matches", () => {

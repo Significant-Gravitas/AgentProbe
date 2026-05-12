@@ -324,7 +324,9 @@ async function loadScenarioRecords(
   }
 
   if (options.summary) {
-    return scenarioRows.map((row) => mapScenarioRow(row, [], [], [], [], [], []));
+    return scenarioRows.map((row) =>
+      mapScenarioRow(row, [], [], [], [], [], []),
+    );
   }
 
   const [
@@ -334,53 +336,51 @@ async function loadScenarioRecords(
     checkpoints,
     dimensionScores,
     retrievalRows,
-  ] = await span(
-    "pg.scenario_children",
-    () =>
-      Promise.all([
-        span(
-          "pg.turns",
-          () => sql<UnknownRecord>`
+  ] = await span("pg.scenario_children", () =>
+    Promise.all([
+      span(
+        "pg.turns",
+        () => sql<UnknownRecord>`
             select * from turns where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, turn_index asc
           `,
-        ),
-        span(
-          "pg.target_events",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.target_events",
+        () => sql<UnknownRecord>`
             select * from target_events where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, turn_index asc, exchange_index asc
           `,
-        ),
-        span(
-          "pg.tool_calls",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.tool_calls",
+        () => sql<UnknownRecord>`
             select * from tool_calls where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, turn_index asc, call_order asc nulls last
           `,
-        ),
-        span(
-          "pg.checkpoints",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.checkpoints",
+        () => sql<UnknownRecord>`
             select * from checkpoints where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, checkpoint_index asc
           `,
-        ),
-        span(
-          "pg.judge_dimension_scores",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.judge_dimension_scores",
+        () => sql<UnknownRecord>`
             select * from judge_dimension_scores where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, dimension_id asc
           `,
-        ),
-        span(
-          "pg.retrieval_scores",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.retrieval_scores",
+        () => sql<UnknownRecord>`
             select * from retrieval_scores where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, id asc
           `,
-        ),
-      ]),
+      ),
+    ]),
   );
 
   const groupBy = <T extends UnknownRecord>(

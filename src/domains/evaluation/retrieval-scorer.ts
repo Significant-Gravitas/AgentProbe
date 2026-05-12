@@ -82,9 +82,10 @@ function resolveFixturePath(
   }
   let base: string;
   try {
-    base = existsSync(scenariosPath) && statSync(scenariosPath).isDirectory()
-      ? scenariosPath
-      : dirname(scenariosPath);
+    base =
+      existsSync(scenariosPath) && statSync(scenariosPath).isDirectory()
+        ? scenariosPath
+        : dirname(scenariosPath);
   } catch {
     base = dirname(scenariosPath);
   }
@@ -134,10 +135,13 @@ export function resolveRetrievedItems(
     return { items, source: "fixture" };
   }
 
-  const rawExchangeKey = config.source?.rawExchangeKey ?? DEFAULT_RAW_EXCHANGE_KEY;
+  const rawExchangeKey =
+    config.source?.rawExchangeKey ?? DEFAULT_RAW_EXCHANGE_KEY;
   const rawExchange = context.lastAdapterReply?.rawExchange;
   if (rawExchange && typeof rawExchange === "object") {
-    const candidate = (rawExchange as Record<string, JsonValue>)[rawExchangeKey];
+    const candidate = (rawExchange as Record<string, JsonValue>)[
+      rawExchangeKey
+    ];
     if (candidate !== undefined) {
       const items = coerceRetrievedItems(candidate);
       return { items, source: "raw_exchange" };

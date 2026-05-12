@@ -40,12 +40,12 @@ import {
   parseTimeOffset,
 } from "../validation/load-suite.ts";
 import { judgeResponse } from "./judge.ts";
-import { scoreRetrieval } from "./retrieval-scorer.ts";
 import type {
   EndpointAdapter,
   EndpointAdapterFactory,
   LlmResponsesClient,
 } from "./ports.ts";
+import { scoreRetrieval } from "./retrieval-scorer.ts";
 import { generatePersonaStep, resolvePersonaModel } from "./simulator.ts";
 
 const resetsRequiringReinit = new Set(["new", "fresh_agent"]);
@@ -1066,7 +1066,7 @@ export async function runScenario(
     rubricId: rubric.id,
     userId: options.userId,
     passed: overallPassed,
-    failureKind: overallPassed ? undefined : score.failureKind ?? "agent",
+    failureKind: overallPassed ? undefined : (score.failureKind ?? "agent"),
     overallScore: finalScore,
     transcript: fullTranscript,
     checkpoints,

@@ -50,7 +50,10 @@ describe("scenario parsing", () => {
   });
 
   test("parses a retrieval block with defaults", () => {
-    const path = join(makeTempDir("scenario-retrieval-basic"), "scenarios.yaml");
+    const path = join(
+      makeTempDir("scenario-retrieval-basic"),
+      "scenarios.yaml",
+    );
     writeFileSync(
       path,
       [

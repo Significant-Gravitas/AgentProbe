@@ -1648,7 +1648,7 @@ describe("runner", () => {
       adapterReply("Here are the relevant memories.", {
         rawExchange: {
           retrieved: ["Sarah's email", "Atlas project status"],
-        } as Record<string, never>,
+        } as unknown as Record<string, never>,
       }),
     ]);
     const client = new FakeResponsesClient([
@@ -1702,7 +1702,7 @@ describe("runner", () => {
       adapterReply("Sure thing.", {
         rawExchange: {
           retrieved: ["I do not have that on file", "Old budget was $50K"],
-        } as Record<string, never>,
+        } as unknown as Record<string, never>,
       }),
     ]);
     const client = new FakeResponsesClient([

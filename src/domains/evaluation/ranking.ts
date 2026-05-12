@@ -359,7 +359,10 @@ export function scoreRanking(input: RankingScoreInput): RankingScoreResult {
   const passThreshold = input.passThreshold ?? DEFAULT_PASS_THRESHOLD;
   const passed = forbiddenHits === 0 && weightedScore >= passThreshold;
 
-  const hitCount = relevance.reduce((sum, value) => sum + (value > 0 ? 1 : 0), 0);
+  const hitCount = relevance.reduce(
+    (sum, value) => sum + (value > 0 ? 1 : 0),
+    0,
+  );
 
   return {
     k,

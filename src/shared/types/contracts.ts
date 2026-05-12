@@ -394,7 +394,9 @@ export type RetrievalMetricKey =
   | "mrr"
   | "ndcg_at_k";
 
-export type RetrievalMetricWeights = Partial<Record<RetrievalMetricKey, number>>;
+export type RetrievalMetricWeights = Partial<
+  Record<RetrievalMetricKey, number>
+>;
 
 export type RetrievalSource = {
   /**
@@ -689,7 +691,7 @@ export type ScenarioRecord = {
   toolCalls: Array<Record<string, JsonValue>>;
   checkpoints: Array<Record<string, JsonValue>>;
   judgeDimensionScores: Array<Record<string, JsonValue>>;
-  retrievalScores: Array<Record<string, JsonValue>>;
+  retrievalScores?: Array<Record<string, JsonValue>>;
   error?: Record<string, JsonValue> | null;
   startedAt: string;
   completedAt?: string | null;

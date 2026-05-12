@@ -18,7 +18,9 @@ function makeTempDir(prefix: string): string {
   return mkdtempSync(join(tmpdir(), `agentprobe-${prefix}-`));
 }
 
-function buildConfig(overrides: Partial<RetrievalConfig> = {}): RetrievalConfig {
+function buildConfig(
+  overrides: Partial<RetrievalConfig> = {},
+): RetrievalConfig {
   return {
     golden: overrides.golden ?? ["Sarah's email", "Atlas project status"],
     forbidden: overrides.forbidden ?? [],
@@ -56,8 +58,9 @@ function buildReply(retrieved: unknown): AdapterReply {
   return {
     assistantText: "...",
     toolCalls: [],
-    rawExchange:
-      retrieved === undefined ? {} : ({ retrieved } as Record<string, never>),
+    rawExchange: (retrieved === undefined
+      ? {}
+      : { retrieved }) as unknown as AdapterReply["rawExchange"],
     latencyMs: 0,
     usage: {},
   };
@@ -138,7 +141,9 @@ describe("resolveRetrievedItems", () => {
     const reply: AdapterReply = {
       assistantText: "...",
       toolCalls: [],
-      rawExchange: { memories: ["A", "B"] } as Record<string, never>,
+      rawExchange: {
+        memories: ["A", "B"],
+      } as unknown as AdapterReply["rawExchange"],
       latencyMs: 0,
       usage: {},
     };
