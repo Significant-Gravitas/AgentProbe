@@ -1,0 +1,27 @@
+[
+  {
+    "id": "fact-1",
+    "label": "Sarah's email: sarah@acme.co",
+    "scope": "personal"
+  },
+  {
+    "id": "fact-2",
+    "label": "Atlas project status: green, shipping Q3",
+    "scope": "project:atlas"
+  },
+  {
+    "id": "fact-3",
+    "label": "HubSpot is the CRM",
+    "scope": "personal"
+  },
+  {
+    "id": "fact-4",
+    "label": "Marcus Lee, marcus@northstar.io, CTO",
+    "scope": "personal"
+  },
+  {
+    "id": "fact-5",
+    "label": "Standing rule: invoices on the 1st",
+    "scope": "personal"
+  }
+]

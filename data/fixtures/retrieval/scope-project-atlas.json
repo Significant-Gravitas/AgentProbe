@@ -1,0 +1,17 @@
+[
+  {
+    "id": "atlas-spec-doc",
+    "label": "Atlas project specification: v2 metrics overhaul",
+    "scope": "project:atlas"
+  },
+  {
+    "id": "atlas-status",
+    "label": "Atlas status: green, on track for Q3",
+    "scope": "project:atlas"
+  },
+  {
+    "id": "atlas-owner",
+    "label": "Atlas owner: Sarah",
+    "scope": "project:atlas"
+  }
+]
