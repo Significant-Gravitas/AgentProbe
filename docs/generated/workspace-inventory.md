@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-08T14:16:42.633Z
+Generated: 2026-05-12T19:50:46.522Z
 
 ```text
   AGENTS.md
@@ -243,6 +243,12 @@ data/fixtures/
   data/fixtures/research_questions.md
   data/fixtures/resume.pdf
   data/fixtures/retention_by_product.csv
+data/fixtures/retrieval/
+  data/fixtures/retrieval/cascade-after-northstar-invalidated.json
+  data/fixtures/retrieval/forget-budget-after.json
+  data/fixtures/retrieval/scope-project-atlas.json
+  data/fixtures/retrieval/stale-fact-supersession.json
+  data/fixtures/retrieval/warm-context-sarah.json
   data/fixtures/reviews_android.json
   data/fixtures/reviews_google_yelp.json
   data/fixtures/reviews_ios.json
@@ -310,6 +316,7 @@ data/fixtures/snapshots/
   data/openclaw-endpoints.yaml
   data/opencode-endpoints.yaml
   data/personas.yaml
+  data/retrieval-memory.yaml
   data/rubric.yaml
   data/scenarios.yaml
   docker-compose.yml
@@ -397,6 +404,10 @@ src/domains/
 src/domains/evaluation/
   src/domains/evaluation/judge.ts
   src/domains/evaluation/ports.ts
+  src/domains/evaluation/ranking.test.ts
+  src/domains/evaluation/ranking.ts
+  src/domains/evaluation/retrieval-scorer.test.ts
+  src/domains/evaluation/retrieval-scorer.ts
   src/domains/evaluation/run-suite.ts
   src/domains/evaluation/simulator.ts
 src/domains/reporting/
@@ -493,6 +504,7 @@ tests/unit/persistence/
   tests/unit/persistence/repository-contract.test.ts
   tests/unit/persistence/url.test.ts
   tests/unit/report.test.ts
+  tests/unit/retrieval-memory.test.ts
   tests/unit/runner.test.ts
 tests/unit/server/
   tests/unit/server/comparison.test.ts

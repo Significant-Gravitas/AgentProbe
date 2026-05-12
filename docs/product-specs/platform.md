@@ -298,6 +298,21 @@ The queue ignores scenario_runs whose status is not `completed`, and rerunning
 the click on a scenario already scored for the dimension is an upsert (no new
 row).
 
+### Ranking-scored scenarios grade retrieval relevance against a curated golden set
+
+**Given** a scenario YAML that declares a `retrieval:` block with `golden`
+(required), optional `forbidden`, `k`, `match`, `pass_threshold`, per-metric
+`weight`, and a `source` (either `raw_exchange_key` or `fixture`)
+**When** AgentProbe runs the scenario and the adapter returns a retrieval
+payload (either inline on the last reply's `rawExchange[<key>]` or via a
+JSON fixture relative to the scenario YAML)
+**Then** the runner computes precision@k, recall@k, MRR, and NDCG@k on the
+returned list against the golden set, aggregates them under a weighted
+average with `pass_threshold`, and forces a scenario fail when any
+`forbidden` item appears in the top-k. Per-metric and aggregate scores are
+persisted to `retrieval_scores` keyed by `scenario_run_id` for replay, and
+the rendered run report surfaces them alongside the LLM-judge dimensions.
+
 ### Database URL credentials stay redacted in operator-visible output
 
 **Given** an operator configures persistence with a database URL that contains
