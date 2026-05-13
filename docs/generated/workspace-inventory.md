@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-13T19:05:50.184Z
+Generated: 2026-05-13T19:37:36.614Z
 
 ```text
   AGENTS.md
@@ -66,6 +66,7 @@ data/
   data/adversarial-scenarios.yaml
   data/autogpt-endpoint.yaml
   data/baseline-scenarios.yaml
+  data/dream-validation.yaml
   data/fixture-manifest.json
 data/fixtures/
   data/fixtures/ad_spend_3mo.csv
@@ -127,6 +128,16 @@ data/fixtures/
   data/fixtures/dm_corpus.json
   data/fixtures/document_types.yaml
   data/fixtures/domain_to_industry_mapping.json
+data/fixtures/dream/
+  data/fixtures/dream/dedup-false-positive.json
+  data/fixtures/dream/dedup-near-duplicates.json
+  data/fixtures/dream/demotion-cascade-bounded.json
+  data/fixtures/dream/demotion-cascade-runaway.json
+  data/fixtures/dream/demotion-snodgrass-retract.json
+  data/fixtures/dream/demotion-snodgrass-violation.json
+  data/fixtures/dream/demotion-stale-fact.json
+  data/fixtures/dream/procedure-onboarding.json
+  data/fixtures/dream/procedure-weekly-report.json
   data/fixtures/editor_brief_template.md
   data/fixtures/employee_details.json
   data/fixtures/erp_ledger_2026-03.csv
@@ -499,6 +510,7 @@ tests/unit/architecture/
 tests/unit/dashboard/
   tests/unit/dashboard/compare-view.test.tsx
   tests/unit/db.test.ts
+  tests/unit/dream-validation.test.ts
   tests/unit/endpoint-config.test.ts
   tests/unit/endpoint-overrides-controller.test.ts
   tests/unit/judge.test.ts

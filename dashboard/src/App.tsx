@@ -31,6 +31,7 @@ import { AveragesTable } from "./components/AveragesTable.tsx";
 import { CompareView } from "./components/CompareView.tsx";
 import { ConversationView } from "./components/ConversationView.tsx";
 import { DetailPanel } from "./components/DetailPanel.tsx";
+import { EvalScoresView, hasEvalScores } from "./components/EvalScoresView.tsx";
 import { ProgressBar } from "./components/ProgressBar.tsx";
 import { RubricView } from "./components/RubricView.tsx";
 import { ScenarioTable } from "./components/ScenarioTable.tsx";
@@ -186,6 +187,14 @@ function scenarioDetail(scenario: ServerScenario): ScenarioDetail {
     judge_dimension_scores: (scenario.judgeDimensionScores ?? []).map(
       normalizeDimension,
     ),
+    retrieval_scores: (scenario.retrievalScores ??
+      []) as unknown as ScenarioDetail["retrieval_scores"],
+    demotion_scores: (scenario.demotionScores ??
+      []) as unknown as ScenarioDetail["demotion_scores"],
+    procedure_scores: (scenario.procedureScores ??
+      []) as unknown as ScenarioDetail["procedure_scores"],
+    dedup_scores: (scenario.dedupScores ??
+      []) as unknown as ScenarioDetail["dedup_scores"],
     expectations: scenario.expectations,
     error: scenario.error,
     counts: scenario.counts
@@ -992,6 +1001,14 @@ function ScenarioDetailView({
           <RubricView detail={detail} />
         </Card>
       </div>
+      {hasEvalScores(detail) && (
+        <Card className="mt-4 p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">
+            Eval scores
+          </div>
+          <EvalScoresView detail={detail} />
+        </Card>
+      )}
     </>
   );
 }
