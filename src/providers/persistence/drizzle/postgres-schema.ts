@@ -249,6 +249,81 @@ export const postgresRetrievalScores = pgTable(
   ],
 );
 
+export const postgresDemotionScores = pgTable(
+  "demotion_scores",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    scenarioRunId: bigint("scenario_run_id", { mode: "number" })
+      .notNull()
+      .references(() => postgresScenarioRuns.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    value: doublePrecision("value").notNull(),
+    weight: doublePrecision("weight").notNull(),
+    weightedScore: doublePrecision("weighted_score").notNull(),
+    passThreshold: doublePrecision("pass_threshold").notNull(),
+    passed: boolean("passed").notNull(),
+    timestampViolationCount: integer("timestamp_violation_count").notNull(),
+    cascadeBounded: boolean("cascade_bounded"),
+    source: text("source").notNull(),
+    observedJson: jsonb("observed_json"),
+    expectedJson: jsonb("expected_json"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("idx_demotion_scores_scenario_run").on(table.scenarioRunId),
+    index("idx_demotion_scores_metric").on(table.metric),
+  ],
+);
+
+export const postgresProcedureScores = pgTable(
+  "procedure_scores",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    scenarioRunId: bigint("scenario_run_id", { mode: "number" })
+      .notNull()
+      .references(() => postgresScenarioRuns.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    value: doublePrecision("value").notNull(),
+    weight: doublePrecision("weight").notNull(),
+    weightedScore: doublePrecision("weighted_score").notNull(),
+    passThreshold: doublePrecision("pass_threshold").notNull(),
+    passed: boolean("passed").notNull(),
+    source: text("source").notNull(),
+    predictedJson: jsonb("predicted_json"),
+    goldenJson: jsonb("golden_json"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("idx_procedure_scores_scenario_run").on(table.scenarioRunId),
+    index("idx_procedure_scores_metric").on(table.metric),
+  ],
+);
+
+export const postgresDedupScores = pgTable(
+  "dedup_scores",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    scenarioRunId: bigint("scenario_run_id", { mode: "number" })
+      .notNull()
+      .references(() => postgresScenarioRuns.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    value: doublePrecision("value").notNull(),
+    weight: doublePrecision("weight").notNull(),
+    weightedScore: doublePrecision("weighted_score").notNull(),
+    passThreshold: doublePrecision("pass_threshold").notNull(),
+    passed: boolean("passed").notNull(),
+    itemCount: integer("item_count").notNull(),
+    source: text("source").notNull(),
+    predictedJson: jsonb("predicted_json"),
+    goldenJson: jsonb("golden_json"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("idx_dedup_scores_scenario_run").on(table.scenarioRunId),
+    index("idx_dedup_scores_metric").on(table.metric),
+  ],
+);
+
 export const postgresHumanDimensionScores = pgTable(
   "human_dimension_scores",
   {
@@ -332,6 +407,9 @@ export const postgresSchema = {
   judgeDimensionScores: postgresJudgeDimensionScores,
   humanDimensionScores: postgresHumanDimensionScores,
   retrievalScores: postgresRetrievalScores,
+  demotionScores: postgresDemotionScores,
+  procedureScores: postgresProcedureScores,
+  dedupScores: postgresDedupScores,
   presets: postgresPresets,
   presetScenarios: postgresPresetScenarios,
   appSettings: postgresAppSettings,

@@ -4,7 +4,7 @@ import { resolveSqlitePath, withSqliteDatabase } from "../sqlite-connection.ts";
 import type { MigrationReport, MigrationRunner } from "./types.ts";
 
 /** Target schema version for SQLite. Keep synced with SCHEMA_VERSION in sqlite-run-history.ts. */
-export const SQLITE_TARGET_VERSION = 9;
+export const SQLITE_TARGET_VERSION = 10;
 
 function utcNow(): string {
   return new Date().toISOString();
@@ -205,6 +205,54 @@ export function applySqliteBaseline(database: Database): void {
       created_at text not null
     );
 
+    create table if not exists demotion_scores (
+      id integer primary key autoincrement,
+      scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+      metric text not null,
+      value real not null,
+      weight real not null,
+      weighted_score real not null,
+      pass_threshold real not null,
+      passed integer not null,
+      timestamp_violation_count integer not null,
+      cascade_bounded integer,
+      source text not null,
+      observed_json text,
+      expected_json text,
+      created_at text not null
+    );
+
+    create table if not exists procedure_scores (
+      id integer primary key autoincrement,
+      scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+      metric text not null,
+      value real not null,
+      weight real not null,
+      weighted_score real not null,
+      pass_threshold real not null,
+      passed integer not null,
+      source text not null,
+      predicted_json text,
+      golden_json text,
+      created_at text not null
+    );
+
+    create table if not exists dedup_scores (
+      id integer primary key autoincrement,
+      scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+      metric text not null,
+      value real not null,
+      weight real not null,
+      weighted_score real not null,
+      pass_threshold real not null,
+      passed integer not null,
+      item_count integer not null,
+      source text not null,
+      predicted_json text,
+      golden_json text,
+      created_at text not null
+    );
+
     create table if not exists presets (
       id text primary key,
       name text not null unique,
@@ -261,6 +309,18 @@ export function applySqliteBaseline(database: Database): void {
       on retrieval_scores(scenario_run_id);
     create index if not exists idx_retrieval_scores_metric
       on retrieval_scores(metric);
+    create index if not exists idx_demotion_scores_scenario_run
+      on demotion_scores(scenario_run_id);
+    create index if not exists idx_demotion_scores_metric
+      on demotion_scores(metric);
+    create index if not exists idx_procedure_scores_scenario_run
+      on procedure_scores(scenario_run_id);
+    create index if not exists idx_procedure_scores_metric
+      on procedure_scores(metric);
+    create index if not exists idx_dedup_scores_scenario_run
+      on dedup_scores(scenario_run_id);
+    create index if not exists idx_dedup_scores_metric
+      on dedup_scores(metric);
   `);
 }
 
@@ -382,6 +442,72 @@ export function applySqliteMigrations(
     database.query("update meta set schema_version = ? where id = 1").run(9);
     applied.push(9);
     version = 9;
+  }
+  if (version < 10) {
+    database.exec(`
+      create table if not exists demotion_scores (
+        id integer primary key autoincrement,
+        scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+        metric text not null,
+        value real not null,
+        weight real not null,
+        weighted_score real not null,
+        pass_threshold real not null,
+        passed integer not null,
+        timestamp_violation_count integer not null,
+        cascade_bounded integer,
+        source text not null,
+        observed_json text,
+        expected_json text,
+        created_at text not null
+      );
+      create index if not exists idx_demotion_scores_scenario_run
+        on demotion_scores(scenario_run_id);
+      create index if not exists idx_demotion_scores_metric
+        on demotion_scores(metric);
+
+      create table if not exists procedure_scores (
+        id integer primary key autoincrement,
+        scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+        metric text not null,
+        value real not null,
+        weight real not null,
+        weighted_score real not null,
+        pass_threshold real not null,
+        passed integer not null,
+        source text not null,
+        predicted_json text,
+        golden_json text,
+        created_at text not null
+      );
+      create index if not exists idx_procedure_scores_scenario_run
+        on procedure_scores(scenario_run_id);
+      create index if not exists idx_procedure_scores_metric
+        on procedure_scores(metric);
+
+      create table if not exists dedup_scores (
+        id integer primary key autoincrement,
+        scenario_run_id integer not null references scenario_runs(id) on delete cascade,
+        metric text not null,
+        value real not null,
+        weight real not null,
+        weighted_score real not null,
+        pass_threshold real not null,
+        passed integer not null,
+        item_count integer not null,
+        source text not null,
+        predicted_json text,
+        golden_json text,
+        created_at text not null
+      );
+      create index if not exists idx_dedup_scores_scenario_run
+        on dedup_scores(scenario_run_id);
+      create index if not exists idx_dedup_scores_metric
+        on dedup_scores(metric);
+    `);
+    database.query("update meta set schema_version = ? where id = 1").run(10);
+    applied.push(10);
+    version = 10;
   }
   return applied;
 }

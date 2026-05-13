@@ -206,6 +206,81 @@ export const sqliteRetrievalScores = sqliteTable(
   ],
 );
 
+export const sqliteDemotionScores = sqliteTable(
+  "demotion_scores",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    scenarioRunId: integer("scenario_run_id")
+      .notNull()
+      .references(() => sqliteScenarioRuns.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    value: real("value").notNull(),
+    weight: real("weight").notNull(),
+    weightedScore: real("weighted_score").notNull(),
+    passThreshold: real("pass_threshold").notNull(),
+    passed: integer("passed").notNull(),
+    timestampViolationCount: integer("timestamp_violation_count").notNull(),
+    cascadeBounded: integer("cascade_bounded"),
+    source: text("source").notNull(),
+    observedJson: text("observed_json"),
+    expectedJson: text("expected_json"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_demotion_scores_scenario_run").on(table.scenarioRunId),
+    index("idx_demotion_scores_metric").on(table.metric),
+  ],
+);
+
+export const sqliteProcedureScores = sqliteTable(
+  "procedure_scores",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    scenarioRunId: integer("scenario_run_id")
+      .notNull()
+      .references(() => sqliteScenarioRuns.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    value: real("value").notNull(),
+    weight: real("weight").notNull(),
+    weightedScore: real("weighted_score").notNull(),
+    passThreshold: real("pass_threshold").notNull(),
+    passed: integer("passed").notNull(),
+    source: text("source").notNull(),
+    predictedJson: text("predicted_json"),
+    goldenJson: text("golden_json"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_procedure_scores_scenario_run").on(table.scenarioRunId),
+    index("idx_procedure_scores_metric").on(table.metric),
+  ],
+);
+
+export const sqliteDedupScores = sqliteTable(
+  "dedup_scores",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    scenarioRunId: integer("scenario_run_id")
+      .notNull()
+      .references(() => sqliteScenarioRuns.id, { onDelete: "cascade" }),
+    metric: text("metric").notNull(),
+    value: real("value").notNull(),
+    weight: real("weight").notNull(),
+    weightedScore: real("weighted_score").notNull(),
+    passThreshold: real("pass_threshold").notNull(),
+    passed: integer("passed").notNull(),
+    itemCount: integer("item_count").notNull(),
+    source: text("source").notNull(),
+    predictedJson: text("predicted_json"),
+    goldenJson: text("golden_json"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    index("idx_dedup_scores_scenario_run").on(table.scenarioRunId),
+    index("idx_dedup_scores_metric").on(table.metric),
+  ],
+);
+
 export const sqliteHumanDimensionScores = sqliteTable(
   "human_dimension_scores",
   {
@@ -285,6 +360,9 @@ export const sqliteSchema = {
   judgeDimensionScores: sqliteJudgeDimensionScores,
   humanDimensionScores: sqliteHumanDimensionScores,
   retrievalScores: sqliteRetrievalScores,
+  demotionScores: sqliteDemotionScores,
+  procedureScores: sqliteProcedureScores,
+  dedupScores: sqliteDedupScores,
   presets: sqlitePresets,
   presetScenarios: sqlitePresetScenarios,
   appSettings: sqliteAppSettings,

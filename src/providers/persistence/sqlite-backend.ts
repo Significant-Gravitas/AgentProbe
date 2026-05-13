@@ -221,6 +221,9 @@ function projectRunRecord(
             checkpoints: [],
             judgeDimensionScores: [],
             retrievalScores: [],
+            demotionScores: [],
+            procedureScores: [],
+            dedupScores: [],
           }
         : scenario,
   );
