@@ -431,6 +431,80 @@ export type RetrievalConfig = {
   source?: RetrievalSource;
 };
 
+/** A `(rawExchangeKey | fixture)` resolution mirroring `RetrievalSource`. */
+export type DreamSource = {
+  fixture?: string;
+  rawExchangeKey?: string;
+};
+
+export type DemotionMetricKey =
+  | "set_precision"
+  | "set_recall"
+  | "set_f1"
+  | "timestamp_discipline"
+  | "cascade_bounded"
+  | "cascade_direct_f1";
+
+export type DemotionMetricWeights = Partial<Record<DemotionMetricKey, number>>;
+
+export type DemotionAction = {
+  uuid: string;
+  label?: string;
+  expiredAtSet: boolean;
+  invalidAtSet: boolean;
+  status?: string;
+};
+
+export type DemotionCascade = {
+  /** Edges that should be touched (1-hop neighbors of the invalidated entity). */
+  expectedDirectNeighbors: string[];
+  /** Edges that MUST NOT be touched (2+ hops). */
+  tangentialEdges: string[];
+};
+
+export type DemotionConfig = {
+  /** Expected set of demoted edge / memory UUIDs. */
+  expectedDemotions: string[];
+  /** Optional retract-vs-soft-delete discipline check. */
+  expectedRetracts?: string[];
+  /** Optional cascade check (P0.3b). */
+  cascade?: DemotionCascade;
+  weights: Required<DemotionMetricWeights>;
+  passThreshold: number;
+  source?: DreamSource;
+};
+
+export type ProcedureMetricKey =
+  | "step_coverage"
+  | "step_order"
+  | "parameter_coverage";
+
+export type ProcedureMetricWeights = Partial<
+  Record<ProcedureMetricKey, number>
+>;
+
+export type ProcedureConfig = {
+  /** Ordered list of expected step labels. */
+  goldenSteps: string[];
+  /** Optional parameter names the procedure must surface. */
+  goldenParameters?: string[];
+  weights: Required<ProcedureMetricWeights>;
+  passThreshold: number;
+  source?: DreamSource;
+};
+
+export type DedupConfig = {
+  /**
+   * Expected clusters. Each inner list is a cluster of item IDs that should
+   * be merged together. Items present in the predicted set but absent here
+   * are treated as singletons.
+   */
+  goldenClusters: string[][];
+  weights: { precision: number; recall: number; f1: number; ari: number };
+  passThreshold: number;
+  source?: DreamSource;
+};
+
 export type Scenario = {
   id: string;
   name: string;
@@ -447,6 +521,9 @@ export type Scenario = {
   sessions: Session[];
   expectations: ScenarioExpectations;
   retrieval?: RetrievalConfig;
+  demotion?: DemotionConfig;
+  procedure?: ProcedureConfig;
+  dedup?: DedupConfig;
   [key: string]: unknown;
 };
 
@@ -541,6 +618,61 @@ export type RetrievalScore = {
   source: "fixture" | "raw_exchange" | "missing";
 };
 
+export type EvalSource = "fixture" | "raw_exchange" | "missing";
+
+export type DemotionMetricScore = {
+  metric: DemotionMetricKey;
+  value: number;
+  weight: number;
+};
+
+export type DemotionScore = {
+  metrics: DemotionMetricScore[];
+  weightedScore: number;
+  passThreshold: number;
+  passed: boolean;
+  observed: string[];
+  expected: string[];
+  cascadeBounded?: boolean;
+  timestampViolationCount: number;
+  source: EvalSource;
+};
+
+export type ProcedureMetricScore = {
+  metric: ProcedureMetricKey;
+  value: number;
+  weight: number;
+};
+
+export type ProcedureScore = {
+  metrics: ProcedureMetricScore[];
+  weightedScore: number;
+  passThreshold: number;
+  passed: boolean;
+  predictedSteps: string[];
+  goldenSteps: string[];
+  source: EvalSource;
+};
+
+export type DedupMetricKey = "precision" | "recall" | "f1" | "ari";
+
+export type DedupMetricScore = {
+  metric: DedupMetricKey;
+  value: number;
+  weight: number;
+};
+
+export type DedupScore = {
+  metrics: DedupMetricScore[];
+  weightedScore: number;
+  passThreshold: number;
+  passed: boolean;
+  predictedClusters: string[][];
+  goldenClusters: string[][];
+  itemCount: number;
+  source: EvalSource;
+};
+
 export type ScenarioRunResult = {
   scenarioId: string;
   scenarioName: string;
@@ -555,6 +687,9 @@ export type ScenarioRunResult = {
   toolCallsByTurn?: Record<number, ToolCallRecord[]>;
   judgeScore?: RubricScore;
   retrievalScore?: RetrievalScore;
+  demotionScore?: DemotionScore;
+  procedureScore?: ProcedureScore;
+  dedupScore?: DedupScore;
   renderedTurns?: Array<Record<string, unknown>>;
 };
 
@@ -692,6 +827,9 @@ export type ScenarioRecord = {
   checkpoints: Array<Record<string, JsonValue>>;
   judgeDimensionScores: Array<Record<string, JsonValue>>;
   retrievalScores?: Array<Record<string, JsonValue>>;
+  demotionScores?: Array<Record<string, JsonValue>>;
+  procedureScores?: Array<Record<string, JsonValue>>;
+  dedupScores?: Array<Record<string, JsonValue>>;
   error?: Record<string, JsonValue> | null;
   startedAt: string;
   completedAt?: string | null;

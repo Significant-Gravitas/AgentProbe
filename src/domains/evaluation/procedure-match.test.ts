@@ -42,7 +42,9 @@ describe("stepCoverage", () => {
 
 describe("longestCommonSubsequenceLength", () => {
   test("identical sequences yield length |seq|", () => {
-    expect(longestCommonSubsequenceLength(["a", "b", "c"], ["a", "b", "c"])).toBe(3);
+    expect(
+      longestCommonSubsequenceLength(["a", "b", "c"], ["a", "b", "c"]),
+    ).toBe(3);
   });
 
   test("disjoint sequences yield 0", () => {
@@ -62,12 +64,18 @@ describe("longestCommonSubsequenceLength", () => {
 
 describe("orderSimilarity", () => {
   test("identical order is 1.0", () => {
-    expect(orderSimilarity(["a", "b", "c"], ["a", "b", "c"])).toBeCloseTo(1.0, 6);
+    expect(orderSimilarity(["a", "b", "c"], ["a", "b", "c"])).toBeCloseTo(
+      1.0,
+      6,
+    );
   });
 
   test("reversed order with shared elements drops below 1.0", () => {
     // LCS of [a,b,c] and [c,b,a] is 1 (b alone, or a/c alone); max length 3 => 1/3.
-    expect(orderSimilarity(["a", "b", "c"], ["c", "b", "a"])).toBeCloseTo(1 / 3, 6);
+    expect(orderSimilarity(["a", "b", "c"], ["c", "b", "a"])).toBeCloseTo(
+      1 / 3,
+      6,
+    );
   });
 
   test("empty inputs degrade to 1", () => {
@@ -87,7 +95,10 @@ describe("parameterCoverage", () => {
   });
 
   test("missing one and extra one penalize symmetrically", () => {
-    const result = parameterCoverage(["ticket_id", "junk"], ["ticket_id", "assignee"]);
+    const result = parameterCoverage(
+      ["ticket_id", "junk"],
+      ["ticket_id", "assignee"],
+    );
     // matched=1, union={ticket_id, junk, assignee}=3 -> 1/3
     expect(result.jaccard).toBeCloseTo(1 / 3, 6);
   });

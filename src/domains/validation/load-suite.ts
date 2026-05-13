@@ -7,6 +7,11 @@ import type {
   CheckpointAssertion,
   CheckpointTurn,
   CliHarness,
+  DedupConfig,
+  DemotionCascade,
+  DemotionConfig,
+  DemotionMetricKey,
+  DreamSource,
   EndpointAuth,
   EndpointLogging,
   EndpointRequest,
@@ -24,6 +29,8 @@ import type {
   PersonaDemographics,
   PersonaPersonality,
   Personas,
+  ProcedureConfig,
+  ProcedureMetricKey,
   ProcessedYamlFile,
   RetrievalConfig,
   RetrievalMatchPolicy,
@@ -1068,6 +1075,240 @@ function parseRetrievalConfig(value: unknown): RetrievalConfig | undefined {
   };
 }
 
+const DEMOTION_METRIC_KEYS: DemotionMetricKey[] = [
+  "set_precision",
+  "set_recall",
+  "set_f1",
+  "timestamp_discipline",
+  "cascade_bounded",
+  "cascade_direct_f1",
+];
+
+const PROCEDURE_METRIC_KEYS: ProcedureMetricKey[] = [
+  "step_coverage",
+  "step_order",
+  "parameter_coverage",
+];
+
+const DEDUP_METRIC_KEYS = ["precision", "recall", "f1", "ari"] as const;
+
+function parseDreamSource(
+  value: unknown,
+  scopeLabel: string,
+): DreamSource | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = ensureObject(value, `${scopeLabel}.source must be an object.`);
+  const fixture = optionalString(raw.fixture);
+  const rawExchangeKey = optionalString(raw.raw_exchange_key);
+  if (!fixture && !rawExchangeKey) {
+    return undefined;
+  }
+  return { fixture, rawExchangeKey };
+}
+
+function parseWeightedKeys<K extends string>(
+  value: unknown,
+  scopeLabel: string,
+  allowedKeys: readonly K[],
+  defaultWeight: number,
+): Record<K, number> {
+  const result = Object.fromEntries(
+    allowedKeys.map((key) => [key, defaultWeight]),
+  ) as Record<K, number>;
+  if (!value) {
+    return result;
+  }
+  const raw = ensureObject(value, `${scopeLabel}.weight must be an object.`);
+  for (const key of Object.keys(raw)) {
+    if (!(allowedKeys as readonly string[]).includes(key)) {
+      throw new AgentProbeConfigError(
+        `Unknown ${scopeLabel} metric key: ${key}. Allowed: ${allowedKeys.join(", ")}.`,
+      );
+    }
+  }
+  for (const key of allowedKeys) {
+    const candidate = optionalNumber(raw[key]);
+    if (candidate !== undefined) {
+      if (candidate < 0) {
+        throw new AgentProbeConfigError(
+          `${scopeLabel}.weight.${key} must be non-negative.`,
+        );
+      }
+      result[key] = candidate;
+    }
+  }
+  return result;
+}
+
+function parseUnitThreshold(
+  value: unknown,
+  scopeLabel: string,
+  fallback: number,
+): number {
+  const parsed = optionalNumber(value);
+  if (parsed === undefined) {
+    return fallback;
+  }
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1) {
+    throw new AgentProbeConfigError(
+      `${scopeLabel}.pass_threshold must be between 0 and 1 when provided.`,
+    );
+  }
+  return parsed;
+}
+
+function parseDemotionCascade(value: unknown): DemotionCascade | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = ensureObject(value, "demotion.cascade must be an object.");
+  const expected = stringArray(raw.expected_direct_neighbors ?? raw.expected);
+  const tangential = stringArray(raw.tangential_edges ?? raw.tangential);
+  if (expected.length === 0 && tangential.length === 0) {
+    return undefined;
+  }
+  return { expectedDirectNeighbors: expected, tangentialEdges: tangential };
+}
+
+function parseDemotionConfig(value: unknown): DemotionConfig | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = ensureObject(value, "scenario.demotion must be an object.");
+
+  const expectedDemotions = stringArray(raw.expected_demotions ?? raw.expected);
+  if (expectedDemotions.length === 0) {
+    throw new AgentProbeConfigError(
+      "scenario.demotion.expected_demotions must be a non-empty list of UUIDs.",
+    );
+  }
+  const expectedRetracts = stringArray(raw.expected_retracts);
+  const cascade = parseDemotionCascade(raw.cascade);
+  const weights = parseWeightedKeys(
+    raw.weight ?? raw.weights,
+    "scenario.demotion",
+    DEMOTION_METRIC_KEYS,
+    1,
+  );
+  const passThreshold = parseUnitThreshold(
+    raw.pass_threshold,
+    "scenario.demotion",
+    0.6,
+  );
+  return {
+    expectedDemotions,
+    expectedRetracts:
+      expectedRetracts.length > 0 ? expectedRetracts : undefined,
+    cascade,
+    weights,
+    passThreshold,
+    source: parseDreamSource(raw.source, "scenario.demotion"),
+  };
+}
+
+function parseProcedureConfig(value: unknown): ProcedureConfig | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = ensureObject(value, "scenario.procedure must be an object.");
+  const goldenObj =
+    raw.golden && typeof raw.golden === "object" && !Array.isArray(raw.golden)
+      ? (raw.golden as YamlObject)
+      : undefined;
+  const stepsRaw = Array.isArray(raw.golden_steps)
+    ? raw.golden_steps
+    : Array.isArray(raw.steps)
+      ? raw.steps
+      : Array.isArray(goldenObj?.steps)
+        ? (goldenObj.steps as unknown[])
+        : [];
+  const goldenSteps = stringArray(stepsRaw);
+  if (goldenSteps.length === 0) {
+    throw new AgentProbeConfigError(
+      "scenario.procedure.golden_steps (or golden.steps) must be a non-empty list of step labels.",
+    );
+  }
+  const paramRaw =
+    raw.golden_parameters ??
+    raw.parameters ??
+    (goldenObj?.parameters as unknown);
+  const goldenParameters = stringArray(paramRaw);
+  const weights = parseWeightedKeys(
+    raw.weight ?? raw.weights,
+    "scenario.procedure",
+    PROCEDURE_METRIC_KEYS,
+    1,
+  );
+  const passThreshold = parseUnitThreshold(
+    raw.pass_threshold,
+    "scenario.procedure",
+    0.6,
+  );
+  return {
+    goldenSteps,
+    goldenParameters:
+      goldenParameters.length > 0 ? goldenParameters : undefined,
+    weights,
+    passThreshold,
+    source: parseDreamSource(raw.source, "scenario.procedure"),
+  };
+}
+
+function parseDedupConfig(value: unknown): DedupConfig | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const raw = ensureObject(value, "scenario.dedup must be an object.");
+  const clustersRaw = raw.golden_clusters ?? raw.golden;
+  if (!Array.isArray(clustersRaw)) {
+    throw new AgentProbeConfigError(
+      "scenario.dedup.golden_clusters must be a list of clusters (each a list of UUIDs).",
+    );
+  }
+  const clusters: string[][] = [];
+  for (const cluster of clustersRaw) {
+    if (!Array.isArray(cluster)) {
+      throw new AgentProbeConfigError(
+        "scenario.dedup.golden_clusters items must each be a list of UUIDs.",
+      );
+    }
+    const items = stringArray(cluster);
+    if (items.length === 0) {
+      continue;
+    }
+    clusters.push(items);
+  }
+  if (clusters.length === 0) {
+    throw new AgentProbeConfigError(
+      "scenario.dedup.golden_clusters must contain at least one non-empty cluster.",
+    );
+  }
+  const weights = parseWeightedKeys(
+    raw.weight ?? raw.weights,
+    "scenario.dedup",
+    DEDUP_METRIC_KEYS,
+    1,
+  );
+  const passThreshold = parseUnitThreshold(
+    raw.pass_threshold,
+    "scenario.dedup",
+    0.6,
+  );
+  return {
+    goldenClusters: clusters,
+    weights: {
+      precision: weights.precision,
+      recall: weights.recall,
+      f1: weights.f1,
+      ari: weights.ari,
+    },
+    passThreshold,
+    source: parseDreamSource(raw.source, "scenario.dedup"),
+  };
+}
+
 function parseSession(value: unknown): Session {
   const raw = ensureObject(value, "scenario session must be an object.");
   return {
@@ -1132,6 +1373,9 @@ function parseScenario(value: unknown, defaults?: ScenarioDefaults): Scenario {
       : [],
     expectations: parseScenarioExpectations(raw.expectations),
     retrieval: parseRetrievalConfig(raw.retrieval),
+    demotion: parseDemotionConfig(raw.demotion),
+    procedure: parseProcedureConfig(raw.procedure),
+    dedup: parseDedupConfig(raw.dedup),
   };
 }
 

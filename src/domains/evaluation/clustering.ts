@@ -104,7 +104,12 @@ export function pairwiseAgreement(
       }
     }
   }
-  return { truePositives: tp, falsePositives: fp, falseNegatives: fn, trueNegatives: tn };
+  return {
+    truePositives: tp,
+    falsePositives: fp,
+    falseNegatives: fn,
+    trueNegatives: tn,
+  };
 }
 
 export type PairwiseScores = {
@@ -136,7 +141,9 @@ export function pairwiseScores(
       ? 1
       : truePositives / (truePositives + falseNegatives);
   const f1 =
-    precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
+    precision + recall === 0
+      ? 0
+      : (2 * precision * recall) / (precision + recall);
   return { precision, recall, f1 };
 }
 

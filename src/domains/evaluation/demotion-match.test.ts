@@ -83,7 +83,11 @@ describe("assertTimestampDiscipline", () => {
 
 describe("assertCascadeBounded", () => {
   test("touching only direct neighbors is bounded", () => {
-    const result = assertCascadeBounded(["e_ab", "e_bc"], ["e_ab", "e_bc"], ["e_cd"]);
+    const result = assertCascadeBounded(
+      ["e_ab", "e_bc"],
+      ["e_ab", "e_bc"],
+      ["e_cd"],
+    );
     expect(result.bounded).toBe(true);
     expect(result.touchedTangentialNeighbors).toEqual([]);
     expect(result.directNeighborF1).toBeCloseTo(1.0, 6);

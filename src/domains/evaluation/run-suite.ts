@@ -6,11 +6,14 @@ import type {
   CheckpointAssertion,
   CheckpointResult,
   ConversationTurn,
+  DedupScore,
+  DemotionScore,
   Endpoints,
   JsonValue,
   JudgeDimensionScore,
   Persona,
   PresetSnapshot,
+  ProcedureScore,
   RetrievalScore,
   Rubric,
   RubricScore,
@@ -39,12 +42,15 @@ import {
   parseScenariosInput,
   parseTimeOffset,
 } from "../validation/load-suite.ts";
+import { scoreScenarioDedup } from "./dedup-scorer.ts";
+import { scoreScenarioDemotion } from "./demotion-scorer.ts";
 import { judgeResponse } from "./judge.ts";
 import type {
   EndpointAdapter,
   EndpointAdapterFactory,
   LlmResponsesClient,
 } from "./ports.ts";
+import { scoreScenarioProcedure } from "./procedure-scorer.ts";
 import { scoreRetrieval } from "./retrieval-scorer.ts";
 import { generatePersonaStep, resolvePersonaModel } from "./simulator.ts";
 
@@ -167,6 +173,18 @@ export type RunRecorder = {
       scenario: Scenario;
       score: RetrievalScore;
     },
+  ) => Promise<void>;
+  recordDemotionResult?: (
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: DemotionScore },
+  ) => Promise<void>;
+  recordProcedureResult?: (
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: ProcedureScore },
+  ) => Promise<void>;
+  recordDedupResult?: (
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: DedupScore },
   ) => Promise<void>;
 };
 
@@ -1046,10 +1064,12 @@ export async function runScenario(
     });
   }
 
-  const retrievalScore = scoreRetrieval(scenario, {
+  const evalContext = {
     scenariosPath: options.scenariosPath,
     lastAdapterReply: lastReply,
-  });
+  };
+
+  const retrievalScore = scoreRetrieval(scenario, evalContext);
   if (retrievalScore && scenarioRunId !== undefined) {
     await options.recorder?.recordRetrievalResult?.(scenarioRunId, {
       scenario,
@@ -1057,7 +1077,36 @@ export async function runScenario(
     });
   }
 
-  const overallPassed = score.passed && (retrievalScore?.passed ?? true);
+  const demotionScore = scoreScenarioDemotion(scenario, evalContext);
+  if (demotionScore && scenarioRunId !== undefined) {
+    await options.recorder?.recordDemotionResult?.(scenarioRunId, {
+      scenario,
+      score: demotionScore,
+    });
+  }
+
+  const procedureScore = scoreScenarioProcedure(scenario, evalContext);
+  if (procedureScore && scenarioRunId !== undefined) {
+    await options.recorder?.recordProcedureResult?.(scenarioRunId, {
+      scenario,
+      score: procedureScore,
+    });
+  }
+
+  const dedupScore = scoreScenarioDedup(scenario, evalContext);
+  if (dedupScore && scenarioRunId !== undefined) {
+    await options.recorder?.recordDedupResult?.(scenarioRunId, {
+      scenario,
+      score: dedupScore,
+    });
+  }
+
+  const overallPassed =
+    score.passed &&
+    (retrievalScore?.passed ?? true) &&
+    (demotionScore?.passed ?? true) &&
+    (procedureScore?.passed ?? true) &&
+    (dedupScore?.passed ?? true);
 
   const result: ScenarioRunResult = {
     scenarioId: scenario.id,
@@ -1073,6 +1122,9 @@ export async function runScenario(
     toolCallsByTurn,
     judgeScore: score,
     retrievalScore,
+    demotionScore,
+    procedureScore,
+    dedupScore,
     renderedTurns,
   };
   if (scenarioRunId !== undefined) {

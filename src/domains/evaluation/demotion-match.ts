@@ -73,10 +73,16 @@ export function assertExpectedSet(
   const fp = observed_.filter((id) => !expectedSet.has(id));
   const fn = expected_.filter((id) => !observedSet.has(id));
   const precision =
-    observed_.length === 0 ? (expected_.length === 0 ? 1 : 0) : tp.length / observed_.length;
-  const recall =
-    expected_.length === 0 ? 1 : tp.length / expected_.length;
-  const f1 = precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
+    observed_.length === 0
+      ? expected_.length === 0
+        ? 1
+        : 0
+      : tp.length / observed_.length;
+  const recall = expected_.length === 0 ? 1 : tp.length / expected_.length;
+  const f1 =
+    precision + recall === 0
+      ? 0
+      : (2 * precision * recall) / (precision + recall);
   return {
     truePositives: tp,
     falsePositives: fp,
@@ -243,7 +249,10 @@ const DEFAULT_DEMOTION_THRESHOLD = 0.6;
  * can be asserted in CI without an LLM call.
  */
 export function scoreDemotion(input: DemotionMatchInput): DemotionMatchResult {
-  const set = assertExpectedSet(input.observedDemotions, input.expectedDemotions);
+  const set = assertExpectedSet(
+    input.observedDemotions,
+    input.expectedDemotions,
+  );
   const violations = assertTimestampDiscipline(
     input.retractActions ?? [],
     input.softDeleteActions ?? [],
@@ -260,7 +269,11 @@ export function scoreDemotion(input: DemotionMatchInput): DemotionMatchResult {
 
   const weights = { ...DEFAULT_DEMOTION_WEIGHTS, ...(input.weights ?? {}) };
   const metrics: DemotionMetricScore[] = [
-    { metric: "set_precision", value: set.precision, weight: weights.set_precision },
+    {
+      metric: "set_precision",
+      value: set.precision,
+      weight: weights.set_precision,
+    },
     { metric: "set_recall", value: set.recall, weight: weights.set_recall },
     { metric: "set_f1", value: set.f1, weight: weights.set_f1 },
     {

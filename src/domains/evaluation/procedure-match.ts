@@ -53,11 +53,16 @@ export function stepCoverage(
   const extra = predicted_.filter((step) => !goldenSet.has(step));
 
   const precision =
-    predicted_.length === 0 ? (golden_.length === 0 ? 1 : 0) : matched.length / predicted_.length;
-  const recall =
-    golden_.length === 0 ? 1 : matched.length / golden_.length;
+    predicted_.length === 0
+      ? golden_.length === 0
+        ? 1
+        : 0
+      : matched.length / predicted_.length;
+  const recall = golden_.length === 0 ? 1 : matched.length / golden_.length;
   const f1 =
-    precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
+    precision + recall === 0
+      ? 0
+      : (2 * precision * recall) / (precision + recall);
   return {
     precision,
     recall,
@@ -190,7 +195,9 @@ const DEFAULT_PASS_THRESHOLD = 0.6;
  * Score a single (predicted, golden) procedure pair. Use this when the
  * extractor produces one procedure per query.
  */
-export function scoreProcedure(input: ProcedureMatchInput): ProcedureScoreResult {
+export function scoreProcedure(
+  input: ProcedureMatchInput,
+): ProcedureScoreResult {
   const step = stepCoverage(input.predictedSteps, input.goldenSteps);
   const order = orderSimilarity(input.predictedSteps, input.goldenSteps);
   const parameters = parameterCoverage(
