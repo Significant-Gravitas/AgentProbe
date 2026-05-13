@@ -1,0 +1,11 @@
+{
+  "observed": ["edge-pricing-old"],
+  "retract_actions": [
+    {
+      "uuid": "edge-pricing-old",
+      "expired_at_set": true,
+      "invalid_at_set": false,
+      "status": "superseded"
+    }
+  ]
+}

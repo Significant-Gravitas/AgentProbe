@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-12T19:50:46.522Z
+Generated: 2026-05-13T19:05:50.184Z
 
 ```text
   AGENTS.md
@@ -402,8 +402,20 @@ src/cli/
   src/cli/main.ts
 src/domains/
 src/domains/evaluation/
+  src/domains/evaluation/clustering.test.ts
+  src/domains/evaluation/clustering.ts
+  src/domains/evaluation/dedup-scorer.test.ts
+  src/domains/evaluation/dedup-scorer.ts
+  src/domains/evaluation/demotion-match.test.ts
+  src/domains/evaluation/demotion-match.ts
+  src/domains/evaluation/demotion-scorer.test.ts
+  src/domains/evaluation/demotion-scorer.ts
   src/domains/evaluation/judge.ts
   src/domains/evaluation/ports.ts
+  src/domains/evaluation/procedure-match.test.ts
+  src/domains/evaluation/procedure-match.ts
+  src/domains/evaluation/procedure-scorer.test.ts
+  src/domains/evaluation/procedure-scorer.ts
   src/domains/evaluation/ranking.test.ts
   src/domains/evaluation/ranking.ts
   src/domains/evaluation/retrieval-scorer.test.ts

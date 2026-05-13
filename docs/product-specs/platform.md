@@ -313,6 +313,26 @@ average with `pass_threshold`, and forces a scenario fail when any
 persisted to `retrieval_scores` keyed by `scenario_run_id` for replay, and
 the rendered run report surfaces them alongside the LLM-judge dimensions.
 
+### Dream-system scenarios validate demotion, procedure, and dedup behavior
+
+**Given** a scenario YAML that declares one of `demotion:`, `procedure:`, or
+`dedup:` (each a sibling of the existing `retrieval:` block) with its own
+golden expectation, weight, threshold, and `source` (fixture or
+`raw_exchange_key`)
+**When** AgentProbe runs the scenario and the adapter returns the
+corresponding payload (observed demotions / extracted procedure / predicted
+clusters) inline on the last reply's `rawExchange` or via a JSON fixture
+**Then** the runner computes the appropriate metric set — set
+precision/recall/F1 + Snodgrass timestamp discipline + single-hop cascade
+bound for demotion; step-coverage F1 + LCS-normalized order similarity +
+parameter Jaccard for procedure; pairwise P/R/F1 + Adjusted Rand Index for
+dedup — aggregates under per-metric weights, and forces a fail on hard
+violations (Snodgrass conflict, runaway cascade, over- or under-merge below
+threshold). Per-metric and aggregate scores are persisted to
+`demotion_scores`, `procedure_scores`, and `dedup_scores` tables keyed by
+`scenario_run_id`, and the rendered run report surfaces them alongside the
+LLM-judge and retrieval dimensions.
+
 ### Database URL credentials stay redacted in operator-visible output
 
 **Given** an operator configures persistence with a database URL that contains
