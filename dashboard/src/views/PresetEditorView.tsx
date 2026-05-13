@@ -311,7 +311,10 @@ export function PresetEditorView({
               onChange={(e) => setRepeat(Number(e.currentTarget.value))}
             />
           </Field>
-          <Field label="Parallel">
+          <Field
+            label="Parallel"
+            hint="Run multiple scenarios concurrently. Limit caps concurrency (2–4 is typical; higher = faster but more LLM cost spikes)."
+          >
             <div className="flex items-center gap-3">
               <Checkbox
                 checked={parallelEnabled}
@@ -330,7 +333,10 @@ export function PresetEditorView({
               />
             </div>
           </Field>
-          <Field label="Mode">
+          <Field
+            label="Mode"
+            hint="Dry run records run + scenario rows but skips the live adapter, judge, and scorers. Use to validate config / preset shape without spending LLM tokens."
+          >
             <Checkbox
               checked={dryRun}
               onChange={setDryRun}

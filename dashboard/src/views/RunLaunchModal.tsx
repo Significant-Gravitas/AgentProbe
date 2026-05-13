@@ -231,7 +231,10 @@ export function RunLaunchModal({
         </details>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Field label="Parallel">
+          <Field
+            label="Parallel"
+            hint="Run multiple scenarios concurrently. Scenarios still complete in order, but several at a time."
+          >
             <div className="flex items-center gap-2">
               <Checkbox
                 checked={parallelEnabled}
@@ -240,7 +243,10 @@ export function RunLaunchModal({
               />
             </div>
           </Field>
-          <Field label="Parallel limit">
+          <Field
+            label="Parallel limit"
+            hint="Max concurrent scenarios when parallel is on. Higher = faster but more LLM cost spikes; 2–4 is typical."
+          >
             <TextInput
               type="number"
               min={1}
@@ -271,7 +277,10 @@ export function RunLaunchModal({
               maxLength={200}
             />
           </Field>
-          <Field label="Mode">
+          <Field
+            label="Mode"
+            hint="Dry run records run + scenario rows but skips the live adapter, judge, and scorers. Use to validate config / preset shape without spending LLM tokens."
+          >
             <Checkbox checked={dryRun} onChange={setDryRun} label="Dry run" />
           </Field>
         </div>
