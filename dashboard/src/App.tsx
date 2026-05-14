@@ -1480,7 +1480,10 @@ export function StartRunView({
                 onChange={(e) => setRepeat(Number(e.currentTarget.value))}
               />
             </Field>
-            <Field label="Parallel limit">
+            <Field
+              label="Parallel limit"
+              hint="Max concurrent scenarios when parallel is on. 2-4 is typical; higher = faster but more LLM cost spikes."
+            >
               <TextInput
                 type="number"
                 min={1}
@@ -1492,19 +1495,34 @@ export function StartRunView({
               />
             </Field>
           </div>
-          <div className="flex flex-wrap gap-4 items-center">
-            <Checkbox checked={dryRun} onChange={setDryRun} label="Dry run" />
-            <Checkbox
-              checked={parallelEnabled}
-              onChange={setParallelEnabled}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Field
+              label="Dry run"
+              hint="Records run + scenario rows but skips the live adapter, judge, and scorers. Use to validate config without spending LLM tokens."
+            >
+              <Checkbox checked={dryRun} onChange={setDryRun} label="Enabled" />
+            </Field>
+            <Field
               label="Parallel"
-            />
-            {!presetId ? (
+              hint="Run multiple scenarios concurrently. Scenarios still complete in order, but several run at a time (set the limit above)."
+            >
               <Checkbox
-                checked={saveAsPreset}
-                onChange={setSaveAsPreset}
-                label="Save as preset"
+                checked={parallelEnabled}
+                onChange={setParallelEnabled}
+                label="Enabled"
               />
+            </Field>
+            {!presetId ? (
+              <Field
+                label="Save as preset"
+                hint="Save this scenario selection + settings as a reusable preset visible on the Presets page."
+              >
+                <Checkbox
+                  checked={saveAsPreset}
+                  onChange={setSaveAsPreset}
+                  label="Enabled"
+                />
+              </Field>
             ) : null}
           </div>
           {saveAsPreset && !presetId ? (
