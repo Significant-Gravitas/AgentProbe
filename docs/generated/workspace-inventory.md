@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-13T19:37:36.614Z
+Generated: 2026-05-19T15:37:13.471Z
 
 ```text
   AGENTS.md
@@ -30,6 +30,7 @@ dashboard/src/components/
   dashboard/src/components/CompareView.tsx
   dashboard/src/components/ConversationView.tsx
   dashboard/src/components/DetailPanel.tsx
+  dashboard/src/components/EvalScoresView.tsx
   dashboard/src/components/ProgressBar.tsx
   dashboard/src/components/RubricView.tsx
   dashboard/src/components/ScenarioTable.tsx
@@ -402,6 +403,7 @@ scripts/
   scripts/list-required-fixtures.ts
   scripts/patch-scenario-attachments.ts
   scripts/refresh-quality-score.ts
+  scripts/seed-eval-scores.ts
   scripts/seed-preset.ts
   scripts/seed-test-scores.ts
   scripts/validate-repo.sh
