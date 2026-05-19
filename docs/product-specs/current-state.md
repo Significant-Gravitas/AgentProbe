@@ -1,6 +1,6 @@
 # Current State
 
-Last validated against `platform.md`: 2026-04-17
+Last validated against `platform.md`: 2026-05-15
 
 ## Implemented scenarios
 
@@ -10,6 +10,7 @@ Last validated against `platform.md`: 2026-04-17
 - [x] List command shows available scenarios
 - [x] Dry-run mode records intent without contacting external systems
 - [x] Judge requests preserve cache-friendly prompt prefixes
+- [x] Persona simulation uses a configurable default model with hidden reasoning
 - [x] Parallel mode overlaps scenario execution while preserving ordering
 - [ ] Multi-session memory scenarios preserve pinned identity and session controls
 - [ ] AutoGPT preset forges auth tokens internally
@@ -54,6 +55,11 @@ Last validated against `platform.md`: 2026-04-17
 - Judge-model requests now preserve a stable rubric-first prefix, add a stable
   prompt cache key, and enable supported provider caching on the OpenRouter
   Responses path.
+- Persona simulator requests default to `deepseek/deepseek-v4-flash` unless a
+  persona-level `model` or `AGENTPROBE_PERSONA_MODEL` override is present, and
+  they use medium reasoning effort while excluding reasoning from responses,
+  low-temperature decoding, bounded output, and a retry guard for degenerate
+  token-soup messages.
 - The OpenClaw CLI surface is implemented behind websocket endpoint presets and
   can create sessions, send chat turns, and read session history.
 - `bun run fast-feedback` now refreshes generated docs and quality score before

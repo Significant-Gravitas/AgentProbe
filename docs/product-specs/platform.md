@@ -58,6 +58,18 @@ judge-model calls
 pushes transcript-specific content to the tail, and enables supported provider
 prompt caching without changing the scoring contract
 
+### Persona simulation uses a configurable default model with hidden reasoning
+
+**Given** a persona without an explicit `model` field and no
+`AGENTPROBE_PERSONA_MODEL` override
+**When** AgentProbe simulates the next persona turn
+**Then** the CLI sends the simulator request with
+`deepseek/deepseek-v4-flash` as the default model, medium reasoning effort,
+reasoning excluded from the response, low-temperature decoding, and a bounded
+output budget
+**And** generated persona messages that look like degenerate token soup are
+rejected and retried before they can enter the target transcript
+
 ### Parallel mode overlaps scenario execution while preserving ordering
 
 **Given** valid endpoint, scenario, persona, and rubric YAML files with more

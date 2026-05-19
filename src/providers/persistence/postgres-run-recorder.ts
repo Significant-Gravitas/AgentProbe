@@ -21,6 +21,7 @@ import {
   AgentProbeRuntimeError,
   errorPayload,
 } from "../../shared/utils/errors.ts";
+import { normalizeDimensionScore } from "../../shared/utils/scoring.ts";
 import type { SqlTag } from "./postgres-client.ts";
 import type {
   RunRecorderConfigurationOptions,
@@ -169,8 +170,7 @@ function normalizedDimensionScore(
   rawScore: number,
 ): number {
   const dimension = rubric.dimensions.find((item) => item.id === dimensionId);
-  const scalePoints = dimension?.scale.points ?? 1;
-  return rawScore / scalePoints;
+  return normalizeDimensionScore(dimension, rawScore);
 }
 
 async function refreshRunCounts(sql: SqlTag, runId: string): Promise<void> {

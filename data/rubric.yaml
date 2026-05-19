@@ -111,6 +111,7 @@ rubrics:
       - id: friction
         name: "Friction Level"
         weight: 0.10
+        score_direction: lower_is_better
         scale:
           type: likert
           points: 5
@@ -292,17 +293,6 @@ rubrics:
           ERRORS ONLY MATTER IF THEY BLOCKED COMPLETION
 
           Tool failures, command errors, retries, exceptions, and other error messages visible in the trace should only count against the score if they actually prevented the assistant from completing the user's task. If the assistant encountered errors but recovered, retried, worked around them, or otherwise still delivered the requested output, do NOT lower the score and do NOT assign `error_or_failure` as an abandonment reason. `error_or_failure` applies ONLY when a technical error, tool failure, or crash was the reason the task was not completed.
-
-          ABANDONMENT REASON (required when score is 1 or 2, omit for scores 3-5):
-          When the goal was NOT accomplished (score 1-2), you MUST include an "abandonment_reason" field with exactly one of these values:
-          - "capability_limitation" — Assistant lacked the ability or knowledge to perform what was asked
-          - "task_complexity" — Request was too complex or ambiguous to handle
-          - "error_or_failure" — Technical error, tool failure, or crash PREVENTED completion. Does NOT apply if errors occurred but the assistant recovered and still delivered the requested output.
-          - "misunderstanding" — Assistant misunderstood intent and pursued wrong goal
-          - "user_disengagement" — User stopped responding MID-TASK before the assistant could deliver. Does NOT apply when the assistant delivered the requested output on its last turn and the user simply did not reply afterward (that is a completion, score 4-5).
-          - "poor_output_quality" — Output produced was too low quality or incorrect to be useful
-          - "slow_or_stuck" — Assistant was too slow, looped, or made no meaningful progress
-          - "other" — None of the above fit
 
       - id: tool_use
         name: "Tool Use Appropriateness"

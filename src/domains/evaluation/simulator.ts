@@ -8,11 +8,89 @@ import type {
 import { AgentProbeRuntimeError } from "../../shared/utils/errors.ts";
 import type { LlmResponsesClient } from "./ports.ts";
 
-const DEFAULT_PERSONA_MODEL = "moonshotai/kimi-k2.6";
+const DEFAULT_PERSONA_MODEL = "deepseek/deepseek-v4-flash";
+const PERSONA_TEMPERATURE = 0.2;
+const PERSONA_MAX_OUTPUT_TOKENS = 512;
 
 type ConversationHistory =
   | string
   | Array<ConversationTurn | Record<string, unknown>>;
+
+const SCRIPT_PATTERNS: RegExp[] = [
+  /\p{Script=Latin}/gu,
+  /\p{Script=Han}/gu,
+  /\p{Script=Hiragana}/gu,
+  /\p{Script=Katakana}/gu,
+  /\p{Script=Hangul}/gu,
+  /\p{Script=Arabic}/gu,
+  /\p{Script=Cyrillic}/gu,
+  /\p{Script=Hebrew}/gu,
+  /\p{Script=Thai}/gu,
+  /\p{Script=Devanagari}/gu,
+  /\p{Script=Tibetan}/gu,
+];
+
+function countMatches(value: string, pattern: RegExp): number {
+  return value.match(pattern)?.length ?? 0;
+}
+
+function significantScriptCount(message: string): number {
+  return SCRIPT_PATTERNS.filter(
+    (pattern) => countMatches(message, pattern) >= 3,
+  ).length;
+}
+
+function hasUnexpectedControlCharacter(message: string): boolean {
+  for (const char of message) {
+    const code = char.charCodeAt(0);
+    if (
+      code <= 0x08 ||
+      code === 0x0b ||
+      code === 0x0c ||
+      (code >= 0x0e && code <= 0x1f) ||
+      code === 0x7f
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function looksLikeDegeneratePersonaMessage(message: string): boolean {
+  const trimmed = message.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  const codePointLength = [...trimmed].length;
+  if (codePointLength > 1_800) {
+    return true;
+  }
+  if (hasUnexpectedControlCharacter(trimmed)) {
+    return true;
+  }
+  if (/[ \t]{12,}/u.test(trimmed)) {
+    return true;
+  }
+  if (/[^\p{Letter}\p{Number}\s]{8,}/u.test(trimmed)) {
+    return true;
+  }
+
+  const nonEmptyLines = trimmed
+    .split(/\r?\n/u)
+    .filter((line) => line.trim()).length;
+  if (nonEmptyLines > 6) {
+    return true;
+  }
+  if (codePointLength >= 80 && significantScriptCount(trimmed) >= 4) {
+    return true;
+  }
+
+  const commaSeparatedFragments = trimmed
+    .split(/[,\uFF0C،、]/u)
+    .filter((fragment) => fragment.trim()).length;
+  return codePointLength >= 200 && commaSeparatedFragments >= 25;
+}
 
 function simulatorJsonSchema(
   requireResponse: boolean,
@@ -515,7 +593,13 @@ function validatePersonaStep(
         "Persona simulator must return a non-empty `message` when status is `continue`.",
       );
     }
-    return { status: "continue", message: step.message.trim() };
+    const message = step.message.trim();
+    if (looksLikeDegeneratePersonaMessage(message)) {
+      throw new AgentProbeRuntimeError(
+        "Persona simulator returned degenerate token soup instead of a natural user message.",
+      );
+    }
+    return { status: "continue", message };
   }
 
   if (step.status === "continue") {
@@ -524,7 +608,13 @@ function validatePersonaStep(
         "Persona simulator must return a non-empty `message` when status is `continue`.",
       );
     }
-    return { status: "continue", message: step.message.trim() };
+    const message = step.message.trim();
+    if (looksLikeDegeneratePersonaMessage(message)) {
+      throw new AgentProbeRuntimeError(
+        "Persona simulator returned degenerate token soup instead of a natural user message.",
+      );
+    }
+    return { status: "continue", message };
   }
 
   return { status: step.status, message: null };
@@ -549,6 +639,13 @@ const CONTINUE_MESSAGE_CORRECTION_NOTE = [
   "Return one complete message with actual user wording. No blanks, nulls, placeholders, or meta commentary.",
 ].join("\n");
 
+const DEGENERATE_MESSAGE_CORRECTION_NOTE = [
+  "",
+  "IMPORTANT: your previous reply contained corrupted or degenerate token soup.",
+  "Return exactly one coherent natural-language user message in the persona's voice.",
+  "Do not mix unrelated languages, random vocabulary fragments, long symbol runs, or malformed JSON.",
+].join("\n");
+
 const MAX_PERSONA_ATTEMPTS = 3;
 
 function correctionNoteForPersonaError(
@@ -559,6 +656,9 @@ function correctionNoteForPersonaError(
   }
   if (error.message.includes("non-empty `message`")) {
     return CONTINUE_MESSAGE_CORRECTION_NOTE;
+  }
+  if (error.message.includes("degenerate token soup")) {
+    return DEGENERATE_MESSAGE_CORRECTION_NOTE;
   }
   return undefined;
 }
@@ -582,6 +682,12 @@ export async function generatePersonaStep(
     model: resolvePersonaModel(persona),
     instructions: simulatorInstructions(persona, requireResponse),
     input: baseInput,
+    reasoning: {
+      effort: "medium",
+      exclude: true,
+    },
+    temperature: PERSONA_TEMPERATURE,
+    maxOutputTokens: PERSONA_MAX_OUTPUT_TOKENS,
     text: {
       format: {
         type: "json_schema",

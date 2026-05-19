@@ -3,6 +3,10 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 
 import { SqliteRepository } from "../../../src/providers/persistence/sqlite-backend.ts";
+import type {
+  Rubric,
+  RubricScore,
+} from "../../../src/shared/types/contracts.ts";
 import {
   adapterReply,
   buildPersona,
@@ -12,7 +16,14 @@ import {
   makeTempDir,
 } from "../support.ts";
 
-async function seedScenario(repo: SqliteRepository): Promise<{
+async function seedScenario(
+  repo: SqliteRepository,
+  options: {
+    rubric?: Rubric;
+    judgeScore?: RubricScore;
+    overallScore?: number;
+  } = {},
+): Promise<{
   runId: string;
   scenarioRunId: number;
 }> {
@@ -25,7 +36,9 @@ async function seedScenario(repo: SqliteRepository): Promise<{
     trigger: "human-scoring-test",
   });
   const persona = buildPersona();
-  const rubric = buildRubric();
+  const rubric = options.rubric ?? buildRubric();
+  const judgeScore = options.judgeScore ?? buildScore({ score: 4 });
+  const overallScore = options.overallScore ?? 0.8;
   const scenario = buildScenario({ id: "human-test", name: "Human Test" });
   await recorder.recordRunConfiguration({
     endpointConfig: {
@@ -67,8 +80,8 @@ async function seedScenario(repo: SqliteRepository): Promise<{
   });
   await recorder.recordJudgeResult(scenarioRunId, {
     rubric,
-    score: buildScore({ score: 4 }),
-    overallScore: 0.8,
+    score: judgeScore,
+    overallScore,
   });
   await recorder.recordScenarioFinished(scenarioRunId, {
     result: {
@@ -77,10 +90,10 @@ async function seedScenario(repo: SqliteRepository): Promise<{
       personaId: persona.id,
       rubricId: rubric.id,
       passed: true,
-      overallScore: 0.8,
+      overallScore,
       transcript: [],
       checkpoints: [],
-      judgeScore: buildScore({ score: 4 }),
+      judgeScore,
     },
   });
   await recorder.recordRunFinished({
@@ -185,6 +198,65 @@ describe("human scoring (sqlite)", () => {
       expect(rows).toHaveLength(1);
       expect(rows[0]?.raw_score).toBe(5);
       expect(rows[0]?.normalized_score).toBeCloseTo(1, 5);
+    } finally {
+      db.close();
+    }
+  });
+
+  test("recordHumanScore normalizes lower-is-better dimensions like judge scores", async () => {
+    const dir = makeTempDir("human-scoring-lower-is-better");
+    const dbPath = join(dir, "runs.sqlite3");
+    const url = `sqlite:///${dbPath}`;
+    const repo = new SqliteRepository(url);
+    await repo.initialize();
+    const rubric = buildRubric({
+      passThreshold: 0.9,
+      dimensions: [
+        {
+          ...buildRubric().dimensions[0],
+          id: "friction",
+          name: "Friction",
+          scoreDirection: "lower_is_better",
+        },
+      ],
+    });
+    const { scenarioRunId } = await seedScenario(repo, {
+      rubric,
+      judgeScore: buildScore({
+        dimensionId: "friction",
+        score: 1,
+        passed: true,
+      }),
+      overallScore: 1,
+    });
+
+    const rubrics = await repo.listHumanScoringRubrics();
+    expect(rubrics[0]?.dimensions[0]?.scoreDirection).toBe("lower_is_better");
+
+    await repo.recordHumanScore({
+      scenarioRunId,
+      dimensionId: "friction",
+      dimensionName: "Friction",
+      scaleType: "likert",
+      scalePoints: 5,
+      scoreDirection: "lower_is_better",
+      rawScore: 1,
+    });
+
+    const db = new Database(dbPath, { readonly: true });
+    try {
+      const row = db
+        .query(
+          "select raw_score, normalized_score from human_dimension_scores where scenario_run_id = ? and dimension_id = ?",
+        )
+        .get(scenarioRunId, "friction") as
+        | {
+            raw_score: number;
+            normalized_score: number;
+          }
+        | undefined;
+      expect(row?.raw_score).toBe(1);
+      expect(row?.normalized_score).toBeCloseTo(1, 5);
     } finally {
       db.close();
     }

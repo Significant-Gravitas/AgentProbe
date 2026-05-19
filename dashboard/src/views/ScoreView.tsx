@@ -12,6 +12,7 @@ import {
 } from "../ui/index.tsx";
 
 type ScaleType = "likert" | "binary" | "numeric" | "rubric_levels";
+type ScoreDirection = "higher_is_better" | "lower_is_better";
 
 type Scale = {
   type: ScaleType;
@@ -24,6 +25,7 @@ type Dimension = {
   name: string;
   weight: number;
   scale: Scale;
+  scoreDirection?: ScoreDirection | null;
   unscored: number;
   pairedCount: number;
   correlation: number | null;

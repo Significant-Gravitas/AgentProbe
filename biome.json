@@ -20,6 +20,14 @@
   "linter": {
     "enabled": true,
     "rules": {
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 20
+          }
+        }
+      },
       "suspicious": {
         "noArrayIndexKey": "off"
       }

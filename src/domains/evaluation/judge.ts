@@ -64,6 +64,7 @@ export function rubricToPromptMarkdown(rubric: Rubric): string {
       `- ID: \`${dimension.id}\``,
       `- Weight: ${dimension.weight.toFixed(2)}`,
       `- Scale type: ${dimension.scale.type}`,
+      `- Score direction: ${dimension.scoreDirection ?? "higher_is_better"}`,
     );
     if (dimension.scale.points !== undefined) {
       lines.push(`- Scale points: ${dimension.scale.points}`);

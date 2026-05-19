@@ -29,6 +29,10 @@ import {
   AgentProbeRuntimeError,
   errorPayload,
 } from "../../shared/utils/errors.ts";
+import {
+  normalizeDimensionScore,
+  normalizeRawScore,
+} from "../../shared/utils/scoring.ts";
 import { redactDbUrl } from "./url.ts";
 
 export const DEFAULT_DB_DIRNAME = ".agentprobe";
@@ -729,8 +733,7 @@ function normalizedDimensionScore(
   rawScore: number,
 ): number {
   const dimension = rubric.dimensions.find((item) => item.id === dimensionId);
-  const scalePoints = dimension?.scale.points ?? 1;
-  return rawScore / scalePoints;
+  return normalizeDimensionScore(dimension, rawScore);
 }
 
 export class SqliteRunRecorder {
@@ -2469,6 +2472,7 @@ type RubricSnapshotShape = {
     name: string;
     weight: number;
     scale: { type: string; points?: number; labels: Record<string, string> };
+    scoreDirection?: import("./types.ts").HumanScoreInput["scoreDirection"];
   }>;
 };
 
@@ -2497,13 +2501,14 @@ function normalizeHumanScore(
   rawScore: number,
   scaleType: string,
   scalePoints?: number | null,
+  scoreDirection?: import("./types.ts").HumanScoreInput["scoreDirection"],
 ): number {
-  if (scaleType === "binary") {
-    return rawScore >= 1 ? 1 : 0;
-  }
-  const points =
-    typeof scalePoints === "number" && scalePoints > 0 ? scalePoints : 1;
-  return rawScore / points;
+  return normalizeRawScore({
+    rawScore,
+    scaleType,
+    scalePoints,
+    scoreDirection,
+  });
 }
 
 /**
@@ -2651,6 +2656,7 @@ export function listHumanScoringRubrics(
             weight: dim.weight,
             scale:
               dim.scale as import("../../shared/types/contracts.ts").RubricScale,
+            scoreDirection: dim.scoreDirection ?? null,
             unscored: Math.max(0, totalScenarios - scored),
             pairedCount: correlationResult.n,
             correlation: correlationResult.value,
@@ -2857,6 +2863,7 @@ export function recordHumanScore(
       input.rawScore,
       input.scaleType,
       input.scalePoints,
+      input.scoreDirection,
     );
     database
       .query(

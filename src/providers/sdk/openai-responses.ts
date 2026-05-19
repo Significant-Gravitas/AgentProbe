@@ -251,6 +251,14 @@ export class OpenAiResponsesClient {
       },
       temperature: request.temperature,
       max_output_tokens: request.maxOutputTokens,
+      reasoning: request.reasoning
+        ? {
+            effort: request.reasoning.effort,
+            max_tokens: request.reasoning.maxTokens,
+            exclude: request.reasoning.exclude,
+            enabled: request.reasoning.enabled,
+          }
+        : undefined,
       prompt_cache_key: request.promptCacheKey,
       cache_control: request.cacheControl
         ? {

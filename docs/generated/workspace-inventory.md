@@ -480,6 +480,7 @@ src/shared/utils/
   src/shared/utils/json.ts
   src/shared/utils/logging.ts
   src/shared/utils/safe-static-path.ts
+  src/shared/utils/scoring.ts
   src/shared/utils/secret-cipher.ts
   src/shared/utils/template.ts
 tests/

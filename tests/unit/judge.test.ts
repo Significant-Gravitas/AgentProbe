@@ -307,6 +307,10 @@ describe("judge", () => {
       "tool_use",
       "groundedness",
     ]);
+    expect(
+      product?.dimensions.find((dimension) => dimension.id === "friction")
+        ?.scoreDirection,
+    ).toBe("lower_is_better");
     expect(product?.judge?.model).toBe("anthropic/claude-opus-4.6");
     for (const rubricId of [
       "memory-temporal",

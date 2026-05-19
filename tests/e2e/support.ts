@@ -56,7 +56,11 @@ export type OpenAiLogEntry = {
 };
 
 export type RequestRecord = {
-  kind: "register_user" | "create_session" | "send_message";
+  kind:
+    | "register_user"
+    | "enable_subscription"
+    | "create_session"
+    | "send_message";
   method: string;
   path: string;
   headers: Record<string, string>;
@@ -282,6 +286,20 @@ export class FakeAutogptBackend {
         endedAt: Date.now(),
       };
       this.requestLog.push(record);
+      return Response.json({ ok: true });
+    }
+
+    if (
+      request.method === "POST" &&
+      url.pathname === "/api/copilot/admin/rate_limit/tier"
+    ) {
+      const body = (await request.json()) as JsonValue;
+      this.requestLog.push({
+        ...recordBase,
+        kind: "enable_subscription",
+        body,
+        endedAt: Date.now(),
+      });
       return Response.json({ ok: true });
     }
 

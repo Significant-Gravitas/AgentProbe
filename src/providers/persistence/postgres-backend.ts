@@ -11,6 +11,7 @@ import {
   AgentProbeConfigError,
   AgentProbeRuntimeError,
 } from "../../shared/utils/errors.ts";
+import { normalizeRawScore } from "../../shared/utils/scoring.ts";
 import {
   checkSchemaVersion,
   POSTGRES_TARGET_VERSION,
@@ -1223,6 +1224,7 @@ export class PostgresRepository implements RecordingRepository {
               weight: dim.weight,
               scale:
                 dim.scale as HumanScoringRubricSummary["dimensions"][number]["scale"],
+              scoreDirection: dim.scoreDirection ?? null,
               unscored: Math.max(0, totalScenarios - scored),
               pairedCount: correlationResult.n,
               correlation: correlationResult.value,
@@ -1383,6 +1385,7 @@ export class PostgresRepository implements RecordingRepository {
       input.rawScore,
       input.scaleType,
       input.scalePoints,
+      input.scoreDirection,
     );
     return this.withSql(async (sql) => {
       await sql`
@@ -1415,6 +1418,7 @@ type RubricSnapshotShape = {
     name: string;
     weight: number;
     scale: { type: string; points?: number; labels: Record<string, string> };
+    scoreDirection?: HumanScoreInput["scoreDirection"];
   }>;
 };
 
@@ -1422,13 +1426,14 @@ function normalizeHumanScore(
   rawScore: number,
   scaleType: string,
   scalePoints?: number | null,
+  scoreDirection?: HumanScoreInput["scoreDirection"],
 ): number {
-  if (scaleType === "binary") {
-    return rawScore >= 1 ? 1 : 0;
-  }
-  const points =
-    typeof scalePoints === "number" && scalePoints > 0 ? scalePoints : 1;
-  return rawScore / points;
+  return normalizeRawScore({
+    rawScore,
+    scaleType,
+    scalePoints,
+    scoreDirection,
+  });
 }
 
 function pearsonCorrelation(

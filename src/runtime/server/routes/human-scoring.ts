@@ -163,6 +163,7 @@ export async function handlePostHumanScore(
       dimensionName: dimension.name,
       scaleType: dimension.scale.type,
       scalePoints: dimension.scale.points ?? null,
+      scoreDirection: dimension.scoreDirection ?? null,
       rawScore,
     });
   } catch (error) {

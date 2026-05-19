@@ -86,6 +86,36 @@ export async function registerUser(options: {
   }
 }
 
+/*
+ * This function just alls an endpoint to enable subscription for the user
+ * It needs to call a specific url, not the autogpt main one, and we only care
+ * if it comes back successful or not
+ */
+export async function enableSubscription(options: {
+  autogptAuthResult: AutogptAuthResult;
+  backendUrl?: string;
+  userId?: string;
+}): Promise<void> {
+  const backendUrl = options.backendUrl ?? DEFAULT_BACKEND_URL;
+  const userId = options.userId ?? Bun.env.AUTOGPT_USER_ID ?? defaultUserId();
+  const response = await fetch(
+    `${backendUrl.replace(/\/$/, "")}/api/copilot/admin/rate_limit/tier`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.autogptAuthResult.token}`,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        tier: "ENTERPRISE",
+      }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`AutoGPT user registration failed (${response.status}).`);
+  }
+}
+
 export async function resolveAuth(
   options: {
     backendUrl?: string;
@@ -106,7 +136,7 @@ export async function resolveAuth(
     options.issuer ?? Bun.env.AUTOGPT_JWT_ISSUER ?? "supabase-demo";
   const audience =
     options.audience ?? Bun.env.AUTOGPT_JWT_AUDIENCE ?? "authenticated";
-  const role = options.role ?? Bun.env.AUTOGPT_JWT_ROLE ?? "user";
+  const role = options.role ?? Bun.env.AUTOGPT_JWT_ROLE ?? "admin";
   const email = options.email ?? Bun.env.AUTOGPT_EMAIL ?? defaultEmail();
   const userId = options.userId ?? Bun.env.AUTOGPT_USER_ID ?? defaultUserId();
   const name = options.name ?? Bun.env.AUTOGPT_USER_NAME ?? "AgentProbe User";
@@ -123,10 +153,18 @@ export async function resolveAuth(
   });
 
   await registerUser({ backendUrl, token });
-  return {
+  const autogptAuthResult = {
     token,
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
+
+  await enableSubscription({
+    autogptAuthResult,
+    backendUrl,
+    userId,
+  });
+
+  return autogptAuthResult;
 }

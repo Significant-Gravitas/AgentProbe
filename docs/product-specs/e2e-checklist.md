@@ -10,6 +10,7 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | List command shows available scenarios | `tests/e2e/cli.e2e.test.ts` | ⏳ planned |
 | Dry-run mode records intent without contacting external systems | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Judge requests preserve cache-friendly prompt prefixes | `tests/unit/judge.test.ts` | ✅ covered |
+| Persona simulation uses a configurable default model with hidden reasoning | `tests/unit/simulator.test.ts` | ✅ covered |
 | Parallel mode overlaps scenario execution while preserving ordering | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Multi-session memory scenarios preserve pinned identity and session controls | `tests/unit/runner.test.ts` + `tests/unit/scenario-parsing.test.ts` | ⏳ planned |
 | AutoGPT preset forges auth tokens internally | `tests/unit/autogpt-auth.test.ts` + `tests/unit/adapters.test.ts` | ⏳ expanding |

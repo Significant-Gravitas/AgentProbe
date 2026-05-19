@@ -658,6 +658,20 @@ function parseRubricScale(value: unknown): RubricScale {
   };
 }
 
+function parseScoreDirection(
+  value: unknown,
+): RubricDimension["scoreDirection"] {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === "higher_is_better" || value === "lower_is_better") {
+    return value;
+  }
+  throw new AgentProbeConfigError(
+    "rubric dimension score_direction must be higher_is_better or lower_is_better.",
+  );
+}
+
 function parseRubricDimension(value: unknown): RubricDimension {
   const raw = ensureObject(value, "rubric dimension must be an object.");
   return {
@@ -665,6 +679,7 @@ function parseRubricDimension(value: unknown): RubricDimension {
     name: ensureString(raw.name, "rubric dimension name is required."),
     weight: optionalNumber(raw.weight) ?? 0,
     scale: parseRubricScale(raw.scale),
+    scoreDirection: parseScoreDirection(raw.score_direction),
     judgePrompt: ensureString(
       raw.judge_prompt,
       "rubric dimension judge_prompt is required.",

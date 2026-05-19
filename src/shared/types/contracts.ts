@@ -37,6 +37,7 @@ export type TopicDrift = "none" | "low" | "medium" | "high";
 export type ClarificationCompliance = "low" | "medium" | "high";
 export type JudgeProvider = "anthropic" | "openai" | "custom";
 export type ScaleType = "likert" | "binary" | "numeric" | "rubric_levels";
+export type ScoreDirection = "higher_is_better" | "lower_is_better";
 export type AggregationMode = "mean" | "median" | "majority_vote";
 export type CopilotMode = "fast" | "extended_thinking";
 
@@ -242,6 +243,7 @@ export type RubricDimension = {
   name: string;
   weight: number;
   scale: RubricScale;
+  scoreDirection?: ScoreDirection;
   judgePrompt: string;
 };
 
@@ -839,6 +841,12 @@ export type OpenAiResponsesRequest = {
   model: string;
   instructions: string;
   input: string | OpenAiResponsesInputMessage[];
+  reasoning?: {
+    effort?: "xhigh" | "high" | "medium" | "low" | "minimal" | "none";
+    maxTokens?: number;
+    exclude?: boolean;
+    enabled?: boolean;
+  };
   text: {
     format: {
       type: "json_schema";

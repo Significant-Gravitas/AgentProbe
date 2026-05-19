@@ -17,6 +17,7 @@ import type {
   Scenario,
   ScenarioRunResult,
   ScenarioSelectionRef,
+  ScoreDirection,
 } from "../../shared/types/contracts.ts";
 
 export type PersistenceBackendKind = "sqlite" | "postgres";
@@ -236,6 +237,7 @@ export type HumanScoreInput = {
   dimensionName: string;
   scaleType: ScaleType;
   scalePoints?: number | null;
+  scoreDirection?: ScoreDirection | null;
   rawScore: number;
 };
 
@@ -244,6 +246,7 @@ export type HumanScoringDimensionSummary = {
   name: string;
   weight: number;
   scale: RubricScale;
+  scoreDirection?: ScoreDirection | null;
   unscored: number;
   /** Number of scenario_runs with both a human score and a judge score for this dimension. */
   pairedCount: number;

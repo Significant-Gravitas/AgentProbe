@@ -40,6 +40,7 @@ describe("autogpt auth", () => {
     const originalAuthMode = process.env.AUTOGPT_AUTH_MODE;
     const requests: Array<{
       authorization: string | null;
+      body: unknown;
       method: string;
       path: string;
     }> = [];
@@ -57,13 +58,26 @@ describe("autogpt auth", () => {
               init,
             );
       const url = new URL(request.url);
+      const body =
+        request.headers.get("content-type")?.includes("application/json") ||
+        url.pathname === "/api/copilot/admin/rate_limit/tier"
+          ? await request.json()
+          : null;
       requests.push({
         authorization: request.headers.get("Authorization"),
+        body,
         method: request.method,
         path: url.pathname,
       });
 
       if (request.method === "POST" && url.pathname === "/api/auth/user") {
+        return new Response(null, { status: 204 });
+      }
+
+      if (
+        request.method === "POST" &&
+        url.pathname === "/api/copilot/admin/rate_limit/tier"
+      ) {
         return new Response(null, { status: 204 });
       }
 
@@ -87,8 +101,18 @@ describe("autogpt auth", () => {
       expect(requests).toEqual([
         {
           authorization: `Bearer ${result.token}`,
+          body: null,
           method: "POST",
           path: "/api/auth/user",
+        },
+        {
+          authorization: `Bearer ${result.token}`,
+          body: {
+            tier: "ENTERPRISE",
+            user_id: userId,
+          },
+          method: "POST",
+          path: "/api/copilot/admin/rate_limit/tier",
         },
       ]);
       expect(result.headers.Authorization).toBe(`Bearer ${result.token}`);
