@@ -1,0 +1,17 @@
+[
+  {
+    "id": "internal-process-invoicing",
+    "label": "Standing rule: invoices on the 1st",
+    "entity": "policy"
+  },
+  {
+    "id": "hubspot-config",
+    "label": "HubSpot is the CRM",
+    "entity": "tool"
+  },
+  {
+    "id": "fiscal-year",
+    "label": "Fiscal year ends in March",
+    "entity": "policy"
+  }
+]

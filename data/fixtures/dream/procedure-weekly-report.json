@@ -1,0 +1,9 @@
+{
+  "steps": [
+    "pull metrics from analytics",
+    "summarize per channel",
+    "draft email to stakeholders",
+    "send"
+  ],
+  "parameters": ["recipient_list", "week_window"]
+}

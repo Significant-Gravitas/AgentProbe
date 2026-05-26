@@ -31,6 +31,7 @@ import { AveragesTable } from "./components/AveragesTable.tsx";
 import { CompareView } from "./components/CompareView.tsx";
 import { ConversationView } from "./components/ConversationView.tsx";
 import { DetailPanel } from "./components/DetailPanel.tsx";
+import { EvalScoresView, hasEvalScores } from "./components/EvalScoresView.tsx";
 import { ProgressBar } from "./components/ProgressBar.tsx";
 import { RubricView } from "./components/RubricView.tsx";
 import { ScenarioTable } from "./components/ScenarioTable.tsx";
@@ -186,6 +187,14 @@ function scenarioDetail(scenario: ServerScenario): ScenarioDetail {
     judge_dimension_scores: (scenario.judgeDimensionScores ?? []).map(
       normalizeDimension,
     ),
+    retrieval_scores: (scenario.retrievalScores ??
+      []) as unknown as ScenarioDetail["retrieval_scores"],
+    demotion_scores: (scenario.demotionScores ??
+      []) as unknown as ScenarioDetail["demotion_scores"],
+    procedure_scores: (scenario.procedureScores ??
+      []) as unknown as ScenarioDetail["procedure_scores"],
+    dedup_scores: (scenario.dedupScores ??
+      []) as unknown as ScenarioDetail["dedup_scores"],
     expectations: scenario.expectations,
     error: scenario.error,
     counts: scenario.counts
@@ -992,6 +1001,14 @@ function ScenarioDetailView({
           <RubricView detail={detail} />
         </Card>
       </div>
+      {hasEvalScores(detail) && (
+        <Card className="mt-4 p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">
+            Eval scores
+          </div>
+          <EvalScoresView detail={detail} />
+        </Card>
+      )}
     </>
   );
 }
@@ -1463,7 +1480,10 @@ export function StartRunView({
                 onChange={(e) => setRepeat(Number(e.currentTarget.value))}
               />
             </Field>
-            <Field label="Parallel limit">
+            <Field
+              label="Parallel limit"
+              hint="Max concurrent scenarios when parallel is on. 2-4 is typical; higher = faster but more LLM cost spikes."
+            >
               <TextInput
                 type="number"
                 min={1}
@@ -1475,19 +1495,34 @@ export function StartRunView({
               />
             </Field>
           </div>
-          <div className="flex flex-wrap gap-4 items-center">
-            <Checkbox checked={dryRun} onChange={setDryRun} label="Dry run" />
-            <Checkbox
-              checked={parallelEnabled}
-              onChange={setParallelEnabled}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Field
+              label="Dry run"
+              hint="Records run + scenario rows but skips the live adapter, judge, and scorers. Use to validate config without spending LLM tokens."
+            >
+              <Checkbox checked={dryRun} onChange={setDryRun} label="Enabled" />
+            </Field>
+            <Field
               label="Parallel"
-            />
-            {!presetId ? (
+              hint="Run multiple scenarios concurrently. Scenarios still complete in order, but several run at a time (set the limit above)."
+            >
               <Checkbox
-                checked={saveAsPreset}
-                onChange={setSaveAsPreset}
-                label="Save as preset"
+                checked={parallelEnabled}
+                onChange={setParallelEnabled}
+                label="Enabled"
               />
+            </Field>
+            {!presetId ? (
+              <Field
+                label="Save as preset"
+                hint="Save this scenario selection + settings as a reusable preset visible on the Presets page."
+              >
+                <Checkbox
+                  checked={saveAsPreset}
+                  onChange={setSaveAsPreset}
+                  label="Enabled"
+                />
+              </Field>
             ) : null}
           </div>
           {saveAsPreset && !presetId ? (

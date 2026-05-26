@@ -1,4 +1,4 @@
-import { type ComponentProps, memo } from "react";
+import { type ComponentType, type JSX, memo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "../../lib/utils.ts";
@@ -8,7 +8,17 @@ export type MarkdownProps = {
   className?: string;
 };
 
-const components: ComponentProps<typeof ReactMarkdown>["components"] = {
+// Re-type react-markdown's `components` prop against the project's React 19
+// JSX namespace. Upstream react-markdown ships its own bundled React types,
+// which collide with the project's @types/react@19. The component handlers
+// themselves are unchanged — we just remap the JSX intrinsic table.
+type MarkdownComponents = {
+  [Key in keyof JSX.IntrinsicElements]?: ComponentType<
+    JSX.IntrinsicElements[Key]
+  >;
+};
+
+const components: MarkdownComponents = {
   p: ({ className, ...props }) => (
     <p
       className={cn(
@@ -156,7 +166,10 @@ const components: ComponentProps<typeof ReactMarkdown>["components"] = {
 function MarkdownInner({ children, className }: MarkdownProps) {
   return (
     <div className={cn("text-sm text-foreground", className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={components as never}
+      >
         {children}
       </ReactMarkdown>
     </div>

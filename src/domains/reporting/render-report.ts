@@ -374,6 +374,38 @@ function buildDimensionRows(scenario: ScenarioRecord): TemplateObject[] {
   });
 }
 
+function buildRetrievalRows(scenario: ScenarioRecord): TemplateObject[] {
+  const scores = Array.isArray(scenario.retrievalScores)
+    ? scenario.retrievalScores
+    : [];
+  return scores.map((score) => ({
+    metric: String((score as Record<string, unknown>).metric ?? ""),
+    value: numberValue((score as Record<string, unknown>).value) ?? 0,
+    weight: numberValue((score as Record<string, unknown>).weight) ?? 0,
+    k: numberValue((score as Record<string, unknown>).k) ?? 0,
+    weighted_score:
+      numberValue((score as Record<string, unknown>).weighted_score) ?? 0,
+    pass_threshold:
+      numberValue((score as Record<string, unknown>).pass_threshold) ?? 0,
+    passed: (score as Record<string, unknown>).passed === true,
+    total_relevant:
+      numberValue((score as Record<string, unknown>).total_relevant) ?? 0,
+    total_returned:
+      numberValue((score as Record<string, unknown>).total_returned) ?? 0,
+    hit_count: numberValue((score as Record<string, unknown>).hit_count) ?? 0,
+    forbidden_hits:
+      numberValue((score as Record<string, unknown>).forbidden_hits) ?? 0,
+    source: String((score as Record<string, unknown>).source ?? ""),
+    returned: (score as Record<string, unknown>).returned ?? [],
+    value_percent: scorePercent(
+      numberValue((score as Record<string, unknown>).value),
+    ),
+    weighted_score_percent: scorePercent(
+      numberValue((score as Record<string, unknown>).weighted_score),
+    ),
+  }));
+}
+
 function prepareScenarioView(
   scenario: ScenarioRecord,
   index: number,
@@ -397,6 +429,8 @@ function prepareScenarioView(
     threshold_percent: scorePercent(scenario.passThreshold),
     turn_rows: buildTurnRows(scenario),
     dimension_rows: buildDimensionRows(scenario),
+    retrieval_rows: buildRetrievalRows(scenario),
+    retrieval_scores_pretty: prettyJson(scenario.retrievalScores),
     overall_notes: scenario.judge.overallNotes ?? "",
     judge_output_pretty: prettyJson(scenario.judge.output),
     error_pretty: prettyJson(scenario.error),

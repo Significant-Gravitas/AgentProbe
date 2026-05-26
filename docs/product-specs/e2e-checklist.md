@@ -33,3 +33,5 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | Database URL credentials stay redacted in operator-visible output | `tests/unit/persistence/url.test.ts` + `tests/unit/server/config.test.ts` | ✅ covered |
 | Docker Compose readiness waits for server readiness | `docker-compose.yml` + `docs/playbooks/agent-probe-server.md` + `docker compose config` | ✅ covered |
 | Human scoring drains an unscored backlog one chat at a time | `tests/integration/server/human-scoring.test.ts` + `tests/unit/persistence/human-scoring.test.ts` | ✅ covered |
+| Ranking-scored scenarios grade retrieval relevance against a curated golden set | `src/domains/evaluation/ranking.test.ts` + `src/domains/evaluation/retrieval-scorer.test.ts` + `tests/unit/retrieval-memory.test.ts` + `tests/unit/runner.test.ts` | ✅ covered |
+| Dream-system scenarios validate demotion, procedure, and dedup behavior | `src/domains/evaluation/clustering.test.ts` + `src/domains/evaluation/demotion-match.test.ts` + `src/domains/evaluation/procedure-match.test.ts` + `src/domains/evaluation/{demotion,procedure,dedup}-scorer.test.ts` + `tests/unit/dream-validation.test.ts` | ✅ covered |

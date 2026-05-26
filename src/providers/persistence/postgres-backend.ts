@@ -189,6 +189,10 @@ function mapScenarioRow(
   toolCalls: UnknownRecord[],
   checkpoints: UnknownRecord[],
   judgeDimensionScores: UnknownRecord[],
+  retrievalScores: UnknownRecord[] = [],
+  demotionScores: UnknownRecord[] = [],
+  procedureScores: UnknownRecord[] = [],
+  dedupScores: UnknownRecord[] = [],
 ): ScenarioRecord {
   const failureKindRaw = asStringOrNull(row.failure_kind);
   const failureKind =
@@ -270,6 +274,60 @@ function mapScenarioRow(
       reasoning: String(score.reasoning ?? ""),
       evidence: asJson<JsonValue>(score.evidence_json) ?? [],
     })),
+    retrievalScores: retrievalScores.map((score) => ({
+      metric: String(score.metric ?? ""),
+      value: Number(score.value),
+      weight: Number(score.weight),
+      k: Number(score.k),
+      weighted_score: Number(score.weighted_score),
+      pass_threshold: Number(score.pass_threshold),
+      passed: Boolean(score.passed),
+      total_relevant: Number(score.total_relevant),
+      total_returned: Number(score.total_returned),
+      hit_count: Number(score.hit_count),
+      forbidden_hits: Number(score.forbidden_hits),
+      source: String(score.source ?? ""),
+      returned: asJson<JsonValue>(score.returned_json) ?? [],
+    })),
+    demotionScores: demotionScores.map((score) => ({
+      metric: String(score.metric ?? ""),
+      value: Number(score.value),
+      weight: Number(score.weight),
+      weighted_score: Number(score.weighted_score),
+      pass_threshold: Number(score.pass_threshold),
+      passed: Boolean(score.passed),
+      timestamp_violation_count: Number(score.timestamp_violation_count),
+      cascade_bounded:
+        score.cascade_bounded === null || score.cascade_bounded === undefined
+          ? null
+          : Boolean(score.cascade_bounded),
+      source: String(score.source ?? ""),
+      observed: asJson<JsonValue>(score.observed_json) ?? [],
+      expected: asJson<JsonValue>(score.expected_json) ?? [],
+    })),
+    procedureScores: procedureScores.map((score) => ({
+      metric: String(score.metric ?? ""),
+      value: Number(score.value),
+      weight: Number(score.weight),
+      weighted_score: Number(score.weighted_score),
+      pass_threshold: Number(score.pass_threshold),
+      passed: Boolean(score.passed),
+      source: String(score.source ?? ""),
+      predicted: asJson<JsonValue>(score.predicted_json) ?? [],
+      golden: asJson<JsonValue>(score.golden_json) ?? [],
+    })),
+    dedupScores: dedupScores.map((score) => ({
+      metric: String(score.metric ?? ""),
+      value: Number(score.value),
+      weight: Number(score.weight),
+      weighted_score: Number(score.weighted_score),
+      pass_threshold: Number(score.pass_threshold),
+      passed: Boolean(score.passed),
+      item_count: Number(score.item_count),
+      source: String(score.source ?? ""),
+      predicted: asJson<JsonValue>(score.predicted_json) ?? [],
+      golden: asJson<JsonValue>(score.golden_json) ?? [],
+    })),
     error: asJson<Record<string, JsonValue>>(row.error_json) ?? null,
     startedAt: asIsoTimestamp(row.started_at),
     completedAt: asIsoTimestampOrNull(row.completed_at),
@@ -309,49 +367,87 @@ async function loadScenarioRecords(
   }
 
   if (options.summary) {
-    return scenarioRows.map((row) => mapScenarioRow(row, [], [], [], [], []));
+    return scenarioRows.map((row) =>
+      mapScenarioRow(row, [], [], [], [], [], [], [], [], []),
+    );
   }
 
-  const [turns, events, toolCalls, checkpoints, dimensionScores] = await span(
-    "pg.scenario_children",
-    () =>
-      Promise.all([
-        span(
-          "pg.turns",
-          () => sql<UnknownRecord>`
+  const [
+    turns,
+    events,
+    toolCalls,
+    checkpoints,
+    dimensionScores,
+    retrievalRows,
+    demotionRows,
+    procedureRows,
+    dedupRows,
+  ] = await span("pg.scenario_children", () =>
+    Promise.all([
+      span(
+        "pg.turns",
+        () => sql<UnknownRecord>`
             select * from turns where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, turn_index asc
           `,
-        ),
-        span(
-          "pg.target_events",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.target_events",
+        () => sql<UnknownRecord>`
             select * from target_events where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, turn_index asc, exchange_index asc
           `,
-        ),
-        span(
-          "pg.tool_calls",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.tool_calls",
+        () => sql<UnknownRecord>`
             select * from tool_calls where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, turn_index asc, call_order asc nulls last
           `,
-        ),
-        span(
-          "pg.checkpoints",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.checkpoints",
+        () => sql<UnknownRecord>`
             select * from checkpoints where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, checkpoint_index asc
           `,
-        ),
-        span(
-          "pg.judge_dimension_scores",
-          () => sql<UnknownRecord>`
+      ),
+      span(
+        "pg.judge_dimension_scores",
+        () => sql<UnknownRecord>`
             select * from judge_dimension_scores where scenario_run_id in ${sql(ids)}
             order by scenario_run_id asc, dimension_id asc
           `,
-        ),
-      ]),
+      ),
+      span(
+        "pg.retrieval_scores",
+        () => sql<UnknownRecord>`
+            select * from retrieval_scores where scenario_run_id in ${sql(ids)}
+            order by scenario_run_id asc, id asc
+          `,
+      ),
+      span(
+        "pg.demotion_scores",
+        () => sql<UnknownRecord>`
+            select * from demotion_scores where scenario_run_id in ${sql(ids)}
+            order by scenario_run_id asc, id asc
+          `,
+      ),
+      span(
+        "pg.procedure_scores",
+        () => sql<UnknownRecord>`
+            select * from procedure_scores where scenario_run_id in ${sql(ids)}
+            order by scenario_run_id asc, id asc
+          `,
+      ),
+      span(
+        "pg.dedup_scores",
+        () => sql<UnknownRecord>`
+            select * from dedup_scores where scenario_run_id in ${sql(ids)}
+            order by scenario_run_id asc, id asc
+          `,
+      ),
+    ]),
   );
 
   const groupBy = <T extends UnknownRecord>(
@@ -372,6 +468,10 @@ async function loadScenarioRecords(
   const toolsByScenario = groupBy(toolCalls, "scenario_run_id");
   const checkpointsByScenario = groupBy(checkpoints, "scenario_run_id");
   const dimensionsByScenario = groupBy(dimensionScores, "scenario_run_id");
+  const retrievalByScenario = groupBy(retrievalRows, "scenario_run_id");
+  const demotionByScenario = groupBy(demotionRows, "scenario_run_id");
+  const procedureByScenario = groupBy(procedureRows, "scenario_run_id");
+  const dedupByScenario = groupBy(dedupRows, "scenario_run_id");
 
   return scenarioRows.map((row) =>
     mapScenarioRow(
@@ -381,6 +481,10 @@ async function loadScenarioRecords(
       toolsByScenario.get(Number(row.id)) ?? [],
       checkpointsByScenario.get(Number(row.id)) ?? [],
       dimensionsByScenario.get(Number(row.id)) ?? [],
+      retrievalByScenario.get(Number(row.id)) ?? [],
+      demotionByScenario.get(Number(row.id)) ?? [],
+      procedureByScenario.get(Number(row.id)) ?? [],
+      dedupByScenario.get(Number(row.id)) ?? [],
     ),
   );
 }

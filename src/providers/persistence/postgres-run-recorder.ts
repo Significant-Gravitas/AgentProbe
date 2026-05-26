@@ -5,8 +5,12 @@ import type {
   AdapterReply,
   CheckpointAssertion,
   CheckpointResult,
+  DedupScore,
+  DemotionScore,
   JsonValue,
   Persona,
+  ProcedureScore,
+  RetrievalScore,
   Rubric,
   RubricScore,
   RunResult,
@@ -527,6 +531,106 @@ export class PostgresRunRecorder {
         updated_at = now()
       where id = ${scenarioRunId}
     `;
+  }
+
+  async recordRetrievalResult(
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: RetrievalScore },
+  ): Promise<void> {
+    const passed = options.score.passed;
+    const returnedJson = json(redactValue(options.score.returned));
+    for (const metric of options.score.metrics) {
+      await this.sql`
+        insert into retrieval_scores (
+          scenario_run_id, metric, value, weight, k,
+          weighted_score, pass_threshold, passed, total_relevant,
+          total_returned, hit_count, forbidden_hits, source,
+          returned_json, created_at
+        ) values (
+          ${scenarioRunId}, ${metric.metric}, ${metric.value},
+          ${metric.weight}, ${options.score.k},
+          ${options.score.weightedScore}, ${options.score.passThreshold},
+          ${passed}, ${options.score.totalRelevant},
+          ${options.score.totalReturned}, ${options.score.hitCount},
+          ${options.score.forbiddenHits}, ${options.score.source},
+          ${returnedJson}::jsonb, now()
+        )
+      `;
+    }
+  }
+
+  async recordDemotionResult(
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: DemotionScore },
+  ): Promise<void> {
+    const passed = options.score.passed;
+    const cascade = options.score.cascadeBounded ?? null;
+    const observedJson = json(redactValue(options.score.observed));
+    const expectedJson = json(redactValue(options.score.expected));
+    for (const metric of options.score.metrics) {
+      await this.sql`
+        insert into demotion_scores (
+          scenario_run_id, metric, value, weight,
+          weighted_score, pass_threshold, passed,
+          timestamp_violation_count, cascade_bounded,
+          source, observed_json, expected_json, created_at
+        ) values (
+          ${scenarioRunId}, ${metric.metric}, ${metric.value}, ${metric.weight},
+          ${options.score.weightedScore}, ${options.score.passThreshold},
+          ${passed}, ${options.score.timestampViolationCount},
+          ${cascade},
+          ${options.score.source},
+          ${observedJson}::jsonb, ${expectedJson}::jsonb, now()
+        )
+      `;
+    }
+  }
+
+  async recordProcedureResult(
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: ProcedureScore },
+  ): Promise<void> {
+    const passed = options.score.passed;
+    const predictedJson = json(redactValue(options.score.predictedSteps));
+    const goldenJson = json(redactValue(options.score.goldenSteps));
+    for (const metric of options.score.metrics) {
+      await this.sql`
+        insert into procedure_scores (
+          scenario_run_id, metric, value, weight,
+          weighted_score, pass_threshold, passed, source,
+          predicted_json, golden_json, created_at
+        ) values (
+          ${scenarioRunId}, ${metric.metric}, ${metric.value}, ${metric.weight},
+          ${options.score.weightedScore}, ${options.score.passThreshold},
+          ${passed}, ${options.score.source},
+          ${predictedJson}::jsonb, ${goldenJson}::jsonb, now()
+        )
+      `;
+    }
+  }
+
+  async recordDedupResult(
+    scenarioRunId: number,
+    options: { scenario: Scenario; score: DedupScore },
+  ): Promise<void> {
+    const passed = options.score.passed;
+    const predictedJson = json(redactValue(options.score.predictedClusters));
+    const goldenJson = json(redactValue(options.score.goldenClusters));
+    for (const metric of options.score.metrics) {
+      await this.sql`
+        insert into dedup_scores (
+          scenario_run_id, metric, value, weight,
+          weighted_score, pass_threshold, passed, item_count,
+          source, predicted_json, golden_json, created_at
+        ) values (
+          ${scenarioRunId}, ${metric.metric}, ${metric.value}, ${metric.weight},
+          ${options.score.weightedScore}, ${options.score.passThreshold},
+          ${passed}, ${options.score.itemCount},
+          ${options.score.source},
+          ${predictedJson}::jsonb, ${goldenJson}::jsonb, now()
+        )
+      `;
+    }
   }
 
   async recordScenarioFinished(

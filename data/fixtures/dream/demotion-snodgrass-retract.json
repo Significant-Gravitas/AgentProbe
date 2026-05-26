@@ -1,0 +1,6 @@
+{
+  "observed": ["edge-budget-q2"],
+  "retract_actions": [
+    { "uuid": "edge-budget-q2", "expired_at_set": true, "invalid_at_set": false, "status": "superseded" }
+  ]
+}

@@ -1702,4 +1702,111 @@ describe("runner", () => {
     // Judge must NOT have been called.
     expect(client.calls).toHaveLength(0);
   });
+
+  test("runScenario scores retrieval from rawExchange and surfaces it on the result", async () => {
+    const adapter = new FakeAdapter([
+      adapterReply("Here are the relevant memories.", {
+        rawExchange: {
+          retrieved: ["Sarah's email", "Atlas project status"],
+        } as unknown as Record<string, never>,
+      }),
+    ]);
+    const client = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore(),
+    ]);
+
+    const scenario = buildScenario({
+      turns: [
+        {
+          role: "user",
+          content: "What do you remember about Sarah?",
+          useExactMessage: true,
+          attachments: [],
+        },
+      ],
+    });
+    scenario.retrieval = {
+      golden: ["Sarah's email", "Atlas project status"],
+      forbidden: [],
+      weights: {
+        precision_at_k: 1,
+        recall_at_k: 1,
+        mrr: 1,
+        ndcg_at_k: 1,
+      },
+      passThreshold: 0.5,
+      match: "substring",
+      k: 2,
+    };
+
+    const result = await runScenario(
+      adapter,
+      scenario,
+      buildPersona(),
+      buildRubric(),
+      {
+        client: asResponsesClient(client) as never,
+      },
+    );
+
+    expect(result.retrievalScore).toBeDefined();
+    expect(result.retrievalScore?.passed).toBe(true);
+    expect(result.retrievalScore?.hitCount).toBe(2);
+    expect(result.retrievalScore?.source).toBe("raw_exchange");
+    expect(result.passed).toBe(true);
+  });
+
+  test("runScenario fails when retrieval contains a forbidden hit, even if the judge passes", async () => {
+    const adapter = new FakeAdapter([
+      adapterReply("Sure thing.", {
+        rawExchange: {
+          retrieved: ["I do not have that on file", "Old budget was $50K"],
+        } as unknown as Record<string, never>,
+      }),
+    ]);
+    const client = new FakeResponsesClient([
+      buildPersonaStep("completed"),
+      buildScore({ score: 5 }),
+    ]);
+
+    const scenario = buildScenario({
+      turns: [
+        {
+          role: "user",
+          content: "What's our Q2 budget?",
+          useExactMessage: true,
+          attachments: [],
+        },
+      ],
+    });
+    scenario.retrieval = {
+      golden: ["I do not have that"],
+      forbidden: ["$50K"],
+      weights: {
+        precision_at_k: 1,
+        recall_at_k: 1,
+        mrr: 1,
+        ndcg_at_k: 1,
+      },
+      passThreshold: 0.2,
+      match: "substring",
+      k: 5,
+    };
+
+    const result = await runScenario(
+      adapter,
+      scenario,
+      buildPersona(),
+      buildRubric(),
+      {
+        client: asResponsesClient(client) as never,
+      },
+    );
+
+    expect(result.judgeScore?.passed).toBe(true);
+    expect(result.retrievalScore?.forbiddenHits).toBe(1);
+    expect(result.retrievalScore?.passed).toBe(false);
+    expect(result.passed).toBe(false);
+  });
 });
