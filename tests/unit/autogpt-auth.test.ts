@@ -132,4 +132,24 @@ describe("autogpt auth", () => {
       }
     }
   });
+
+  test("resolveAuth rejects better-auth mode until the real-login strategy lands", async () => {
+    await expect(resolveAuth({ mode: "better-auth" })).rejects.toThrow(
+      /not implemented/i,
+    );
+  });
+
+  test("resolveAuth rejects an unknown AUTOGPT_AUTH_MODE", async () => {
+    const originalAuthMode = process.env.AUTOGPT_AUTH_MODE;
+    process.env.AUTOGPT_AUTH_MODE = "totally-bogus";
+    try {
+      await expect(resolveAuth()).rejects.toThrow(/Unknown AUTOGPT_AUTH_MODE/);
+    } finally {
+      if (originalAuthMode === undefined) {
+        delete process.env.AUTOGPT_AUTH_MODE;
+      } else {
+        process.env.AUTOGPT_AUTH_MODE = originalAuthMode;
+      }
+    }
+  });
 });

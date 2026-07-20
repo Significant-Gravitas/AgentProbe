@@ -2,6 +2,19 @@ import { createHmac, randomUUID } from "node:crypto";
 
 import type { AutogptAuthResult } from "../../shared/types/contracts.ts";
 
+/**
+ * How AgentProbe obtains a bearer token the AutoGPT backend will accept.
+ *
+ * - `supabase` (default): forge an HS256 JWT signed with the shared
+ *   `AUTOGPT_JWT_SECRET`. Matches the Supabase GoTrue token the backend has
+ *   always accepted. Works only while the backend still honours the legacy
+ *   symmetric secret (`JWT_VERIFY_KEY`).
+ * - `better-auth`: obtain a real ES256 token from the Better Auth service
+ *   (sign up / sign in / mint), verified by the backend via JWKS. Required
+ *   once the platform drops the legacy HS256 path. Implemented separately.
+ */
+export type AutogptAuthMode = "supabase" | "better-auth";
+
 const DEFAULT_BACKEND_URL =
   Bun.env.AUTOGPT_BACKEND_URL?.trim() ||
   Bun.env.BACKEND_URL?.trim() ||
@@ -14,6 +27,18 @@ const DEFAULT_JWT_ALGORITHM =
   Bun.env.AUTOGPT_JWT_ALGORITHM?.trim() ||
   Bun.env.JWT_ALGORITHM?.trim() ||
   "HS256";
+
+function resolveAuthMode(explicit?: AutogptAuthMode): AutogptAuthMode {
+  const raw = (explicit ?? Bun.env.AUTOGPT_AUTH_MODE ?? "supabase")
+    .trim()
+    .toLowerCase();
+  if (raw === "supabase" || raw === "better-auth") {
+    return raw;
+  }
+  throw new Error(
+    `Unknown AUTOGPT_AUTH_MODE "${raw}". Expected "supabase" or "better-auth".`,
+  );
+}
 
 function base64UrlEncode(value: string): string {
   return Buffer.from(value, "utf8")
@@ -116,18 +141,21 @@ export async function enableSubscription(options: {
   }
 }
 
-export async function resolveAuth(
-  options: {
-    backendUrl?: string;
-    jwtSecret?: string;
-    jwtAlgorithm?: string;
-    issuer?: string;
-    audience?: string;
-    role?: string;
-    email?: string;
-    userId?: string;
-    name?: string;
-  } = {},
+export type ResolveAuthOptions = {
+  mode?: AutogptAuthMode;
+  backendUrl?: string;
+  jwtSecret?: string;
+  jwtAlgorithm?: string;
+  issuer?: string;
+  audience?: string;
+  role?: string;
+  email?: string;
+  userId?: string;
+  name?: string;
+};
+
+async function resolveSupabaseAuth(
+  options: ResolveAuthOptions = {},
 ): Promise<AutogptAuthResult> {
   const backendUrl = options.backendUrl ?? DEFAULT_BACKEND_URL;
   const jwtSecret = options.jwtSecret ?? DEFAULT_JWT_SECRET;
@@ -167,4 +195,23 @@ export async function resolveAuth(
   });
 
   return autogptAuthResult;
+}
+
+/**
+ * Resolve a bearer token for the AutoGPT backend, dispatching on
+ * `AUTOGPT_AUTH_MODE` (default `supabase`). See {@link AutogptAuthMode}.
+ */
+export async function resolveAuth(
+  options: ResolveAuthOptions = {},
+): Promise<AutogptAuthResult> {
+  const mode = resolveAuthMode(options.mode);
+  if (mode === "better-auth") {
+    throw new Error(
+      'AUTOGPT_AUTH_MODE="better-auth" is not implemented in this build. ' +
+        "The platform is migrating auth from Supabase GoTrue (HS256 shared " +
+        "secret) to Better Auth (ES256 via JWKS); the real-login strategy " +
+        'lands separately. Use AUTOGPT_AUTH_MODE="supabase" until then.',
+    );
+  }
+  return resolveSupabaseAuth(options);
 }

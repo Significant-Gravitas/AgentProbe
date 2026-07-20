@@ -43,8 +43,10 @@ Last validated against `platform.md`: 2026-05-15
 
 - The Bun-owned end-to-end baseline now covers validation, run/report flows,
   filtering, dry-run, parallel execution, and the OpenClaw CLI path.
-- AutoGPT auth now follows a forged-token-only path in the provider layer and
-  no longer depends on Supabase signup.
+- AutoGPT auth resolves through a mode seam (`AUTOGPT_AUTH_MODE`, default
+  `supabase`): the `supabase` mode forges an HS256 token in the provider layer;
+  the `better-auth` mode (real ES256 login) is stubbed pending the platform
+  auth migration.
 - The copied `data/` and `dashboard/` assets have landed ahead of the runtime
   parity work, so the remaining gap is the Bun runtime, persistence, and
   reporting support that makes those assets executable.
