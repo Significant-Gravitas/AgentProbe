@@ -152,6 +152,10 @@ export type ResolveAuthOptions = {
   email?: string;
   userId?: string;
   name?: string;
+  /** `better-auth` mode: base URL of the Better Auth (frontend) service. */
+  frontendUrl?: string;
+  /** `better-auth` mode: password for the benchmark account. */
+  password?: string;
 };
 
 async function resolveSupabaseAuth(
@@ -206,12 +210,10 @@ export async function resolveAuth(
 ): Promise<AutogptAuthResult> {
   const mode = resolveAuthMode(options.mode);
   if (mode === "better-auth") {
-    throw new Error(
-      'AUTOGPT_AUTH_MODE="better-auth" is not implemented in this build. ' +
-        "The platform is migrating auth from Supabase GoTrue (HS256 shared " +
-        "secret) to Better Auth (ES256 via JWKS); the real-login strategy " +
-        'lands separately. Use AUTOGPT_AUTH_MODE="supabase" until then.',
-    );
+    // Dynamic import keeps the strategy module (which imports helpers from
+    // here) out of an eager import cycle; it loads only when selected.
+    const { resolveBetterAuthAuth } = await import("./better-auth-strategy.ts");
+    return resolveBetterAuthAuth(options);
   }
   return resolveSupabaseAuth(options);
 }
