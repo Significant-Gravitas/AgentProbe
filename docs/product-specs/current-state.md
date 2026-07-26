@@ -36,8 +36,6 @@ Last validated against `platform.md`: 2026-05-15
 - [x] Database URL credentials stay redacted in operator-visible output
 - [x] Docker Compose readiness waits for server readiness
 - [x] Human scoring drains an unscored backlog one chat at a time
-- [x] Ranking-scored scenarios grade retrieval relevance against a curated golden set
-- [x] Dream-system scenarios validate demotion, procedure, and dedup behavior
 
 ## Notes
 

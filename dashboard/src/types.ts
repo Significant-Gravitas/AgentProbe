@@ -55,61 +55,6 @@ export interface DimensionScore {
   evidence?: string[];
 }
 
-export interface RetrievalMetricScore {
-  metric: string;
-  value: number;
-  weight: number;
-  k: number;
-  weighted_score: number;
-  pass_threshold: number;
-  passed: boolean;
-  total_relevant: number;
-  total_returned: number;
-  hit_count: number;
-  forbidden_hits: number;
-  source: string;
-  returned: unknown;
-}
-
-export interface DemotionMetricScore {
-  metric: string;
-  value: number;
-  weight: number;
-  weighted_score: number;
-  pass_threshold: number;
-  passed: boolean;
-  timestamp_violation_count: number;
-  cascade_bounded: boolean | null;
-  source: string;
-  observed: unknown;
-  expected: unknown;
-}
-
-export interface ProcedureMetricScore {
-  metric: string;
-  value: number;
-  weight: number;
-  weighted_score: number;
-  pass_threshold: number;
-  passed: boolean;
-  source: string;
-  predicted: unknown;
-  golden: unknown;
-}
-
-export interface DedupMetricScore {
-  metric: string;
-  value: number;
-  weight: number;
-  weighted_score: number;
-  pass_threshold: number;
-  passed: boolean;
-  item_count: number;
-  source: string;
-  predicted: unknown;
-  golden: unknown;
-}
-
 export interface ScenarioDetail {
   scenario_id: string;
   scenario_name: string;
@@ -131,10 +76,6 @@ export interface ScenarioDetail {
   target_events?: Array<Record<string, unknown>>;
   checkpoints?: Checkpoint[];
   judge_dimension_scores?: DimensionScore[];
-  retrieval_scores?: RetrievalMetricScore[];
-  demotion_scores?: DemotionMetricScore[];
-  procedure_scores?: ProcedureMetricScore[];
-  dedup_scores?: DedupMetricScore[];
   expectations?: unknown;
   error?: unknown;
   counts?: {

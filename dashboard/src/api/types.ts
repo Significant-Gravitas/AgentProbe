@@ -46,10 +46,6 @@ export type ServerScenario = {
   targetEvents?: Array<Record<string, unknown>>;
   checkpoints?: Array<Record<string, unknown>>;
   judgeDimensionScores?: Array<Record<string, unknown>>;
-  retrievalScores?: Array<Record<string, unknown>>;
-  demotionScores?: Array<Record<string, unknown>>;
-  procedureScores?: Array<Record<string, unknown>>;
-  dedupScores?: Array<Record<string, unknown>>;
   expectations?: unknown;
   error?: unknown;
   counts?: {

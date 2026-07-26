@@ -5,7 +5,6 @@ import { join } from "node:path";
 import { SqliteRepository } from "../../../src/providers/persistence/sqlite-backend.ts";
 import { SuiteController } from "../../../src/runtime/server/controllers/suite-controller.ts";
 import {
-  FULL_MEMORY_DEFAULT_PRESET,
   PRE_RELEASE_DEFAULT_PRESET,
   seedDefaultPresets,
 } from "../../../src/runtime/server/default-presets.ts";
@@ -26,23 +25,14 @@ describe("default preset seeding", () => {
       repository,
       suiteController,
     });
-    const preReleaseResult = results.find(
-      (r) => r.name === PRE_RELEASE_DEFAULT_PRESET.name,
-    );
-    expect(preReleaseResult).toMatchObject({
+    expect(results[0]).toMatchObject({
       name: PRE_RELEASE_DEFAULT_PRESET.name,
-      status: "created",
-    });
-    expect(
-      results.find((r) => r.name === FULL_MEMORY_DEFAULT_PRESET.name),
-    ).toMatchObject({
-      name: FULL_MEMORY_DEFAULT_PRESET.name,
       status: "created",
     });
 
     const presets = await repository.listPresets();
-    expect(presets).toHaveLength(2);
-    const preset = presets.find((p) => p.name === "Pre Release Checks");
+    expect(presets).toHaveLength(1);
+    const preset = presets[0];
     expect(preset).toMatchObject({
       name: "Pre Release Checks",
       description: null,
@@ -54,31 +44,17 @@ describe("default preset seeding", () => {
       dryRun: false,
     });
     expect(preset?.selection).toEqual(PRE_RELEASE_DEFAULT_PRESET.selection);
-    const memoryPreset = presets.find(
-      (p) => p.name === FULL_MEMORY_DEFAULT_PRESET.name,
-    );
-    expect(memoryPreset?.selection).toEqual(
-      FULL_MEMORY_DEFAULT_PRESET.selection,
-    );
 
     const secondPass = await seedDefaultPresets({
       repository,
       suiteController,
     });
-    expect(
-      secondPass.find((r) => r.name === PRE_RELEASE_DEFAULT_PRESET.name),
-    ).toMatchObject({
+    expect(secondPass[0]).toMatchObject({
       name: PRE_RELEASE_DEFAULT_PRESET.name,
       status: "existing",
       presetId: preset?.id,
     });
-    expect(
-      secondPass.find((r) => r.name === FULL_MEMORY_DEFAULT_PRESET.name),
-    ).toMatchObject({
-      name: FULL_MEMORY_DEFAULT_PRESET.name,
-      status: "existing",
-    });
-    expect(await repository.listPresets()).toHaveLength(2);
+    expect(await repository.listPresets()).toHaveLength(1);
   });
 
   test("restores a soft-deleted default preset by name", async () => {
@@ -86,31 +62,24 @@ describe("default preset seeding", () => {
     await repository.initialize();
     const suiteController = new SuiteController({ dataPath: DATA_DIR });
     await seedDefaultPresets({ repository, suiteController });
-    const seeded = (await repository.listPresets()).find(
-      (p) => p.name === PRE_RELEASE_DEFAULT_PRESET.name,
-    );
+    const seeded = (await repository.listPresets())[0];
     expect(seeded).toBeDefined();
 
     await repository.softDeletePreset(seeded?.id ?? "");
-    expect(await repository.listPresets()).toHaveLength(1);
+    expect(await repository.listPresets()).toHaveLength(0);
 
     const results = await seedDefaultPresets({
       repository,
       suiteController,
     });
-    expect(
-      results.find((r) => r.name === PRE_RELEASE_DEFAULT_PRESET.name),
-    ).toMatchObject({
+    expect(results[0]).toMatchObject({
       name: PRE_RELEASE_DEFAULT_PRESET.name,
       status: "restored",
       presetId: seeded?.id,
     });
     const presets = await repository.listPresets();
-    expect(presets).toHaveLength(2);
-    expect(
-      presets.find((p) => p.name === PRE_RELEASE_DEFAULT_PRESET.name)
-        ?.deletedAt ?? null,
-    ).toBeNull();
+    expect(presets).toHaveLength(1);
+    expect(presets[0]?.deletedAt ?? null).toBeNull();
   });
 
   test("skips seeding when the data root does not include packaged default files", async () => {
@@ -126,16 +95,8 @@ describe("default preset seeding", () => {
       repository,
       suiteController: new SuiteController({ dataPath }),
     });
-    expect(
-      results.find((r) => r.name === PRE_RELEASE_DEFAULT_PRESET.name),
-    ).toMatchObject({
+    expect(results[0]).toMatchObject({
       name: PRE_RELEASE_DEFAULT_PRESET.name,
-      status: "skipped",
-    });
-    expect(
-      results.find((r) => r.name === FULL_MEMORY_DEFAULT_PRESET.name),
-    ).toMatchObject({
-      name: FULL_MEMORY_DEFAULT_PRESET.name,
       status: "skipped",
     });
     expect(await repository.listPresets()).toHaveLength(0);
