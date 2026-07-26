@@ -2,7 +2,6 @@ import { useState } from "react";
 import { scorePct } from "../helpers.ts";
 import type { ScenarioDetail } from "../types.ts";
 import { ConversationView } from "./ConversationView.tsx";
-import { EvalScoresView, hasEvalScores } from "./EvalScoresView.tsx";
 import { RubricView } from "./RubricView.tsx";
 
 interface Props {
@@ -10,11 +9,8 @@ interface Props {
   onClose: () => void;
 }
 
-type TabKey = "conversation" | "rubric" | "evals";
-
 export function DetailPanel({ detail, onClose }: Props) {
-  const evalsVisible = hasEvalScores(detail);
-  const [tab, setTab] = useState<TabKey>("conversation");
+  const [tab, setTab] = useState<"conversation" | "rubric">("conversation");
 
   const isRunning = detail.status === "running";
   const scoreLabel =
@@ -113,21 +109,14 @@ export function DetailPanel({ detail, onClose }: Props) {
               >
                 Rubric
               </button>
-              {evalsVisible && (
-                <button
-                  type="button"
-                  className={`tab-btn${tab === "evals" ? " tab-active" : ""}`}
-                  onClick={() => setTab("evals")}
-                >
-                  Eval scores
-                </button>
-              )}
             </div>
           </div>
           <div className="detail-body">
-            {tab === "conversation" && <ConversationView detail={detail} />}
-            {tab === "rubric" && <RubricView detail={detail} />}
-            {tab === "evals" && <EvalScoresView detail={detail} />}
+            {tab === "conversation" ? (
+              <ConversationView detail={detail} />
+            ) : (
+              <RubricView detail={detail} />
+            )}
           </div>
         </div>
       </div>

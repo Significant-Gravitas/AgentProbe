@@ -1,8 +1,0 @@
-{
-  "observed": ["edge-northstar-marcus", "edge-northstar-cto"],
-  "cascade_touched": ["edge-northstar-marcus", "edge-northstar-cto"],
-  "retract_actions": [
-    { "uuid": "edge-northstar-marcus", "expired_at_set": true, "invalid_at_set": false, "status": "superseded" },
-    { "uuid": "edge-northstar-cto", "expired_at_set": true, "invalid_at_set": false, "status": "superseded" }
-  ]
-}

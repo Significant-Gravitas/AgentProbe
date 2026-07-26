@@ -388,125 +388,6 @@ export type Session = {
   turns: TurnType[];
 };
 
-export type RetrievalMatchPolicy = "exact" | "substring" | "regex";
-
-export type RetrievalMetricKey =
-  | "precision_at_k"
-  | "recall_at_k"
-  | "mrr"
-  | "ndcg_at_k";
-
-export type RetrievalMetricWeights = Partial<
-  Record<RetrievalMetricKey, number>
->;
-
-export type RetrievalSource = {
-  /**
-   * Path resolved relative to the scenario YAML file.
-   * The file must contain a JSON array of strings or objects with a `label` field.
-   */
-  fixture?: string;
-  /**
-   * Key on the last assistant reply's `rawExchange` payload that holds the
-   * returned items. Defaults to `retrieved`.
-   */
-  rawExchangeKey?: string;
-};
-
-export type RetrievalConfig = {
-  /** Ordered list of items the retriever is expected to surface. */
-  golden: string[];
-  /**
-   * Items that MUST NOT appear in the top-k. A forbidden hit forces a fail
-   * regardless of the weighted score (used for forget / scope-filter probes).
-   */
-  forbidden: string[];
-  /** Rank cutoff. Defaults to max(|golden|, |returned|, 1) when omitted. */
-  k?: number;
-  /** Per-metric weights for the weighted aggregate score. */
-  weights: Required<RetrievalMetricWeights>;
-  /** Pass threshold on the weighted aggregate score. Defaults to 0.5. */
-  passThreshold: number;
-  /** Match policy applied to each pair of returned vs golden / forbidden items. */
-  match: RetrievalMatchPolicy;
-  /** Where to look for the retrieved list at scoring time. */
-  source?: RetrievalSource;
-};
-
-/** A `(rawExchangeKey | fixture)` resolution mirroring `RetrievalSource`. */
-export type DreamSource = {
-  fixture?: string;
-  rawExchangeKey?: string;
-};
-
-export type DemotionMetricKey =
-  | "set_precision"
-  | "set_recall"
-  | "set_f1"
-  | "timestamp_discipline"
-  | "cascade_bounded"
-  | "cascade_direct_f1";
-
-export type DemotionMetricWeights = Partial<Record<DemotionMetricKey, number>>;
-
-export type DemotionAction = {
-  uuid: string;
-  label?: string;
-  expiredAtSet: boolean;
-  invalidAtSet: boolean;
-  status?: string;
-};
-
-export type DemotionCascade = {
-  /** Edges that should be touched (1-hop neighbors of the invalidated entity). */
-  expectedDirectNeighbors: string[];
-  /** Edges that MUST NOT be touched (2+ hops). */
-  tangentialEdges: string[];
-};
-
-export type DemotionConfig = {
-  /** Expected set of demoted edge / memory UUIDs. */
-  expectedDemotions: string[];
-  /** Optional retract-vs-soft-delete discipline check. */
-  expectedRetracts?: string[];
-  /** Optional cascade check (P0.3b). */
-  cascade?: DemotionCascade;
-  weights: Required<DemotionMetricWeights>;
-  passThreshold: number;
-  source?: DreamSource;
-};
-
-export type ProcedureMetricKey =
-  | "step_coverage"
-  | "step_order"
-  | "parameter_coverage";
-
-export type ProcedureMetricWeights = Partial<
-  Record<ProcedureMetricKey, number>
->;
-
-export type ProcedureConfig = {
-  /** Ordered list of expected step labels. */
-  goldenSteps: string[];
-  /** Optional parameter names the procedure must surface. */
-  goldenParameters?: string[];
-  weights: Required<ProcedureMetricWeights>;
-  passThreshold: number;
-  source?: DreamSource;
-};
-
-export type DedupConfig = {
-  /**
-   * Expected clusters. Each inner list is a cluster of item IDs that should
-   * be merged together. Items present in the predicted set but absent here
-   * are treated as singletons.
-   */
-  goldenClusters: string[][];
-  weights: { precision: number; recall: number; f1: number; ari: number };
-  passThreshold: number;
-  source?: DreamSource;
-};
-
 export type Scenario = {
   id: string;
   name: string;
@@ -522,10 +403,6 @@ export type Scenario = {
   turns: TurnType[];
   sessions: Session[];
   expectations: ScenarioExpectations;
-  retrieval?: RetrievalConfig;
-  demotion?: DemotionConfig;
-  procedure?: ProcedureConfig;
-  dedup?: DedupConfig;
   [key: string]: unknown;
 };
 
@@ -598,83 +475,6 @@ export type RubricScore = {
   failureModeDetected?: string | null;
 };
 
-export type RetrievalMetricScore = {
-  metric: RetrievalMetricKey;
-  value: number;
-  weight: number;
-};
-
-export type RetrievalScore = {
-  k: number;
-  totalRelevant: number;
-  totalReturned: number;
-  hitCount: number;
-  forbiddenHits: number;
-  metrics: RetrievalMetricScore[];
-  weightedScore: number;
-  passThreshold: number;
-  passed: boolean;
-  /** The returned list (in rank order) used to score, captured for replay. */
-  returned: string[];
-  /** Where the returned list came from: `fixture` | `raw_exchange` | `missing`. */
-  source: "fixture" | "raw_exchange" | "missing";
-};
-
-export type EvalSource = "fixture" | "raw_exchange" | "missing";
-
-export type DemotionMetricScore = {
-  metric: DemotionMetricKey;
-  value: number;
-  weight: number;
-};
-
-export type DemotionScore = {
-  metrics: DemotionMetricScore[];
-  weightedScore: number;
-  passThreshold: number;
-  passed: boolean;
-  observed: string[];
-  expected: string[];
-  cascadeBounded?: boolean;
-  timestampViolationCount: number;
-  source: EvalSource;
-};
-
-export type ProcedureMetricScore = {
-  metric: ProcedureMetricKey;
-  value: number;
-  weight: number;
-};
-
-export type ProcedureScore = {
-  metrics: ProcedureMetricScore[];
-  weightedScore: number;
-  passThreshold: number;
-  passed: boolean;
-  predictedSteps: string[];
-  goldenSteps: string[];
-  source: EvalSource;
-};
-
-export type DedupMetricKey = "precision" | "recall" | "f1" | "ari";
-
-export type DedupMetricScore = {
-  metric: DedupMetricKey;
-  value: number;
-  weight: number;
-};
-
-export type DedupScore = {
-  metrics: DedupMetricScore[];
-  weightedScore: number;
-  passThreshold: number;
-  passed: boolean;
-  predictedClusters: string[][];
-  goldenClusters: string[][];
-  itemCount: number;
-  source: EvalSource;
-};
-
 export type ScenarioRunResult = {
   scenarioId: string;
   scenarioName: string;
@@ -688,10 +488,6 @@ export type ScenarioRunResult = {
   checkpoints: CheckpointResult[];
   toolCallsByTurn?: Record<number, ToolCallRecord[]>;
   judgeScore?: RubricScore;
-  retrievalScore?: RetrievalScore;
-  demotionScore?: DemotionScore;
-  procedureScore?: ProcedureScore;
-  dedupScore?: DedupScore;
   renderedTurns?: Array<Record<string, unknown>>;
 };
 
@@ -828,10 +624,6 @@ export type ScenarioRecord = {
   toolCalls: Array<Record<string, JsonValue>>;
   checkpoints: Array<Record<string, JsonValue>>;
   judgeDimensionScores: Array<Record<string, JsonValue>>;
-  retrievalScores?: Array<Record<string, JsonValue>>;
-  demotionScores?: Array<Record<string, JsonValue>>;
-  procedureScores?: Array<Record<string, JsonValue>>;
-  dedupScores?: Array<Record<string, JsonValue>>;
   error?: Record<string, JsonValue> | null;
   startedAt: string;
   completedAt?: string | null;

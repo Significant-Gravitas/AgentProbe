@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-19T15:37:13.471Z
+Generated: 2026-05-15T12:20:13.570Z
 
 ```text
   AGENTS.md
@@ -30,7 +30,6 @@ dashboard/src/components/
   dashboard/src/components/CompareView.tsx
   dashboard/src/components/ConversationView.tsx
   dashboard/src/components/DetailPanel.tsx
-  dashboard/src/components/EvalScoresView.tsx
   dashboard/src/components/ProgressBar.tsx
   dashboard/src/components/RubricView.tsx
   dashboard/src/components/ScenarioTable.tsx
@@ -67,7 +66,6 @@ data/
   data/adversarial-scenarios.yaml
   data/autogpt-endpoint.yaml
   data/baseline-scenarios.yaml
-  data/dream-validation.yaml
   data/fixture-manifest.json
 data/fixtures/
   data/fixtures/ad_spend_3mo.csv
@@ -129,16 +127,6 @@ data/fixtures/
   data/fixtures/dm_corpus.json
   data/fixtures/document_types.yaml
   data/fixtures/domain_to_industry_mapping.json
-data/fixtures/dream/
-  data/fixtures/dream/dedup-false-positive.json
-  data/fixtures/dream/dedup-near-duplicates.json
-  data/fixtures/dream/demotion-cascade-bounded.json
-  data/fixtures/dream/demotion-cascade-runaway.json
-  data/fixtures/dream/demotion-snodgrass-retract.json
-  data/fixtures/dream/demotion-snodgrass-violation.json
-  data/fixtures/dream/demotion-stale-fact.json
-  data/fixtures/dream/procedure-onboarding.json
-  data/fixtures/dream/procedure-weekly-report.json
   data/fixtures/editor_brief_template.md
   data/fixtures/employee_details.json
   data/fixtures/erp_ledger_2026-03.csv
@@ -255,12 +243,6 @@ data/fixtures/dream/
   data/fixtures/research_questions.md
   data/fixtures/resume.pdf
   data/fixtures/retention_by_product.csv
-data/fixtures/retrieval/
-  data/fixtures/retrieval/cascade-after-northstar-invalidated.json
-  data/fixtures/retrieval/forget-budget-after.json
-  data/fixtures/retrieval/scope-project-atlas.json
-  data/fixtures/retrieval/stale-fact-supersession.json
-  data/fixtures/retrieval/warm-context-sarah.json
   data/fixtures/reviews_android.json
   data/fixtures/reviews_google_yelp.json
   data/fixtures/reviews_ios.json
@@ -328,7 +310,6 @@ data/fixtures/snapshots/
   data/openclaw-endpoints.yaml
   data/opencode-endpoints.yaml
   data/personas.yaml
-  data/retrieval-memory.yaml
   data/rubric.yaml
   data/scenarios.yaml
   docker-compose.yml
@@ -403,7 +384,6 @@ scripts/
   scripts/list-required-fixtures.ts
   scripts/patch-scenario-attachments.ts
   scripts/refresh-quality-score.ts
-  scripts/seed-eval-scores.ts
   scripts/seed-preset.ts
   scripts/seed-test-scores.ts
   scripts/validate-repo.sh
@@ -415,24 +395,8 @@ src/cli/
   src/cli/main.ts
 src/domains/
 src/domains/evaluation/
-  src/domains/evaluation/clustering.test.ts
-  src/domains/evaluation/clustering.ts
-  src/domains/evaluation/dedup-scorer.test.ts
-  src/domains/evaluation/dedup-scorer.ts
-  src/domains/evaluation/demotion-match.test.ts
-  src/domains/evaluation/demotion-match.ts
-  src/domains/evaluation/demotion-scorer.test.ts
-  src/domains/evaluation/demotion-scorer.ts
   src/domains/evaluation/judge.ts
   src/domains/evaluation/ports.ts
-  src/domains/evaluation/procedure-match.test.ts
-  src/domains/evaluation/procedure-match.ts
-  src/domains/evaluation/procedure-scorer.test.ts
-  src/domains/evaluation/procedure-scorer.ts
-  src/domains/evaluation/ranking.test.ts
-  src/domains/evaluation/ranking.ts
-  src/domains/evaluation/retrieval-scorer.test.ts
-  src/domains/evaluation/retrieval-scorer.ts
   src/domains/evaluation/run-suite.ts
   src/domains/evaluation/simulator.ts
 src/domains/reporting/
@@ -513,7 +477,6 @@ tests/unit/architecture/
 tests/unit/dashboard/
   tests/unit/dashboard/compare-view.test.tsx
   tests/unit/db.test.ts
-  tests/unit/dream-validation.test.ts
   tests/unit/endpoint-config.test.ts
   tests/unit/endpoint-overrides-controller.test.ts
   tests/unit/judge.test.ts
@@ -531,7 +494,6 @@ tests/unit/persistence/
   tests/unit/persistence/repository-contract.test.ts
   tests/unit/persistence/url.test.ts
   tests/unit/report.test.ts
-  tests/unit/retrieval-memory.test.ts
   tests/unit/runner.test.ts
 tests/unit/server/
   tests/unit/server/comparison.test.ts

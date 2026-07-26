@@ -1,9 +1,0 @@
-{
-  "steps": [
-    "create folder in workspace",
-    "draft welcome email",
-    "schedule kickoff call",
-    "share onboarding doc"
-  ],
-  "parameters": ["client_name", "kickoff_date"]
-}

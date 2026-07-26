@@ -1,7 +1,0 @@
-{
-  "clusters": [
-    ["fact-sarah-billing-1", "fact-sarah-billing-2"],
-    ["fact-hubspot-crm-1"],
-    ["fact-fiscal-year-1"]
-  ]
-}
