@@ -133,14 +133,24 @@ describe("autogpt auth", () => {
     }
   });
 
-  test("resolveAuth routes better-auth mode to the real-login strategy (which needs a password)", async () => {
+  test("resolveAuth routes better-auth mode to the real-login strategy (which needs a real account)", async () => {
+    const originalEmail = process.env.AUTOGPT_EMAIL;
     const originalPassword = process.env.AUTOGPT_PASSWORD;
+    delete process.env.AUTOGPT_EMAIL;
     delete process.env.AUTOGPT_PASSWORD;
     try {
       await expect(resolveAuth({ mode: "better-auth" })).rejects.toThrow(
-        /requires a password/i,
+        /requires a stable benchmark account/i,
       );
+      await expect(
+        resolveAuth({ mode: "better-auth", email: "bench@agpt.co" }),
+      ).rejects.toThrow(/requires a password/i);
     } finally {
+      if (originalEmail === undefined) {
+        delete process.env.AUTOGPT_EMAIL;
+      } else {
+        process.env.AUTOGPT_EMAIL = originalEmail;
+      }
       if (originalPassword === undefined) {
         delete process.env.AUTOGPT_PASSWORD;
       } else {

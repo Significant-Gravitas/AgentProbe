@@ -156,6 +156,12 @@ export type ResolveAuthOptions = {
   frontendUrl?: string;
   /** `better-auth` mode: password for the benchmark account. */
   password?: string;
+  /**
+   * `better-auth` mode: provision the account via sign-up when it does not
+   * exist. Defaults to `AUTOGPT_ALLOW_SIGNUP`; off unless asked for, so runs
+   * against an open-signup environment cannot silently create accounts.
+   */
+  allowSignup?: boolean;
 };
 
 async function resolveSupabaseAuth(
