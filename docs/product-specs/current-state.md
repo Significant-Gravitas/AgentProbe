@@ -13,7 +13,8 @@ Last validated against `platform.md`: 2026-05-15
 - [x] Persona simulation uses a configurable default model with hidden reasoning
 - [x] Parallel mode overlaps scenario execution while preserving ordering
 - [ ] Multi-session memory scenarios preserve pinned identity and session controls
-- [ ] AutoGPT preset forges auth tokens internally
+- [ ] AutoGPT preset resolves auth internally per auth mode
+- [x] Expired AutoGPT tokens are refreshed mid-run
 - [ ] Repeat mode reruns scenarios with isolated users per iteration
 - [x] OpenClaw CLI commands manage sessions, chat, and history
 - [x] Fast feedback enforces the repo quality gates
@@ -45,8 +46,12 @@ Last validated against `platform.md`: 2026-05-15
   filtering, dry-run, parallel execution, and the OpenClaw CLI path.
 - AutoGPT auth resolves through a mode seam (`AUTOGPT_AUTH_MODE`, default
   `supabase`): the `supabase` mode forges an HS256 token in the provider layer;
-  the `better-auth` mode (real ES256 login) is stubbed pending the platform
-  auth migration.
+  the `better-auth` mode signs a pre-provisioned account in against the
+  platform frontend and mints a real ES256 token. The platform dev environment
+  has cut over to Better Auth and needs `AUTOGPT_AUTH_MODE=better-auth`;
+  production is still on Supabase GoTrue and stays on the default.
+- Internally-resolved AutoGPT tokens are refreshed once on a 401, so a token
+  expiring mid-run does not fail the run.
 - The copied `data/` and `dashboard/` assets have landed ahead of the runtime
   parity work, so the remaining gap is the Bun runtime, persistence, and
   reporting support that makes those assets executable.

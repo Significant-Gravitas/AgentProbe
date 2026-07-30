@@ -90,16 +90,30 @@ session-level `max_turns`, and context fields such as `user_name` or
 session-specific turn caps without aborting later sessions, and records session
 boundary metadata that agents and reports can inspect
 
-### AutoGPT preset forges auth tokens internally
+### AutoGPT preset resolves auth internally per auth mode
 
 **Given** an AutoGPT preset endpoint configured for AgentProbe
 **When** the CLI prepares authenticated requests for that endpoint
-**Then** the CLI forges the bearer token locally, registers the user with the
-backend, extracts tool-call evidence from the backend SSE stream, and does not
-depend on a Supabase signup flow. The dashboard server may persist per-endpoint
+**Then** the CLI resolves the bearer token internally according to
+`AUTOGPT_AUTH_MODE`, registers the user with the backend, and extracts
+tool-call evidence from the backend SSE stream. In `supabase` mode (default)
+the token is forged locally against the shared HS256 secret. In `better-auth`
+mode the CLI signs a pre-provisioned account in to Better Auth on the platform
+frontend and mints a real ES256 token, which the backend verifies via JWKS;
+that mode never invents an account, and only signs one up when
+`AUTOGPT_ALLOW_SIGNUP` is set. The dashboard server may persist per-endpoint
 overrides for the AutoGPT backend base URL and JWT secret; when present, those
 saved values take precedence over the endpoint YAML defaults and process
 environment fallbacks for runs launched through the server.
+
+### Expired AutoGPT tokens are refreshed mid-run
+
+**Given** an AutoGPT preset run whose internally-resolved token expires while
+the run is still in flight
+**When** the backend rejects a request with 401
+**Then** the CLI re-resolves auth once and retries that request with the new
+token; if the re-resolved token is unchanged, or the request carried operator
+configured `header` / `bearer_token` auth instead, the 401 surfaces unchanged
 
 ### Repeat mode reruns scenarios with isolated users per iteration
 

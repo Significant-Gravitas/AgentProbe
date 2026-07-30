@@ -596,15 +596,63 @@ export class HttpEndpointAdapter {
   }
 
   private async fetch(request: ResolvedRequest): Promise<Response> {
-    return await this.fetchImpl(request.url, {
+    const response = await this.fetchImpl(
+      request.url,
+      this.requestInit(request.headers, request),
+    );
+    if (response.status !== 401) {
+      return response;
+    }
+    // Internally-resolved tokens expire mid-run (a Better Auth token lasts
+    // ~1h, shorter than a long benchmark), so a 401 on a request that carried
+    // one is retried once with a freshly minted token.
+    const refreshed = await this.reauthenticate(request);
+    if (!refreshed) {
+      return response;
+    }
+    return await this.fetchImpl(
+      request.url,
+      this.requestInit({ ...request.headers, ...refreshed }, request),
+    );
+  }
+
+  private requestInit(
+    headers: Record<string, string>,
+    request: ResolvedRequest,
+  ): RequestInit {
+    return {
       method: request.method,
-      headers: request.headers,
+      headers,
       body:
         request.content ??
         (request.jsonBody !== undefined
           ? JSON.stringify(request.jsonBody)
           : undefined),
-    });
+    };
+  }
+
+  /**
+   * Re-resolve internal auth after a 401. Returns the new headers only when
+   * the request actually carried the cached internal token and the retry would
+   * use a different one — configured `header`/`bearer_token` auth and
+   * unchanged tokens are left alone so a genuine 401 surfaces as itself.
+   */
+  private async reauthenticate(
+    request: ResolvedRequest,
+  ): Promise<Record<string, string> | undefined> {
+    const previous = this.cachedAuthHeaders;
+    if (!previous?.Authorization) {
+      return undefined;
+    }
+    if (request.headers.Authorization !== previous.Authorization) {
+      return undefined;
+    }
+    this.cachedAuthHeaders = undefined;
+    const refreshed = await this.resolveInternalAuthHeaders();
+    if (refreshed.Authorization === previous.Authorization) {
+      return undefined;
+    }
+    return refreshed;
   }
 
   private async resolveRequestDefinition(
@@ -723,7 +771,7 @@ export class HttpEndpointAdapter {
       throw new AgentProbeRuntimeError(
         `AutoGPT auth failed: ${
           error instanceof Error ? error.message : String(error)
-        }. Verify the backend is running at the configured URL (AUTOGPT_BACKEND_URL or default http://localhost:8006) and that AUTOGPT_JWT_SECRET is set correctly.`,
+        }. Verify the backend is running at the configured URL (AUTOGPT_BACKEND_URL or default http://localhost:8006) and that the credentials for AUTOGPT_AUTH_MODE are set correctly (AUTOGPT_JWT_SECRET for "supabase"; AUTOGPT_FRONTEND_URL, AUTOGPT_EMAIL and AUTOGPT_PASSWORD for "better-auth").`,
       );
     }
   }
