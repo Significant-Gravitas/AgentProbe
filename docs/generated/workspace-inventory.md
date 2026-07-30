@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-07-30T23:31:39.025Z
+Generated: 2026-07-30T23:36:50.732Z
 
 ```text
   AGENTS.md
@@ -368,6 +368,7 @@ docs/generated/
 docs/playbooks/
   docs/playbooks/INDEX.md
   docs/playbooks/agent-probe-server.md
+  docs/playbooks/autogpt-auth.md
 docs/product-specs/
   docs/product-specs/INDEX.md
   docs/product-specs/README.md
