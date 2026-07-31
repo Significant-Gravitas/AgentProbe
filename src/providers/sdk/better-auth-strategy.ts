@@ -19,12 +19,13 @@ import {
  * sign-in / token, then uses the resulting token against
  * `AUTOGPT_BACKEND_URL`.
  *
- * The flow is **sign-in first**. The benchmark account is expected to already
- * exist: GoTrue accounts were copied into Better Auth at the platform cutover
- * with their passwords intact. Sign-up runs only when `AUTOGPT_ALLOW_SIGNUP`
- * is set, because where signup is open an unconditional sign-up mints a brand
- * new account on every run — the removed forge path invented a throwaway
- * identity per run, and that habit must not carry over to real accounts.
+ * The flow is **sign-in first**, so an existing account (including GoTrue
+ * accounts copied into Better Auth at the platform cutover with their
+ * passwords intact) is never re-registered. When sign-in reports an unknown
+ * account, the benchmark account is **auto-provisioned via sign-up by
+ * default** — nobody wants to hand-create accounts per environment. Setting
+ * `AUTOGPT_ALLOW_SIGNUP=false` turns a missing account into a hard error
+ * instead, for targets where account creation must not happen.
  *
  * The ENTERPRISE tier grant hits an admin-only endpoint. It runs with the
  * account's own token when that token carries `role: "admin"` (the platform
@@ -136,8 +137,8 @@ async function signUp(options: {
   }
   throw new Error(
     `Better Auth sign-up failed (${response.status}) for ${options.email}: ` +
-      `${detail}. Provision the benchmark account out-of-band and leave ` +
-      "AUTOGPT_ALLOW_SIGNUP unset if this environment gates signup.",
+      `${detail}. Provision the benchmark account out-of-band and set ` +
+      "AUTOGPT_ALLOW_SIGNUP=false if this environment gates signup.",
   );
 }
 
@@ -186,12 +187,19 @@ function tokenClaims(token: string): { sub?: string; role?: string } {
   }
 }
 
+/**
+ * Auto-provisioning is on unless AUTOGPT_ALLOW_SIGNUP explicitly disables it:
+ * nobody wants to hand-create benchmark accounts, and sign-in runs first so
+ * an existing account is never re-registered. Set it to false against
+ * environments where a failed sign-in must be an error instead of a signup
+ * (e.g. gated-signup or account-hygiene-sensitive targets).
+ */
 function allowSignupFromEnv(explicit?: boolean): boolean {
   if (explicit !== undefined) {
     return explicit;
   }
   const raw = Bun.env.AUTOGPT_ALLOW_SIGNUP?.trim().toLowerCase();
-  return raw === "1" || raw === "true" || raw === "yes";
+  return !(raw === "0" || raw === "false" || raw === "no");
 }
 
 /**
@@ -258,9 +266,10 @@ export async function resolveBetterAuthAuth(
   }
 
   // The runner pins an identity per scenario iteration for memory isolation.
-  // With signup available, that identity becomes a derived sub-account;
-  // without it, every iteration shares the base account and isolation is
-  // gone — worth a loud warning, not an error, since not every run cares.
+  // With signup available (the default), that identity becomes a derived
+  // sub-account; with signup disabled, every iteration shares the base
+  // account and isolation is gone — worth a loud warning, not an error,
+  // since not every run cares.
   const allowSignup = allowSignupFromEnv(options.allowSignup);
   let account = { email, password };
   if (options.userId) {
@@ -273,8 +282,9 @@ export async function resolveBetterAuthAuth(
     } else {
       logWarn(
         "AutoGPT auth: an isolated identity was requested but " +
-          "AUTOGPT_ALLOW_SIGNUP is off; all iterations share the base " +
-          "benchmark account, so memory is NOT isolated between them.",
+          "AUTOGPT_ALLOW_SIGNUP=false disables sub-account provisioning; " +
+          "all iterations share the base benchmark account, so memory is " +
+          "NOT isolated between them.",
       );
     }
   }
@@ -285,11 +295,13 @@ export async function resolveBetterAuthAuth(
     if (!(unknownAccount && allowSignup)) {
       throw new Error(
         `Better Auth sign-in failed (${attempt.status}) for ${account.email}: ` +
-          `${attempt.detail}. The benchmark account must exist in Better Auth ` +
-          "— GoTrue accounts migrated at the platform cutover keep their " +
-          "passwords, but an account seeded directly into GoTrue afterwards " +
-          "will not exist there. Set AUTOGPT_ALLOW_SIGNUP=true to provision " +
-          "it where signup is open.",
+          `${attempt.detail}. ` +
+          (unknownAccount
+            ? "AUTOGPT_ALLOW_SIGNUP=false disabled auto-provisioning, so a " +
+              "missing account is an error: provision it out-of-band, fix " +
+              "the credentials, or unset AUTOGPT_ALLOW_SIGNUP."
+            : "The credentials were rejected for a reason auto-provisioning " +
+              "cannot fix; check AUTOGPT_EMAIL and AUTOGPT_PASSWORD."),
       );
     }
     await signUp({ frontendUrl, ...account, name });

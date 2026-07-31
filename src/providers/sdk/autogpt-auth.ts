@@ -75,9 +75,10 @@ export type ResolveAuthOptions = {
   userId?: string;
   name?: string;
   /**
-   * Provision the account via sign-up when it does not exist. Defaults to
-   * `AUTOGPT_ALLOW_SIGNUP`; off unless asked for, so runs against an
-   * open-signup environment cannot silently create accounts.
+   * Provision the account via sign-up when it does not exist. On by default
+   * (sign-in always runs first, so existing accounts are never
+   * re-registered); `AUTOGPT_ALLOW_SIGNUP=false` makes a missing account a
+   * hard error instead.
    */
   allowSignup?: boolean;
 };

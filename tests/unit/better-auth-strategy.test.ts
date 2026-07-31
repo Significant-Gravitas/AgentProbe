@@ -176,7 +176,7 @@ describe("better-auth strategy", () => {
     ).toBe(false);
   });
 
-  test("does not create an account when sign-in fails and signup is not allowed", async () => {
+  test("does not create an account when signup is explicitly disabled", async () => {
     installFetch({ knownAccounts: new Set() });
 
     await expect(
@@ -184,20 +184,20 @@ describe("better-auth strategy", () => {
         frontendUrl: FRONTEND,
         backendUrl: BACKEND,
         ...ACCOUNT,
+        allowSignup: false,
       }),
-    ).rejects.toThrow(/must exist in Better Auth/i);
+    ).rejects.toThrow(/disabled auto-provisioning/i);
 
     expect(requests.map((r) => r.url)).toEqual(["/api/auth/sign-in/email"]);
   });
 
-  test("provisions the account only when signup is explicitly allowed", async () => {
+  test("auto-provisions the account by default when sign-in reports it unknown", async () => {
     installFetch({ knownAccounts: new Set() });
 
     const result = await resolveBetterAuthAuth({
       frontendUrl: FRONTEND,
       backendUrl: BACKEND,
       ...ACCOUNT,
-      allowSignup: true,
     });
 
     expect(result.token).toBe(ES256_TOKEN);
@@ -269,7 +269,7 @@ describe("better-auth strategy", () => {
     expect(tierCall?.body).toEqual({ tier: "ENTERPRISE", user_id: SUBJECT });
   });
 
-  test("derives an isolated sub-account from the pinned identity when signup is allowed", async () => {
+  test("derives an isolated sub-account from the pinned identity by default", async () => {
     const pinned = "3F6C2A1E-5B7D-4E8F-9A0B-1C2D3E4F5A6B";
     const derived = deriveIsolatedAccount({
       ...ACCOUNT,
@@ -290,7 +290,6 @@ describe("better-auth strategy", () => {
       backendUrl: BACKEND,
       ...ACCOUNT,
       userId: pinned,
-      allowSignup: true,
     });
 
     const authCalls = requests
@@ -312,7 +311,8 @@ describe("better-auth strategy", () => {
     );
   });
 
-  test("shares the base account when isolation is requested but signup is off", async () => {
+  test("shares the base account when isolation is requested but signup is disabled via env", async () => {
+    process.env.AUTOGPT_ALLOW_SIGNUP = "false";
     await resolveBetterAuthAuth({
       frontendUrl: FRONTEND,
       backendUrl: BACKEND,

@@ -626,7 +626,6 @@ export async function runAgentprobe(
     AUTOGPT_FRONTEND_URL: options.backendUrl,
     AUTOGPT_EMAIL: E2E_BENCH_ACCOUNT.email,
     AUTOGPT_PASSWORD: E2E_BENCH_ACCOUNT.password,
-    AUTOGPT_ALLOW_SIGNUP: "true",
     AGENTPROBE_E2E_OPENAI_SCRIPT: options.workspace.openAiScriptPath,
     AGENTPROBE_E2E_OPENAI_LOG: options.workspace.openAiLogPath,
     ...options.extraEnv,

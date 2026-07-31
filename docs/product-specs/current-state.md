@@ -48,10 +48,11 @@ Last validated against `platform.md`: 2026-05-15
 - AutoGPT auth is Better Auth only: a pre-provisioned benchmark account signs
   in against the platform frontend and mints a real ES256 token the backend
   verifies via JWKS. The legacy forged-HS256 GoTrue path was removed; a
-  leftover `AUTOGPT_AUTH_MODE=supabase` fails loudly. Pinned per-iteration
-  identities become derived plus-addressed sub-accounts when
-  `AUTOGPT_ALLOW_SIGNUP` is on; otherwise iterations share the base account
-  and a warning notes that memory is not isolated.
+  leftover `AUTOGPT_AUTH_MODE=supabase` fails loudly. Accounts (the benchmark
+  account and the derived plus-addressed per-iteration sub-accounts used for
+  memory isolation) auto-provision by default via sign-in-first sign-up;
+  `AUTOGPT_ALLOW_SIGNUP=false` makes a missing account a hard error and drops
+  iterations onto the shared base account with a not-isolated warning.
 - Internally-resolved AutoGPT tokens are refreshed once on a 401, so a token
   expiring mid-run does not fail the run.
 - The copied `data/` and `dashboard/` assets have landed ahead of the runtime

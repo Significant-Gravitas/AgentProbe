@@ -98,8 +98,10 @@ boundary metadata that agents and reports can inspect
 `AUTOGPT_PASSWORD`) in to Better Auth on the platform frontend
 (`AUTOGPT_FRONTEND_URL`), mints a real ES256 token the backend verifies via
 JWKS, registers the user with the backend, and extracts tool-call evidence
-from the backend SSE stream. Auth never invents an account and only signs one
-up when `AUTOGPT_ALLOW_SIGNUP` is set. A leftover
+from the backend SSE stream. Auth never invents an email, and sign-in runs
+first — but a benchmark account that does not exist yet is auto-provisioned
+via sign-up by default; `AUTOGPT_ALLOW_SIGNUP=false` turns a missing account
+into a hard error instead. A leftover
 `AUTOGPT_AUTH_MODE=supabase` fails loudly: the legacy forged-HS256 path was
 removed with the platform's GoTrue cutover. The dashboard server may persist a
 per-endpoint override for the AutoGPT backend base URL; when present, that
@@ -110,12 +112,12 @@ environment fallback for runs launched through the server.
 
 **Given** a run whose scenario iterations pin per-iteration user identities
 for memory isolation
-**When** `AUTOGPT_ALLOW_SIGNUP` is enabled
+**When** the CLI resolves auth for those iterations
 **Then** each pinned identity signs in as a sub-account derived from the base
 benchmark credentials — a plus-addressed email (`bench+<seed>@…`) with an
 HMAC-derived password — provisioned through the normal sign-up flow on first
 use, so iterations stay memory-isolated with only one credential pair in the
-environment. Without `AUTOGPT_ALLOW_SIGNUP`, all iterations share the base
+environment. With `AUTOGPT_ALLOW_SIGNUP=false`, all iterations share the base
 account and the CLI logs a warning that memory is not isolated between them.
 
 ### Expired AutoGPT tokens are refreshed mid-run

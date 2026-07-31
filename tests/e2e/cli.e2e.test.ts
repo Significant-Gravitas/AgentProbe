@@ -969,7 +969,6 @@ describe("bun e2e baseline for the typescript cli", () => {
       AUTOGPT_FRONTEND_URL: backend.url,
       AUTOGPT_EMAIL: E2E_BENCH_ACCOUNT.email,
       AUTOGPT_PASSWORD: E2E_BENCH_ACCOUNT.password,
-      AUTOGPT_ALLOW_SIGNUP: "true",
       AGENTPROBE_E2E_OPENAI_SCRIPT: workspace.openAiScriptPath,
       AGENTPROBE_E2E_OPENAI_LOG: workspace.openAiLogPath,
       AGENTPROBE_DISABLE_BROWSER_OPEN: "1",

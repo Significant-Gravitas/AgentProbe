@@ -7,9 +7,10 @@ or debugging platform auth failures.
 
 ## How auth works
 
-AgentProbe signs a **real, pre-provisioned account** in to Better Auth, which
-is mounted on the platform **frontend** (not the backend AgentProbe benchmarks
-against), then mints an ES256 token the backend verifies via JWKS.
+AgentProbe signs a **real account** in to Better Auth, which is mounted on
+the platform **frontend** (not the backend AgentProbe benchmarks against),
+then mints an ES256 token the backend verifies via JWKS. The account is
+auto-provisioned on first use where signup is open (see below).
 
 The legacy path — forging an HS256 token with the shared GoTrue secret — was
 removed when the platform dropped Supabase/GoTrue. AgentProbe therefore
@@ -31,26 +32,32 @@ the environment is on Better Auth before pointing a probe at it:
 curl -fsS "$AUTOGPT_FRONTEND_URL/api/auth/jwks"   # 200 + an ES256 key
 ```
 
-## The benchmark account must already exist
+## Accounts auto-provision by default
 
-Auth has no random-email fallback. The removed forge could invent an identity
-per run because the token was self-signed; a real login cannot.
+Auth has no random-email fallback — `AUTOGPT_EMAIL` names the one benchmark
+identity — but the account itself does not need to exist up front: sign-in
+runs first, and when it reports an unknown account AgentProbe signs it up
+automatically where signup is open. Existing accounts (including GoTrue
+accounts copied into Better Auth at the cutover with their passwords intact)
+are never re-registered.
 
-GoTrue accounts were copied into Better Auth at the platform cutover and keep
-their passwords, so a pre-cutover account signs in as-is. An account created
-**after** the cutover by writing to GoTrue / `auth.users` directly will not
-exist in Better Auth and will fail with `INVALID_EMAIL_OR_PASSWORD`.
+`AUTOGPT_ALLOW_SIGNUP=false` disables auto-provisioning and turns a missing
+account into a hard error. Set it against gated-signup environments (the
+sign-up would fail anyway; the error is cleaner) or anywhere account creation
+must not happen. Note the trade-off: with provisioning on, a typo'd email or
+password mints a fresh account instead of failing — if a run unexpectedly
+"works" with a brand-new empty account, check the credentials.
 
-Where signup is open, `AUTOGPT_ALLOW_SIGNUP=true` lets AgentProbe provision
-accounts on first use. It is off by default on purpose: an unconditional
-sign-up would mint a new real account on every run.
+An account created **after** the cutover by writing to GoTrue / `auth.users`
+directly will not exist in Better Auth; with provisioning on you get a new
+Better Auth account under the same email rather than the GoTrue one.
 
 ## Isolated identities: derived sub-accounts
 
 The runner pins a fresh user identity per scenario iteration so memory
-evaluations stay isolated. Real logins cannot forge those identities, so with
-`AUTOGPT_ALLOW_SIGNUP=true` each pinned identity becomes a **derived
-sub-account** of the base benchmark account:
+evaluations stay isolated. Real logins cannot forge those identities, so each
+pinned identity becomes a **derived sub-account** of the base benchmark
+account (on by default, like all provisioning):
 
 - email: plus-addressed from the base email — `bench+<seed>@agpt.co`, where
   the seed comes from the pinned id
@@ -60,12 +67,13 @@ One credential pair in the environment, any number of isolated accounts; each
 is provisioned through the normal sign-up flow on first use. Expect benchmark
 runs to accumulate `+`-suffixed accounts in the target environment — that is
 by design (one identity per iteration is the isolation mechanism), but it
-means `AUTOGPT_ALLOW_SIGNUP` should only ever be enabled against environments
-that tolerate benchmark accounts (dev/local, never prod).
+means probes should only point at environments that tolerate benchmark
+accounts (dev/local); set `AUTOGPT_ALLOW_SIGNUP=false` anywhere they are not
+welcome.
 
-Without `AUTOGPT_ALLOW_SIGNUP`, every iteration signs in as the base account:
-runs work, but memory is **not** isolated between iterations and the CLI logs
-a warning. Memory suites need derived accounts to be meaningful.
+With `AUTOGPT_ALLOW_SIGNUP=false`, every iteration signs in as the base
+account: runs work, but memory is **not** isolated between iterations and the
+CLI logs a warning. Memory suites need derived accounts to be meaningful.
 
 ## Rate-limit tier
 
@@ -96,8 +104,9 @@ surfaces unchanged.
 
 | Symptom | Cause |
 | --- | --- |
-| `sign-in failed (401) … INVALID_EMAIL_OR_PASSWORD` | Account absent from Better Auth, or wrong password. Check it existed before the cutover |
-| `sign-up failed (403)` | Signup is gated on that environment; provision the account out-of-band and unset `AUTOGPT_ALLOW_SIGNUP` |
+| `sign-in failed (401) … INVALID_EMAIL_OR_PASSWORD` | Wrong password for an existing account, or `AUTOGPT_ALLOW_SIGNUP=false` with a missing one |
+| `sign-up failed (403)` | Signup is gated on that environment; provision the account out-of-band and set `AUTOGPT_ALLOW_SIGNUP=false` |
 | `requires a stable benchmark account` | `AUTOGPT_EMAIL` is unset — auth will not invent one |
 | `AUTOGPT_AUTH_MODE="supabase" is no longer supported` | Stale env var from before the forge removal; unset it and configure the Better Auth credentials |
-| `memory is NOT isolated` warning | An isolated identity was requested but `AUTOGPT_ALLOW_SIGNUP` is off; enable it (dev only) for derived sub-accounts |
+| `memory is NOT isolated` warning | `AUTOGPT_ALLOW_SIGNUP=false` blocks derived sub-accounts; remove the override where benchmark accounts are tolerated |
+| A run "works" against a fresh, empty account | Typo'd `AUTOGPT_EMAIL`/`AUTOGPT_PASSWORD` auto-provisioned a new account; fix the credentials |
