@@ -23,7 +23,6 @@ export type EndpointAdapterFactoryContext = {
   userId: string;
   userName?: string;
   baseUrlOverride?: string;
-  autogptJwtSecretOverride?: string;
 };
 
 export type EndpointAdapterFactory = (

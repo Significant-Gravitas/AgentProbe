@@ -9,6 +9,7 @@ import {
   buildOpenAiRules,
   cleanupWorkspace,
   createWorkspace,
+  E2E_BENCH_ACCOUNT,
   type E2EWorkspace,
   FakeAutogptBackend,
   queryRows,
@@ -33,18 +34,24 @@ type GatewaySession = {
 
 type GatewaySocket = ServerWebSocket<{ nonce: string }>;
 
-function jwtSubject(authorization: string | undefined): string | undefined {
+function jwtClaims(authorization: string | undefined): {
+  sub?: string;
+  email?: string;
+} {
   if (!authorization?.startsWith("Bearer ")) {
-    return undefined;
+    return {};
   }
   const [, payload] = authorization.slice("Bearer ".length).split(".");
   if (!payload) {
-    return undefined;
+    return {};
   }
   const decoded = JSON.parse(
     Buffer.from(payload, "base64url").toString("utf8"),
-  ) as { sub?: string };
-  return typeof decoded.sub === "string" ? decoded.sub : undefined;
+  ) as { sub?: string; email?: string };
+  return {
+    sub: typeof decoded.sub === "string" ? decoded.sub : undefined,
+    email: typeof decoded.email === "string" ? decoded.email : undefined,
+  };
 }
 
 async function waitForStderrMatch(
@@ -935,12 +942,20 @@ describe("bun e2e baseline for the typescript cli", () => {
     ]);
     expect(scenarioRows[0]?.user_id).not.toBe(scenarioRows[1]?.user_id);
 
-    const subjects = backend.requestLog
+    const registrations = backend.requestLog
       .filter((entry) => entry.kind === "register_user")
-      .map((entry) => jwtSubject(entry.headers.authorization))
-      .filter((value): value is string => typeof value === "string");
-    expect(new Set(subjects).size).toBe(2);
-    expect(subjects).toEqual(scenarioRows.map((row) => String(row.user_id)));
+      .map((entry) => jwtClaims(entry.headers.authorization));
+    expect(new Set(registrations.map((claims) => claims.sub)).size).toBe(2);
+    // Each iteration signs in as a sub-account derived from its pinned id.
+    expect(registrations.map((claims) => claims.email)).toEqual(
+      scenarioRows.map((row) => {
+        const seed = String(row.user_id)
+          .toLowerCase()
+          .replaceAll(/[^a-z0-9]/g, "")
+          .slice(0, 16);
+        return `bench+${seed}@e2e.test`;
+      }),
+    );
   });
 
   test("dashboard mode serves live state from the Bun dashboard server", async () => {
@@ -951,6 +966,10 @@ describe("bun e2e baseline for the typescript cli", () => {
       ...Bun.env,
       OPEN_ROUTER_API_KEY: "e2e-openrouter-key",
       AUTOGPT_BACKEND_URL: backend.url,
+      AUTOGPT_FRONTEND_URL: backend.url,
+      AUTOGPT_EMAIL: E2E_BENCH_ACCOUNT.email,
+      AUTOGPT_PASSWORD: E2E_BENCH_ACCOUNT.password,
+      AUTOGPT_ALLOW_SIGNUP: "true",
       AGENTPROBE_E2E_OPENAI_SCRIPT: workspace.openAiScriptPath,
       AGENTPROBE_E2E_OPENAI_LOG: workspace.openAiLogPath,
       AGENTPROBE_DISABLE_BROWSER_OPEN: "1",

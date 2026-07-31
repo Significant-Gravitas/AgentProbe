@@ -1,4 +1,7 @@
+import { createHash, createHmac } from "node:crypto";
+
 import type { AutogptAuthResult } from "../../shared/types/contracts.ts";
+import { logWarn } from "../../shared/utils/logging.ts";
 import {
   enableSubscription,
   type ResolveAuthOptions,
@@ -6,9 +9,10 @@ import {
 } from "./autogpt-auth.ts";
 
 /**
- * `better-auth` auth strategy: obtain a real ES256 token from Better Auth,
- * which the AutoGPT backend verifies via JWKS. Unlike the `supabase` mode,
- * nothing is forged — the token is minted by the platform for a real account.
+ * AgentProbe's auth strategy: obtain a real ES256 token from Better Auth,
+ * which the AutoGPT backend verifies via JWKS. Nothing is forged — the token
+ * is minted by the platform for a real account. (The legacy path forged an
+ * HS256 GoTrue token locally; it was removed with the platform cutover.)
  *
  * Better Auth is mounted on the **frontend** (Next.js), not the backend
  * AgentProbe benchmarks against, so this talks to `AUTOGPT_FRONTEND_URL` for
@@ -19,8 +23,8 @@ import {
  * exist: GoTrue accounts were copied into Better Auth at the platform cutover
  * with their passwords intact. Sign-up runs only when `AUTOGPT_ALLOW_SIGNUP`
  * is set, because where signup is open an unconditional sign-up mints a brand
- * new account on every run — the `supabase` mode invented a throwaway identity
- * per run, and that habit must not carry over to real accounts.
+ * new account on every run — the removed forge path invented a throwaway
+ * identity per run, and that habit must not carry over to real accounts.
  *
  * The ENTERPRISE tier grant hits an admin-only endpoint. It runs with the
  * account's own token when that token carries `role: "admin"` (the platform
@@ -190,6 +194,39 @@ function allowSignupFromEnv(explicit?: boolean): boolean {
   return raw === "1" || raw === "true" || raw === "yes";
 }
 
+/**
+ * Derive an isolated sub-account from the base benchmark credentials and a
+ * pinned identity seed. Real logins cannot invent a user per run the way the
+ * removed forge did, but memory evaluations still need one identity per
+ * scenario iteration — so the runner's pinned id becomes a plus-addressed
+ * variant of the base account (`bench+a1b2…@agpt.co`) with a password derived
+ * via HMAC from the base password. One credential pair in the environment,
+ * any number of isolated accounts; each is provisioned through the normal
+ * sign-up flow on first use.
+ */
+export function deriveIsolatedAccount(options: {
+  email: string;
+  password: string;
+  identitySeed: string;
+}): { email: string; password: string } {
+  const sanitized = options.identitySeed
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]/g, "")
+    .slice(0, 16);
+  const seed =
+    sanitized ||
+    createHash("sha256")
+      .update(options.identitySeed)
+      .digest("hex")
+      .slice(0, 16);
+  const at = options.email.lastIndexOf("@");
+  const email = `${options.email.slice(0, at)}+${seed}@${options.email.slice(at + 1)}`;
+  const password = createHmac("sha256", options.password)
+    .update(email)
+    .digest("hex");
+  return { email, password };
+}
+
 export async function resolveBetterAuthAuth(
   options: ResolveAuthOptions = {},
 ): Promise<AutogptAuthResult> {
@@ -204,28 +241,50 @@ export async function resolveBetterAuthAuth(
   const password = options.password ?? Bun.env.AUTOGPT_PASSWORD;
   const name = options.name ?? Bun.env.AUTOGPT_USER_NAME ?? "AgentProbe User";
 
-  // Deliberately no random-email fallback: `supabase` mode could invent an
-  // identity because the token was forged, but a real login needs a stable,
-  // pre-provisioned account.
+  // Deliberately no random-email fallback: the removed forge path could
+  // invent an identity because the token was forged, but a real login needs
+  // a stable, pre-provisioned account.
   if (!email) {
     throw new Error(
-      'AUTOGPT_AUTH_MODE="better-auth" requires a stable benchmark account: ' +
+      "AutoGPT auth requires a stable benchmark account: " +
         "set AUTOGPT_EMAIL (or pass options.email).",
     );
   }
   if (!password) {
     throw new Error(
-      'AUTOGPT_AUTH_MODE="better-auth" requires a password: set ' +
+      "AutoGPT auth requires a password: set " +
         "AUTOGPT_PASSWORD (or pass options.password).",
     );
   }
 
-  let attempt = await signIn({ frontendUrl, email, password });
+  // The runner pins an identity per scenario iteration for memory isolation.
+  // With signup available, that identity becomes a derived sub-account;
+  // without it, every iteration shares the base account and isolation is
+  // gone — worth a loud warning, not an error, since not every run cares.
+  const allowSignup = allowSignupFromEnv(options.allowSignup);
+  let account = { email, password };
+  if (options.userId) {
+    if (allowSignup) {
+      account = deriveIsolatedAccount({
+        email,
+        password,
+        identitySeed: options.userId,
+      });
+    } else {
+      logWarn(
+        "AutoGPT auth: an isolated identity was requested but " +
+          "AUTOGPT_ALLOW_SIGNUP is off; all iterations share the base " +
+          "benchmark account, so memory is NOT isolated between them.",
+      );
+    }
+  }
+
+  let attempt = await signIn({ frontendUrl, ...account });
   if (!attempt.ok) {
     const unknownAccount = attempt.code === "INVALID_EMAIL_OR_PASSWORD";
-    if (!(unknownAccount && allowSignupFromEnv(options.allowSignup))) {
+    if (!(unknownAccount && allowSignup)) {
       throw new Error(
-        `Better Auth sign-in failed (${attempt.status}) for ${email}: ` +
+        `Better Auth sign-in failed (${attempt.status}) for ${account.email}: ` +
           `${attempt.detail}. The benchmark account must exist in Better Auth ` +
           "— GoTrue accounts migrated at the platform cutover keep their " +
           "passwords, but an account seeded directly into GoTrue afterwards " +
@@ -233,12 +292,12 @@ export async function resolveBetterAuthAuth(
           "it where signup is open.",
       );
     }
-    await signUp({ frontendUrl, email, password, name });
-    attempt = await signIn({ frontendUrl, email, password });
+    await signUp({ frontendUrl, ...account, name });
+    attempt = await signIn({ frontendUrl, ...account });
     if (!attempt.ok) {
       throw new Error(
         `Better Auth sign-in failed after sign-up (${attempt.status}) for ` +
-          `${email}: ${attempt.detail}.`,
+          `${account.email}: ${attempt.detail}.`,
       );
     }
   }
@@ -254,14 +313,15 @@ export async function resolveBetterAuthAuth(
 
   // The tier grant is admin-only. An admin benchmark account authorizes it
   // with its own token; otherwise an explicit AUTOGPT_ADMIN_TOKEN can. With
-  // neither, the account keeps its own tier.
+  // neither, the account keeps its own tier. It targets the minted token's
+  // own subject — the runner's pinned id is a probe-side seed, not a real
+  // platform user id — unless AUTOGPT_USER_ID explicitly overrides.
   const claims = tokenClaims(token);
   const adminToken = Bun.env.AUTOGPT_ADMIN_TOKEN?.trim();
   const grantToken =
     adminToken || (claims.role === "admin" ? token : undefined);
   if (grantToken) {
-    const userId =
-      options.userId ?? Bun.env.AUTOGPT_USER_ID?.trim() ?? claims.sub;
+    const userId = Bun.env.AUTOGPT_USER_ID?.trim() || claims.sub;
     if (!userId) {
       throw new Error(
         "Cannot apply the rate-limit tier: the minted token has no `sub` " +

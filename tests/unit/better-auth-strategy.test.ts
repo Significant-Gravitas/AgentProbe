@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { createHmac } from "node:crypto";
 
-import { resolveBetterAuthAuth } from "../../src/providers/sdk/better-auth-strategy.ts";
+import {
+  deriveIsolatedAccount,
+  resolveBetterAuthAuth,
+} from "../../src/providers/sdk/better-auth-strategy.ts";
 
 type RecordedRequest = {
   method: string;
@@ -250,20 +254,76 @@ describe("better-auth strategy", () => {
     ).rejects.toThrow(/Signups are not allowed/);
   });
 
-  test("applies the ENTERPRISE tier with an admin token", async () => {
+  test("applies the ENTERPRISE tier with an admin token, targeting the token's subject", async () => {
     process.env.AUTOGPT_ADMIN_TOKEN = "admin-bearer";
     await resolveBetterAuthAuth({
       frontendUrl: FRONTEND,
       backendUrl: BACKEND,
       ...ACCOUNT,
-      userId: "user-1",
     });
 
     const tierCall = requests.find(
       (r) => r.url === "/api/copilot/admin/rate_limit/tier",
     );
     expect(tierCall?.authorization).toBe("Bearer admin-bearer");
-    expect(tierCall?.body).toEqual({ tier: "ENTERPRISE", user_id: "user-1" });
+    expect(tierCall?.body).toEqual({ tier: "ENTERPRISE", user_id: SUBJECT });
+  });
+
+  test("derives an isolated sub-account from the pinned identity when signup is allowed", async () => {
+    const pinned = "3F6C2A1E-5B7D-4E8F-9A0B-1C2D3E4F5A6B";
+    const derived = deriveIsolatedAccount({
+      ...ACCOUNT,
+      identitySeed: pinned,
+    });
+    expect(derived.email).toBe("bench+3f6c2a1e5b7d4e8f@agpt.co");
+    expect(derived.password).toBe(
+      createHmac("sha256", ACCOUNT.password)
+        .update(derived.email)
+        .digest("hex"),
+    );
+
+    // Only the base account exists, so the derived one is provisioned on
+    // first use: sign-in 401 → sign-up → sign-in.
+    installFetch({ knownAccounts: new Set([ACCOUNT.email]) });
+    await resolveBetterAuthAuth({
+      frontendUrl: FRONTEND,
+      backendUrl: BACKEND,
+      ...ACCOUNT,
+      userId: pinned,
+      allowSignup: true,
+    });
+
+    const authCalls = requests
+      .filter((r) => r.url.startsWith("/api/auth/sign-"))
+      .map((r) => ({
+        url: r.url,
+        email: (r.body as { email?: string } | null)?.email,
+      }));
+    expect(authCalls).toEqual([
+      { url: "/api/auth/sign-in/email", email: derived.email },
+      { url: "/api/auth/sign-up/email", email: derived.email },
+      { url: "/api/auth/sign-in/email", email: derived.email },
+    ]);
+    const signUpCall = requests.find(
+      (r) => r.url === "/api/auth/sign-up/email",
+    );
+    expect((signUpCall?.body as { password?: string } | null)?.password).toBe(
+      derived.password,
+    );
+  });
+
+  test("shares the base account when isolation is requested but signup is off", async () => {
+    await resolveBetterAuthAuth({
+      frontendUrl: FRONTEND,
+      backendUrl: BACKEND,
+      ...ACCOUNT,
+      userId: "3f6c2a1e-5b7d-4e8f-9a0b-1c2d3e4f5a6b",
+    });
+
+    const signIns = requests.filter((r) => r.url === "/api/auth/sign-in/email");
+    expect(
+      signIns.map((r) => (r.body as { email?: string } | null)?.email),
+    ).toEqual([ACCOUNT.email]);
   });
 
   test("targets the tier grant at the token's own subject when no user id is given", async () => {

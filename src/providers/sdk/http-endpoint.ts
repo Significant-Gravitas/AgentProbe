@@ -771,7 +771,7 @@ export class HttpEndpointAdapter {
       throw new AgentProbeRuntimeError(
         `AutoGPT auth failed: ${
           error instanceof Error ? error.message : String(error)
-        }. Verify the backend is running at the configured URL (AUTOGPT_BACKEND_URL or default http://localhost:8006) and that the credentials for AUTOGPT_AUTH_MODE are set correctly (AUTOGPT_JWT_SECRET for "supabase"; AUTOGPT_FRONTEND_URL, AUTOGPT_EMAIL and AUTOGPT_PASSWORD for "better-auth").`,
+        }. Verify the backend is running at the configured URL (AUTOGPT_BACKEND_URL or default http://localhost:8006) and that the Better Auth credentials are set (AUTOGPT_FRONTEND_URL, AUTOGPT_EMAIL, AUTOGPT_PASSWORD).`,
       );
     }
   }

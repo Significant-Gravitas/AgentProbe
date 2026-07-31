@@ -11,7 +11,6 @@ import type { SuiteController } from "./suite-controller.ts";
 export type EndpointOverridePayload = {
   endpoint_path: string;
   base_url: string | null;
-  autogpt_jwt_secret: string | null;
   updated_at: string;
 };
 
@@ -25,13 +24,9 @@ export type EndpointDefaultsPayload = {
 
 export type EndpointOverrideFields = {
   baseUrl?: string;
-  autogptJwtSecret?: string;
 };
 
-const KNOWN_FIELDS: Array<keyof EndpointOverrideFields> = [
-  "baseUrl",
-  "autogptJwtSecret",
-];
+const KNOWN_FIELDS: Array<keyof EndpointOverrideFields> = ["baseUrl"];
 
 function readBaseUrlFromConnection(connection: unknown): string | undefined {
   if (!connection || typeof connection !== "object") {
@@ -52,14 +47,9 @@ function toPayload(stored: StoredEndpointOverride): EndpointOverridePayload {
     typeof stored.overrides.baseUrl === "string"
       ? stored.overrides.baseUrl
       : null;
-  const autogptJwtSecret =
-    typeof stored.overrides.autogptJwtSecret === "string"
-      ? stored.overrides.autogptJwtSecret
-      : null;
   return {
     endpoint_path: stored.endpointPath,
     base_url: baseUrl,
-    autogpt_jwt_secret: autogptJwtSecret,
     updated_at: stored.updatedAt,
   };
 }
@@ -80,23 +70,6 @@ function pickKnownFields(raw: Record<string, unknown>): EndpointOverrideFields {
       const trimmed = value.trim();
       if (trimmed) {
         result.baseUrl = trimmed;
-      }
-    }
-  }
-  if (Object.hasOwn(raw, "autogpt_jwt_secret")) {
-    const value = raw.autogpt_jwt_secret;
-    if (value === null || value === undefined || value === "") {
-      // explicit clear — caller can also use DELETE
-    } else if (typeof value !== "string") {
-      throw new HttpInputError(
-        400,
-        "bad_request",
-        "autogpt_jwt_secret must be a string.",
-      );
-    } else {
-      const trimmed = value.trim();
-      if (trimmed) {
-        result.autogptJwtSecret = trimmed;
       }
     }
   }
@@ -128,9 +101,6 @@ export class EndpointOverridesController {
     const fields: EndpointOverrideFields = {};
     if (typeof stored.overrides.baseUrl === "string") {
       fields.baseUrl = stored.overrides.baseUrl;
-    }
-    if (typeof stored.overrides.autogptJwtSecret === "string") {
-      fields.autogptJwtSecret = stored.overrides.autogptJwtSecret;
     }
     return fields;
   }
@@ -193,7 +163,6 @@ export class EndpointOverridesController {
       return {
         endpoint_path: relativePath,
         base_url: null,
-        autogpt_jwt_secret: null,
         updated_at: new Date().toISOString(),
       };
     }

@@ -65,10 +65,9 @@ bun run ci
 - `AGENTPROBE_PERSONA_MODEL`: optional persona model override
 - `OPENCLAW_GATEWAY_URL`: default OpenClaw gateway URL
 - `AUTOGPT_BACKEND_URL`: default local AutoGPT backend URL
-- `AUTOGPT_AUTH_MODE`: `supabase` (default, forged HS256) or `better-auth`
-  (real ES256 login); `better-auth` also needs `AUTOGPT_FRONTEND_URL`,
-  `AUTOGPT_EMAIL`, and `AUTOGPT_PASSWORD` — see
-  `docs/playbooks/autogpt-auth.md`
+- `AUTOGPT_FRONTEND_URL`, `AUTOGPT_EMAIL`, `AUTOGPT_PASSWORD`: Better Auth
+  real-login credentials for the AutoGPT platform (the only auth path — the
+  forged-token mode was removed); see `docs/playbooks/autogpt-auth.md`
 
 ## Hard rules
 

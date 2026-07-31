@@ -13,7 +13,8 @@ Derived from `platform.md`. Every scenario should have a coverage owner.
 | Persona simulation uses a configurable default model with hidden reasoning | `tests/unit/simulator.test.ts` | ✅ covered |
 | Parallel mode overlaps scenario execution while preserving ordering | `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Multi-session memory scenarios preserve pinned identity and session controls | `tests/unit/runner.test.ts` + `tests/unit/scenario-parsing.test.ts` | ⏳ planned |
-| AutoGPT preset resolves auth internally per auth mode | `tests/unit/autogpt-auth.test.ts` + `tests/unit/better-auth-strategy.test.ts` + `tests/unit/adapters.test.ts` | ⏳ expanding |
+| AutoGPT preset resolves auth internally via Better Auth | `tests/unit/autogpt-auth.test.ts` + `tests/unit/better-auth-strategy.test.ts` + `tests/unit/adapters.test.ts` | ✅ covered |
+| Pinned identities become derived Better Auth sub-accounts | `tests/unit/better-auth-strategy.test.ts` + `tests/e2e/cli.e2e.test.ts` | ✅ covered |
 | Expired AutoGPT tokens are refreshed mid-run | `tests/unit/adapters.test.ts` | ✅ covered |
 | Repeat mode reruns scenarios with isolated users per iteration | `tests/unit/runner.test.ts` + `tests/e2e/cli.e2e.test.ts` | ⏳ planned |
 | OpenClaw CLI commands manage sessions, chat, and history | `tests/e2e/cli.e2e.test.ts` | ✅ covered |

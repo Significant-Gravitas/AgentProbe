@@ -13,7 +13,8 @@ Last validated against `platform.md`: 2026-05-15
 - [x] Persona simulation uses a configurable default model with hidden reasoning
 - [x] Parallel mode overlaps scenario execution while preserving ordering
 - [ ] Multi-session memory scenarios preserve pinned identity and session controls
-- [ ] AutoGPT preset resolves auth internally per auth mode
+- [x] AutoGPT preset resolves auth internally via Better Auth
+- [x] Pinned identities become derived Better Auth sub-accounts
 - [x] Expired AutoGPT tokens are refreshed mid-run
 - [ ] Repeat mode reruns scenarios with isolated users per iteration
 - [x] OpenClaw CLI commands manage sessions, chat, and history
@@ -44,12 +45,13 @@ Last validated against `platform.md`: 2026-05-15
 
 - The Bun-owned end-to-end baseline now covers validation, run/report flows,
   filtering, dry-run, parallel execution, and the OpenClaw CLI path.
-- AutoGPT auth resolves through a mode seam (`AUTOGPT_AUTH_MODE`, default
-  `supabase`): the `supabase` mode forges an HS256 token in the provider layer;
-  the `better-auth` mode signs a pre-provisioned account in against the
-  platform frontend and mints a real ES256 token. The platform dev environment
-  has cut over to Better Auth and needs `AUTOGPT_AUTH_MODE=better-auth`;
-  production is still on Supabase GoTrue and stays on the default.
+- AutoGPT auth is Better Auth only: a pre-provisioned benchmark account signs
+  in against the platform frontend and mints a real ES256 token the backend
+  verifies via JWKS. The legacy forged-HS256 GoTrue path was removed; a
+  leftover `AUTOGPT_AUTH_MODE=supabase` fails loudly. Pinned per-iteration
+  identities become derived plus-addressed sub-accounts when
+  `AUTOGPT_ALLOW_SIGNUP` is on; otherwise iterations share the base account
+  and a warning notes that memory is not isolated.
 - Internally-resolved AutoGPT tokens are refreshed once on a 401, so a token
   expiring mid-run does not fail the run.
 - The copied `data/` and `dashboard/` assets have landed ahead of the runtime

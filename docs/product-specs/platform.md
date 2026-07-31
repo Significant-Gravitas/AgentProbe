@@ -90,21 +90,33 @@ session-level `max_turns`, and context fields such as `user_name` or
 session-specific turn caps without aborting later sessions, and records session
 boundary metadata that agents and reports can inspect
 
-### AutoGPT preset resolves auth internally per auth mode
+### AutoGPT preset resolves auth internally via Better Auth
 
 **Given** an AutoGPT preset endpoint configured for AgentProbe
 **When** the CLI prepares authenticated requests for that endpoint
-**Then** the CLI resolves the bearer token internally according to
-`AUTOGPT_AUTH_MODE`, registers the user with the backend, and extracts
-tool-call evidence from the backend SSE stream. In `supabase` mode (default)
-the token is forged locally against the shared HS256 secret. In `better-auth`
-mode the CLI signs a pre-provisioned account in to Better Auth on the platform
-frontend and mints a real ES256 token, which the backend verifies via JWKS;
-that mode never invents an account, and only signs one up when
-`AUTOGPT_ALLOW_SIGNUP` is set. The dashboard server may persist per-endpoint
-overrides for the AutoGPT backend base URL and JWT secret; when present, those
-saved values take precedence over the endpoint YAML defaults and process
-environment fallbacks for runs launched through the server.
+**Then** the CLI signs the benchmark account (`AUTOGPT_EMAIL` /
+`AUTOGPT_PASSWORD`) in to Better Auth on the platform frontend
+(`AUTOGPT_FRONTEND_URL`), mints a real ES256 token the backend verifies via
+JWKS, registers the user with the backend, and extracts tool-call evidence
+from the backend SSE stream. Auth never invents an account and only signs one
+up when `AUTOGPT_ALLOW_SIGNUP` is set. A leftover
+`AUTOGPT_AUTH_MODE=supabase` fails loudly: the legacy forged-HS256 path was
+removed with the platform's GoTrue cutover. The dashboard server may persist a
+per-endpoint override for the AutoGPT backend base URL; when present, that
+saved value takes precedence over the endpoint YAML default and process
+environment fallback for runs launched through the server.
+
+### Pinned identities become derived Better Auth sub-accounts
+
+**Given** a run whose scenario iterations pin per-iteration user identities
+for memory isolation
+**When** `AUTOGPT_ALLOW_SIGNUP` is enabled
+**Then** each pinned identity signs in as a sub-account derived from the base
+benchmark credentials — a plus-addressed email (`bench+<seed>@…`) with an
+HMAC-derived password — provisioned through the normal sign-up flow on first
+use, so iterations stay memory-isolated with only one credential pair in the
+environment. Without `AUTOGPT_ALLOW_SIGNUP`, all iterations share the base
+account and the CLI logs a warning that memory is not isolated between them.
 
 ### Expired AutoGPT tokens are refreshed mid-run
 

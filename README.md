@@ -42,9 +42,9 @@ bun run ci
 Copy `.env.example` to `.env` and fill in what your run needs — every variable
 is documented there. Credentials are supplied through env vars only; `.env` is
 gitignored and secrets are never committed. Auth against the AutoGPT platform
-is selected by `AUTOGPT_AUTH_MODE` (`supabase` forged HS256 by default, or
-`better-auth` real ES256 login); `docs/playbooks/autogpt-auth.md` explains
-which mode each environment needs.
+is a real Better Auth login (`AUTOGPT_FRONTEND_URL`, `AUTOGPT_EMAIL`,
+`AUTOGPT_PASSWORD` — the legacy forged-token path is gone);
+`docs/playbooks/autogpt-auth.md` is the runbook.
 
 ## Docs map
 

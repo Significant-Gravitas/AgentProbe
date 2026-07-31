@@ -19,8 +19,8 @@ or human can execute without external tribal knowledge.
 
 - [agent-probe-server.md](agent-probe-server.md) - Local, token-protected, and
   Docker bring-up for the SQLite-backed AgentProbe server.
-- [autogpt-auth.md](autogpt-auth.md) - Choosing `AUTOGPT_AUTH_MODE` per target
-  environment during the platform's Supabase-to-Better-Auth migration.
+- [autogpt-auth.md](autogpt-auth.md) - Better Auth credentials, derived
+  sub-accounts for isolated identities, and auth troubleshooting.
 
 ## Subdirectories
 
