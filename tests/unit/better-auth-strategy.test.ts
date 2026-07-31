@@ -12,11 +12,20 @@ type RecordedRequest = {
 
 const FRONTEND = "http://frontend.test:3000";
 const BACKEND = "http://backend.test:8006";
-const ES256_TOKEN = "header.payload.signature";
 const ACCOUNT = {
   email: "bench@agpt.co",
   password: "correct horse battery staple",
 };
+
+/** Unsigned but JWT-shaped, so the strategy can read `sub`/`role` claims. */
+function fakeJwt(claims: Record<string, unknown>): string {
+  const payload = Buffer.from(JSON.stringify(claims)).toString("base64url");
+  return `header.${payload}.signature`;
+}
+
+const SUBJECT = "3f6c2a1e-5b7d-4e8f-9a0b-1c2d3e4f5a6b";
+const ES256_TOKEN = fakeJwt({ sub: SUBJECT, role: "user" });
+const ADMIN_TOKEN = fakeJwt({ sub: SUBJECT, role: "admin" });
 
 let originalFetch: typeof fetch;
 let originalEnv: Record<string, string | undefined>;
@@ -26,8 +35,11 @@ let requests: RecordedRequest[];
  * Fake Better Auth + backend. `knownAccounts` decides whether sign-in
  * succeeds, so the sign-in-first flow can be exercised both ways.
  */
-function installFetch(options: { knownAccounts?: Set<string> } = {}): void {
+function installFetch(
+  options: { knownAccounts?: Set<string>; mintedToken?: string } = {},
+): void {
   const known = options.knownAccounts ?? new Set([ACCOUNT.email]);
+  const minted = options.mintedToken ?? ES256_TOKEN;
   requests = [];
   globalThis.fetch = (async (
     input: string | URL | Request,
@@ -56,11 +68,16 @@ function installFetch(options: { knownAccounts?: Set<string> } = {}): void {
       body,
     });
 
-    return route(url.pathname, body, known);
+    return route(url.pathname, body, known, minted);
   }) as typeof fetch;
 }
 
-function route(pathname: string, body: unknown, known: Set<string>): Response {
+function route(
+  pathname: string,
+  body: unknown,
+  known: Set<string>,
+  minted: string,
+): Response {
   const email = (body as { email?: string } | null)?.email ?? "";
   switch (pathname) {
     case "/api/auth/sign-up/email":
@@ -83,7 +100,7 @@ function route(pathname: string, body: unknown, known: Set<string>): Response {
             { status: 401, headers: { "content-type": "application/json" } },
           );
     case "/api/auth/token":
-      return new Response(JSON.stringify({ token: ES256_TOKEN }), {
+      return new Response(JSON.stringify({ token: minted }), {
         status: 200,
         headers: { "content-type": "application/json" },
       });
@@ -102,6 +119,7 @@ beforeEach(() => {
     AUTOGPT_ALLOW_SIGNUP: process.env.AUTOGPT_ALLOW_SIGNUP,
     AUTOGPT_EMAIL: process.env.AUTOGPT_EMAIL,
     AUTOGPT_PASSWORD: process.env.AUTOGPT_PASSWORD,
+    AUTOGPT_USER_ID: process.env.AUTOGPT_USER_ID,
   };
   for (const key of Object.keys(originalEnv)) {
     delete process.env[key];
@@ -246,6 +264,36 @@ describe("better-auth strategy", () => {
     );
     expect(tierCall?.authorization).toBe("Bearer admin-bearer");
     expect(tierCall?.body).toEqual({ tier: "ENTERPRISE", user_id: "user-1" });
+  });
+
+  test("targets the tier grant at the token's own subject when no user id is given", async () => {
+    process.env.AUTOGPT_ADMIN_TOKEN = "admin-bearer";
+    await resolveBetterAuthAuth({
+      frontendUrl: FRONTEND,
+      backendUrl: BACKEND,
+      ...ACCOUNT,
+    });
+
+    const tierCall = requests.find(
+      (r) => r.url === "/api/copilot/admin/rate_limit/tier",
+    );
+    expect(tierCall?.body).toEqual({ tier: "ENTERPRISE", user_id: SUBJECT });
+  });
+
+  test("self-grants the tier when the account's own token carries the admin role", async () => {
+    installFetch({ mintedToken: ADMIN_TOKEN });
+
+    await resolveBetterAuthAuth({
+      frontendUrl: FRONTEND,
+      backendUrl: BACKEND,
+      ...ACCOUNT,
+    });
+
+    const tierCall = requests.find(
+      (r) => r.url === "/api/copilot/admin/rate_limit/tier",
+    );
+    expect(tierCall?.authorization).toBe(`Bearer ${ADMIN_TOKEN}`);
+    expect(tierCall?.body).toEqual({ tier: "ENTERPRISE", user_id: SUBJECT });
   });
 
   test("requires an email — it must not invent one like the forge did", async () => {

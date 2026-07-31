@@ -22,9 +22,12 @@ import {
  * new account on every run — the `supabase` mode invented a throwaway identity
  * per run, and that habit must not carry over to real accounts.
  *
- * The ENTERPRISE tier grant hits an admin-only endpoint, so it is skipped
- * unless an admin bearer token is supplied via `AUTOGPT_ADMIN_TOKEN`. Without
- * it, runs use the account's own tier.
+ * The ENTERPRISE tier grant hits an admin-only endpoint. It runs with the
+ * account's own token when that token carries `role: "admin"` (the platform
+ * decides admin from the claim alone, and Better Auth stamps it from the
+ * account's `role` column — so an admin benchmark account needs no second
+ * credential), or with an explicit `AUTOGPT_ADMIN_TOKEN`. Otherwise it is
+ * skipped and runs use the account's own tier.
  */
 
 const DEFAULT_FRONTEND_URL =
@@ -156,6 +159,29 @@ async function mintToken(options: {
   return payload.token;
 }
 
+/**
+ * The minted JWT carries the account's identity (`sub`) and `role`. Decoded
+ * without verification — the backend verifies; this only needs the claims to
+ * target the tier grant at the right user and to detect an admin account.
+ */
+function tokenClaims(token: string): { sub?: string; role?: string } {
+  const payload = token.split(".")[1];
+  if (!payload) {
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8"),
+    ) as { sub?: unknown; role?: unknown };
+    return {
+      sub: typeof parsed.sub === "string" ? parsed.sub : undefined,
+      role: typeof parsed.role === "string" ? parsed.role : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
 function allowSignupFromEnv(explicit?: boolean): boolean {
   if (explicit !== undefined) {
     return explicit;
@@ -226,15 +252,26 @@ export async function resolveBetterAuthAuth(
 
   await registerUser({ backendUrl, token });
 
-  // The tier grant is admin-only; the benchmark account is not an admin.
-  // Apply it only with an explicit admin token, otherwise leave the account
-  // at its own tier.
+  // The tier grant is admin-only. An admin benchmark account authorizes it
+  // with its own token; otherwise an explicit AUTOGPT_ADMIN_TOKEN can. With
+  // neither, the account keeps its own tier.
+  const claims = tokenClaims(token);
   const adminToken = Bun.env.AUTOGPT_ADMIN_TOKEN?.trim();
-  if (adminToken) {
+  const grantToken =
+    adminToken || (claims.role === "admin" ? token : undefined);
+  if (grantToken) {
+    const userId =
+      options.userId ?? Bun.env.AUTOGPT_USER_ID?.trim() ?? claims.sub;
+    if (!userId) {
+      throw new Error(
+        "Cannot apply the rate-limit tier: the minted token has no `sub` " +
+          "claim and no AUTOGPT_USER_ID is set.",
+      );
+    }
     await enableSubscription({
-      autogptAuthResult: { token: adminToken, headers: {} },
+      autogptAuthResult: { token: grantToken, headers: {} },
       backendUrl,
-      userId: options.userId,
+      userId,
     });
   }
 

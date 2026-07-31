@@ -67,14 +67,18 @@ would mint a new real account on every run.
 
 ### Rate-limit tier
 
-The ENTERPRISE tier grant hits an admin-only endpoint, so it is skipped unless
-`AUTOGPT_ADMIN_TOKEN` is set. Without it, runs use the account's own tier.
+The ENTERPRISE tier grant hits an admin-only endpoint. It targets the user id
+in the minted token's `sub` claim (`AUTOGPT_USER_ID` overrides) and runs when
+either:
 
-A separate admin token is usually the wrong tool. The platform decides admin
-from the token's `role` claim alone, and Better Auth stamps that claim at mint
-time from the account's own `role` column. So marking the benchmark account
-admin once makes its **own** token carry `role: "admin"`, and the grant works
-with no second credential to distribute or rotate.
+- the minted token itself carries `role: "admin"` — the platform decides admin
+  from that claim alone, and Better Auth stamps it at mint time from the
+  account's own `role` column, so marking the benchmark account admin once
+  makes the grant work with no second credential to distribute or rotate
+  (preferred); or
+- `AUTOGPT_ADMIN_TOKEN` supplies a separate admin bearer token.
+
+With neither, the grant is skipped and runs use the account's own tier.
 
 ## Token expiry
 
