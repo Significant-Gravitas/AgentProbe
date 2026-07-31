@@ -13,7 +13,9 @@ Last validated against `platform.md`: 2026-05-15
 - [x] Persona simulation uses a configurable default model with hidden reasoning
 - [x] Parallel mode overlaps scenario execution while preserving ordering
 - [ ] Multi-session memory scenarios preserve pinned identity and session controls
-- [ ] AutoGPT preset forges auth tokens internally
+- [x] AutoGPT preset resolves auth internally via Better Auth
+- [x] Pinned identities become derived Better Auth sub-accounts
+- [x] Expired AutoGPT tokens are refreshed mid-run
 - [ ] Repeat mode reruns scenarios with isolated users per iteration
 - [x] OpenClaw CLI commands manage sessions, chat, and history
 - [x] Fast feedback enforces the repo quality gates
@@ -43,8 +45,16 @@ Last validated against `platform.md`: 2026-05-15
 
 - The Bun-owned end-to-end baseline now covers validation, run/report flows,
   filtering, dry-run, parallel execution, and the OpenClaw CLI path.
-- AutoGPT auth now follows a forged-token-only path in the provider layer and
-  no longer depends on Supabase signup.
+- AutoGPT auth is Better Auth only: a pre-provisioned benchmark account signs
+  in against the platform frontend and mints a real ES256 token the backend
+  verifies via JWKS. The legacy forged-HS256 GoTrue path was removed; a
+  leftover `AUTOGPT_AUTH_MODE=supabase` fails loudly. Accounts (the benchmark
+  account and the derived plus-addressed per-iteration sub-accounts used for
+  memory isolation) auto-provision by default via sign-in-first sign-up;
+  `AUTOGPT_ALLOW_SIGNUP=false` makes a missing account a hard error and drops
+  iterations onto the shared base account with a not-isolated warning.
+- Internally-resolved AutoGPT tokens are refreshed once on a 401, so a token
+  expiring mid-run does not fail the run.
 - The copied `data/` and `dashboard/` assets have landed ahead of the runtime
   parity work, so the remaining gap is the Bun runtime, persistence, and
   reporting support that makes those assets executable.

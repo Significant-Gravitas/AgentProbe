@@ -216,6 +216,87 @@ describe("endpoint adapters", () => {
     ]);
   });
 
+  test("re-authenticates once when an expired token is rejected", async () => {
+    process.env.AUTOGPT_BACKEND_URL = "http://backend.test:8006";
+    const seen: Array<string | null> = [];
+    let authCalls = 0;
+
+    // A Better Auth token lives ~1h, so a long run outlives it mid-flight.
+    const fakeAuth = (): AutogptAuthResult => {
+      authCalls += 1;
+      const token = `token-${authCalls}`;
+      return { token, headers: { Authorization: `Bearer ${token}` } };
+    };
+
+    const fetchImpl = (async (
+      input: string | URL | Request,
+      init?: RequestInit,
+    ) => {
+      const request =
+        input instanceof Request
+          ? input
+          : new Request(
+              typeof input === "string" ? input : input.toString(),
+              init,
+            );
+      const authorization = request.headers.get("Authorization");
+      seen.push(authorization);
+      if (authorization === "Bearer token-1") {
+        return new Response("token expired", { status: 401 });
+      }
+      return Response.json({ id: "chat-123" });
+    }) as typeof fetch;
+
+    const adapter = buildEndpointAdapter(
+      parseEndpointsYaml(join(DATA_DIR, "autogpt-endpoint.yaml")),
+      { fetchImpl, autogptAuthResolver: fakeAuth },
+    );
+
+    const session = await adapter.openScenario({
+      scenario: { id: "demo" },
+      persona: { id: "shopper" },
+      last_message: { content: "Hello AutoGPT" },
+    });
+
+    expect(session).toEqual({ session_id: "chat-123" });
+    expect(seen).toEqual(["Bearer token-1", "Bearer token-2"]);
+    expect(authCalls).toBe(2);
+  });
+
+  test("surfaces a genuine 401 instead of retrying forever", async () => {
+    process.env.AUTOGPT_BACKEND_URL = "http://backend.test:8006";
+    let attempts = 0;
+
+    // A resolver that keeps handing back the same token means the 401 is a
+    // real authorization failure, not an expiry.
+    const fakeAuth = (): AutogptAuthResult => ({
+      token: "static-token",
+      headers: { Authorization: "Bearer static-token" },
+    });
+
+    const fetchImpl = (async (
+      _input: string | URL | Request,
+      _init?: RequestInit,
+    ) => {
+      attempts += 1;
+      return new Response("forbidden", { status: 401 });
+    }) as typeof fetch;
+
+    const adapter = buildEndpointAdapter(
+      parseEndpointsYaml(join(DATA_DIR, "autogpt-endpoint.yaml")),
+      { fetchImpl, autogptAuthResolver: fakeAuth },
+    );
+
+    await expect(
+      adapter.openScenario({
+        scenario: { id: "demo" },
+        persona: { id: "shopper" },
+        last_message: { content: "Hello AutoGPT" },
+      }),
+    ).rejects.toThrow(/401/);
+    expect(attempts).toBe(1);
+  });
+
   test("dispatches adapters by transport", () => {
     const httpAdapter = buildEndpointAdapter(
       parseEndpointsYaml(join(DATA_DIR, "opencode-endpoints.yaml")),

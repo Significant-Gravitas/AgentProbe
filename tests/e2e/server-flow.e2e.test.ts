@@ -118,6 +118,7 @@ describe("dashboard server: create preset, run, view results", () => {
       extraEnv: {
         OPEN_ROUTER_API_KEY: "e2e-openrouter-key",
         AUTOGPT_BACKEND_URL: "http://127.0.0.1:9",
+        AUTOGPT_FRONTEND_URL: "http://127.0.0.1:9",
       },
     });
   });

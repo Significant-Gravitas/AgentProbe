@@ -24,7 +24,6 @@ type EndpointRow = {
 
 type EndpointOverrideSummary = {
   baseUrl: string | null;
-  autogptJwtSecret: string | null;
 };
 
 export function EndpointsView({ request }: { request: ServerRequest }) {
@@ -45,7 +44,6 @@ export function EndpointsView({ request }: { request: ServerRequest }) {
       for (const item of nextOverrides.overrides) {
         next[item.endpoint_path] = {
           baseUrl: item.base_url,
-          autogptJwtSecret: item.autogpt_jwt_secret,
         };
       }
       setOverrideMap(next);
@@ -76,7 +74,7 @@ export function EndpointsView({ request }: { request: ServerRequest }) {
 
   const overriddenCount = endpointSuites.filter((row) => {
     const entry = overrideMap[row.relativePath];
-    return Boolean(entry?.baseUrl || entry?.autogptJwtSecret);
+    return Boolean(entry?.baseUrl);
   }).length;
 
   return (
@@ -128,7 +126,6 @@ function EndpointOverrideCard({
   );
   const [loading, setLoading] = useState(true);
   const [draftBaseUrl, setDraftBaseUrl] = useState("");
-  const [draftAutogptJwtSecret, setDraftAutogptJwtSecret] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -141,7 +138,6 @@ function EndpointOverrideCard({
       );
       setDetail(next);
       setDraftBaseUrl(next.override?.base_url ?? "");
-      setDraftAutogptJwtSecret(next.override?.autogpt_jwt_secret ?? "");
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -168,28 +164,21 @@ function EndpointOverrideCard({
     setMessage(null);
     try {
       const trimmedBaseUrl = draftBaseUrl.trim();
-      const trimmedAutogptJwtSecret = draftAutogptJwtSecret.trim();
       const response = await request<EndpointOverrideUpsertResponse>(
         `/api/endpoint-overrides/${encodeURIComponent(relativePath)}`,
         jsonBody("PUT", {
           base_url: trimmedBaseUrl || null,
-          autogpt_jwt_secret: trimmedAutogptJwtSecret || null,
         }),
       );
       setDetail((prev) =>
         prev
           ? {
               ...prev,
-              override:
-                trimmedBaseUrl || trimmedAutogptJwtSecret
-                  ? response.override
-                  : null,
+              override: trimmedBaseUrl ? response.override : null,
             }
           : prev,
       );
-      setMessage(
-        trimmedBaseUrl || trimmedAutogptJwtSecret ? "Saved." : "Cleared.",
-      );
+      setMessage(trimmedBaseUrl ? "Saved." : "Cleared.");
       setError(null);
       onChanged();
     } catch (err) {
@@ -208,7 +197,6 @@ function EndpointOverrideCard({
         jsonBody("DELETE"),
       );
       setDraftBaseUrl("");
-      setDraftAutogptJwtSecret("");
       setDetail((prev) => (prev ? { ...prev, override: null } : prev));
       setMessage("Cleared.");
       setError(null);
@@ -220,10 +208,7 @@ function EndpointOverrideCard({
     }
   };
 
-  const hasSavedOverride = Boolean(
-    detail?.override?.base_url || detail?.override?.autogpt_jwt_secret,
-  );
-  const isAutogptEndpoint = detail?.defaults.preset === "autogpt";
+  const hasSavedOverride = Boolean(detail?.override?.base_url);
 
   return (
     <Card className="p-4">
@@ -273,23 +258,6 @@ function EndpointOverrideCard({
               />
             </Field>
           </div>
-          {isAutogptEndpoint ? (
-            <Field
-              label="AutoGPT JWT secret override"
-              hint="Overrides the secret used to forge AutoGPT bearer tokens for this endpoint. Leave blank to remove and fall back to AUTOGPT_JWT_SECRET, JWT_SECRET, or the built-in dev default."
-            >
-              <TextInput
-                type="password"
-                value={draftAutogptJwtSecret}
-                onChange={(event) =>
-                  setDraftAutogptJwtSecret(event.currentTarget.value)
-                }
-                placeholder="your-super-secret-jwt-token..."
-                autoComplete="off"
-                className="font-mono text-xs"
-              />
-            </Field>
-          ) : null}
           <div className="flex items-center gap-2">
             <Button type="submit" disabled={submitting}>
               {submitting ? "Saving…" : "Save"}

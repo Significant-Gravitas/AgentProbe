@@ -51,7 +51,6 @@ type RunSpec = {
   presetId?: string | null;
   presetSnapshot?: PresetSnapshot | null;
   baseUrlOverride?: string;
-  autogptJwtSecretOverride?: string;
 };
 
 type ActiveRun = {
@@ -201,11 +200,9 @@ export class RunController {
     endpointPathInput: string,
     requestOverrides: {
       baseUrl?: string;
-      autogptJwtSecret?: string;
     },
   ): Promise<{
     baseUrlOverride?: string;
-    autogptJwtSecretOverride?: string;
   }> {
     const { relativePath } =
       this.options.suiteController.resolveDataFile(endpointPathInput);
@@ -215,8 +212,6 @@ export class RunController {
       );
     return {
       baseUrlOverride: requestOverrides.baseUrl?.trim() || fields.baseUrl,
-      autogptJwtSecretOverride:
-        requestOverrides.autogptJwtSecret?.trim() || fields.autogptJwtSecret,
     };
   }
 
@@ -281,7 +276,6 @@ export class RunController {
       endpointInput,
       {
         baseUrl: optionalString(body, "base_url"),
-        autogptJwtSecret: optionalString(body, "autogpt_jwt_secret"),
       },
     );
 
@@ -333,7 +327,6 @@ export class RunController {
       endpointInput,
       {
         baseUrl: optionalString(overrides, "base_url"),
-        autogptJwtSecret: optionalString(overrides, "autogpt_jwt_secret"),
       },
     );
 
@@ -481,7 +474,6 @@ export class RunController {
         presetId: spec.presetId,
         presetSnapshot: spec.presetSnapshot,
         baseUrlOverride: spec.baseUrlOverride,
-        autogptJwtSecretOverride: spec.autogptJwtSecretOverride,
       });
     } catch (error) {
       const runId = options.recorder.runId;

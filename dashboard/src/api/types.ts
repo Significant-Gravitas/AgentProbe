@@ -170,7 +170,6 @@ export type OpenRouterStatusResponse = {
 export type EndpointOverride = {
   endpoint_path: string;
   base_url: string | null;
-  autogpt_jwt_secret: string | null;
   updated_at: string;
 };
 

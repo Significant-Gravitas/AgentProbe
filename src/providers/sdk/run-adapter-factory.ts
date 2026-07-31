@@ -16,7 +16,6 @@ export function buildProviderEndpointAdapter(
         userId: context.userId,
         name: context.userName,
         backendUrl: context.baseUrlOverride?.trim() || undefined,
-        jwtSecret: context.autogptJwtSecretOverride?.trim() || undefined,
       }),
   });
 }

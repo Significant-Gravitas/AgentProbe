@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-19T15:37:13.471Z
+Generated: 2026-07-31T11:16:04.019Z
 
 ```text
   AGENTS.md
@@ -368,6 +368,7 @@ docs/generated/
 docs/playbooks/
   docs/playbooks/INDEX.md
   docs/playbooks/agent-probe-server.md
+  docs/playbooks/autogpt-auth.md
 docs/product-specs/
   docs/product-specs/INDEX.md
   docs/product-specs/README.md
@@ -456,6 +457,7 @@ src/providers/persistence/migrations/
 src/providers/sdk/
   src/providers/sdk/adapters.ts
   src/providers/sdk/autogpt-auth.ts
+  src/providers/sdk/better-auth-strategy.ts
   src/providers/sdk/http-endpoint.ts
   src/providers/sdk/openai-responses.ts
   src/providers/sdk/openclaw.ts
@@ -506,6 +508,7 @@ tests/unit/
 tests/unit/architecture/
   tests/unit/architecture/boundaries.test.ts
   tests/unit/autogpt-auth.test.ts
+  tests/unit/better-auth-strategy.test.ts
   tests/unit/cli-args.test.ts
   tests/unit/dashboard-api.test.tsx
   tests/unit/dashboard-app.test.tsx

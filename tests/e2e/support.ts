@@ -57,6 +57,9 @@ export type OpenAiLogEntry = {
 
 export type RequestRecord = {
   kind:
+    | "auth_sign_up"
+    | "auth_sign_in"
+    | "auth_token"
     | "register_user"
     | "enable_subscription"
     | "create_session"
@@ -198,6 +201,8 @@ function responseBodyForScenario(
 }
 
 export class FakeAutogptBackend {
+  /** Better Auth accounts (email → password); signup is open like dev. */
+  private readonly authAccounts = new Map<string, string>();
   private readonly sessionToScenario = new Map<string, string>();
   private readonly sessionToLabel = new Map<string, string>();
   private readonly requestCounter = { current: 0 };
@@ -277,6 +282,98 @@ export class FakeAutogptBackend {
       headers,
       startedAt,
     };
+
+    // Better Auth is mounted on the platform frontend; in e2e the same fake
+    // serves both, so AUTOGPT_FRONTEND_URL can equal AUTOGPT_BACKEND_URL.
+    if (
+      request.method === "POST" &&
+      url.pathname === "/api/auth/sign-up/email"
+    ) {
+      const body = (await request.json()) as {
+        email?: string;
+        password?: string;
+      };
+      const email = String(body.email ?? "");
+      this.requestLog.push({
+        ...recordBase,
+        kind: "auth_sign_up",
+        body: body as JsonValue,
+        endedAt: Date.now(),
+      });
+      if (this.authAccounts.has(email)) {
+        return Response.json(
+          { message: "User already exists", code: "USER_ALREADY_EXISTS" },
+          { status: 400 },
+        );
+      }
+      this.authAccounts.set(email, String(body.password ?? ""));
+      return Response.json({ ok: true });
+    }
+
+    if (
+      request.method === "POST" &&
+      url.pathname === "/api/auth/sign-in/email"
+    ) {
+      const body = (await request.json()) as {
+        email?: string;
+        password?: string;
+      };
+      const email = String(body.email ?? "");
+      this.requestLog.push({
+        ...recordBase,
+        kind: "auth_sign_in",
+        body: body as JsonValue,
+        endedAt: Date.now(),
+      });
+      if (this.authAccounts.get(email) !== String(body.password ?? "")) {
+        return Response.json(
+          {
+            message: "Invalid email or password",
+            code: "INVALID_EMAIL_OR_PASSWORD",
+          },
+          { status: 401 },
+        );
+      }
+      const session = Buffer.from(email, "utf8").toString("base64url");
+      return Response.json(
+        { ok: true },
+        {
+          headers: {
+            "Set-Cookie": `better-auth.session_token=${session}; Path=/; HttpOnly`,
+          },
+        },
+      );
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/auth/token") {
+      this.requestLog.push({
+        ...recordBase,
+        kind: "auth_token",
+        body: null,
+        endedAt: Date.now(),
+      });
+      const session = /better-auth\.session_token=([^;]+)/.exec(
+        headers.cookie ?? "",
+      )?.[1];
+      if (!session) {
+        return Response.json({ message: "Unauthorized" }, { status: 401 });
+      }
+      const email = Buffer.from(session, "base64url").toString("utf8");
+      const payload = Buffer.from(
+        JSON.stringify({
+          sub: `sub-${Buffer.from(email, "utf8").toString("hex").slice(0, 24)}`,
+          email,
+          role: "user",
+          aud: "authenticated",
+        }),
+        "utf8",
+      ).toString("base64url");
+      const header = Buffer.from(
+        JSON.stringify({ alg: "ES256", typ: "JWT" }),
+        "utf8",
+      ).toString("base64url");
+      return Response.json({ token: `${header}.${payload}.e2e-signature` });
+    }
 
     if (request.method === "POST" && url.pathname === "/api/auth/user") {
       const record: RequestRecord = {
@@ -512,6 +609,12 @@ export async function startDashboardServer(options: {
   return { url, process, stop };
 }
 
+/** Base benchmark credentials every e2e CLI run signs in with. */
+export const E2E_BENCH_ACCOUNT = {
+  email: "bench@e2e.test",
+  password: "e2e-benchmark-password",
+};
+
 export async function runAgentprobe(
   args: string[],
   options: RunOptions,
@@ -520,6 +623,9 @@ export async function runAgentprobe(
     ...Bun.env,
     OPEN_ROUTER_API_KEY: "e2e-openrouter-key",
     AUTOGPT_BACKEND_URL: options.backendUrl,
+    AUTOGPT_FRONTEND_URL: options.backendUrl,
+    AUTOGPT_EMAIL: E2E_BENCH_ACCOUNT.email,
+    AUTOGPT_PASSWORD: E2E_BENCH_ACCOUNT.password,
     AGENTPROBE_E2E_OPENAI_SCRIPT: options.workspace.openAiScriptPath,
     AGENTPROBE_E2E_OPENAI_LOG: options.workspace.openAiLogPath,
     ...options.extraEnv,

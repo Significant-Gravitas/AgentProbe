@@ -1,135 +1,54 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import {
-  defaultUserId,
-  forgeJwt,
-  resolveAuth,
-} from "../../src/providers/sdk/autogpt-auth.ts";
+import { resolveAuth } from "../../src/providers/sdk/autogpt-auth.ts";
+
+let originalEnv: Record<string, string | undefined>;
+
+beforeEach(() => {
+  originalEnv = {
+    AUTOGPT_AUTH_MODE: process.env.AUTOGPT_AUTH_MODE,
+    AUTOGPT_EMAIL: process.env.AUTOGPT_EMAIL,
+    AUTOGPT_PASSWORD: process.env.AUTOGPT_PASSWORD,
+  };
+  for (const key of Object.keys(originalEnv)) {
+    delete process.env[key];
+  }
+});
+
+afterEach(() => {
+  for (const [key, value] of Object.entries(originalEnv)) {
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+});
 
 describe("autogpt auth", () => {
-  test("defaultUserId returns a UUID", () => {
-    expect(defaultUserId()).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+  test("resolveAuth is the real-login strategy (which needs a real account)", async () => {
+    await expect(resolveAuth()).rejects.toThrow(
+      /requires a stable benchmark account/i,
+    );
+    await expect(resolveAuth({ email: "bench@agpt.co" })).rejects.toThrow(
+      /requires a password/i,
     );
   });
 
-  test("forgeJwt preserves the subject", () => {
-    const userId = crypto.randomUUID();
-    const token = forgeJwt({
-      userId,
-      email: "agentprobe@example.com",
-      jwtSecret: "test-secret",
-      jwtAlgorithm: "HS256",
-      issuer: "supabase-demo",
-      audience: "authenticated",
-      role: "user",
-      name: "AgentProbe User",
-    });
-
-    expect(typeof token).toBe("string");
-    const [, payload] = token.split(".");
-    expect(payload).toBeDefined();
-    const decoded = JSON.parse(
-      Buffer.from(payload ?? "", "base64url").toString("utf8"),
-    ) as { sub?: string };
-    expect(decoded.sub).toBe(userId);
+  test("resolveAuth rejects the removed supabase mode loudly", async () => {
+    process.env.AUTOGPT_AUTH_MODE = "supabase";
+    await expect(resolveAuth()).rejects.toThrow(/no longer supported/i);
   });
 
-  test("resolveAuth always forges the token and registers the user", async () => {
-    const originalFetch = globalThis.fetch;
-    const originalAuthMode = process.env.AUTOGPT_AUTH_MODE;
-    const requests: Array<{
-      authorization: string | null;
-      body: unknown;
-      method: string;
-      path: string;
-    }> = [];
+  test("resolveAuth rejects an unknown AUTOGPT_AUTH_MODE", async () => {
+    process.env.AUTOGPT_AUTH_MODE = "totally-bogus";
+    await expect(resolveAuth()).rejects.toThrow(/no longer supported/i);
+  });
 
-    process.env.AUTOGPT_AUTH_MODE = "supabase";
-    globalThis.fetch = (async (
-      input: string | URL | Request,
-      init?: RequestInit,
-    ) => {
-      const request =
-        input instanceof Request
-          ? input
-          : new Request(
-              typeof input === "string" ? input : input.toString(),
-              init,
-            );
-      const url = new URL(request.url);
-      const body =
-        request.headers.get("content-type")?.includes("application/json") ||
-        url.pathname === "/api/copilot/admin/rate_limit/tier"
-          ? await request.json()
-          : null;
-      requests.push({
-        authorization: request.headers.get("Authorization"),
-        body,
-        method: request.method,
-        path: url.pathname,
-      });
-
-      if (request.method === "POST" && url.pathname === "/api/auth/user") {
-        return new Response(null, { status: 204 });
-      }
-
-      if (
-        request.method === "POST" &&
-        url.pathname === "/api/copilot/admin/rate_limit/tier"
-      ) {
-        return new Response(null, { status: 204 });
-      }
-
-      throw new Error(`Unexpected request: ${request.method} ${request.url}`);
-    }) as typeof fetch;
-
-    try {
-      const userId = crypto.randomUUID();
-      const result = await resolveAuth({
-        audience: "authenticated",
-        backendUrl: "http://backend.test:8006",
-        email: "agentprobe@example.com",
-        issuer: "supabase-demo",
-        jwtAlgorithm: "HS256",
-        jwtSecret: "test-secret",
-        name: "AgentProbe User",
-        role: "user",
-        userId,
-      });
-
-      expect(requests).toEqual([
-        {
-          authorization: `Bearer ${result.token}`,
-          body: null,
-          method: "POST",
-          path: "/api/auth/user",
-        },
-        {
-          authorization: `Bearer ${result.token}`,
-          body: {
-            tier: "ENTERPRISE",
-            user_id: userId,
-          },
-          method: "POST",
-          path: "/api/copilot/admin/rate_limit/tier",
-        },
-      ]);
-      expect(result.headers.Authorization).toBe(`Bearer ${result.token}`);
-
-      const [, payload] = result.token.split(".");
-      const decoded = JSON.parse(
-        Buffer.from(payload ?? "", "base64url").toString("utf8"),
-      ) as { sub?: string; user_metadata?: { name?: string } };
-      expect(decoded.sub).toBe(userId);
-      expect(decoded.user_metadata?.name).toBe("AgentProbe User");
-    } finally {
-      globalThis.fetch = originalFetch;
-      if (originalAuthMode === undefined) {
-        delete process.env.AUTOGPT_AUTH_MODE;
-      } else {
-        process.env.AUTOGPT_AUTH_MODE = originalAuthMode;
-      }
-    }
+  test("resolveAuth tolerates a leftover better-auth mode setting", async () => {
+    process.env.AUTOGPT_AUTH_MODE = "better-auth";
+    await expect(resolveAuth()).rejects.toThrow(
+      /requires a stable benchmark account/i,
+    );
   });
 });

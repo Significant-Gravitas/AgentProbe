@@ -1172,7 +1172,6 @@ export async function runSuite(options: {
   dryRun?: boolean;
   repeat?: number;
   baseUrlOverride?: string;
-  autogptJwtSecretOverride?: string;
 }): Promise<RunResult> {
   const runId = await options.recorder?.recordRunStarted?.({
     endpoint: options.endpoint,
@@ -1318,7 +1317,6 @@ export async function runSuite(options: {
               userId: pinnedUserId,
               userName: pinnedUserName,
               baseUrlOverride: options.baseUrlOverride,
-              autogptJwtSecretOverride: options.autogptJwtSecretOverride,
             });
           },
         });

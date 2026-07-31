@@ -54,7 +54,7 @@ function makeSuiteController(root: string): SuiteController {
 }
 
 describe("EndpointOverridesController", () => {
-  test("reads and writes autogpt jwt secret overrides beside base_url", async () => {
+  test("reads and writes base_url overrides, ignoring unknown fields", async () => {
     const controller = new EndpointOverridesController({
       repository: makeRepository(),
       suiteController: makeSuiteController(process.cwd()),
@@ -62,13 +62,12 @@ describe("EndpointOverridesController", () => {
 
     const saved = await controller.upsert("data/autogpt-endpoint.yaml", {
       base_url: " https://autogpt.example ",
-      autogpt_jwt_secret: " secret-override ",
+      autogpt_jwt_secret: "removed-with-the-forge",
     });
 
     expect(saved).toEqual({
       endpoint_path: "data/autogpt-endpoint.yaml",
       base_url: "https://autogpt.example",
-      autogpt_jwt_secret: "secret-override",
       updated_at: "2026-05-04T00:00:00.000Z",
     });
 
@@ -77,17 +76,18 @@ describe("EndpointOverridesController", () => {
     );
     expect(fields).toEqual({
       baseUrl: "https://autogpt.example",
-      autogptJwtSecret: "secret-override",
     });
   });
 
-  test("reports autogpt preset metadata in defaults payload", async () => {
+  test("reports autogpt preset metadata and drops stale jwt secret overrides", async () => {
     const controller = new EndpointOverridesController({
       repository: makeRepository({
         "data/autogpt-endpoint.yaml": {
           endpointPath: "data/autogpt-endpoint.yaml",
           overrides: {
-            autogptJwtSecret: "secret-override",
+            baseUrl: "https://autogpt.example",
+            // Stored before the forge was removed; must not resurface.
+            autogptJwtSecret: "stale-secret-override",
           },
           updatedAt: "2026-05-04T00:00:00.000Z",
         },
@@ -99,9 +99,11 @@ describe("EndpointOverridesController", () => {
     expect(result.defaults.preset).toBe("autogpt");
     expect(result.override).toEqual({
       endpoint_path: "data/autogpt-endpoint.yaml",
-      base_url: null,
-      autogpt_jwt_secret: "secret-override",
+      base_url: "https://autogpt.example",
       updated_at: "2026-05-04T00:00:00.000Z",
     });
+    expect(
+      await controller.resolveFields("data/autogpt-endpoint.yaml"),
+    ).toEqual({ baseUrl: "https://autogpt.example" });
   });
 });
