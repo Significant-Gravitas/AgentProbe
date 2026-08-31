@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-19T15:37:13.471Z
+Generated: 2026-08-31T09:21:51.311Z
 
 ```text
   AGENTS.md
