@@ -1,13 +1,17 @@
 import type { RunRecord } from "../../../shared/types/contracts.ts";
 import type { ServerContext } from "../app-server.ts";
 import { errorResponse } from "../http-helpers.ts";
+import { METRIC_NAMES } from "../observability/index.ts";
 import {
   formatSseEvent,
   formatSseKeepalive,
+  formatSseRetry,
+  isTerminalEvent,
   type RunEvent,
 } from "../streams/events.ts";
 
-const KEEPALIVE_INTERVAL_MS = 15_000;
+export const SSE_KEEPALIVE_INTERVAL_MS = 15_000;
+export const SSE_RECONNECT_RETRY_MS = 2_000;
 
 function snapshotPayloadForRun(run: RunRecord): RunEvent["payload"] {
   return {
@@ -33,7 +37,9 @@ function snapshotPayloadForRun(run: RunRecord): RunEvent["payload"] {
   };
 }
 
-function parseLastEventId(value: string | null): number | undefined {
+function parseLastEventId(
+  value: string | null | undefined,
+): number | undefined {
   if (!value) {
     return undefined;
   }
@@ -44,22 +50,38 @@ function parseLastEventId(value: string | null): number | undefined {
   return parsed;
 }
 
+function pickLastEventId(request: Request, url: URL): number | undefined {
+  const headerValue =
+    request.headers.get("last-event-id") ??
+    request.headers.get("Last-Event-ID");
+  const queryValue = url.searchParams.get("last_event_id");
+  return parseLastEventId(headerValue) ?? parseLastEventId(queryValue);
+}
+
+function terminalEventForHistorical(
+  run: RunRecord,
+): RunEvent["kind"] | undefined {
+  if (run.status === "running") return undefined;
+  if (run.status === "cancelled") return "run_cancelled";
+  if (run.status === "errored" || run.status === "failed") return "run_failed";
+  return "run_finished";
+}
+
 export async function handleRunSse(
   request: Request,
   context: ServerContext,
   params: { runId: string },
 ): Promise<Response> {
-  const lastEventId = parseLastEventId(request.headers.get("last-event-id"));
+  const url = new URL(request.url);
+  const lastEventId = pickLastEventId(request, url);
   const { runId } = params;
 
   const historicalRun: RunRecord | undefined = context.config.dbUrl
     ? await context.repository.getRun(runId)
     : undefined;
 
-  // Replay any buffered events (after last-event-id if provided).
   const replayEvents = context.streamHub.replay(runId, lastEventId);
 
-  // If neither a buffered stream nor a historical run exist, treat as 404.
   if (!historicalRun && replayEvents.length === 0) {
     return errorResponse({
       status: 404,
@@ -70,12 +92,16 @@ export async function handleRunSse(
   }
 
   const encoder = new TextEncoder();
+  const metrics = context.observability.metrics;
   let unsubscribe: (() => void) | undefined;
   let keepalive: ReturnType<typeof setInterval> | undefined;
+  let teardown: (() => void) | undefined;
 
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
       let closed = false;
+      let connectionCounted = false;
+      let terminalSent = false;
       const safeEnqueue = (chunk: string): void => {
         try {
           controller.enqueue(encoder.encode(chunk));
@@ -96,7 +122,12 @@ export async function handleRunSse(
           clearInterval(keepalive);
           keepalive = undefined;
         }
+        if (connectionCounted) {
+          metrics.adjustGauge(METRIC_NAMES.sseConnections, -1);
+          connectionCounted = false;
+        }
       };
+      teardown = cleanup;
       const close = (): void => {
         cleanup();
         try {
@@ -106,13 +137,39 @@ export async function handleRunSse(
         }
       };
 
+      metrics.adjustGauge(METRIC_NAMES.sseConnections, 1);
+      connectionCounted = true;
+
+      // Always advise reconnect retry interval to the browser.
+      safeEnqueue(formatSseRetry(SSE_RECONNECT_RETRY_MS));
+
+      const dispatchEvent = (event: RunEvent): void => {
+        safeEnqueue(formatSseEvent(event));
+        if (isTerminalEvent(event) && !terminalSent) {
+          terminalSent = true;
+          queueMicrotask(close);
+        }
+      };
+
       if (replayEvents.length > 0) {
         for (const event of replayEvents) {
-          safeEnqueue(formatSseEvent(event));
+          dispatchEvent(event);
         }
-        if (historicalRun && historicalRun.status !== "running") {
-          queueMicrotask(close);
-          return;
+        if (!terminalSent && historicalRun) {
+          const terminalKind = terminalEventForHistorical(historicalRun);
+          if (terminalKind) {
+            const terminalEvent = context.streamHub.publish({
+              runId,
+              kind: terminalKind,
+              payload: {
+                run_id: runId,
+                source: "historical_terminal",
+                status: historicalRun.status,
+              },
+            });
+            dispatchEvent(terminalEvent);
+            return;
+          }
         }
       } else if (historicalRun) {
         const snapshot = context.streamHub.publish({
@@ -120,20 +177,32 @@ export async function handleRunSse(
           kind: "snapshot",
           payload: snapshotPayloadForRun(historicalRun),
         });
-        safeEnqueue(formatSseEvent(snapshot));
-        if (historicalRun.status !== "running") {
-          queueMicrotask(close);
+        dispatchEvent(snapshot);
+        const terminalKind = terminalEventForHistorical(historicalRun);
+        if (terminalKind && !terminalSent) {
+          const terminalEvent = context.streamHub.publish({
+            runId,
+            kind: terminalKind,
+            payload: {
+              run_id: runId,
+              source: "historical_terminal",
+              status: historicalRun.status,
+            },
+          });
+          dispatchEvent(terminalEvent);
           return;
         }
       }
 
+      if (terminalSent) return;
+
       unsubscribe = context.streamHub.subscribe(runId, (event) => {
-        safeEnqueue(formatSseEvent(event));
+        dispatchEvent(event);
       });
 
       keepalive = setInterval(() => {
         safeEnqueue(formatSseKeepalive());
-      }, KEEPALIVE_INTERVAL_MS);
+      }, SSE_KEEPALIVE_INTERVAL_MS);
 
       if (request.signal) {
         request.signal.addEventListener("abort", () => {
@@ -142,11 +211,8 @@ export async function handleRunSse(
       }
     },
     cancel() {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-      if (keepalive) {
-        clearInterval(keepalive);
+      if (teardown) {
+        teardown();
       }
     },
   });

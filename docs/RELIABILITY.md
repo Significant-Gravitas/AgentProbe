@@ -40,3 +40,69 @@ The initial repository-level budgets are:
 - Include the smallest stable identifiers needed for tracing a failure.
 - Log enough context to reproduce the path, but not guessed or unvalidated
   payloads.
+
+## Server metrics, spans, and budgets (Phase 4)
+
+The AgentProbe server ships a narrow in-process metrics registry and span
+recorder so operators can introspect a running server without depending on an
+external collector. All adapters live under
+`src/runtime/server/observability/`.
+
+### Shipped counters
+
+| Name | Labels | Purpose |
+| --- | --- | --- |
+| `server.http.requests` | `method`, `route`, `status` | Per-request volume by outcome. |
+| `server.runs.started_total` | `preset` | Runs accepted by the run controller. |
+| `server.runs.finished_total` | `preset` | Runs that reached a terminal state. |
+
+### Shipped gauges
+
+| Name | Purpose |
+| --- | --- |
+| `server.runs.active` | Active runs tracked by the controller. |
+| `server.sse.connections` | Open SSE subscribers across all runs. |
+
+### Shipped spans
+
+| Name | Where | Purpose |
+| --- | --- | --- |
+| `server.run.start.validation` | `RunController.start` | Validates OpenRouter configuration and suite conflicts. |
+| `server.run.controller.execute` | `RunController.execute` | End-to-end run execution wrapper. |
+| `server.run.suite.boot` | `RunController.execute` | Time from controller accept to first suite/scenario event. |
+
+### Latency budgets
+
+Run `bun run latency-budget --samples 25` to populate these numbers against
+seeded local data. Budgets are `p95` unless noted. CI is expected to stay
+well below the budget on loopback; degraded values should be investigated
+before shipping.
+
+| Surface | Budget (p95) |
+| --- | --- |
+| `GET /` (dashboard index) | 150 ms |
+| `GET /api/runs` | 150 ms |
+| `POST /api/runs` (validation rejection) | 200 ms |
+| SSE first-event latency | 200 ms |
+
+### SSE hardening contract
+
+- Every SSE response emits `retry: 2000` on connect and periodic heartbeat
+  comments every 15 seconds.
+- Terminal events (`run_finished`, `run_cancelled`, `run_failed`) are emitted
+  exactly once per run and close the stream after dispatch.
+- `Last-Event-ID` is honored from both the standard `Last-Event-ID` header and
+  the `last_event_id` query parameter.
+- Historical runs resolve terminal state on replay even when the ring buffer
+  has been dropped.
+- Proxy-safe headers (`cache-control: no-store, no-transform`,
+  `x-accel-buffering: no`, `connection: keep-alive`) are set on every stream
+  response.
+
+### Soak harness
+
+`bun run soak --duration-ms 10000 --runs 50 --sse-connections 3` is the fast
+CI mode: it verifies that no active runs, no stuck streams, and no request
+failures remain at shutdown. The `--manual` flag extends the defaults to a
+~1h soak and emits the run/failure/RSS/event-lag/latency/connection summary
+line for PR evidence.

@@ -7,11 +7,22 @@ export type RunEventKind =
   | "run_progress"
   | "run_finished"
   | "run_cancelled"
+  | "run_failed"
   | "run_error"
   | "scenario_started"
   | "scenario_finished"
   | "scenario_error"
   | "log";
+
+export const TERMINAL_EVENT_KINDS: ReadonlySet<RunEventKind> = new Set([
+  "run_finished",
+  "run_cancelled",
+  "run_failed",
+]);
+
+export function isTerminalEvent(event: RunEvent): boolean {
+  return TERMINAL_EVENT_KINDS.has(event.kind);
+}
 
 export type RunEvent = {
   id: number;
@@ -34,4 +45,8 @@ export function formatSseEvent(event: RunEvent): string {
 
 export function formatSseKeepalive(): string {
   return `: keepalive ${new Date().toISOString()}\n\n`;
+}
+
+export function formatSseRetry(retryMs: number): string {
+  return `retry: ${Math.max(0, Math.floor(retryMs))}\n\n`;
 }
