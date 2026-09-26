@@ -395,27 +395,6 @@ event (`run_finished`, `run_cancelled`, or `run_failed`) before closing the
 stream even when replaying a historical run whose ring buffer has been
 evicted.
 
-### Dashboard keyboard shortcuts coexist with form typing
-
-**Given** an operator on any dashboard page
-**When** they press `/`, `j`, `k`, or the `g r` / `g p` / `g s` chord
-**Then** the browser focuses the runs search input, moves the keyboard focus
-between list rows, or navigates to the Runs, Presets, or Start-run routes
-respectively; shortcuts are ignored while typing in `INPUT`, `TEXTAREA`,
-`SELECT`, or a `contenteditable` element, ignored when any of `Ctrl`, `Meta`,
-or `Alt` is held, and every shortcut-backed action remains reachable through a
-visible nav link or button.
-
-### Dashboard views render empty, error, and loading states for every major surface
-
-**Given** a dashboard view loading data from the server
-**When** the view is awaiting a response, receives an empty result set,
-receives a filter that does not match any rows, or encounters an HTTP error
-**Then** the runs, presets, compare, settings, suites, and auth surfaces all
-render a dedicated empty, error, or loading affordance rather than a blank
-layout, and the runs page provides a filter input that collapses to an empty
-state explaining that the current filter term returned no rows.
-
 ### Latency budget checks run deterministically against seeded local data
 
 **Given** a developer or CI job running `bun run latency-budget`
