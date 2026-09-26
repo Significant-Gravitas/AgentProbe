@@ -1,6 +1,6 @@
 # Workspace Inventory
 
-Generated: 2026-05-19T15:37:13.471Z
+Generated: 2026-09-26T01:48:10.216Z
 
 ```text
   AGENTS.md
@@ -400,12 +400,14 @@ scripts/
   scripts/generate-index-docs.ts
   scripts/generate-tasks-100-scenarios.ts
   scripts/generate-workspace-docs.ts
+  scripts/latency-budget.ts
   scripts/list-required-fixtures.ts
   scripts/patch-scenario-attachments.ts
   scripts/refresh-quality-score.ts
   scripts/seed-eval-scores.ts
   scripts/seed-preset.ts
   scripts/seed-test-scores.ts
+  scripts/soak.ts
   scripts/validate-repo.sh
   scripts/validate-setup.sh
   skills-lock.json
@@ -469,6 +471,7 @@ src/runtime/server/controllers/
   src/runtime/server/default-presets.ts
   src/runtime/server/http-helpers.ts
 src/runtime/server/middleware/
+src/runtime/server/observability/
 src/runtime/server/routes/
 src/runtime/server/streams/
   src/runtime/server/validation.ts
@@ -500,6 +503,7 @@ tests/integration/server/
   tests/integration/server/human-scoring.test.ts
   tests/integration/server/read-only.test.ts
   tests/integration/server/settings.test.ts
+  tests/integration/server/sse-reconnect.test.ts
   tests/integration/server/write-control.test.ts
 tests/unit/
   tests/unit/adapters.test.ts
@@ -537,6 +541,7 @@ tests/unit/server/
   tests/unit/server/comparison.test.ts
   tests/unit/server/config.test.ts
   tests/unit/server/default-presets.test.ts
+tests/unit/server/observability/
   tests/unit/server/preset-fake-repository.test.ts
   tests/unit/server/selection.test.ts
   tests/unit/server/settings-controller.test.ts
